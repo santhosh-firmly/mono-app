@@ -1,0 +1,88 @@
+{
+    "extends": [
+        "airbnb",
+        "prettier"
+    ],
+    "globals": {
+        "crypto": true,
+        "ADAPTER_STRATEGY_FACADE": true
+    },
+    "env": {
+        "es2021": true,
+        "worker": true,
+        "jest": true
+    },
+    "plugins": [
+        "jest",
+        "svelte3",
+        "prettier"
+    ],
+    "overrides": [
+        {
+            "files": [
+                "*.svelte"
+            ],
+            "processor": "svelte3/svelte3"
+        }
+    ],
+    "parser": "@babel/eslint-parser",
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "requireConfigFile": false,
+        "babelOptions": {
+            "plugins": [
+                "@babel/plugin-syntax-import-assertions"
+            ]
+        }
+    },
+    "settings": {
+        "react": {
+            "version": "999.999.999"
+        }
+    },
+    "rules": {
+        "indent": [
+            "error",
+            4,
+            {
+                "SwitchCase": 1
+            }
+        ],
+        "class-methods-use-this": "off",
+        "no-underscore-dangle": "off",
+        "max-len": [
+            "error",
+            {
+                "code": 140,
+                "ignorePattern": "^import "
+            }
+        ],
+        "operator-linebreak": [
+            "error",
+            "after"
+        ],
+        "no-plusplus": "off",
+        "import/extensions": [
+            "error",
+            "always"
+        ],
+        "import/prefer-default-export": "off",
+        "no-throw-literal": "off",
+        "comma-dangle": [
+            "error",
+            "always-multiline"
+        ],
+        "function-call-argument-newline": [
+            "error",
+            "consistent"
+        ],
+        "no-restricted-syntax": "off",
+        "no-await-in-loop": "off",
+        "no-param-reassign": [
+            "error",
+            {
+                "props": false
+            }
+        ]
+    }
+}
