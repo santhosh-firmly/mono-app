@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<title>Firmly Dynamo</title>
+		<meta charset="utf-8" />
+		<meta
+			name="viewport"
+			content="width=device-width,height=device-height,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=0"
+		/>
+		<link rel="icon" href="%sveltekit.assets%/favicon.ico" />
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div id="sveltebody" fobs>%sveltekit.body%</div>
+	</body>
+	<script>
+		document.addEventListener('gesturestart', function (e) {
+			e.preventDefault();
+			document.body.style.zoom = 0.99;
+		});
+
+		document.addEventListener('gesturechange', function (e) {
+			e.preventDefault();
+
+			document.body.style.zoom = 0.99;
+		});
+		document.addEventListener('gestureend', function (e) {
+			e.preventDefault();
+			document.body.style.zoom = 1;
+		});
+	</script>
+</html>

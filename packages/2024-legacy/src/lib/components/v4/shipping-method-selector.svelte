@@ -1,0 +1,135 @@
+<script>
+	// @ts-nocheck
+	import { createEventDispatcher } from 'svelte';
+	import Group from './group.svelte';
+	import { formatCurrency } from '$lib/utils.js';
+
+	/**
+	 * List of shipping methods to be rendered
+	 */
+	export let shippingMethods = null;
+
+	/**
+	 * SKU of the currently selected shipping method
+	 */
+	export let selectedShippingMethod = null;
+
+	/**
+	 * Whether or not API calls that changes the shipping methods are in progress;
+	 */
+	export let inProgress = false;
+
+	/**
+	 * Whether or not the form elements are disabled
+	 */
+	export let disabled = false;
+
+	const dispatch = createEventDispatcher();
+
+	function onChange(event) {
+		selectedShippingMethod = event.currentTarget.value;
+		dispatch('set-shipping-method', selectedShippingMethod);
+	}
+
+	function isFirst(shippingMethods, index) {
+		return index === 0;
+	}
+
+	function isLast(shippingMethods, index) {
+		return index === shippingMethods.length - 1;
+	}
+</script>
+
+<Group>
+	{#if !shippingMethods}
+		{@const mockEntries = [0, 1]}
+		<!-- eslint-ignore no-unused-vars -->
+		{#each mockEntries as index}
+			<label
+				class="flex flex-row items-center px-3 py-2 gap-3 col-span-2 border w-full rounded-t-lg"
+				class:rounded-t-lg={isFirst(mockEntries, index)}
+				class:rounded-b-lg={isLast(mockEntries, index)}
+			>
+				<input
+					name="shipping-method"
+					disabled={true}
+					class="text-fy-on-primary-subtle bg-fy-on-primary-subtle border-0 animate-pulse"
+					type="radio"
+					checked={false}
+				/>
+				<div class="grow">
+					<span class="block font-bold">
+						<div class="h-3 w-1/2 my-2 bg-fy-on-primary-subtle animate-pulse rounded"></div>
+					</span>
+					<span class="block text-sm">
+						<div class="h-3 w-2/3 my-2 bg-fy-on-primary-subtle animate-pulse rounded"></div>
+					</span>
+				</div>
+				<span class="font-bold">
+					<div class="h-3 w-12 my-2 bg-fy-on-primary-subtle animate-pulse rounded"></div>
+				</span>
+			</label>
+		{/each}
+	{:else}
+		{#each shippingMethods as shippingMethod, index (shippingMethod.sku)}
+			<label
+				class="flex flex-row items-center px-3 py-3 gap-3 col-span-2 w-full border-0"
+				class:disabled-label={disabled}
+				class:rounded-t-lg={isFirst(shippingMethods, index)}
+				class:rounded-b-lg={isLast(shippingMethods, index)}
+			>
+				<input
+					name="shipping-method"
+					class="text-fy-action disabled:text-fy-on-primary-subtle"
+					type="radio"
+					disabled={inProgress || disabled}
+					value={shippingMethod.sku}
+					checked={selectedShippingMethod === shippingMethod.sku}
+					on:change={onChange}
+				/>
+				<div>
+					<span
+						class="block font-bold text-sm"
+						class:text-fy-on-surface-subtle={selectedShippingMethod !== shippingMethod.sku}
+					>
+						{#if inProgress}
+							<div class="h-3 w-32 my-2 bg-fy-on-primary-subtle animate-pulse rounded"></div>
+						{:else}
+							{shippingMethod.description}
+						{/if}
+					</span>
+					{#if shippingMethod.estimated_delivery}
+						<span class="block text-sm text-fy-on-surface-subtle">
+							{#if inProgress}
+								<div class="h-3 w-64 my-2 bg-fy-on-primary-subtle animate-pulse rounded"></div>
+							{:else}
+								{shippingMethod.estimated_delivery}
+							{/if}
+						</span>
+					{/if}
+				</div>
+				<div class="grow" />
+				<span
+					class="font-bold text-sm"
+					class:text-fy-on-surface-subtle={selectedShippingMethod !== shippingMethod.sku}
+				>
+					{#if inProgress}
+						<div class="h-3 w-12 my-2 bg-fy-on-primary-subtle animate-pulse rounded"></div>
+					{:else}
+						{shippingMethod.price.value === 0 ? 'Free' : formatCurrency(shippingMethod.price)}
+					{/if}
+				</span>
+			</label>
+		{/each}
+	{/if}
+</Group>
+
+<style>
+	input[type='radio']:focus {
+		box-shadow: none;
+	}
+
+	.disabled-label {
+		@apply bg-gray-100;
+	}
+</style>
