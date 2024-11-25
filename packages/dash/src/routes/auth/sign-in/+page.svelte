@@ -2,7 +2,7 @@
 	// Refer to https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow
 	import { PUBLIC_AZURE_AD_CLIENT_ID, PUBLIC_AZURE_AD_TENANT_ID, PUBLIC_AZURE_REDIRECT_URL } from '$env/static/public';
 
-	import SignIn from '$lib/authentication/SignIn.svelte';
+	import SignIn from '$lib/authentication/sign-in.svelte';
 	import { onMount } from 'svelte';
 
 	let title = 'Sign in to firmly Dashboard';
@@ -37,7 +37,6 @@
 
 <SignIn
 	{title}
-	{site}
 	{rememberMe}
 	{lostPassword}
 	{createAccount}

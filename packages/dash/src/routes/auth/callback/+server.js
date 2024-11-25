@@ -32,7 +32,7 @@ export async function GET({url, cookies}) {
     // }
     if (response.ok) {
         const userDetails = await response.json();
-        cookies.set(FIRMLY_AUTH_COOKIE, userDetails.access_token, {
+        cookies.set(FIRMLY_AUTH_COOKIE, userDetails.id_token, {
             path: '/',
             maxAge: userDetails.expires_in,
         });

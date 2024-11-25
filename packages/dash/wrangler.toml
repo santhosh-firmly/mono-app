@@ -1,0 +1,26 @@
+name = "dash"
+compatibility_date = "2024-04-03"
+compatibility_flags = ['nodejs_compat']
+send_metrics = false
+pages_build_output_dir = "./.svelte-kit/cloudflare"
+services = [
+    # { binding = 'dataHealth', service = 'data-health', environment = "production" }
+]
+
+[durable_objects]
+bindings = [
+    # {name = "checker", class_name = "Checker", script_name = "do-health"}
+]
+
+[[d1_databases]]
+binding = "firmlyConfigs"
+database_name = "firmly-configs"
+database_id = "f1e42435-758a-4abf-842d-2303131a96a1"
+
+[[d1_databases]]
+binding = "reporting"
+database_name = "reporting"
+database_id = "d269cace-932c-41e0-bf7c-b852db8e83f1"
+
+[dev]
+port = 8840
