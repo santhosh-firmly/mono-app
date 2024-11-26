@@ -1,8 +1,7 @@
 <script context="module">
 	import SignInPage from './sign-in-page.svelte';
 	export const meta = {
-		title: 'Components/Authentication/Sign In Pagea',
-		tags: ['autodocs'],
+		title: 'Components/Authentication/Sign In Page',
 		component: SignInPage
 	};
 </script>

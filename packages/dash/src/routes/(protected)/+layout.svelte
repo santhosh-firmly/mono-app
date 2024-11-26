@@ -54,7 +54,7 @@
 				</Tooltip.Trigger>
 				<Tooltip.Content side="right">Dashboard</Tooltip.Content>
 			</Tooltip.Root>
-			<Tooltip.Root>
+			<!-- <Tooltip.Root>
 				<Tooltip.Trigger asChild let:builder>
 					<a
 						href="/orders"
@@ -123,7 +123,7 @@
 					</a>
 				</Tooltip.Trigger>
 				<Tooltip.Content side="right">Analytics</Tooltip.Content>
-			</Tooltip.Root>
+			</Tooltip.Root> -->
 		</nav>
 		<nav class="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
 			<Tooltip.Root>
@@ -169,7 +169,7 @@
 							<File class="h-5 w-5" />
 							Dashboard
 						</a>
-						<a
+						<!-- <a
 							href="/orders"
 							class="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
 						>
@@ -193,11 +193,11 @@
 						>
 							<File class="h-5 w-5" />
 							Settings
-						</a>
+						</a> -->
 					</nav>
 				</Sheet.Content>
 			</Sheet.Root>
-			<Breadcrumb.Root class="hidden md:flex">
+			<!-- <Breadcrumb.Root class="hidden md:flex">
 				<Breadcrumb.List>
 					<Breadcrumb.Item>
 						<Breadcrumb.Link href="##">Merchants</Breadcrumb.Link>
@@ -211,16 +211,16 @@
 						<Breadcrumb.Page>All Products</Breadcrumb.Page>
 					</Breadcrumb.Item>
 				</Breadcrumb.List>
-			</Breadcrumb.Root>
+			</Breadcrumb.Root> -->
 			<div class="relative ml-auto flex-1 md:grow-0">
-				<Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+				<!-- <Search class="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
 				<Input
 					type="search"
 					placeholder="Search..."
 					class="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
-				/>
+				/> -->
 			</div>
-			<UserNav user={data.authInfo}/>
+			<UserNav user={data.authInfo} />
 		</header>
 		<slot></slot>
 	</div>

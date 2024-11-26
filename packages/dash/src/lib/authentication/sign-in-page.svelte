@@ -15,11 +15,7 @@
 		<div class="relative z-20 flex items-center text-lg font-medium">firmly AI Dashboard</div>
 		<div class="relative z-20 mt-auto">
 			<blockquote class="space-y-2">
-				<p class="text-lg">
-					&ldquo;This library has saved me countless hours of work and helped me deliver stunning
-					designs to my clients faster than ever before. Highly recommended!&rdquo;
-				</p>
-				<footer class="text-sm">Sofia Davis</footer>
+				<p class="text-lg">Buy now, anywhere®</p>
 			</blockquote>
 		</div>
 	</div>
