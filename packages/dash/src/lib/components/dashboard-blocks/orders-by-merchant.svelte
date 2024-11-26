@@ -4,6 +4,16 @@
 	import { formatCurrency } from '$lib/currency.js';
 
 	export let ordersByMerchant;
+	export let merchants;
+
+	function getMerchantName(domain) {
+		const dest = merchants.results.find((e) => e.key === domain);
+		if (dest) {
+			return JSON.parse(dest.info).display_name || domain;
+		}
+
+		return domain;
+	}
 </script>
 
 <Card.Root>
@@ -22,10 +32,10 @@
 				</Table.Row>
 			</Table.Header>
 			<Table.Body>
-				{#each ordersByMerchant.results.slice(0, 2) as order, index}
+				{#each ordersByMerchant.results as order, index}
 					<Table.Row class="">
 						<Table.Cell>
-							<div class="font-medium">{order.display_name || order.shop_id}</div>
+							<div class="font-medium">{getMerchantName(order.shop_id)}</div>
 							<div class="hidden text-sm text-muted-foreground md:inline">
 								{order.shop_id}
 							</div>

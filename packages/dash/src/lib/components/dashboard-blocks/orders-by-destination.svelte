@@ -32,7 +32,7 @@
 				</Table.Row>
 			</Table.Header>
 			<Table.Body>
-				{#each ordersByDestination.results.slice(0, 2) as order, index}
+				{#each ordersByDestination.results as order, index}
 					<Table.Row class="">
 						<Table.Cell
 							><div class="font-medium">{getDestinationName(order.app_id)}</div></Table.Cell

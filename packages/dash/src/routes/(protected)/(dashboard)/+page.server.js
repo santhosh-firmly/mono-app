@@ -9,7 +9,9 @@ export async function load({ platform }) {
 
     const destinationsStmt = platform.env.firmlyConfigs.prepare('SELECT key, info from app_identifiers');
 
-    const [wtd, mtd, ytd, ordersByMerchantWtd, ordersByMerchantMtd, ordersByMerchantYtd, ordersByDestinationWtd, ordersByDestinationMtd, ordersByDestinationYtd, destinations] = await Promise.all([
+    const merchantsStmt = platform.env.firmlyConfigs.prepare('SELECT key, info from stores');
+
+    const [wtd, mtd, ytd, ordersByMerchantWtd, ordersByMerchantMtd, ordersByMerchantYtd, ordersByDestinationWtd, ordersByDestinationMtd, ordersByDestinationYtd, destinations, merchants] = await Promise.all([
         orderSumStmt.bind(startOfWeek(today).toISOString()).all(),
         orderSumStmt.bind(startOfMonth(today).toISOString()).all(),
         orderSumStmt.bind(startOfYear(today).toISOString()).all(),
@@ -20,10 +22,12 @@ export async function load({ platform }) {
         orderByDestinationStmt.bind(startOfMonth(today).toISOString()).all(),
         orderByDestinationStmt.bind(startOfYear(today).toISOString()).all(),
         destinationsStmt.all(),
+        merchantsStmt.all(),
     ]);
 
     return {
         wtd, mtd, ytd, ordersByMerchantWtd, ordersByMerchantMtd, ordersByMerchantYtd,
         ordersByDestinationWtd, ordersByDestinationMtd, ordersByDestinationYtd, destinations,
+        merchants
     };
 }

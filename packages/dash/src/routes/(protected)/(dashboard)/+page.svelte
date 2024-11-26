@@ -75,13 +75,13 @@
 				</div>
 			</div>
 			<Tabs.Content value="week">
-				<OrdersByMerchant ordersByMerchant={data.ordersByMerchantWtd} /></Tabs.Content
+				<OrdersByMerchant ordersByMerchant={data.ordersByMerchantWtd} merchants={data.merchants} /></Tabs.Content
 			>
 			<Tabs.Content value="month">
-				<OrdersByMerchant ordersByMerchant={data.ordersByMerchantMtd} /></Tabs.Content
+				<OrdersByMerchant ordersByMerchant={data.ordersByMerchantMtd} merchants={data.merchants} /></Tabs.Content
 			>
 			<Tabs.Content value="year">
-				<OrdersByMerchant ordersByMerchant={data.ordersByMerchantYtd} /></Tabs.Content
+				<OrdersByMerchant ordersByMerchant={data.ordersByMerchantYtd} merchants={data.merchants} /></Tabs.Content
 			>
 		</Tabs.Root>
 	</div>
