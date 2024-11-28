@@ -1,10 +1,10 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card/index.js';
-	import { Progress } from '$lib/components/ui/progress/index.js';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import OrdersByMerchant from '$lib/components/dashboard-blocks/orders-by-merchant.svelte';
 	import { formatCurrency } from '$lib/currency.js';
 	import OrdersByDestination from '$lib/components/dashboard-blocks/orders-by-destination.svelte';
+	import DebugPopover from '$lib/components/custom/debug-popover.svelte';
 
 	export let data;
 </script>
@@ -13,8 +13,9 @@
 	<div class="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-4">
 		<div class="flex flex-wrap gap-4">
 			<Card.Root class="min-w-[300px]">
-				<Card.Header class="pb-2">
+				<Card.Header class="flex flex-row justify-between pb-2">
 					<Card.Description>This Week</Card.Description>
+					<DebugPopover objToDebug={data.wtd.meta} />
 				</Card.Header>
 				<Card.Footer>
 					<Card.Title class="text-3xl">
@@ -23,8 +24,9 @@
 				</Card.Footer>
 			</Card.Root>
 			<Card.Root class="min-w-[300px]">
-				<Card.Header class="pb-2">
+				<Card.Header class="flex flex-row justify-between pb-2">
 					<Card.Description>This Month</Card.Description>
+					<DebugPopover objToDebug={data.mtd.meta} />
 				</Card.Header>
 				<Card.Footer>
 					<Card.Title class="text-3xl">
@@ -33,8 +35,9 @@
 				</Card.Footer>
 			</Card.Root>
 			<Card.Root class="min-w-[300px]">
-				<Card.Header class="pb-2">
+				<Card.Header class="flex flex-row justify-between pb-2">
 					<Card.Description>This Year</Card.Description>
+					<DebugPopover objToDebug={data.ytd.meta} />
 				</Card.Header>
 				<Card.Footer>
 					<Card.Title class="text-3xl">
@@ -75,13 +78,25 @@
 				</div>
 			</div>
 			<Tabs.Content value="week">
-				<OrdersByMerchant ordersByMerchant={data.ordersByMerchantWtd} merchants={data.merchants} /></Tabs.Content
+				<DebugPopover objToDebug={data.ordersByMerchantWtd.meta} />
+				<OrdersByMerchant
+					ordersByMerchant={data.ordersByMerchantWtd}
+					merchants={data.merchants}
+				/></Tabs.Content
 			>
 			<Tabs.Content value="month">
-				<OrdersByMerchant ordersByMerchant={data.ordersByMerchantMtd} merchants={data.merchants} /></Tabs.Content
+				<DebugPopover objToDebug={data.ordersByMerchantMtd.meta} />
+				<OrdersByMerchant
+					ordersByMerchant={data.ordersByMerchantMtd}
+					merchants={data.merchants}
+				/></Tabs.Content
 			>
 			<Tabs.Content value="year">
-				<OrdersByMerchant ordersByMerchant={data.ordersByMerchantYtd} merchants={data.merchants} /></Tabs.Content
+				<DebugPopover objToDebug={data.ordersByMerchantYtd.meta} />
+				<OrdersByMerchant
+					ordersByMerchant={data.ordersByMerchantYtd}
+					merchants={data.merchants}
+				/></Tabs.Content
 			>
 		</Tabs.Root>
 	</div>
@@ -95,18 +110,21 @@
 				</Tabs.List>
 			</div>
 			<Tabs.Content value="week">
+				<DebugPopover objToDebug={data.ordersByDestinationWtd.meta} />
 				<OrdersByDestination
 					ordersByDestination={data.ordersByDestinationWtd}
 					destinations={data.destinations}
 				/></Tabs.Content
 			>
 			<Tabs.Content value="month">
+				<DebugPopover objToDebug={data.ordersByDestinationMtd.meta} />
 				<OrdersByDestination
 					ordersByDestination={data.ordersByDestinationMtd}
 					destinations={data.destinations}
 				/></Tabs.Content
 			>
 			<Tabs.Content value="year">
+				<DebugPopover objToDebug={data.ordersByDestinationYtd.meta} />
 				<OrdersByDestination
 					ordersByDestination={data.ordersByDestinationYtd}
 					destinations={data.destinations}
