@@ -5,6 +5,22 @@
   "workspaces": [
     "packages/*"
   ],
+  "scripts": {
+    "build": "lerna run build",
+    "build-dev": "lerna run build-dev",
+    "build-qa": "lerna run build-qa",
+    "build-uat": "lerna run build-uat",
+    "build-prod": "lerna run build-prod",
+    "deploy-dev": "lerna run deploy-dev",
+    "deploy-qa": "lerna run deploy-qa",
+    "deploy-uat": "lerna run deploy-uat",
+    "deploy-prod": "lerna run deploy-prod",
+    "outdated": "npx check-outdated --prefer-wanted --ignore-packages @vitest,@vitest/ui,@vitest/coverage-istanbul,vitest",
+    "format-code": "lerna run format-code",
+    "test": "lerna run test",
+    "update-version": "lerna version --no-push --yes",
+    "update-version-no-hooks": "lerna version --no-push --no-commit-hooks --yes"
+  },
   "dependencies": {},
   "devDependencies": {
     "lerna": "^8.1.2"

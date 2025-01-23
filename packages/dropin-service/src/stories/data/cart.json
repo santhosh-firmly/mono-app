@@ -1,0 +1,80 @@
+{
+    "display_name": "Young Rebelz",
+    "cart_status": "active",
+    "platform_id": "shopify",
+    "shop_id": "youngrebelz.com",
+    "shop_properties": {
+        "paypal": {
+            "clientId": "AfUEYT7nO4BwZQERn9Vym5TbHAG08ptiKa9gm8OARBYgoqiAJIjllRjeIMI4g294KAH1JdTnkzubt1fr",
+            "merchantId": "kumar@harrysholding.com"
+        }
+    },
+    "cart_id": "7f43d396-e3f7-4efb-8be3-dfc357cd0a4c",
+    "urls": {},
+    "line_items": [
+        {
+            "line_item_id": "b82c88fb-7a90-4652-8c1a-eebd4a3a4790",
+            "sku": "29227235868724",
+            "base_sku": "3796148518964",
+            "quantity": 2,
+            "msrp": {
+                "currency": "USD",
+                "value": 6.5
+            },
+            "price": {
+                "currency": "USD",
+                "value": 6.5
+            },
+            "line_price": {
+                "currency": "USD",
+                "value": 13
+            },
+            "requires_shipping": true,
+            "image": {
+                "url": "http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_large.jpg?v=1565574386",
+                "large": "http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_large.jpg?v=1565574386",
+                "grande": "http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_grande.jpg?v=1565574386",
+                "medium": "http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_medium.jpg?v=1565574386",
+                "compact": "http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_compact.jpg?v=1565574386",
+                "small": "http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_small.jpg?v=1565574386"
+            },
+            "platform_line_item_id": "310b03b0be9f37edb3ae55631fdb8c0a",
+            "description": "Plant 5 : Do not order",
+            "variant_description": "M / White"
+        }
+    ],
+    "sub_total": {
+        "currency": "USD",
+        "value": 13
+    },
+    "cart_discount": {
+        "currency": "USD",
+        "value": 0
+    },
+    "shipping_total": {
+        "currency": "USD",
+        "value": 0
+    },
+    "tax": {
+        "currency": "USD",
+        "value": 0
+    },
+    "total": {
+        "currency": "USD",
+        "value": 13
+    },
+    "payment_method_options": [
+        {
+            "type": "CreditCard",
+            "wallet": "user"
+        },
+        {
+            "type": "PayPal",
+            "wallet": "paypal"
+        },
+        {
+            "type": "ShopPay",
+            "wallet": "shoppay"
+        }
+    ]
+}
