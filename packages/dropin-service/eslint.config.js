@@ -8,6 +8,9 @@ const gitignorePath = fileURLToPath(new URL('./.gitignore', import.meta.url));
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
+    {
+        ignores: ['**/node_modules/**', '**/dist/**', '**/static/**', '**/storybook-static/**', '**/.storybook/**', '**/.svelte-kit/**', '**/.wrangler/**']
+    },
     includeIgnoreFile(gitignorePath),
     js.configs.recommended,
     ...svelte.configs['flat/recommended'],

@@ -1,0 +1,27 @@
+#!/bin/bash
+# Uncomment the next line for debugging
+# set -x
+set -e
+die() {
+    echo "$1";
+    exit 1;
+}
+# We're skipping this step for now in order to clarify which dependencies are required
+# Verify for library dependency inconsistencies
+# npm run depcheck || die 'There are unused libraries in the project. Please, remove them before committing';
+
+# Verify for outdated libraries
+npm run outdated || die 'There are outdated libraries in the project. Please, update them before commiting with "npm update"';
+# TODO: Fix lint formatting for all projects
+npx lerna run format-code --since origin/main || die 'Is the code formatted properly?';
+#Verify if debugging functionality is forgotten in the tests folder
+for testFolder in $(ls -d1 ./packages/*/tests/); do
+    if grep -E '(\.only|[\s]fit)\(' "$testFolder" -r; then
+        printf "\n\n\tDid you forget any test with the \".only\" attribute? 👆\n\n"
+        exit 1
+    fi
+done;
+# Verify if the build runs as expected
+npx lerna run build --since origin/main || die 'Cannot build the project for Dev'
+# Execute the tests
+npx lerna run test:static --since origin/main || die 'Some tests failed. Please, review your code.';

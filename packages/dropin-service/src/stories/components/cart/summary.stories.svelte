@@ -162,8 +162,8 @@
             const elements = canvas.queryAllByTestId('discount');
 
             expect(elements.length).toEqual(2);
-            expect(elements[0].textContent).toEqual('First Set for $19.99 (-$39.96) ');
-            expect(elements[1].textContent).toEqual('2 VIP sets 45% OFF (-$53.96) ');
+            expect(elements[0].textContent).toEqual('First Set for $19.99 (-$39.96)');
+            expect(elements[1].textContent).toEqual('2 VIP sets 45% OFF (-$53.96)');
         });
     }}
     children={template}

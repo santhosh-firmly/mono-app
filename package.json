@@ -16,13 +16,20 @@
     "deploy-uat": "lerna run deploy-uat",
     "deploy-prod": "lerna run deploy-prod",
     "outdated": "npx check-outdated --prefer-wanted --ignore-packages @vitest,@vitest/ui,@vitest/coverage-istanbul,vitest",
+    "depcheck": "npx @tinkoff-monorepo/depscheck --depcheck-ignore-matches cloudflare:test",
     "format-code": "lerna run format-code",
-    "test": "lerna run test",
+    "test": "lerna run test:static",
     "update-version": "lerna version --no-push --yes",
-    "update-version-no-hooks": "lerna version --no-push --no-commit-hooks --yes"
+    "update-version-no-hooks": "lerna version --no-push --no-commit-hooks --yes",
+    "prepare": "husky"
   },
-  "dependencies": {},
   "devDependencies": {
+    "husky": "^9.1.7",
     "lerna": "^8.1.2"
+  },
+  "dependencies": {
+    "concurrently": "^9.1.2",
+    "http-server": "^14.1.1",
+    "wait-on": "^8.0.2"
   }
 }
