@@ -1,9 +1,11 @@
 <script>
     // @ts-nocheck
-    import { formatCurrency } from '$lib/utils.js';
     import { slide } from 'svelte/transition';
+
     import LineItem from './line-item.svelte';
     import PromoCodes from './promo-codes.svelte';
+
+    import { formatCurrency } from '$lib/utils.js';
 
     /**
      * Whether or not to show the "calculating..." text

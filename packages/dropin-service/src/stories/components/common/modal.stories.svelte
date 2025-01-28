@@ -1,11 +1,12 @@
 <script module>
-    import Modal from '$lib/components/common/modal.svelte';
     import { defineMeta } from '@storybook/addon-svelte-csf';
+
+    import Modal from '$lib/components/common/modal.svelte';
 
     const { Story } = defineMeta({
         title: 'Checkout V4/Common/Modal',
         component: Modal,
-        tags: ['autodocs']
+        tags: ['autodocs'],
     });
 </script>
 

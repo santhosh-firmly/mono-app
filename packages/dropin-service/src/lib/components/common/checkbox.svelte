@@ -24,7 +24,7 @@
         isChecked = false,
         disabled = false,
         labelClasses = 'w-full px-4 py-3 flex rounded-lg bg-fy-surface-subtle',
-        titleClasses = 'font-medium text-fy-on-secondary text-sm'
+        titleClasses = 'font-medium text-fy-on-secondary text-sm',
     } = $props();
 
     // Handle checkbox change event

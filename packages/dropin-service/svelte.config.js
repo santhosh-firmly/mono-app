@@ -8,15 +8,15 @@ const config = {
     kit: {
         adapter: adapter(),
         version: {
-            name: process.env.npm_package_version
-        }
+            name: process.env.npm_package_version,
+        },
     },
     preprocess: [
         vitePreprocess(),
         preprocess({
-            postcss: true
-        })
-    ]
+            postcss: true,
+        }),
+    ],
 };
 
 export default config;
