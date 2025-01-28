@@ -1,11 +1,12 @@
 <script module>
-    import Group from '$lib/components/common/group.svelte';
     import { defineMeta } from '@storybook/addon-svelte-csf';
+
+    import Group from '$lib/components/common/group.svelte';
 
     const { Story } = defineMeta({
         title: 'Checkout V4/Common/Group',
         component: Group,
-        tags: ['autodocs']
+        tags: ['autodocs'],
     });
 </script>
 

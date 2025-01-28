@@ -1,7 +1,8 @@
 <script>
     import CardImage from './card-image.svelte';
-    import { formatCurrency } from '$lib/utils.js';
     import QuantityController from './quantity-controller.svelte';
+
+    import { formatCurrency } from '$lib/utils.js';
 
     /**
      * Title or description of the product

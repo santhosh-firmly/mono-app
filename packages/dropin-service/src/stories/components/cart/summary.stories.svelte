@@ -1,18 +1,19 @@
 <script module>
-    import Summary from '$lib/components/cart/summary.svelte';
     import { defineMeta } from '@storybook/addon-svelte-csf';
-    import { within } from '@storybook/testing-library';
     import { expect } from '@storybook/jest';
+    import { within } from '@storybook/testing-library';
 
     import cart from '../../data/cart.json';
     import subscriptionLineItem from '../../data/line-item-subscription.json';
+
+    import Summary from '$lib/components/cart/summary.svelte';
 
     const lineItems = cart.line_items;
 
     const { Story } = defineMeta({
         title: 'Checkout V4/Cart/Summary',
         component: Summary,
-        tags: ['autodocs']
+        tags: ['autodocs'],
     });
 </script>
 
@@ -23,7 +24,7 @@
 <Story
     name="Single Line Item"
     args={{
-        lineItems: [lineItems[0]]
+        lineItems: [lineItems[0]],
     }}
     children={template}
 />
@@ -31,7 +32,7 @@
 <Story
     name="Two Line Items"
     args={{
-        lineItems: [lineItems[0], { ...lineItems[0], line_item_id: 'b82c88fb-7a90-4652-8c1a-eebd4a3a4791' }]
+        lineItems: [lineItems[0], { ...lineItems[0], line_item_id: 'b82c88fb-7a90-4652-8c1a-eebd4a3a4791' }],
     }}
     children={template}
 />
@@ -44,13 +45,13 @@
             description: 'Economy shipping',
             price: {
                 currency: 'USD',
-                value: 100.5
-            }
+                value: 100.5,
+            },
         },
         tax: {
             currency: 'USD',
-            value: 13.95
-        }
+            value: 13.95,
+        },
     }}
     children={template}
 />
@@ -63,13 +64,13 @@
             description: 'Economy shipping',
             price: {
                 currency: 'USD',
-                value: 100.5
-            }
+                value: 100.5,
+            },
         },
         tax: {
             currency: 'USD',
-            value: 13.95
-        }
+            value: 13.95,
+        },
     }}
     children={template}
 />
@@ -82,21 +83,21 @@
             description: 'Economy shipping',
             price: {
                 currency: 'USD',
-                value: 100.5
-            }
+                value: 100.5,
+            },
         },
         storeCredit: {
             currency: 'USD',
-            value: 10.0
+            value: 10.0,
         },
         rewardPoints: {
             currency: 'USD',
-            value: 39.95
+            value: 39.95,
         },
         tax: {
             currency: 'USD',
-            value: 13.95
-        }
+            value: 13.95,
+        },
     }}
     children={template}
 />
@@ -109,13 +110,13 @@
             description: 'Economy shipping',
             price: {
                 currency: 'USD',
-                value: 100.5
-            }
+                value: 100.5,
+            },
         },
         total: {
             currency: 'USD',
-            value: 0
-        }
+            value: 0,
+        },
     }}
     children={template}
 />
@@ -128,12 +129,12 @@
             description: 'Economy shipping',
             price: {
                 currency: 'USD',
-                value: 100.5
-            }
+                value: 100.5,
+            },
         },
         total: {
             currency: 'USD',
-            value: 0
+            value: 0,
         },
         discountsBreakdown: [
             {
@@ -142,8 +143,8 @@
                 label: 'First Set for $19.99',
                 discount: {
                     currency: 'USD',
-                    value: 39.96
-                }
+                    value: 39.96,
+                },
             },
             {
                 is_vip: true,
@@ -151,10 +152,10 @@
                 label: '2 VIP sets 45% OFF',
                 discount: {
                     currency: 'USD',
-                    value: 53.96
-                }
-            }
-        ]
+                    value: 53.96,
+                },
+            },
+        ],
     }}
     play={async ({ canvasElement, step }) => {
         const canvas = within(canvasElement);
@@ -162,8 +163,8 @@
             const elements = canvas.queryAllByTestId('discount');
 
             expect(elements.length).toEqual(2);
-            expect(elements[0].textContent).toEqual('First Set for $19.99 (-$39.96) ');
-            expect(elements[1].textContent).toEqual('2 VIP sets 45% OFF (-$53.96) ');
+            expect(elements[0].textContent).toEqual('First Set for $19.99 (-$39.96)');
+            expect(elements[1].textContent).toEqual('2 VIP sets 45% OFF (-$53.96)');
         });
     }}
     children={template}

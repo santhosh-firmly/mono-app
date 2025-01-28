@@ -1,2 +1,6 @@
 node_modules/
 *storybook.log
+
+
+packages/**/storybook-static/
+packages/**/.storybook/static/*

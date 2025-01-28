@@ -1,6 +1,7 @@
 <script module>
-    import Checkbox from '$lib/components/common/checkbox.svelte';
     import { defineMeta } from '@storybook/addon-svelte-csf';
+
+    import Checkbox from '$lib/components/common/checkbox.svelte';
 
     const title = 'This is the title text.';
     const subtitle = 'This is the subtitle text.';
@@ -9,7 +10,7 @@
     const { Story } = defineMeta({
         title: 'Checkout V4/Common/Checkbox',
         component: Checkbox,
-        tags: ['autodocs']
+        tags: ['autodocs'],
     });
 </script>
 

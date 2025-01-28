@@ -24,10 +24,10 @@ export default {
                 'fy-form-element-input-focus': 'var(--fy-form-element-input-focus)',
                 'fy-form-element-input-error': 'var(--fy-form-element-input-error)',
                 'fy-on-primary-subtle2': 'var(--fy-on-primary-subtle2)',
-                'fy-on-primary-accent': 'var(--fy-on-primary-accent)'
-            }
-        }
+                'fy-on-primary-accent': 'var(--fy-on-primary-accent)',
+            },
+        },
     },
 
-    plugins: [typography, containerQueries]
+    plugins: [typography, containerQueries],
 };

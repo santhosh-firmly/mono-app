@@ -1,6 +1,7 @@
 <script module>
-    import Notice from '$lib/components/common/notice.svelte';
     import { defineMeta } from '@storybook/addon-svelte-csf';
+
+    import Notice from '$lib/components/common/notice.svelte';
 
     async function undo() {
         return new Promise((resolve) => {
@@ -11,7 +12,7 @@
     const { Story } = defineMeta({
         title: 'Checkout V4/Common/Notice',
         component: Notice,
-        tags: ['autodocs']
+        tags: ['autodocs'],
     });
 </script>
 
@@ -32,7 +33,7 @@
     name="Default"
     args={{
         text: 'Cart has changed. Please review the cart.',
-        closeable: true
+        closeable: true,
     }}
     children={template}
 />
@@ -42,7 +43,7 @@
     args={{
         text: 'Item removed from the cart.',
         undoCallback: undo,
-        closeable: true
+        closeable: true,
     }}
     children={template}
 />
