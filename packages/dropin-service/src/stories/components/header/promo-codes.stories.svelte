@@ -3,10 +3,10 @@
     import { expect } from '@storybook/jest';
     import { userEvent, waitFor, within } from '@storybook/testing-library';
 
-    import PromoCodes from '$lib/components/cart/promo-codes.svelte';
+    import PromoCodes from '$lib/components/header/promo-codes.svelte';
 
     const { Story } = defineMeta({
-        title: 'Checkout V4/Cart/Promo Codes',
+        title: 'Checkout V4/Header/Promo Codes',
         component: PromoCodes,
         tags: ['autodocs'],
     });

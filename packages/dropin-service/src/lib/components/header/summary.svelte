@@ -2,9 +2,8 @@
     // @ts-nocheck
     import { slide } from 'svelte/transition';
 
-    import LineItem from './line-item.svelte';
-    import PromoCodes from './promo-codes.svelte';
-
+    import LineItem from '$lib/components/cart/line-item.svelte';
+    import PromoCodes from '$lib/components/header/promo-codes.svelte';
     import { formatCurrency } from '$lib/utils.js';
 
     /**

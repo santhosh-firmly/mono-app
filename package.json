@@ -24,6 +24,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "classnames": "^2.5.1",
     "husky": "^9.1.7",
     "lerna": "^8.1.2"
   },

@@ -6,12 +6,12 @@
     import cart from '../../data/cart.json';
     import subscriptionLineItem from '../../data/line-item-subscription.json';
 
-    import Summary from '$lib/components/cart/summary.svelte';
+    import Summary from '$lib/components/Header/summary.svelte';
 
     const lineItems = cart.line_items;
 
     const { Story } = defineMeta({
-        title: 'Checkout V4/Cart/Summary',
+        title: 'Checkout V4/Header/Summary',
         component: Summary,
         tags: ['autodocs'],
     });
