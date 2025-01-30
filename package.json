@@ -19,8 +19,8 @@
     "depcheck": "npx @tinkoff-monorepo/depscheck --depcheck-ignore-matches cloudflare:test",
     "format-code": "lerna run format-code",
     "test": "lerna run test:static",
-    "update-version": "lerna version --no-push --yes",
-    "update-version-no-hooks": "lerna version --no-push --no-commit-hooks --yes",
+    "update-version": "lerna version --no-push --force-publish --yes",
+    "update-version-no-hooks": "lerna version --no-push --force-publish --no-commit-hooks --yes",
     "prepare": "husky"
   },
   "devDependencies": {
