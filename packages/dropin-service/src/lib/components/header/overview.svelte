@@ -9,28 +9,21 @@
     import { formatCurrency } from '$lib/utils.js';
 
     /**
-     * Merchant information to be used in the back button.
+     * @typedef {Object} OverviewProps
+     * @property {Object} merchantInfo - Merchant information for display
+     * @property {Array<string>|null} images - Images to show in product card stack
+     * @property {number} quantity - Total items in cart
+     * @property {number|null} total - Total cost of the current cart
      */
-    export let merchantInfo = {};
 
     /**
-     * Images to show in product card stack.
+     * @type {OverviewProps}
      */
-    export let images = null;
+    let { merchantInfo = {}, images = null, quantity, total = null, children } = $props();
 
-    /**
-     * Total items in cart.
-     */
-    export let quantity;
+    let toggleExpanded = $state();
 
-    /**
-     * Total cost of the current cart
-     */
-    export let total = null;
-
-    let toggleExpanded;
-
-    let showMiniOverview = false;
+    let showMiniOverview = $state(false);
 
     let overviewElement;
 
@@ -55,7 +48,7 @@
 <div class="relative w-full">
     <div class="flex w-full flex-col items-center bg-fy-primary max-md:px-3 max-md:pb-3 max-md:pt-12">
         <Header {merchantInfo} {total} skeleton={!images} on:back-click bind:toggleExpanded {showMiniOverview}>
-            <div slot="smallSummary" class="relative mx-2 h-7 w-7 rounded bg-gray-300 bg-cover shadow" style={`background-image: url(${images?.[0]});`}>
+            {#snippet smallSummary()}
                 <span
                     class={classNames(
                         'bg-fy-alert',
@@ -76,9 +69,9 @@
                 >
                     {quantity || '?'}
                 </span>
-            </div>
+            {/snippet}
             <div class="h-full overflow-scroll px-4">
-                <slot />
+                {@render children?.()}
             </div>
         </Header>
         <div bind:this={overviewElement} class="flex w-full flex-col p-4 max-md:items-center md:items-start">
@@ -93,9 +86,9 @@
                 <span class="text-4xl font-semibold leading-normal text-fy-on-primary">{formatCurrency(total)}</span>
             {/if}
             <div class="w-full py-2 max-md:hidden">
-                <slot />
+                {@render children?.()}
             </div>
         </div>
     </div>
-    <button aria-label="Toggle details" class="absolute left-0 top-0 h-full w-full border-0 bg-transparent md:hidden" on:click={toggleExpanded}></button>
+    <button aria-label="Toggle details" class="absolute left-0 top-0 h-full w-full border-0 bg-transparent md:hidden" onclick={toggleExpanded}></button>
 </div>

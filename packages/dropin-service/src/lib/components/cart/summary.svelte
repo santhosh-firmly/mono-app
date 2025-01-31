@@ -3,46 +3,53 @@
     import { slide } from 'svelte/transition';
 
     import LineItem from '$lib/components/cart/line-item.svelte';
-    import PromoCodes from '$lib/components/header/promo-codes.svelte';
+    import PromoCodes from '$lib/components/cart/promo-codes.svelte';
     import { formatCurrency } from '$lib/utils.js';
 
     /**
-     * Whether or not to show the "calculating..." text
+     * @typedef {Object} SummaryProps
+     * @property {boolean} calculating - Whether the summary is currently calculating totals
+     * @property {Array|null} lineItems - Array of cart line items
+     * @property {Function} updateQuantity - Callback function to update item quantity
+     * @property {boolean} disabled - Whether the summary interactions are disabled
+     * @property {Array|null} coupons - Array of applied coupon codes
+     * @property {number|null} subtotal - Cart subtotal amount
+     * @property {number|null} discount - Total discount amount
+     * @property {Array|null} discountsBreakdown - Detailed breakdown of applied discounts
+     * @property {number|null} storeCredit - Applied store credit amount
+     * @property {number|null} rewardPoints - Applied reward points
+     * @property {Object|null} shippingMethod - Selected shipping method details
+     * @property {number|null} tax - Tax amount
+     * @property {number|null} total - Cart total amount
+     * @property {boolean} showImageBorder - Whether to show borders around product images
+     * @property {Function} addPromoCodeCallback - Callback function to add a promo code
+     * @property {Function} clearPromoCodesCallback - Callback function to clear all promo codes
      */
-    export let calculating = false;
 
     /**
-     * List of items to display
+     * @type {SummaryProps}
      */
-    export let lineItems = null;
+    let {
+        calculating = false,
+        lineItems = null,
+        updateQuantity = () => {},
+        disabled = false,
+        coupons = null,
+        subtotal = null,
+        discount = null,
+        discountsBreakdown = null,
+        storeCredit = null,
+        rewardPoints = null,
+        shippingMethod = null,
+        tax = null,
+        total = null,
+        showImageBorder = true,
+        addPromoCodeCallback,
+        clearPromoCodesCallback,
+    } = $props();
 
-    export let updateQuantity = () => {};
-    export let disabled = false;
-
-    export let coupons = null;
-    export let subtotal = null;
-    export let discount = null;
-    export let discountsBreakdown = null;
-    export let storeCredit = null;
-    export let rewardPoints = null;
-    export let shippingMethod = null;
-    export let tax = null;
-    export let total = null;
-    export let showImageBorder = true;
-
-    let skeleton = false;
-    let monthlyRecurring;
-
-    export let addPromoCodeCallback;
-    export let clearPromoCodesCallback;
-
-    $: {
-        monthlyRecurring = (lineItems || []).filter((l) => l.recurring === 'monthly').reduce((sum, l) => sum + l.price.value, 0);
-    }
-
-    $: {
-        skeleton = !subtotal;
-    }
+    let skeleton = $derived(!subtotal);
+    let monthlyRecurring = $derived((lineItems || []).filter((l) => l.recurring === 'monthly').reduce((sum, l) => sum + l.price.value, 0));
 </script>
 
 <div class="mx-auto flex w-full max-w-[800px] flex-col gap-4 py-4 text-fy-on-primary">

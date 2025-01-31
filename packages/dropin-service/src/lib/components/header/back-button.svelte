@@ -6,29 +6,18 @@
     import { isPrimaryDark } from '$lib/theme/theme-context.js';
 
     /**
-     * URL for the small logo displayed before the merchant name.
+     * @typedef {Object} BackButtonProps
+     * @property {string} smallLogo - URL for the small logo displayed before the merchant name
+     * @property {string} largeLogo - Large logo URL
+     * @property {string} displayName - Display name of the merchant
+     * @property {boolean} showBackButton - Whether or not to show the back button
+     * @property {boolean} skeleton - Whether or not to show skeleton structure
      */
-    export let smallLogo = '';
 
     /**
-     * Large logo URL.
+     * @type {BackButtonProps}
      */
-    export let largeLogo = '';
-
-    /**
-     * Display name
-     */
-    export let displayName = '';
-
-    /**
-     * Whether or not to show back button
-     */
-    export let showBackButton = true;
-
-    /**
-     * Whether or not to show skeleton structure
-     */
-    export let skeleton = false;
+    let { smallLogo = '', largeLogo = '', displayName = '', showBackButton = true, skeleton = false } = $props();
 
     const dispatch = createEventDispatcher();
     function onBackClicked(ev) {
@@ -38,7 +27,7 @@
 </script>
 
 <button
-    on:click={onBackClicked}
+    onclick={onBackClicked}
     type="button"
     disabled={!showBackButton}
     class="flex w-full flex-row items-center gap-2 p-3 text-fy-on-primary"

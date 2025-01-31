@@ -9,36 +9,22 @@
     import BackButton from '$lib/components/header/back-button.svelte';
 
     /**
-     * Merchant information to be used in the back button.
+     * @typedef {Object} HeaderProps
+     * @property {Object} merchantInfo - Merchant information for the back button
+     * @property {number|null} total - Total cost of the current cart
+     * @property {boolean} expanded - Whether the header content is expanded
+     * @property {boolean} showMiniOverview - Whether to show the small overview
+     * @property {number} itemCount - Number of items in cart
+     * @property {boolean} skeleton - Whether to show loading skeleton
+     * @property {Function} smallSummary - Function to render the small summary (from overview)
      */
-    export let merchantInfo = {};
 
     /**
-     * Total cost of the current cart
+     * @type {HeaderProps}
      */
-    export let total = null;
+    let { merchantInfo = {}, total = null, expanded = false, showMiniOverview = false, itemCount = 0, skeleton = false, smallSummary, children } = $props();
 
-    /**
-     * Controls whether or not the contents are expanded
-     */
-    export let expanded = false;
-
-    /**
-     * Controls whether or not to show the small overview
-     */
-    export let showMiniOverview = false;
-
-    /**
-     * Number of items in cart
-     */
-    export let itemCount = 0;
-
-    /**
-     * Wheter or not to show the skeleton
-     */
-    export let skeleton = false;
-
-    let headerOffset;
+    let headerOffset = $state();
 
     export function toggleExpanded(ev) {
         ev.stopPropagation();
@@ -53,13 +39,13 @@
 
 <header class="top-0 z-[120] flex w-full flex-col max-md:fixed max-md:shadow-sm">
     {#if expanded}
-        <button aria-label="Close overlay" class="fixed left-0 top-0 z-[-100] h-screen w-screen bg-black opacity-30 backdrop-blur-2xl" on:click={toggleExpanded}></button>
+        <button aria-label="Close overlay" class="fixed left-0 top-0 z-[-100] h-screen w-screen bg-black opacity-30 backdrop-blur-2xl" onclick={toggleExpanded}></button>
     {/if}
     <button
         aria-label="Toggle details"
         bind:offsetHeight={headerOffset}
         class="z-[101] flex w-full flex-row items-center justify-between bg-fy-primary md:z-[1]"
-        on:click={toggleExpanded}
+        onclick={toggleExpanded}
         type="button"
     >
         <div class="w-1/2 md:w-full">
@@ -72,7 +58,7 @@
                     <span class="absolute right-0 min-w-max" style="min-width: max-content;" transition:fade={{ duration: 150 }}> Close </span>
                 {:else if showMiniOverview}
                     <div class="absolute right-0 flex flex-row items-center" transition:fade={{ duration: 150 }}>
-                        <slot name="smallSummary" />
+                        {@render smallSummary?.()}
                         <span class="min-w-max" style="min-width: max-content;" transition:fade={{ duration: 150 }}>
                             {total ? formatCurrency(total) : 'Details'}
                         </span>
@@ -108,7 +94,7 @@
             class="ov-gradient-y-primary fixed left-0 top-0 z-[100] flex max-h-screen w-screen flex-col bg-fy-primary"
             style="padding-top: {headerOffset}px;"
         >
-            <slot />
+            {@render children?.()}
         </div>
     {/if}
 </header>

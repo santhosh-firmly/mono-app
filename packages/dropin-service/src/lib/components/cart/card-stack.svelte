@@ -3,24 +3,17 @@
     import CardImage from '$lib/components/cart/card-image.svelte';
 
     /**
-     * List of images to show.
+     * @typedef {Object} CardStackProps
+     * @property {Array<string>|null} images - List of image URLs to display
+     * @property {number} maxImages - Maximum number of images to show in the stack
+     * @property {number} horizontalOffsetPx - Horizontal offset between stacked cards in pixels
+     * @property {number} verticalOffsetPx - Vertical offset between stacked cards in pixels
      */
-    export let images = null;
 
     /**
-     * Max amount of images to be shown
+     * @type {CardStackProps}
      */
-    export let maxImages = 3;
-
-    /**
-     * Offset of cards on horizontal axis
-     */
-    export let horizontalOffsetPx = 24;
-
-    /**
-     * Offset of cards on verical axis
-     */
-    export let verticalOffsetPx = 16;
+    let { images = null, maxImages = 3, horizontalOffsetPx = 24, verticalOffsetPx = 16 } = $props();
 </script>
 
 <div class="relative flex flex-row">
