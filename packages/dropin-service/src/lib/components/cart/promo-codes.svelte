@@ -6,26 +6,45 @@
     import Group from '$lib/components/common/group.svelte';
     import { isActionDark } from '$lib/theme/theme-context.js';
 
-    export let addPromoCodeCallback;
-    export let clearPromoCodesCallback;
-    export let coupons = [];
+    /**
+     * @typedef {Object} PromoCodesProps
+     * @property {Array<string>|null} coupons - Array of applied coupon codes
+     * @property {Function} addPromoCodeCallback - Callback function to add a new promo code
+     * @property {Function} clearPromoCodesCallback - Callback function to remove all promo codes
+     * @property {string} spinnerClasses - CSS classes for the loading spinner
+     * @property {boolean} showButton - Whether to show the promo code button
+     * @property {string} promoCode - The current promo code input
+     * @property {boolean} showSpinner - Whether to show the loading spinner
+     * @property {HTMLElement} inputElement - The input element for the promo code
+     * @property {boolean} removingPromoCodes - Whether to remove all promo codes
+     * @property {string} error - The error message
+     * @property {HTMLElement} promoListContainer - The container for the promo codes
+     * @property {number} promoListContainerScrollLeft - The scroll position of the promo codes container
+     */
 
-    let showButton = true;
-    let promoCode = '';
-    let showSpinner = false;
-    let inputElement;
-    let removingPromoCodes = false;
-    let error = '';
-    let promoListContainer;
-    let promoListContainerScrollLeft = 0;
+    /**
+     * @type {PromoCodesProps}
+     */
+    let {
+        addPromoCodeCallback,
+        clearPromoCodesCallback,
+        coupons = [],
+        showButton = true,
+        promoCode = '',
+        showSpinner = false,
+        inputElement,
+        removingPromoCodes = false,
+        error = '',
+        promoListContainer,
+        promoListContainerScrollLeft = 0,
+        spinnerClasses = !$isActionDark ? 'fill-fy-on-action text-gray-400' : 'fill-fy-on-action text-gray-fy-on-action-subtle',
+    } = $props();
 
-    $: {
+    $effect(() => {
         if (inputElement && !showButton) {
             inputElement.focus();
         }
-    }
-
-    export let spinnerClasses = !$isActionDark ? 'fill-fy-on-action text-gray-400' : 'fill-fy-on-action text-gray-fy-on-action-subtle';
+    });
 
     function promoCodeButtonClicked() {
         showButton = false;
@@ -72,7 +91,7 @@
     {#if showButton}
         <button
             data-testid="add-promo-code-button"
-            on:click={() => promoCodeButtonClicked()}
+            onclick={() => promoCodeButtonClicked()}
             class="promo-button col-span-2 w-full rounded-lg border-0 bg-fy-primary px-2 py-2 text-sm text-fy-on-primary"
         >
             Add promotion code
@@ -106,7 +125,7 @@
                             disabled={showSpinner || removingPromoCodes}
                             data-testid="apply-promo-code-button"
                             class="m-1.5 mx-2 rounded-full px-2 py-1 shadow"
-                            on:click={() => addPromoCode()}
+                            onclick={() => addPromoCode()}
                         >
                             Apply
                         </button>
@@ -123,8 +142,8 @@
                     class="h-full w-full rounded-lg border-0 px-1 text-sm"
                     class:error
                     placeholder="Add promotion code"
-                    on:keyup={handleInputKeyPress}
-                    on:blur={() => onInputBlur()}
+                    onkeyup={handleInputKeyPress}
+                    onblur={() => onInputBlur()}
                 />
             </div>
         </Group>
@@ -145,7 +164,7 @@
             >
                 <div
                     bind:this={promoListContainer}
-                    on:scroll={() => {
+                    onscroll={() => {
                         promoListContainerScrollLeft = promoListContainer.scrollLeft;
                     }}
                     class="no-scrollbar flex grow flex-row gap-2 overflow-scroll overflow-y-hidden px-0.5 py-2"
@@ -197,7 +216,7 @@
                             disabled={showSpinner || removingPromoCodes}
                             data-testid="remove-promo-codes-button"
                             class="ml-2 whitespace-nowrap rounded-lg p-1 text-fy-on-primary-subtle underline"
-                            on:click={() => clearPromoCodes()}>Remove all</button
+                            onclick={() => clearPromoCodes()}>Remove all</button
                         >
                     {:else}
                         <div class="m-0.5 rounded-l-md pl-2">
