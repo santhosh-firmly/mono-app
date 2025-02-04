@@ -9,6 +9,9 @@ import svelte from 'eslint-plugin-svelte';
 import tailwind from 'eslint-plugin-tailwindcss';
 import globals from 'globals';
 
+// Import your custom rule
+import noRelativeLibImports from './eslint-rules/no-relative-lib-imports.js';
+
 const gitignorePath = fileURLToPath(new URL('./.gitignore', import.meta.url));
 
 /** @type {import('eslint').Linter.Config[]} */
@@ -32,6 +35,12 @@ export default [
         plugins: {
             prettier: prettierPlugin,
             import: importPlugin,
+            // Register your custom rule as a plugin
+            custom: {
+                rules: {
+                    'no-relative-lib-imports': noRelativeLibImports,
+                },
+            },
         },
         rules: {
             'prettier/prettier': [
@@ -50,6 +59,7 @@ export default [
             'tailwindcss/no-custom-classname': 'off',
             // Import
             'import/prefer-default-export': 'off',
+            // 'import/no-relative-packages': 'error',
             'import/no-cycle': 'off',
             'import/order': [
                 'error',
@@ -71,6 +81,8 @@ export default [
                     },
                 },
             ],
+            // Reference the custom rule with the plugin prefix
+            'custom/no-relative-lib-imports': 'error',
         },
     },
 ];
