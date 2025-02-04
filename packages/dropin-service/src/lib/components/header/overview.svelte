@@ -3,9 +3,8 @@
     import classNames from 'classnames';
     import { onMount } from 'svelte';
 
-    import Header from './header.svelte';
-
     import CardStack from '$lib/components/cart/card-stack.svelte';
+    import Header from '$lib/components/header/header.svelte';
     import { formatCurrency } from '$lib/utils.js';
 
     /**

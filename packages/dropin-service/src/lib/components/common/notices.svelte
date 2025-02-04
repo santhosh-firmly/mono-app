@@ -1,7 +1,7 @@
 <script>
     import { fade } from 'svelte/transition';
 
-    import Notice from './notice.svelte';
+    import Notice from '$lib/components/cart/notice.svelte';
 
     export let notices = [];
 

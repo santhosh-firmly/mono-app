@@ -4,9 +4,8 @@
     import { cubicInOut } from 'svelte/easing';
     import { fade, slide } from 'svelte/transition';
 
-    import { formatCurrency } from '../../utils.js';
-
     import BackButton from '$lib/components/header/back-button.svelte';
+    import { formatCurrency } from '$lib/utils.js';
 
     /**
      * @typedef {Object} HeaderProps

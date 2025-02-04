@@ -1,7 +1,6 @@
 <script>
-    import CardImage from './card-image.svelte';
-    import QuantityController from './quantity-controller.svelte';
-
+    import CardImage from '$lib/components/cart/card-image.svelte';
+    import QuantityController from '$lib/components/cart/quantity-controller.svelte';
     import { formatCurrency } from '$lib/utils.js';
 
     /**
