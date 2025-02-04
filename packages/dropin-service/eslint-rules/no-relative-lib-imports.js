@@ -5,7 +5,7 @@ export default {
     meta: {
         type: 'problem',
         docs: {
-            description: 'Disallow relative imports for files inside src/lib—use the $lib alias instead.',
+            description: 'Disallow relative imports for files inside src/lib—use the $lib alias instead, except for imports from the same folder.',
             category: 'Best Practices',
             recommended: true,
         },
@@ -31,18 +31,23 @@ export default {
                 }
 
                 const importerDir = dirname(currentFilename);
-
                 // Resolve the absolute path of the imported file.
                 const resolvedImportPath = resolve(importerDir, importPath);
+
+                // Check if the import is from the same directory
+                if (importPath.startsWith('./') && !importPath.slice(2).includes('/')) {
+                    // The import is from the same directory, so skip the check
+                    return;
+                }
 
                 // Define the absolute path to the src/lib folder.
                 // Assumes your project root is process.cwd(), adjust if needed.
                 const libDir = resolve(process.cwd(), 'src', 'lib');
 
                 // Check if the resolved path is located within libDir:
-                // relative(libDir, resolvedImportPath) does not start with '..'
+                  // relative(libDir, resolvedImportPath) does not start with '..'
                 // if and only if resolvedImportPath is inside libDir.
-                if (!relative(libDir, resolvedImportPath).startsWith('.')) {
+                if (!relative(libDir, resolvedImportPath).startsWith('..')) {
                     context.report({
                         node,
                         messageId: 'noRelativeLibImport',
