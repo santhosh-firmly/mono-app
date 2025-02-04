@@ -45,7 +45,7 @@ export default {
                 const libDir = resolve(process.cwd(), 'src', 'lib');
 
                 // Check if the resolved path is located within libDir:
-                  // relative(libDir, resolvedImportPath) does not start with '..'
+                // relative(libDir, resolvedImportPath) does not start with '..'
                 // if and only if resolvedImportPath is inside libDir.
                 if (!relative(libDir, resolvedImportPath).startsWith('..')) {
                     context.report({
