@@ -25,12 +25,15 @@
   },
   "devDependencies": {
     "classnames": "^2.5.1",
+    "flowbite": "^3.1.2",
+    "flowbite-svelte": "^0.47.4",
     "husky": "^9.1.7",
     "lerna": "^8.1.2"
   },
   "dependencies": {
     "concurrently": "^9.1.2",
     "http-server": "^14.1.1",
-    "wait-on": "^8.0.2"
+    "wait-on": "^8.0.2",
+    "yup": "^1.6.1"
   }
 }

@@ -54,7 +54,7 @@
             <div class="relative flex flex-row items-center gap-1 text-right" style={`min-width: max-content;`}>
                 {#if expanded}
                     <span class="min-w-max" style="min-width: max-content;">&nbsp;&nbsp;</span>
-                    <span class="absolute right-0 min-w-max" style="min-width: max-content;" transition:fade={{ duration: 150 }}> Close </span>
+                    <span class="min-w-max absolute right-0" style="min-width: max-content;" transition:fade={{ duration: 150 }}> Close </span>
                 {:else if showMiniOverview}
                     <div class="absolute right-0 flex flex-row items-center" transition:fade={{ duration: 150 }}>
                         {@render smallSummary?.()}
