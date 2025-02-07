@@ -87,7 +87,7 @@
     name="US Phone Number"
     play={async ({ canvasElement, step }) => {
         const canvas = within(canvasElement);
-		const phoneElement = canvas.getByTestId('phone');
+        const phoneElement = canvas.getByTestId('phone');
         phoneElement.value = '';
         await waitFor(() => phoneElement.value === '');
         await userEvent.click(phoneElement);
@@ -103,11 +103,11 @@
     name="Brazilian Phone Number"
     play={async ({ canvasElement, step }) => {
         const canvas = within(canvasElement);
-		const phoneElement = canvas.getByTestId('phone');
-            phoneElement.value = '';
-            await waitFor(() => phoneElement.value === '');
-            await userEvent.click(phoneElement);
-            await userEvent.keyboard('+5519123451234');
+        const phoneElement = canvas.getByTestId('phone');
+        phoneElement.value = '';
+        await waitFor(() => phoneElement.value === '');
+        await userEvent.click(phoneElement);
+        await userEvent.keyboard('+5519123451234');
         await step('Verify phone flag', async () => {
             await expect(canvas.getByTestId('flag')).toBeInTheDocument();
             await expect(canvas.getByTestId('flag').textContent).toEqual('🇧🇷');

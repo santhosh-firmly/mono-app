@@ -59,7 +59,6 @@
         fullName,
     } = $props();
 
-
     let currentCountry = $state(Countries[0]);
 
     let first_name_error = $state(false);
