@@ -1,9 +1,10 @@
 import containerQueries from '@tailwindcss/container-queries';
 import typography from '@tailwindcss/typography';
+import FlowBitePlugin from 'flowbite/plugin';
 
 /** @type {import('tailwindcss').Config} */
 export default {
-    content: ['./src/**/*.{html,js,svelte,ts}'],
+    content: ['./src/**/*.{html,js,svelte,ts}', './node_modules/flowbite-svelte/**/*.{html,js,svelte,ts}'],
 
     theme: {
         extend: {
@@ -27,7 +28,10 @@ export default {
                 'fy-on-primary-accent': 'var(--fy-on-primary-accent)',
             },
         },
+        minWidth: {
+            80: '80px',
+        },
     },
 
-    plugins: [typography, containerQueries],
+    plugins: [typography, containerQueries, FlowBitePlugin],
 };
