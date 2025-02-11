@@ -1,4 +1,16 @@
 {
     "$schema": "https://inlang.com/schema/inlang-message-format",
-    "hello_world": "Hello, {name} from ta-in!"
+    "hello_world": "வணக்கம், {name}!",
+    "credit_card_expires": "காலாவதியாகிறது",
+    "credit_card_expired": "காலாவதியானது",
+    "otp_validation": "சரியான OTP-ஐ உள்ளிடவும்",
+    "info_c2p_remember_me_long": "வேகமான செக்அவுட்டுக்காக பங்கேற்கும் கடைகளில் உங்கள் சாதனம் மற்றும் உலாவியில் நினைவில் கொள்ள தேர்ந்தெடுக்கவும். பகிரப்பட்ட சாதனங்களுக்கு பரிந்துரைக்கப்படவில்லை.",
+    "credit_card_validation": "சரியான கிரெடிட் கார்டை உள்ளிடவும்",
+    "expiry_date_validation": "காலாவதி தேதி சரியாக இல்லை",
+    "last_name_required": "கடைசி பெயர் தேவை",
+    "required": "தேவை",
+    "phone_number_validation": "தொலைபேசி எண் சரியாக இல்லை",
+    "zip_code_validation": "சரியான அஞ்சல் குறியீடு வேண்டும்",
+    "minimum": "குறைந்தபட்சம் {val} எழுத்துகள் தேவை",
+    "maximum": "அதிகபட்சம் {val} எழுத்துகள் மட்டுமே"
 }

@@ -48,26 +48,28 @@
     <div class="flex w-full flex-col items-center bg-fy-primary max-md:px-3 max-md:pb-3 max-md:pt-12">
         <Header {merchantInfo} {total} skeleton={!images} on:back-click bind:toggleExpanded {showMiniOverview}>
             {#snippet smallSummary()}
-                <span
-                    class={classNames(
-                        'bg-fy-alert',
-                        'text-fy-on-alert',
-                        'shadow',
-                        'absolute',
-                        'rounded-full',
-                        'w-4',
-                        'h-4',
-                        'text-xs',
-                        'right-[-5px]',
-                        'bottom-[-5px]',
-                        'flex',
-                        'items-center',
-                        'justify-center',
-                        'font-bold',
-                    )}
-                >
-                    {quantity || '?'}
-                </span>
+                <div class="relative mx-2 h-7 w-7 rounded bg-gray-300 bg-cover shadow">
+                    <span
+                        class={classNames(
+                            'bg-fy-alert',
+                            'text-fy-on-alert',
+                            'shadow',
+                            'absolute',
+                            'rounded-full',
+                            'w-4',
+                            'h-4',
+                            'text-xs',
+                            'right-[-5px]',
+                            'bottom-[-5px]',
+                            'flex',
+                            'items-center',
+                            'justify-center',
+                            'font-bold',
+                        )}
+                    >
+                        {quantity || '?'}
+                    </span>
+                </div>
             {/snippet}
             <div class="h-full overflow-scroll px-4">
                 {@render children?.()}

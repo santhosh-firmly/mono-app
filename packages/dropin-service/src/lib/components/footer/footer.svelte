@@ -3,7 +3,7 @@
 
     import FooterLinks from './footer-links.svelte';
 
-    import PaymentButton from '$lib/components/payment/payment-button.svelte';
+    import PaymentButton from '$lib/components/checkout/payment-button.svelte';
 
     /**
      * @typedef {Object} footerProps

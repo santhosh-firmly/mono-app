@@ -2,11 +2,12 @@
 import * as Yup from 'yup';
 
 import { getCardTypeByValue, validateLuhn } from './credit-card-helper.js';
-import { CreditCardValidation, ExpiryDateValidation, LastNameRequired, maximum, minumum, PhoneNumberValidation, Required, ZipCodeValidation } from './localization.js';
+
+import * as m from '$lib/paraglide/messages.js';
 
 // Reference for the Regex (Francis Gagnon's answer): https://stackoverflow.com/questions/16699007/regular-expression-to-match-standard-10-digit-phone-number
 const phoneRegExp = /^\s*(?:\+?(\d{1,3}))?[-. (]*(\d{3})[-. )]*(\d{3})[-. ]*(\d{4})(?: *x(\d+))?\s*$/m;
-Yup.addMethod(Yup.string, 'phone', function (messageError = PhoneNumberValidation) {
+Yup.addMethod(Yup.string, 'phone', function (messageError = m.phone_number_validation()) {
     return this.test('phone', messageError, (value) => {
         if (value && value.length > 0) {
             return phoneRegExp.test(value);
@@ -21,7 +22,7 @@ const MONTH_OUT_OF_RANGE = 'Expiry month must be between 01 and 12';
 const YEAR_OUT_OF_RANGE = 'Expiry year cannot be in the past';
 const DATE_OUT_OF_RANGE = 'Expiry date cannot be in the past';
 
-Yup.addMethod(Yup.string, 'expiry', function (messageError = ExpiryDateValidation) {
+Yup.addMethod(Yup.string, 'expiry', function (messageError = m.expiry_date_validation()) {
     return this.test('expiry', messageError, function (value) {
         const { path, createError } = this;
         if (value && value.length > 0) {
@@ -49,7 +50,7 @@ Yup.addMethod(Yup.string, 'expiry', function (messageError = ExpiryDateValidatio
     });
 });
 
-Yup.addMethod(Yup.string, 'expiryMonth', function (messageError = ExpiryDateValidation) {
+Yup.addMethod(Yup.string, 'expiryMonth', function (messageError = m.expiry_date_validation()) {
     return this.test('expiration month', messageError, function (value) {
         const { path, createError } = this;
         if (value && value.length > 0) {
@@ -63,7 +64,7 @@ Yup.addMethod(Yup.string, 'expiryMonth', function (messageError = ExpiryDateVali
     });
 });
 
-Yup.addMethod(Yup.string, 'expiryYear', function (messageError = ExpiryDateValidation) {
+Yup.addMethod(Yup.string, 'expiryYear', function (messageError = m.expiry_date_validation()) {
     return this.test('expiry year', messageError, function (value) {
         const { path, createError } = this;
         if (value && value.length > 0) {
@@ -79,7 +80,7 @@ Yup.addMethod(Yup.string, 'expiryYear', function (messageError = ExpiryDateValid
     });
 });
 
-Yup.addMethod(Yup.string, 'cardnumber', function (messageError = CreditCardValidation) {
+Yup.addMethod(Yup.string, 'cardnumber', function (messageError = m.credit_card_validation()) {
     return this.test('cardnumber', messageError, (value) => {
         if (value && value.length > 0) {
             const rawCardNumber = value.replace(/\s/g, '');
@@ -103,18 +104,18 @@ Yup.addMethod(Yup.string, 'cardnumber', function (messageError = CreditCardValid
 });
 
 const Email = {
-    email: Yup.string().email().required(Required).default(''),
+    email: Yup.string().email().required(m.required()).default(''),
 };
 
 const FirstAndLastName = {
-    first_name: Yup.string().required(Required).min(3, minumum(3)).max(30, maximum(30)).default(''),
-    last_name: Yup.string().required(LastNameRequired).min(3, minumum(3)).max(30, maximum(30)).default(''),
+    first_name: Yup.string().required(m.required()).min(3, m.minimum(3)).max(30, m.maximum(30)).default(''),
+    last_name: Yup.string().required(m.last_name_required()).min(3, m.minimum(3)).max(30, m.maximum(30)).default(''),
 };
 
 export const EmailSchema = Yup.object().shape(Email);
 
 const Phone = {
-    phone: Yup.string().phone().required(Required).default(''),
+    phone: Yup.string().phone().required(m.required()).default(''),
 };
 
 export const PhoneSchema = Yup.object().shape(Phone);
@@ -125,28 +126,28 @@ export const ContactSchema = Yup.object().shape({
 });
 
 const address = {
-    address1: Yup.string().required(Required).min(3, minumum(3)).max(100, maximum(100)).default(''),
-    address2: Yup.string().default('').max(100, maximum(100)),
-    city: Yup.string().required(Required).default('').max(100, maximum(100)),
-    state_or_province: Yup.string().required(Required).default('').max(100, maximum(100)),
+    address1: Yup.string().required(m.required()).min(3, m.minimum(3)).max(100, m.maximum(100)).default(''),
+    address2: Yup.string().default('').max(100, m.maximum(100)),
+    city: Yup.string().required(m.required()).default('').max(100, m.maximum(100)),
+    state_or_province: Yup.string().required(m.required()).default('').max(100, m.maximum(100)),
     postal_code: Yup.string()
-        .required(Required)
+        .required(m.required())
         .default('')
-        .matches(/^\d{5}[-\s]?(?:\d{4})?$/, ZipCodeValidation)
-        .max(50, maximum(50)),
-    country: Yup.string().required(Required).default('United States').max(50, maximum(50)),
+        .matches(/^\d{5}[-\s]?(?:\d{4})?$/, m.zip_code_validation())
+        .max(50, m.maximum(50)),
+    country: Yup.string().required(m.required()).default('United States').max(50, m.maximum(50)),
 };
 
 export const CVCSchema = Yup.object().shape({
-    cvc: Yup.string().required(Required).max(4, maximum(4)).default(''),
+    cvc: Yup.string().required(m.required()).max(4, m.maximum(4)).default(''),
 });
 
 export const creditCard = {
     cardType: Yup.mixed().default(''),
-    cardName: Yup.string().required(Required).min(3, minumum(3)).max(30, maximum(30)).default(''),
-    cardNumber: Yup.string().required(Required).cardnumber().default(''),
-    expiryDate: Yup.string().required(Required).expiry().default(''),
-    cvc: Yup.string().required(Required).max(4, maximum(4)).default(''),
+    cardName: Yup.string().required(m.required()).min(3, m.minimum(3)).max(30, m.maximum(30)).default(''),
+    cardNumber: Yup.string().required(m.required()).cardnumber().default(''),
+    expiryDate: Yup.string().required(m.required()).expiry().default(''),
+    cvc: Yup.string().required(m.required()).max(4, m.maximum(4)).default(''),
 };
 
 export const CreditCardSchema = Yup.object().shape({
@@ -154,10 +155,10 @@ export const CreditCardSchema = Yup.object().shape({
 });
 
 export const CreditCardApiSchema = Yup.object().shape({
-    number: Yup.string().required(Required).cardnumber().default(''),
-    month: Yup.string().required(Required).expiryMonth().default(''),
-    year: Yup.string().required(Required).expiryYear().default(''),
-    verification_value: Yup.string().required(Required).max(4, maximum(4)).default(''),
+    number: Yup.string().required(m.required()).cardnumber().default(''),
+    month: Yup.string().required(m.required()).expiryMonth().default(''),
+    year: Yup.string().required(m.required()).expiryYear().default(''),
+    verification_value: Yup.string().required(m.required()).max(4, m.maximum(4)).default(''),
 });
 
 export const PaymentInfoSchema = Yup.object().shape({
@@ -195,7 +196,7 @@ export const BillingInfoSchema = Yup.object().shape({
 });
 
 const Password = {
-    password: Yup.string().trim().required(Required).default(''),
+    password: Yup.string().trim().required(m.required()).default(''),
 };
 
 export const PasswordSchema = Yup.object().shape(Password);
