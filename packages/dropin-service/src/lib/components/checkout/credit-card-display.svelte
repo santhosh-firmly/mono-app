@@ -2,11 +2,11 @@
     // @ts-nocheck
 
     import { formatCardNumberRaw } from '$lib/browser/credit-card-helper.js';
-    import { CreditCardExpired, CreditCardExpires } from '$lib/browser/localization.js';
     import CustomArtCardIcon from '$lib/components/common/svg/custom-art-card-icon.svelte';
     import EmptyCard from '$lib/components/common/svg/empty-card-icon.svelte';
     import MasterCard from '$lib/components/common/svg/master-card-icon.svelte';
     import VisaCard from '$lib/components/common/svg/visa-card-icon.svelte';
+    import * as m from '$lib/paraglide/messages.js';
 
     /**
      * @typedef {Object} CreditCardDisplayProps
@@ -68,7 +68,7 @@
 
 <div class="flex flex-row gap-1 font-normal">
     {#if isExpired}
-        <div class="flex flex-wrap content-center justify-center text-red-400">{CreditCardExpired}</div>
+        <div class="flex flex-wrap content-center justify-center text-red-400">{m.credit_card_expired()}</div>
     {/if}
     <div class="flex justify-center">
         {@render cardComponent({
@@ -86,7 +86,7 @@
             {/if}
         </div>
         {#if showExpiration}
-            <div class="flex justify-start">{CreditCardExpires} {cardMonth} / {cardYear}</div>
+            <div class="flex justify-start">{m.credit_card_expires()} {cardMonth} / {cardYear}</div>
         {/if}
     </div>
 </div>

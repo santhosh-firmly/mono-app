@@ -2,10 +2,10 @@
     // @ts-nocheck
     import { defineMeta } from '@storybook/addon-svelte-csf';
 
-    import PaymentButton from '$lib/components/payment/payment-button.svelte';
+    import PaymentButton from '$lib/components/checkout/payment-button.svelte';
 
     const { Story } = defineMeta({
-        title: 'Checkout V4/Payment/Payment Button',
+        title: 'Checkout V4/Checkout/Payment Button',
         tags: ['autodocs'],
         component: PaymentButton,
     });

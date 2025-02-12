@@ -1,7 +1,7 @@
 <script module>
     import { defineMeta } from '@storybook/addon-svelte-csf';
 
-    import ExistingCreditCard from '$lib/components/payment/existing-credit-card.svelte';
+    import ExistingCreditCard from '$lib/components/checkout/existing-credit-card.svelte';
 
     const { Story } = defineMeta({
         title: 'Checkout V4/Checkout/Existing Credit Card',

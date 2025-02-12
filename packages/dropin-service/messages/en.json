@@ -1,4 +1,16 @@
 {
     "$schema": "https://inlang.com/schema/inlang-message-format",
-    "hello_world": "Hello, {name} from en!"
+    "hello_world": "Hello, {name} from en!",
+    "credit_card_expires": "Expires",
+    "credit_card_expired": "expired",
+    "otp_validation": "Enter a valid OTP",
+    "info_c2p_remember_me_long": "Select to be remembered on your device and browser at participating stores for faster checkout. Not recommended for shared devices.",
+    "credit_card_validation": "Enter a Valid Credit Card",
+    "expiry_date_validation": "Expiry date is not valid",
+    "last_name_required": "Last name is required",
+    "required": "Required",
+    "phone_number_validation": "Phone number is not valid",
+    "zip_code_validation": "Should be a valid Zip",
+    "minimum": "Minimum of {val} characters required",
+    "maximum": "Maximum of {val} characters required"
 }
