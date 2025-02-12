@@ -5,7 +5,7 @@
 
     /**
      * @typedef {Object} CheckboxProps
-     * @property {string} titleSnippet - Title snippet/slot
+     * @property {Snippet} titleSnippet - Title snippet/slot
      * @property {string} title - Title text to display next to checkbox
      * @property {string} subtitle - Optional subtitle text to display below title
      * @property {boolean} isChecked - Whether the checkbox is checked

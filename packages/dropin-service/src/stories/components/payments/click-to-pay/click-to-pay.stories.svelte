@@ -8,7 +8,7 @@
     // import FlowSinglePage from '../flow-single-page.svelte';
 
     const { Story } = defineMeta({
-        title: 'Checkout V4/payments/click-to-pay/Click to Pay Popup',
+        title: 'Checkout V4/Payments/ClickToPay/Click to Pay Popup',
         component: ClickToPay,
         tags: ['autodocs'],
         parameters: {
