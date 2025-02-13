@@ -27,9 +27,9 @@
         titleClasses = 'font-medium text-fy-on-secondary text-sm',
     } = $props();
 
-    // Handle checkbox change event
-    function handleCheckboxChange(event) {
-        dispatch('checkboxChanged', { isChecked: event.target.checked });
+    function handleChange(event) {
+        isChecked = event.target.checked;
+        dispatch('change', { isChecked });
     }
 </script>
 
@@ -37,7 +37,7 @@
     <input
         type="checkbox"
         bind:checked={isChecked}
-        onchange={handleCheckboxChange}
+        onchange={handleChange}
         class="mr-3 h-5 w-5 rounded border-gray-300 text-fy-action disabled:text-fy-on-primary-subtle"
         {disabled}
     />

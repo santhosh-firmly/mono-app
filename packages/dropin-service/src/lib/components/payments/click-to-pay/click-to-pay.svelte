@@ -171,7 +171,7 @@
                 dispatch('login-c2p-successful', Object.assign(res.data));
             }
         } catch (ex) {
-            console.log('Should throw an error', ex);
+            console.error('Should throw an error', ex);
         }
     });
 </script>

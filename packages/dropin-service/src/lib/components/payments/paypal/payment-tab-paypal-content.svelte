@@ -1,114 +1,100 @@
 <script>
-	// @ts-nocheck
-	import Group from '$lib/components/common/group.svelte';
-	import Paypal from './paypal.svelte';
+    // @ts-nocheck
+    import Paypal from './paypal.svelte';
 
-	
-	/**
-	 * @typedef {Object} PaymentTabPaypalContentProps
-	 * @property {boolean} connected - Whether the user is connected to a PayPal account
-	 * @property {string} email - The email address of the user's PayPal account
-	 */
-	/**
-	 * @type {PaymentTabPaypalContentProps}
-	 */
-	let { connected = false, email } = $props();
+    import Group from '$lib/components/common/group.svelte';
+
+    /**
+     * @typedef {Object} PaymentTabPaypalContentProps
+     * @property {boolean} connected - Whether the user is connected to a PayPal account
+     * @property {string} email - The email address of the user's PayPal account
+     */
+    /**
+     * @type {PaymentTabPaypalContentProps}
+     */
+    let { connected = false, email } = $props();
 </script>
 
 <Group>
-	<div class="flex flex-col gap-2 col-span-2 items-start rounded-lg py-4 px-5">
-		<svg
-			xmlns:dc="http://purl.org/dc/elements/1.1/"
-			xmlns:cc="http://creativecommons.org/ns#"
-			xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-			xmlns:svg="http://www.w3.org/2000/svg"
-			xmlns="http://www.w3.org/2000/svg"
-			viewBox="0 0 526.77502 140.375"
-			class="my-1"
-			height="16"
-			xml:space="preserve"
-			version="1.1"
-		>
-			<defs id="defs6" />
-			<g transform="matrix(1.25,0,0,-1.25,0,140.375)" id="g10">
-				<g transform="scale(0.1,0.1)" id="g12">
-					<path
-						id="path14"
-						style="fill:#283b82;fill-opacity:1;fill-rule:nonzero;stroke:none"
-						d="m 505.703,1122.93 -327.781,0 c -22.434,0 -41.508,-16.3 -45.008,-38.45 L 0.34375,243.961 C -2.29297,227.383 10.5547,212.426 27.375,212.426 l 156.488,0 c 22.43,0 41.504,16.293 45.004,38.484 l 35.754,226.699 c 3.453,22.196 22.574,38.493 44.957,38.493 l 103.766,0 c 215.918,0 340.531,104.484 373.078,311.535 14.664,90.586 0.621,161.758 -41.797,211.603 -46.586,54.74 -129.215,83.69 -238.922,83.69 z M 543.52,815.941 C 525.594,698.324 435.727,698.324 348.832,698.324 l -49.461,0 34.699,219.656 c 2.063,13.278 13.563,23.055 26.985,23.055 l 22.668,0 c 59.191,0 115.031,0 143.882,-33.738 17.208,-20.133 22.481,-50.039 15.915,-91.356"
-					/>
-					<path
-						id="path16"
-						style="fill:#283b82;fill-opacity:1;fill-rule:nonzero;stroke:none"
-						d="m 1485.5,819.727 -156.96,0 c -13.37,0 -24.92,-9.778 -26.99,-23.055 l -6.94,-43.902 -10.98,15.914 c -33.98,49.32 -109.76,65.804 -185.39,65.804 -173.451,0 -321.599,-131.371 -350.451,-315.656 -15,-91.926 6.328,-179.828 58.473,-241.125 47.832,-56.363 116.273,-79.848 197.708,-79.848 139.76,0 217.26,89.86 217.26,89.86 l -7,-43.614 c -2.64,-16.679 10.21,-31.632 26.94,-31.632 l 141.38,0 c 22.48,0 41.46,16.297 45.01,38.484 l 84.83,537.234 c 2.69,16.536 -10.11,31.536 -26.89,31.536 z M 1266.71,514.23 c -15.14,-89.671 -86.32,-149.875 -177.09,-149.875 -45.58,0 -82.01,14.622 -105.401,42.325 -23.196,27.511 -32.016,66.668 -24.633,110.285 14.137,88.906 86.514,151.066 175.894,151.066 44.58,0 80.81,-14.808 104.68,-42.746 23.92,-28.23 33.4,-67.629 26.55,-111.055"
-					/>
-					<path
-						id="path18"
-						style="fill:#283b82;fill-opacity:1;fill-rule:nonzero;stroke:none"
-						d="m 2321.47,819.727 -157.73,0 c -15.05,0 -29.19,-7.477 -37.72,-19.989 L 1908.47,479.289 1816.26,787.23 c -5.8,19.27 -23.58,32.497 -43.71,32.497 l -155,0 c -18.84,0 -31.92,-18.403 -25.93,-36.137 L 1765.36,273.727 1602.02,43.1406 C 1589.17,24.9805 1602.11,0 1624.31,0 l 157.54,0 c 14.95,0 28.95,7.28906 37.43,19.5586 L 2343.9,776.828 c 12.56,18.121 -0.33,42.899 -22.43,42.899"
-					/>
-					<path
-						id="path20"
-						style="fill:#469bdb;fill-opacity:1;fill-rule:nonzero;stroke:none"
-						d="m 2843.7,1122.93 -327.83,0 c -22.38,0 -41.46,-16.3 -44.96,-38.45 L 2338.34,243.961 c -2.63,-16.578 10.21,-31.535 26.94,-31.535 l 168.23,0 c 15.62,0 29,11.402 31.44,26.933 l 37.62,238.25 c 3.45,22.196 22.58,38.493 44.96,38.493 l 103.72,0 c 215.96,0 340.53,104.484 373.12,311.535 14.72,90.586 0.58,161.758 -41.84,211.603 -46.54,54.74 -129.12,83.69 -238.83,83.69 z m 37.82,-306.989 C 2863.64,698.324 2773.78,698.324 2686.83,698.324 l -49.41,0 34.75,219.656 c 2.06,13.278 13.46,23.055 26.93,23.055 l 22.67,0 c 59.15,0 115.03,0 143.88,-33.738 17.21,-20.133 22.43,-50.039 15.87,-91.356"
-					/>
-					<path
-						id="path22"
-						style="fill:#469bdb;fill-opacity:1;fill-rule:nonzero;stroke:none"
-						d="m 3823.46,819.727 -156.87,0 c -13.47,0 -24.93,-9.778 -26.94,-23.055 l -6.95,-43.902 -11.02,15.914 c -33.98,49.32 -109.71,65.804 -185.34,65.804 -173.46,0 -321.55,-131.371 -350.41,-315.656 -14.95,-91.926 6.28,-179.828 58.43,-241.125 47.93,-56.363 116.27,-79.848 197.7,-79.848 139.76,0 217.26,89.86 217.26,89.86 l -7,-43.614 c -2.63,-16.679 10.21,-31.632 27.04,-31.632 l 141.34,0 c 22.38,0 41.46,16.297 44.96,38.484 l 84.88,537.234 c 2.58,16.536 -10.26,31.536 -27.08,31.536 z M 3604.66,514.23 c -15.05,-89.671 -86.32,-149.875 -177.09,-149.875 -45.49,0 -82.01,14.622 -105.4,42.325 -23.19,27.511 -31.92,66.668 -24.63,110.285 14.23,88.906 86.51,151.066 175.9,151.066 44.57,0 80.8,-14.808 104.67,-42.746 24.01,-28.23 33.5,-67.629 26.55,-111.055"
-					/>
-					<path
-						id="path24"
-						style="fill:#469bdb;fill-opacity:1;fill-rule:nonzero;stroke:none"
-						d="M 4008.51,1099.87 3873.97,243.961 c -2.63,-16.578 10.21,-31.535 26.94,-31.535 l 135.25,0 c 22.48,0 41.56,16.293 45.01,38.484 l 132.66,840.47 c 2.64,16.59 -10.2,31.59 -26.93,31.59 l -151.46,0 c -13.37,-0.04 -24.87,-9.83 -26.93,-23.1"
-					/>
-				</g>
-			</g>
-		</svg>
-		<span class="text-xs w-full"
-			>Paypal selected
-			{#if !connected || email}
-				<hr class="w-full mt-1" />
-			{/if}
-		</span>
-		{#if !connected}
-			<div class="text-xs text-fy-on-surface-subtle py-2 flex flex-row gap-3 items-center">
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					width="24"
-					height="24"
-					viewBox="0 0 26 26"
-					class="w-6 h-6 shrink-0"
-					fill="none"
-				>
-					<path
-						d="M15 5H4C3.20435 5 2.44129 5.31607 1.87868 5.87868C1.31607 6.44129 1 7.20435 1 8V22C1 22.7957 1.31607 23.5587 1.87868 24.1213C2.44129 24.6839 3.20435 25 4 25H18C18.7956 25 19.5587 24.6839 20.1213 24.1213C20.6839 23.5587 21 22.7957 21 22V11M7 19L25 1M25 1H18M25 1V8"
-						stroke="#A8A8A8"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					/>
-				</svg>
-				<span class="shrink">
-					You will be redirected to Paypal to authenticate. You will be redirected back to our site
-					to complete your order.
-				</span>
-			</div>
-			<div
-				class="rounded w-full flex flex-row justify-center h-12 overflow-hidden shadow-lg my-1 bg-[#ffc439]"
-			>
-				<Paypal class="w-full" label="pay" onPaypalHandler={() => {}} />
-			</div>
-		{:else if email}
-			<div class="flex flex-row w-full justify-between py-2">
-				<div class="flex flex-col text-sm">
-					<span>Connected to</span>
-					<span class="font-semibold">{email}</span>
-				</div>
-				<button type="button" class="text-[#009CDE] mx-2 font-bold text-xs">
-					Change
-				</button>
-			</div>
-		{/if}
-	</div>
+    <div class="col-span-2 flex flex-col items-start gap-2 rounded-lg px-5 py-4">
+        <svg
+            xmlns:dc="http://purl.org/dc/elements/1.1/"
+            xmlns:cc="http://creativecommons.org/ns#"
+            xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+            xmlns:svg="http://www.w3.org/2000/svg"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 526.77502 140.375"
+            class="my-1"
+            height="16"
+            xml:space="preserve"
+            version="1.1"
+        >
+            <defs id="defs6" />
+            <g transform="matrix(1.25,0,0,-1.25,0,140.375)" id="g10">
+                <g transform="scale(0.1,0.1)" id="g12">
+                    <path
+                        id="path14"
+                        style="fill:#283b82;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                        d="m 505.703,1122.93 -327.781,0 c -22.434,0 -41.508,-16.3 -45.008,-38.45 L 0.34375,243.961 C -2.29297,227.383 10.5547,212.426 27.375,212.426 l 156.488,0 c 22.43,0 41.504,16.293 45.004,38.484 l 35.754,226.699 c 3.453,22.196 22.574,38.493 44.957,38.493 l 103.766,0 c 215.918,0 340.531,104.484 373.078,311.535 14.664,90.586 0.621,161.758 -41.797,211.603 -46.586,54.74 -129.215,83.69 -238.922,83.69 z M 543.52,815.941 C 525.594,698.324 435.727,698.324 348.832,698.324 l -49.461,0 34.699,219.656 c 2.063,13.278 13.563,23.055 26.985,23.055 l 22.668,0 c 59.191,0 115.031,0 143.882,-33.738 17.208,-20.133 22.481,-50.039 15.915,-91.356"
+                    />
+                    <path
+                        id="path16"
+                        style="fill:#283b82;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                        d="m 1485.5,819.727 -156.96,0 c -13.37,0 -24.92,-9.778 -26.99,-23.055 l -6.94,-43.902 -10.98,15.914 c -33.98,49.32 -109.76,65.804 -185.39,65.804 -173.451,0 -321.599,-131.371 -350.451,-315.656 -15,-91.926 6.328,-179.828 58.473,-241.125 47.832,-56.363 116.273,-79.848 197.708,-79.848 139.76,0 217.26,89.86 217.26,89.86 l -7,-43.614 c -2.64,-16.679 10.21,-31.632 26.94,-31.632 l 141.38,0 c 22.48,0 41.46,16.297 45.01,38.484 l 84.83,537.234 c 2.69,16.536 -10.11,31.536 -26.89,31.536 z M 1266.71,514.23 c -15.14,-89.671 -86.32,-149.875 -177.09,-149.875 -45.58,0 -82.01,14.622 -105.401,42.325 -23.196,27.511 -32.016,66.668 -24.633,110.285 14.137,88.906 86.514,151.066 175.894,151.066 44.58,0 80.81,-14.808 104.68,-42.746 23.92,-28.23 33.4,-67.629 26.55,-111.055"
+                    />
+                    <path
+                        id="path18"
+                        style="fill:#283b82;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                        d="m 2321.47,819.727 -157.73,0 c -15.05,0 -29.19,-7.477 -37.72,-19.989 L 1908.47,479.289 1816.26,787.23 c -5.8,19.27 -23.58,32.497 -43.71,32.497 l -155,0 c -18.84,0 -31.92,-18.403 -25.93,-36.137 L 1765.36,273.727 1602.02,43.1406 C 1589.17,24.9805 1602.11,0 1624.31,0 l 157.54,0 c 14.95,0 28.95,7.28906 37.43,19.5586 L 2343.9,776.828 c 12.56,18.121 -0.33,42.899 -22.43,42.899"
+                    />
+                    <path
+                        id="path20"
+                        style="fill:#469bdb;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                        d="m 2843.7,1122.93 -327.83,0 c -22.38,0 -41.46,-16.3 -44.96,-38.45 L 2338.34,243.961 c -2.63,-16.578 10.21,-31.535 26.94,-31.535 l 168.23,0 c 15.62,0 29,11.402 31.44,26.933 l 37.62,238.25 c 3.45,22.196 22.58,38.493 44.96,38.493 l 103.72,0 c 215.96,0 340.53,104.484 373.12,311.535 14.72,90.586 0.58,161.758 -41.84,211.603 -46.54,54.74 -129.12,83.69 -238.83,83.69 z m 37.82,-306.989 C 2863.64,698.324 2773.78,698.324 2686.83,698.324 l -49.41,0 34.75,219.656 c 2.06,13.278 13.46,23.055 26.93,23.055 l 22.67,0 c 59.15,0 115.03,0 143.88,-33.738 17.21,-20.133 22.43,-50.039 15.87,-91.356"
+                    />
+                    <path
+                        id="path22"
+                        style="fill:#469bdb;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                        d="m 3823.46,819.727 -156.87,0 c -13.47,0 -24.93,-9.778 -26.94,-23.055 l -6.95,-43.902 -11.02,15.914 c -33.98,49.32 -109.71,65.804 -185.34,65.804 -173.46,0 -321.55,-131.371 -350.41,-315.656 -14.95,-91.926 6.28,-179.828 58.43,-241.125 47.93,-56.363 116.27,-79.848 197.7,-79.848 139.76,0 217.26,89.86 217.26,89.86 l -7,-43.614 c -2.63,-16.679 10.21,-31.632 27.04,-31.632 l 141.34,0 c 22.38,0 41.46,16.297 44.96,38.484 l 84.88,537.234 c 2.58,16.536 -10.26,31.536 -27.08,31.536 z M 3604.66,514.23 c -15.05,-89.671 -86.32,-149.875 -177.09,-149.875 -45.49,0 -82.01,14.622 -105.4,42.325 -23.19,27.511 -31.92,66.668 -24.63,110.285 14.23,88.906 86.51,151.066 175.9,151.066 44.57,0 80.8,-14.808 104.67,-42.746 24.01,-28.23 33.5,-67.629 26.55,-111.055"
+                    />
+                    <path
+                        id="path24"
+                        style="fill:#469bdb;fill-opacity:1;fill-rule:nonzero;stroke:none"
+                        d="M 4008.51,1099.87 3873.97,243.961 c -2.63,-16.578 10.21,-31.535 26.94,-31.535 l 135.25,0 c 22.48,0 41.56,16.293 45.01,38.484 l 132.66,840.47 c 2.64,16.59 -10.2,31.59 -26.93,31.59 l -151.46,0 c -13.37,-0.04 -24.87,-9.83 -26.93,-23.1"
+                    />
+                </g>
+            </g>
+        </svg>
+        <span class="w-full text-xs"
+            >Paypal selected
+            {#if !connected || email}
+                <hr class="mt-1 w-full" />
+            {/if}
+        </span>
+        {#if !connected}
+            <div class="flex flex-row items-center gap-3 py-2 text-xs text-fy-on-surface-subtle">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 26 26" class="h-6 w-6 shrink-0" fill="none">
+                    <path
+                        d="M15 5H4C3.20435 5 2.44129 5.31607 1.87868 5.87868C1.31607 6.44129 1 7.20435 1 8V22C1 22.7957 1.31607 23.5587 1.87868 24.1213C2.44129 24.6839 3.20435 25 4 25H18C18.7956 25 19.5587 24.6839 20.1213 24.1213C20.6839 23.5587 21 22.7957 21 22V11M7 19L25 1M25 1H18M25 1V8"
+                        stroke="#A8A8A8"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                    />
+                </svg>
+                <span class="shrink"> You will be redirected to Paypal to authenticate. You will be redirected back to our site to complete your order. </span>
+            </div>
+            <div class="my-1 flex h-12 w-full flex-row justify-center overflow-hidden rounded bg-[#ffc439] shadow-lg">
+                <Paypal class="w-full" label="pay" onPaypalHandler={() => {}} />
+            </div>
+        {:else if email}
+            <div class="flex w-full flex-row justify-between py-2">
+                <div class="flex flex-col text-sm">
+                    <span>Connected to</span>
+                    <span class="font-semibold">{email}</span>
+                </div>
+                <button type="button" class="mx-2 text-xs font-bold text-[#009CDE]"> Change </button>
+            </div>
+        {/if}
+    </div>
 </Group>
