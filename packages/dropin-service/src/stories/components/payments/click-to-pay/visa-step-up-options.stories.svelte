@@ -5,7 +5,7 @@
     import { BASE_LOGIN_STEPS } from '$lib/constants';
 
     const { Story } = defineMeta({
-        title: 'Checkout V4/payments/click-to-pay/Click to Pay Popup',
+        title: 'Checkout V4/Payments/ClickToPay/Click to Pay Popup',
         component: VisaStepUpOptions,
         tags: ['autodocs'],
     });
