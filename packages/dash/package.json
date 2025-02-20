@@ -12,7 +12,7 @@
     "build-uat": "vite build --mode uat",
     "build-prod": "vite build --mode prod",
     "dev-binding": "npm run build && wrangler pages dev .svelte-kit/cloudflare --compatibility-date=2024-02-19",
-    "deploy-dev": "npm run build-dev && mkdir -p node_modules/.cache/wrangler/ && cp pages-uat.json node_modules/.cache/wrangler/pages.json && && cp wrangler-dev.toml wrangler.toml wrangler pages deploy --branch main",
+    "deploy-dev": "npm run build-dev && mkdir -p node_modules/.cache/wrangler/ && cp pages-uat.json node_modules/.cache/wrangler/pages.json && cp wrangler-dev.toml wrangler.toml wrangler pages deploy --branch main",
     "deploy-uat": "npm run build-uat && mkdir -p node_modules/.cache/wrangler/ && cp pages-uat.json node_modules/.cache/wrangler/pages.json && cp wrangler-uat.toml wrangler.toml && wrangler pages deploy --branch main",
     "deploy-prod": "npm run build-prod && mkdir -p node_modules/.cache/wrangler/ && cp pages-prod.json node_modules/.cache/wrangler/pages.json && cp wrangler-prod.toml wrangler.toml && wrangler pages deploy --branch main",
     "storybook": "storybook dev -p 6006",

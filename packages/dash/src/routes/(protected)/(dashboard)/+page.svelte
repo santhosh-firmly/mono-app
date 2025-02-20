@@ -45,6 +45,17 @@
 					</Card.Title>
 				</Card.Footer>
 			</Card.Root>
+			<Card.Root class="min-w-[300px]">
+				<Card.Header class="flex flex-row justify-between pb-2">
+					<Card.Description>Last Year</Card.Description>
+					<DebugPopover objToDebug={data.lytd.meta} />
+				</Card.Header>
+				<Card.Footer>
+					<Card.Title class="text-3xl">
+						{formatCurrency(Object.values(data.lytd.results[0])[0])}
+					</Card.Title>
+				</Card.Footer>
+			</Card.Root>
 		</div>
 	</div>
 	<div class="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
@@ -54,6 +65,7 @@
 					<Tabs.Trigger value="week">Week</Tabs.Trigger>
 					<Tabs.Trigger value="month">Month</Tabs.Trigger>
 					<Tabs.Trigger value="year">Year</Tabs.Trigger>
+					<Tabs.Trigger value="last-year">Last Year</Tabs.Trigger>
 				</Tabs.List>
 				<div class="ml-auto flex items-center gap-2">
 					<!-- <DropdownMenu.Root>
@@ -98,6 +110,13 @@
 					merchants={data.merchants}
 				/></Tabs.Content
 			>
+			<Tabs.Content value="last-year">
+				<DebugPopover objToDebug={data.ordersByMerchantLytd.meta} />
+				<OrdersByMerchant
+					ordersByMerchant={data.ordersByMerchantLytd}
+					merchants={data.merchants}
+				/></Tabs.Content
+			>
 		</Tabs.Root>
 	</div>
 	<div class="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
@@ -107,6 +126,7 @@
 					<Tabs.Trigger value="week">Week</Tabs.Trigger>
 					<Tabs.Trigger value="month">Month</Tabs.Trigger>
 					<Tabs.Trigger value="year">Year</Tabs.Trigger>
+					<Tabs.Trigger value="last-year">Last Year</Tabs.Trigger>
 				</Tabs.List>
 			</div>
 			<Tabs.Content value="week">
@@ -127,6 +147,13 @@
 				<DebugPopover objToDebug={data.ordersByDestinationYtd.meta} />
 				<OrdersByDestination
 					ordersByDestination={data.ordersByDestinationYtd}
+					destinations={data.destinations}
+				/></Tabs.Content
+			>
+			<Tabs.Content value="last-year">
+				<DebugPopover objToDebug={data.ordersByDestinationLytd.meta} />
+				<OrdersByDestination
+					ordersByDestination={data.ordersByDestinationLytd}
 					destinations={data.destinations}
 				/></Tabs.Content
 			>
