@@ -2,6 +2,7 @@
     // @ts-nocheck
 
     import { defineMeta } from '@storybook/addon-svelte-csf';
+    import { fn } from '@storybook/test';
 
     import ShippingMethodSelector from '$lib/components/checkout/shipping-method-selector.svelte';
 
@@ -9,6 +10,9 @@
         title: 'Checkout V4/Checkout/Shipping Method Selector',
         component: ShippingMethodSelector,
         tags: ['autodocs'],
+        args: {
+            onSetShippingMethod: fn(),
+        },
     });
 </script>
 
