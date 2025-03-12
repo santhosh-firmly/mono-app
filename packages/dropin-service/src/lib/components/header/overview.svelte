@@ -13,12 +13,14 @@
      * @property {Array<string>|null} images - Images to show in product card stack
      * @property {number} quantity - Total items in cart
      * @property {number|null} total - Total cost of the current cart
+     * @property {Function} children - Function to render additional content
+     * @property {Function} onBack - Callback function for back button
      */
 
     /**
      * @type {OverviewProps}
      */
-    let { merchantInfo = {}, images = null, quantity, total = null, children } = $props();
+    let { merchantInfo = {}, images = null, quantity, total = null, children, onBack = () => {} } = $props();
 
     let toggleExpanded = $state();
 
@@ -46,7 +48,7 @@
 
 <div class="relative w-full">
     <div class="flex w-full flex-col items-center bg-fy-primary max-md:px-3 max-md:pb-3 max-md:pt-12">
-        <Header {merchantInfo} {total} skeleton={!images} on:back-click bind:toggleExpanded {showMiniOverview}>
+        <Header {merchantInfo} {total} skeleton={!images} on:back-click={() => onBack()} bind:toggleExpanded {showMiniOverview}>
             {#snippet smallSummary()}
                 <div class="relative mx-2 h-7 w-7 rounded bg-gray-300 bg-cover shadow">
                     <span
