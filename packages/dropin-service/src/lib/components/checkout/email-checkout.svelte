@@ -68,10 +68,11 @@
 
 {#if marketingConsent && marketingConsent.ui_slot === 'UNDER_EMAIL_INPUT'}
     <Checkbox disabled={placeOrderInProgress} labelClasses="w-full pt-4 pb-4 flex rounded-lg" bind:isChecked={isMarketingConsentSigned}>
-        <span slot="title" class="pt-0.5 text-xs font-normal text-fy-on-surface-subtle">
-            {#each marketingConsent.parts as part}
-                {#if part.type === 'text'}
-                    {part.content}
+        {#snippet titleSnippet()}
+            <span class="pt-0.5 text-xs font-normal text-fy-on-surface-subtle">
+                {#each marketingConsent.parts as part}
+                    {#if part.type === 'text'}
+                        {part.content}
                 {/if}
                 {#if part.type === 'terms'}
                     <button type="button" onclick={() => (isTermsPopupOpen = true)} class="underline">
@@ -80,5 +81,6 @@
                 {/if}
             {/each}
         </span>
+        {/snippet}
     </Checkbox>
 {/if}
