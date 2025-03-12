@@ -17,7 +17,7 @@
     let { smallLogo, largeLogo, displayText, merchantName, onclick, disabled } = $props();
 </script>
 
-<button {onclick} class="text-fy-on-action bg-fy-action flex w-full flex-row items-center justify-center gap-2 rounded p-3 pr-5 shadow" {disabled}>
+<button {onclick} class="flex w-full flex-row items-center justify-center gap-2 rounded bg-fy-action p-3 pr-5 text-fy-on-action shadow" {disabled}>
     {#if smallLogo && !largeLogo}
         <img class="inline h-6" src={smallLogo} alt="" />
     {/if}
