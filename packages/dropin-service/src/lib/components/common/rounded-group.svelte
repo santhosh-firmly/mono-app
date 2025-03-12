@@ -1,6 +1,19 @@
 <script>
     import Group from '$lib/components/common/group.svelte';
 
+    /**
+     * @typedef {Object} RoundedGroupProps
+     * @property {boolean} isLoading - Whether or not the group is loading
+     * @property {function} skeleton - Function to render the skeleton
+     * @property {number} skeletonQuantity - Number of skeletons to render
+     * @property {Array} items - List of items to be rendered
+     * @property {function} item - Function to render each item
+     * @property {function} children - Function to render additional content
+     */
+
+    /**
+     * @type {RoundedGroupProps}
+     */
     let { isLoading = true, skeleton, skeletonQuantity = 3, items, item, children } = $props();
 </script>
 
