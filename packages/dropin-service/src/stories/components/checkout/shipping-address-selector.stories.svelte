@@ -1,12 +1,17 @@
 <script module>
     import { defineMeta } from '@storybook/addon-svelte-csf';
+    import { fn } from '@storybook/test';
 
-    import ShippingAddress from '$lib/components/checkout/shipping-address.svelte';
+    import ShippingAddress from '$lib/components/checkout/shipping-address-selector.svelte';
 
     const { Story } = defineMeta({
-        title: 'Checkout V4/Checkout/Shipping Address',
+        title: 'Checkout V4/Checkout/Shipping Address Selector',
         component: ShippingAddress,
         tags: ['autodocs'],
+        args: {
+            onAddNewAddress: fn(),
+            onSetShippingInfo: fn(),
+        },
     });
 
     const name = 'John Doe';
