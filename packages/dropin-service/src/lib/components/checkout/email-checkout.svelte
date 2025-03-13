@@ -11,7 +11,7 @@
      * @property {function} onChange - Callback function to handle email changes
      * @property {Object} marketingConsent - Marketing consent configuration object
      * @property {boolean} isMarketingConsentSigned - Whether marketing consent has been accepted (Bindable)
-     * @property {boolean} isShippingAutoCompleteEnabled - Whether to enable browser autocomplete for shipping email
+     * @property {boolean} autocomplete - Whether to enable browser autocomplete for shipping email
      * @property {function} isC2PAvailable - Function that determines if Click to Pay is available
      * @property {boolean} isPlaceOrderInProgress - Whether order placement is in progress
      * @property {string} storeName - Name of the store
@@ -20,8 +20,7 @@
      * @type {EmailCheckoutProps}
      */
 
-    let { ref, onChange, isPlaceOrderInProgress, isMarketingConsentSigned, isC2PAvailable, isShippingAutoCompleteEnabled, email, marketingConsent, errorMessage, storeName } =
-        $props();
+    let { ref, onChange, isPlaceOrderInProgress, isMarketingConsentSigned, isC2PAvailable, autocomplete, email, marketingConsent, errorMessage, storeName } = $props();
 
     let isTermsPopupOpen = $state(false);
 </script>
@@ -43,7 +42,7 @@
             }}
             placeholder=""
             data-testid="email-input"
-            autocomplete={isShippingAutoCompleteEnabled ? 'shipping email' : ''}
+            autocomplete={autocomplete ? 'shipping email' : ''}
             type="email"
         />
     </div>

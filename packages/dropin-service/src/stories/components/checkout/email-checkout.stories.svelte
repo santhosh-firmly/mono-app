@@ -17,7 +17,7 @@
             isC2PAvailable: false,
             isMarketingConsentSigned: false,
             isPlaceOrderInProgress: false,
-            isShippingAutoCompleteEnabled: false,
+            autocomplete: false,
             storeName: 'Firmly Inc',
             marketingConsent: {
                 ui_slot: 'UNDER_EMAIL_INPUT',
@@ -39,7 +39,7 @@
                 { type: 'terms', content: 'Terms and Conditions' },
             ],
         },
-        isShippingAutoCompleteEnabled: true,
+        autocomplete: true,
         isC2PAvailable: true,
     };
 

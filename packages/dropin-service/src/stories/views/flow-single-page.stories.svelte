@@ -26,6 +26,8 @@
             isPlaceOrderInProgress: false,
             isShippingInfoInProgress: false,
             isShippingMethodInProgress: false,
+            isCartLoading: false,
+            isMarketingConsentSigned: false,
         },
     });
 </script>

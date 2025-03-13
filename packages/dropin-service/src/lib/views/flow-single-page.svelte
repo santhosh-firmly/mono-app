@@ -9,6 +9,7 @@
 
     let {
         cart,
+        marketingConsent,
         onUpdateQuantity,
         onAddPromoCode,
         onClearPromoCode,
@@ -17,6 +18,7 @@
         isShippingInfoInProgress,
         isShippingMethodInProgress,
         isPlaceOrderInProgress,
+        isMarketingConsentSigned,
         isC2PAvailable,
         isC2PInProgress,
         isCartLoading,
@@ -77,6 +79,17 @@
                 <span class="z-10 bg-fy-background px-4 text-sm"> Or pay another way </span>
             </div>
         {/if}
-        <EmailCheckout email={email.value} errorMessage={email.error} onChange={email.set} {isPlaceOrderInProgress} {isC2PAvailable} />
+        <EmailCheckout
+            ref={null}
+            email={email.value}
+            errorMessage={email.error}
+            storeName={cart.display_name}
+            autocomplete={false}
+            {marketingConsent}
+            onChange={email.set}
+            {isC2PAvailable}
+            {isPlaceOrderInProgress}
+            {isMarketingConsentSigned}
+        />
     {/snippet}
 </Layout>
