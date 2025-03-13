@@ -2,13 +2,23 @@
     // @ts-nocheck
 
     import { defineMeta } from '@storybook/addon-svelte-csf';
+    import { fn } from '@storybook/test';
 
     import CollapsedInformation from '$lib/components/checkout/collapsed-information.svelte';
+
 
     const { Story } = defineMeta({
         title: 'Checkout V4/Checkout/Collapsed Information',
         component: CollapsedInformation,
-        tags: ['autodocs']
+        tags: ['autodocs'],
+        args:{
+            onSetShippingMethod: fn(),
+            onCreditCardUpdated: fn(),
+            onPaypalHandler: fn(),
+            handleSetShippingInfo: fn(),
+            getBillingInfo: fn(),
+            validateCreditCard: fn(),
+        }
     });
 
     const name = 'John Doe';
@@ -156,20 +166,14 @@
         savedCreditCards: savedCreditCards,
         selectedCardOption: 'card1',
         placeOrderInProgress: false,
-        onSetShippingMethod: () => console.log('Set shipping method'),
-        onCreditCardUpdated: () => console.log('Credit card updated'),
-        onPaypalHandler: () => console.log('PayPal handler'),
         shouldTryFocusOnPaymentTab: false,
         isCvvRequired: false,
         isShippingAddrComplete: true,
-        handleSetShippingInfo: () => console.log('Set shipping info'),
         paypalConnected: false,
         paypalPayerId: null,
         cvvConfirmationValue: '',
-        validateCreditCard: () => true,
         selectedPaymentMethod: 'credit_card',
         isBillingSameShipping: true,
-        getBillingInfo: () => ({}),
         email: 'john.doe@example.com',
         cart: cartWithShippingInfo
     };
