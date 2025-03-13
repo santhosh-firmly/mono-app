@@ -1,36 +1,28 @@
 <script>
     import Checkbox from '$lib/components/common/checkbox.svelte';
     import Group from '$lib/components/common/group.svelte';
+    import TermsPopup from '$lib/components/footer/terms-popup.svelte';
 
     /**
      * @typedef {Object} EmailCheckoutProps
      * @property {string} email - Customer's email address
-     * @property {HTMLInputElement} emailField - Reference to the email input element
-     * @property {string} email_error_message - Error message to display for invalid email
-     * @property {function} validateAndSubmitContactInfo - Function to validate and submit contact information
+     * @property {HTMLInputElement} ref - Reference to the email input element
+     * @property {string} errorMessage - Error message to display for invalid email
+     * @property {function} onChange - Callback function to handle email changes
      * @property {Object} marketingConsent - Marketing consent configuration object
-     * @property {boolean} isMarketingConsentSigned - Whether marketing consent has been accepted
-     * @property {boolean} isTermsPopupOpen - Controls visibility of terms and conditions popup
-     * @property {boolean} shippingAutoCompleteEnabled - Whether to enable browser autocomplete for shipping email
+     * @property {boolean} isMarketingConsentSigned - Whether marketing consent has been accepted (Bindable)
+     * @property {boolean} autocomplete - Whether to enable browser autocomplete for shipping email
      * @property {function} isC2PAvailable - Function that determines if Click to Pay is available
-     * @property {boolean} placeOrderInProgress - Whether order placement is in progress
+     * @property {boolean} isPlaceOrderInProgress - Whether order placement is in progress
+     * @property {string} storeName - Name of the store
      */
     /**
      * @type {EmailCheckoutProps}
      */
 
-    let {
-        placeOrderInProgress,
-        emailField,
-        email,
-        email_error_message,
-        validateAndSubmitContactInfo,
-        marketingConsent,
-        isMarketingConsentSigned,
-        isTermsPopupOpen,
-        isC2PAvailable,
-        shippingAutoCompleteEnabled,
-    } = $props();
+    let { ref, onChange, isPlaceOrderInProgress, isMarketingConsentSigned, isC2PAvailable, autocomplete, email, marketingConsent, errorMessage, storeName } = $props();
+
+    let isTermsPopupOpen = $state(false);
 </script>
 
 <h3 class="py-1 text-sm">Email</h3>
@@ -38,22 +30,27 @@
     <div class="col-span-2 flex w-full flex-col justify-center rounded-lg">
         <input
             class="w-full rounded-lg border-0 placeholder:text-fy-on-primary-subtle focus:z-[2] disabled:bg-gray-100"
-            disabled={placeOrderInProgress}
-            class:error={email_error_message}
-            bind:this={emailField}
+            disabled={isPlaceOrderInProgress}
+            class:error={errorMessage}
+            bind:this={ref}
             bind:value={email}
-            onblur={validateAndSubmitContactInfo}
+            onblur={(e) => onChange(e.target.value)}
+            onkeypress={(e) => {
+                if (e.key === 'Enter') {
+                    onChange(e.target.value);
+                }
+            }}
             placeholder=""
             data-testid="email-input"
-            autocomplete={shippingAutoCompleteEnabled ? 'shipping email' : ''}
+            autocomplete={autocomplete ? 'shipping email' : ''}
             type="email"
         />
     </div>
 </Group>
 
-{#if email_error_message}
+{#if errorMessage}
     <span class="text-xs text-fy-alert">
-        {email_error_message}
+        {errorMessage}
     </span>
 {/if}
 
@@ -67,20 +64,41 @@
 {/if}
 
 {#if marketingConsent && marketingConsent.ui_slot === 'UNDER_EMAIL_INPUT'}
-    <Checkbox disabled={placeOrderInProgress} labelClasses="w-full pt-4 pb-4 flex rounded-lg" bind:isChecked={isMarketingConsentSigned}>
+    <Checkbox disabled={isPlaceOrderInProgress} labelClasses="w-full pt-4 pb-4 flex rounded-lg" bind:isChecked={isMarketingConsentSigned}>
         {#snippet titleSnippet()}
             <span class="pt-0.5 text-xs font-normal text-fy-on-surface-subtle">
                 {#each marketingConsent.parts as part}
                     {#if part.type === 'text'}
                         {part.content}
-                {/if}
-                {#if part.type === 'terms'}
-                    <button type="button" onclick={() => (isTermsPopupOpen = true)} class="underline">
-                        {part.content}
-                    </button>
-                {/if}
-            {/each}
-        </span>
+                    {/if}
+                    {#if part.type === 'terms'}
+                        <button type="button" onclick={() => (isTermsPopupOpen = true)} class="underline">
+                            {part.content}
+                        </button>
+                    {/if}
+                {/each}
+            </span>
         {/snippet}
     </Checkbox>
 {/if}
+
+<!-- It is fetching some terms and conditions from the adoreme - hardcoded -->
+<TermsPopup isModalOpen={isTermsPopupOpen} title={storeName} />
+
+<style scoped>
+    input.error {
+        color: var(--fy-alert);
+        box-shadow: var(--fy-form-element-input-error);
+        z-index: 1;
+    }
+
+    input:focus,
+    button:focus {
+        border: 0 !important;
+        outline: 0 !important;
+        z-index: 10;
+
+        box-shadow: var(--fy-form-element-input-focus);
+        transition-property: box-shadow, color, filter;
+    }
+</style>

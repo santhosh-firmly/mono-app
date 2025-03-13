@@ -1,12 +1,15 @@
 <script>
     import Summary from '$lib/components/cart/summary.svelte';
+    import EmailCheckout from '$lib/components/checkout/email-checkout.svelte';
     import FastCheckout from '$lib/components/checkout/fast-checkout-buttons.svelte';
     import FooterLinks from '$lib/components/footer/footer-links.svelte';
     import Overview from '$lib/components/header/overview.svelte';
     import Layout from '$lib/components/layout/root.svelte';
+    import { useEmailWithValidation } from '$lib/views/flow-single-page.svelte.js';
 
     let {
         cart,
+        marketingConsent,
         onUpdateQuantity,
         onAddPromoCode,
         onClearPromoCode,
@@ -15,9 +18,13 @@
         isShippingInfoInProgress,
         isShippingMethodInProgress,
         isPlaceOrderInProgress,
+        isMarketingConsentSigned,
+        isC2PAvailable,
         isC2PInProgress,
         isCartLoading,
     } = $props();
+
+    let email = useEmailWithValidation(cart?.email);
 
     let allowShopPay = $derived(cart?.payment_method_options?.some((p) => p.type === 'ShopPay' || p.wallet === 'shoppay'));
     let allowPayPal = $derived(!!cart?.shop_properties?.paypal);
@@ -72,5 +79,17 @@
                 <span class="z-10 bg-fy-background px-4 text-sm"> Or pay another way </span>
             </div>
         {/if}
+        <EmailCheckout
+            ref={null}
+            email={email.value}
+            errorMessage={email.error}
+            storeName={cart.display_name}
+            autocomplete={false}
+            {marketingConsent}
+            onChange={email.set}
+            {isC2PAvailable}
+            {isPlaceOrderInProgress}
+            {isMarketingConsentSigned}
+        />
     {/snippet}
 </Layout>
