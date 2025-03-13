@@ -21,6 +21,7 @@
             onFastCheckout: fn(),
             onBack: fn(),
             cart: cartData,
+            isC2PAvailable: true,
             isC2PInProgress: false,
             isPlaceOrderInProgress: false,
             isShippingInfoInProgress: false,

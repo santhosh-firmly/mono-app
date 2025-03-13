@@ -2,6 +2,7 @@
     // @ts-nocheck
 
     import { defineMeta } from '@storybook/addon-svelte-csf';
+    import { fn } from '@storybook/test';
 
     import EmailCheckoutComponent from '$lib/components/checkout/email-checkout.svelte';
 
@@ -9,13 +10,28 @@
         title: 'Checkout V4/Checkout/Email Checkout',
         component: EmailCheckoutComponent,
         tags: ['autodocs'],
+        args: {
+            onChange: fn(),
+            email: '',
+            errorMessage: '',
+            isC2PAvailable: false,
+            isMarketingConsentSigned: false,
+            isPlaceOrderInProgress: false,
+            isShippingAutoCompleteEnabled: false,
+            storeName: 'Firmly Inc',
+            marketingConsent: {
+                ui_slot: 'UNDER_EMAIL_INPUT',
+                parts: [
+                    { type: 'text', content: 'I agree to receive marketing communications ' },
+                    { type: 'terms', content: 'Terms and Conditions' },
+                ],
+            },
+            ref: null,
+        },
     });
 
     const baseProps = {
         email: '',
-        validateAndSubmitContactInfo: () => {
-            console.log('validateAndSubmitContactInfo');
-        },
         marketingConsent: {
             ui_slot: 'UNDER_EMAIL_INPUT',
             parts: [
@@ -23,16 +39,16 @@
                 { type: 'terms', content: 'Terms and Conditions' },
             ],
         },
-        shippingAutoCompleteEnabled: true,
+        isShippingAutoCompleteEnabled: true,
         isC2PAvailable: true,
     };
+
     const defaultProps = {
         args: {
             ...baseProps,
-            placeOrderInProgress: false,
-            email_error_message: '',
+            isPlaceOrderInProgress: false,
+            errorMessage: '',
             isMarketingConsentSigned: false,
-            isTermsPopupOpen: false,
         },
     };
 
@@ -40,30 +56,22 @@
         args: {
             ...baseProps,
             email: 'teste124firmly.ai',
-            placeOrderInProgress: false,
-            email_error_message: 'Please enter a valid email address',
-            isMarketingConsentSigned: false,
-            isTermsPopupOpen: false,
+            errorMessage: 'Please enter a valid email address',
         },
     };
 
     const loadingProps = {
         args: {
             ...baseProps,
-            placeOrderInProgress: true,
-            email_error_message: '',
+            isPlaceOrderInProgress: true,
             isMarketingConsentSigned: true,
-            isTermsPopupOpen: false,
         },
     };
 
     const consentSignedProps = {
         args: {
             ...baseProps,
-            placeOrderInProgress: false,
-            email_error_message: '',
             isMarketingConsentSigned: true,
-            isTermsPopupOpen: false,
         },
     };
 </script>
