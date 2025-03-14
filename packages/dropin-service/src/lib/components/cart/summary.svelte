@@ -22,6 +22,10 @@
      * @property {number|null} tax - Tax amount
      * @property {number|null} total - Cart total amount
      * @property {boolean} showImageBorder - Whether to show borders around product images
+     * @property {boolean} displayMode - Display mode for the summary:
+     *  'header' - Used in the header component (always expanded)
+     *  'collapsible' - Used in the main flow with collapsible line items
+     * @property {boolean} toggleLineItemsExpanded - This is used to determine the origin of the summary, which is used to determine the layout of the summary
      * @property {Function} addPromoCodeCallback - Callback function to add a promo code
      * @property {Function} clearPromoCodesCallback - Callback function to clear all promo codes
      */
@@ -44,6 +48,8 @@
         tax = null,
         total = null,
         showImageBorder = true,
+        displayMode = 'header',
+        toggleLineItemsExpanded = false,
         addPromoCodeCallback,
         clearPromoCodesCallback,
     } = $props();
@@ -53,35 +59,30 @@
 </script>
 
 <div class="mx-auto flex w-full max-w-[800px] flex-col gap-4 py-4 text-fy-on-primary">
-    {#each lineItems || [] as item (item.line_item_id)}
-        <LineItem
-            image={item.image.url}
-            quantity={item.quantity}
-            description={item.description}
-            variantDescription={item.variant_description}
-            msrp={item.msrp}
-            price={item.line_price}
-            recurringPeriod={item.recurring}
-            updateQuantity={(qty) => updateQuantity(item, qty)}
-            allowChangeQuantity={!item.fixed_quantity}
-            {disabled}
-            {showImageBorder}
-        />
-    {:else}
-        <LineItem />
-    {/each}
-    <div class="ml-[5.5rem] flex flex-col text-sm">
+    {#if displayMode === 'header' || (displayMode === 'collapsible' && toggleLineItemsExpanded)}
+        <div transition:slide={{ duration: 300 }}>
+            {#each lineItems || [] as item (item.line_item_id)}
+                <LineItem
+                    image={item.image.url}
+                    quantity={item.quantity}
+                    description={item.description}
+                    variantDescription={item.variant_description}
+                    msrp={item.msrp}
+                    price={item.line_price}
+                    recurringPeriod={item.recurring}
+                    updateQuantity={(qty) => updateQuantity(item, qty)}
+                    allowChangeQuantity={!item.fixed_quantity}
+                    {disabled}
+                    {showImageBorder}
+                />
+            {:else}
+                <LineItem />
+            {/each}
+        </div>
+    {/if}
+    <div class="flex flex-col text-sm">
         <hr class="my-3" />
         <div class="flex flex-col gap-5">
-            <div class="flex flex-row justify-between font-semibold">
-                {#if skeleton}
-                    <div class="m-1 h-4 w-24 animate-pulse rounded bg-fy-on-primary-subtle2"></div>
-                    <div class="m-1 h-4 w-12 animate-pulse rounded bg-fy-on-primary-subtle2 text-right"></div>
-                {:else}
-                    <span>Subtotal</span>
-                    <span class="text-right">{formatCurrency(subtotal)}</span>
-                {/if}
-            </div>
             {#if !skeleton}
                 <PromoCodes {coupons} {addPromoCodeCallback} {clearPromoCodesCallback} />
             {/if}
@@ -106,6 +107,15 @@
                     </span>
                 </div>
             {/if}
+            <div class="flex flex-row justify-between font-semibold">
+                {#if skeleton}
+                    <div class="m-1 h-4 w-24 animate-pulse rounded bg-fy-on-primary-subtle2"></div>
+                    <div class="m-1 h-4 w-12 animate-pulse rounded bg-fy-on-primary-subtle2 text-right"></div>
+                {:else}
+                    <span>Subtotal</span>
+                    <span class="text-right">{formatCurrency(subtotal)}</span>
+                {/if}
+            </div>
             <div class="flex flex-row items-start justify-between gap-2 text-fy-on-primary-subtle">
                 {#if skeleton}
                     <div class="flex flex-col text-left">
