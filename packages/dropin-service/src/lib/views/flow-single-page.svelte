@@ -51,7 +51,7 @@
             </div>
         </Overview>
         <div class="grow"></div>
-        <div class="text-center text-xs text-fy-on-primary-subtle @max-md:hidden">
+        <div class="text-center text-xs text-fy-on-primary-subtle max-md:hidden">
             <FooterLinks />
         </div>
     {/snippet}
