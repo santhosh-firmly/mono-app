@@ -19,8 +19,8 @@
     }
 </script>
 
-<div class="pointer-events-none fixed bottom-10 z-[121] flex w-full md:bottom-24 md:justify-around">
-    <div class="flex w-full flex-col justify-center px-3 md:w-1/2 md:max-w-[412px]">
+<div class="pointer-events-none fixed bottom-10 z-[121] flex w-full @md:bottom-24 @md:justify-around">
+    <div class="flex w-full flex-col justify-center px-3 @md:w-1/2 @md:max-w-[412px]">
         {#each notices as notice}
             <div transition:fade class="pointer-events-auto py-1">
                 <Notice text={notice.text} undoCallback={notice.undoCallback} closeable={notice.closeable}>
