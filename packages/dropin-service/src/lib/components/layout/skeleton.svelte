@@ -1,5 +1,5 @@
 <!-- svelte-ignore element_invalid_self_closing_tag -->
-<div class="flex flex-col gap-4 max-md:p-4 md:px-4">
+<div class="flex flex-col gap-4 max-md:p-4 @md:px-4">
     <div class="grid grid-cols-1 gap-4">
         <div class="flex justify-center">
             <div class="h-8 w-full animate-pulse rounded-lg bg-fy-on-primary-subtle2 px-4 py-2" />

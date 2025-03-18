@@ -43,14 +43,14 @@
     <button
         aria-label="Toggle details"
         bind:offsetHeight={headerOffset}
-        class="z-[101] flex w-full flex-row items-center justify-between bg-fy-primary md:z-[1]"
+        class="z-[101] flex w-full flex-row items-center justify-between bg-fy-primary @md:z-[1]"
         onclick={toggleExpanded}
         type="button"
     >
-        <div class="w-1/2 md:w-full">
+        <div class="w-1/2 @md:w-full">
             <BackButton {...merchantInfo} showBackButton={!expanded} {skeleton} on:back-click />
         </div>
-        <div class="flex h-full w-1/2 flex-row items-center justify-end p-1 text-xs text-fy-on-primary-subtle md:hidden">
+        <div class="flex h-full w-1/2 flex-row items-center justify-end p-1 text-xs text-fy-on-primary-subtle @md:hidden">
             <div class="relative flex flex-row items-center gap-1 text-right" style={`min-width: max-content;`}>
                 {#if expanded}
                     <span class="min-w-max" style="min-width: max-content;">&nbsp;&nbsp;</span>
