@@ -6,22 +6,21 @@
 
     import CollapsedInformation from '$lib/components/checkout/collapsed-information.svelte';
 
-
     const { Story } = defineMeta({
         title: 'Checkout V4/Checkout/Collapsed Information',
         component: CollapsedInformation,
         tags: ['autodocs'],
-        args:{
+        args: {
             onSetShippingMethod: fn(),
             onCreditCardUpdated: fn(),
             onPaypalHandler: fn(),
             handleSetShippingInfo: fn(),
             getBillingInfo: fn(),
             validateCreditCard: fn(),
-        }
+        },
     });
 
-    const name = 'John Doe';
+    // const name = 'John Doe';
     const savedAddresses = [
         {
             first_name: 'testing',
@@ -33,7 +32,7 @@
             state_or_province: 'wa',
             country: 'us',
             postal_code: '98052',
-            email: 'john@doe.com'
+            email: 'john@doe.com',
         },
         {
             first_name: 'john',
@@ -45,7 +44,7 @@
             state_or_province: 'CA',
             country: 'us',
             postal_code: '11111',
-            email: 'john@doe.com'
+            email: 'john@doe.com',
         },
         {
             first_name: 'mock',
@@ -57,24 +56,24 @@
             state_or_province: 'CA',
             country: 'us',
             postal_code: '22222',
-            email: 'mock@mocking.com'
-        }
+            email: 'mock@mocking.com',
+        },
     ];
 
-    const oneAddress = [
-        {
-            first_name: 'testing',
-            last_name: 'teste',
-            phone: '1234567891',
-            address1: '1 microsoft way',
-            address2: '',
-            city: 'redmond',
-            state_or_province: 'wa',
-            country: 'us',
-            postal_code: '98052',
-            email: 'mateus@firmly.ai'
-        }
-    ];
+    // const oneAddress = [
+    //     {
+    //         first_name: 'testing',
+    //         last_name: 'teste',
+    //         phone: '1234567891',
+    //         address1: '1 microsoft way',
+    //         address2: '',
+    //         city: 'redmond',
+    //         state_or_province: 'wa',
+    //         country: 'us',
+    //         postal_code: '98052',
+    //         email: 'mateus@firmly.ai',
+    //     },
+    // ];
 
     // Mock data for saved credit cards
     const savedCreditCards = [
@@ -82,14 +81,14 @@
             id: 'card1',
             last_four: '4242',
             card_type: 'visa',
-            art: null
+            art: null,
         },
         {
             id: 'card2',
             last_four: '1234',
             card_type: 'mastercard',
-            art: null
-        }
+            art: null,
+        },
     ];
 
     // Mock cart data
@@ -103,7 +102,7 @@
             state_or_province: 'NY',
             postal_code: '10001',
             country: 'US',
-            phone: '555-123-4567'
+            phone: '555-123-4567',
         },
         shipping_method: null,
         shipping_method_options: [
@@ -112,31 +111,31 @@
                 description: 'Standard Shipping',
                 price: {
                     currency: 'USD',
-                    value: 0
+                    value: 0,
                 },
-                estimate: '3-5 business days'
+                estimate: '3-5 business days',
             },
             {
                 sku: 'express',
                 description: 'Express Shipping',
                 price: {
                     currency: 'USD',
-                    value: 12.99
+                    value: 12.99,
                 },
-                estimate: '1-2 business days'
-            }
+                estimate: '1-2 business days',
+            },
         ],
         payment_method_options: [{ type: 'credit_card' }, { type: 'paypal' }],
         shop_properties: {
             paypal: {
                 merchantId: 'merchant123',
-                clientId: 'client123'
-            }
+                clientId: 'client123',
+            },
         },
         available_store_credit: {
-            value: 10.0
+            value: 10.0,
         },
-        store_credit: 5.0
+        store_credit: 5.0,
     };
 
     const cartWithShippingMethod = {
@@ -146,10 +145,10 @@
             description: 'Standard Shipping',
             price: {
                 currency: 'USD',
-                value: 12.99
+                value: 12.99,
             },
-            estimate: '3-5 business days'
-        }
+            estimate: '3-5 business days',
+        },
     };
 
     const baseProps = {
@@ -175,14 +174,14 @@
         selectedPaymentMethod: 'credit_card',
         isBillingSameShipping: true,
         email: 'john.doe@example.com',
-        cart: cartWithShippingInfo
+        cart: cartWithShippingInfo,
     };
 
     // Default state - nothing collapsed
     const defaultProps = {
         args: {
-            ...baseProps
-        }
+            ...baseProps,
+        },
     };
 
     // Shipping section collapsed
@@ -190,8 +189,8 @@
         args: {
             ...baseProps,
             collapsedStateShipping: true,
-            cart: cartWithShippingInfo
-        }
+            cart: cartWithShippingInfo,
+        },
     };
 
     // Shipping and shipping method collapsed
@@ -200,8 +199,8 @@
             ...baseProps,
             collapsedStateShipping: true,
             collapsedStateShippingMethod: true,
-            cart: cartWithShippingMethod
-        }
+            cart: cartWithShippingMethod,
+        },
     };
 
     // All sections collapsed (fully completed checkout)
@@ -211,16 +210,16 @@
             collapsedStateShipping: true,
             collapsedStateShippingMethod: true,
             collapsedStatePayment: true,
-            cart: cartWithShippingMethod
-        }
+            cart: cartWithShippingMethod,
+        },
     };
 
     // Loading state
     const loadingProps = {
         args: {
             ...baseProps,
-            shippingInfoInProgress: true
-        }
+            shippingInfoInProgress: true,
+        },
     };
 
     // Add the missing shippingAddressProps
@@ -228,8 +227,8 @@
         args: {
             ...baseProps,
             headerDisplay: 'Shipping Address',
-            collapsedStateShipping: false
-        }
+            collapsedStateShipping: false,
+        },
     };
 </script>
 

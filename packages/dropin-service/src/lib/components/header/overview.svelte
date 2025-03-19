@@ -77,7 +77,7 @@
                 {@render children?.()}
             </div>
         </Header>
-        <div bind:this={overviewElement} class="flex w-full flex-col p-4 max-md:items-center @md:items-start">
+        <div bind:this={overviewElement} class="flex w-full flex-col p-4 @md:items-start max-md:items-center">
             <div class="py-7 @md:hidden">
                 <CardStack {images} />
             </div>
