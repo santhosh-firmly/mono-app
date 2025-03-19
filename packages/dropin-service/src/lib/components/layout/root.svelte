@@ -4,7 +4,7 @@
     let { isLoading = false, aside, bside, summary } = $props();
 </script>
 
-<div class="@container relative min-h-full">
+<div class="relative min-h-full @container">
     <div class="fixed bottom-0 left-0 right-0 top-0 z-[-1] @md:bg-fy-primary"></div>
     <div class="fixed bottom-0 right-0 top-0 z-[-1] w-1/2 shadow @md:bg-fy-background"></div>
     <div class="flex w-full flex-row justify-center">

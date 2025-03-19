@@ -1,10 +1,10 @@
 <script>
-    import Group from '$lib/components/common/group.svelte';
+    import ExistingCreditCard from '$lib/components/checkout/existing-credit-card.svelte';
     import ShippingAddress from '$lib/components/checkout/shipping-address-selector.svelte';
     import ShippingMethodSelector from '$lib/components/checkout/shipping-method-selector.svelte';
-    import ExistingCreditCard from '$lib/components/checkout/existing-credit-card.svelte';
-    import PaymentTabs from '$lib/components/payments/payment-tabs.svelte';
     import Checkbox from '$lib/components/common/checkbox.svelte';
+    import Group from '$lib/components/common/group.svelte';
+    import PaymentTabs from '$lib/components/payments/payment-tabs.svelte';
     import { fadeSlide } from '$lib/transitions';
     import { formatCurrency } from '$lib/utils';
 
@@ -17,7 +17,6 @@
      * @property {string} headerDisplay - Display text for the shipping address header
      * @property {string} subheaderName - Subheader name for shipping address section
      * @property {Object} newShippingAddress - Empty shipping address object for new addresses
-     * @property {boolean} isFormComplete - Whether the entire checkout form is complete
      * @property {Object} selectedShippingAddress - Currently selected shipping address
      * @property {boolean} shippingInfoInProgress - Whether shipping info is being processed
      * @property {Array<Object>} savedCreditCards - List of user's saved credit cards
@@ -49,7 +48,6 @@
         headerDisplay,
         subheaderName,
         newShippingAddress,
-        isFormComplete,
         selectedShippingAddress,
         shippingInfoInProgress,
         savedCreditCards,
@@ -70,7 +68,7 @@
         isBillingSameShipping,
         getBillingInfo,
         email,
-        cart
+        cart,
     } = $props();
 </script>
 
@@ -105,13 +103,13 @@
                     </button>
                 {:else}
                     <div class="w-full">
-                        <div class="m-1 h-4 w-48 animate-pulse rounded bg-fy-on-primary-subtle2" />
+                        <div class="m-1 h-4 w-48 animate-pulse rounded bg-fy-on-primary-subtle2"></div>
                         <hr />
-                        <div class="m-1 h-4 w-48 animate-pulse rounded bg-fy-on-primary-subtle2" />
-                        <div class="m-1 h-4 w-32 animate-pulse rounded bg-fy-on-primary-subtle2" />
-                        <div class="m-1 h-4 w-24 animate-pulse rounded bg-fy-on-primary-subtle2" />
+                        <div class="m-1 h-4 w-48 animate-pulse rounded bg-fy-on-primary-subtle2"></div>
+                        <div class="m-1 h-4 w-32 animate-pulse rounded bg-fy-on-primary-subtle2"></div>
+                        <div class="m-1 h-4 w-24 animate-pulse rounded bg-fy-on-primary-subtle2"></div>
                     </div>
-                    <div class="m-1 ml-5 h-4 w-16 animate-pulse rounded bg-fy-on-primary-subtle2" />
+                    <div class="m-1 ml-5 h-4 w-16 animate-pulse rounded bg-fy-on-primary-subtle2"></div>
                 {/if}
             </div>
         </Group>
@@ -162,10 +160,10 @@
                     </button>
                 {:else}
                     <div class="w-full">
-                        <div class="m-1 h-4 w-56 animate-pulse rounded bg-fy-on-primary-subtle2" />
-                        <div class="m-1 h-4 w-24 animate-pulse rounded bg-fy-on-primary-subtle2" />
+                        <div class="m-1 h-4 w-56 animate-pulse rounded bg-fy-on-primary-subtle2"></div>
+                        <div class="m-1 h-4 w-24 animate-pulse rounded bg-fy-on-primary-subtle2"></div>
                     </div>
-                    <div class="m-1 h-4 w-16 animate-pulse rounded bg-fy-on-primary-subtle2" />
+                    <div class="m-1 h-4 w-16 animate-pulse rounded bg-fy-on-primary-subtle2"></div>
                 {/if}
             </div>
         </Group>
