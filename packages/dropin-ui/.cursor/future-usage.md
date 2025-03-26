@@ -1,0 +1,42 @@
+Routing and Pages
+
+- Utilize SvelteKit's file-based routing system in the src/routes/ directory.
+- Implement dynamic routes using [slug] syntax.
+- Use load functions for server-side data fetching and pre-rendering.
+- Implement proper error handling with +error.svelte pages.
+
+Server-Side Rendering (SSR) and Static Site Generation (SSG)
+
+- Leverage SvelteKit's SSR capabilities for dynamic content.
+- Implement SSG for static pages using prerender option.
+- Use the adapter-auto for automatic deployment configuration.
+
+Performance Optimization
+
+- Leverage Svelte's compile-time optimizations.
+- Use `{#key}` blocks to force re-rendering of components when needed.
+- Implement code splitting using dynamic imports for large applications.
+- Profile and monitor performance using browser developer tools.
+- Use `$effect.tracking()` to optimize effect dependencies.
+- Minimize use of client-side JavaScript; leverage SvelteKit's SSR and SSG.
+- Implement proper lazy loading for images and other assets.
+
+Data Fetching and API Routes
+
+- Use load functions for server-side data fetching.
+- Implement proper error handling for data fetching operations.
+- Create API routes in the src/routes/api/ directory.
+- Implement proper request handling and response formatting in API routes.
+- Use SvelteKit's hooks for global API middleware.
+
+SEO and Meta Tags
+
+- Use Svelte:head component for adding meta information.
+- Implement canonical URLs for proper SEO.
+- Create reusable SEO components for consistent meta tag management.
+
+Forms and Actions
+
+- Utilize SvelteKit's form actions for server-side form handling.
+- Implement proper client-side form validation using Svelte's reactive declarations.
+- Use progressive enhancement for JavaScript-optional form submissions.

@@ -1,0 +1,178 @@
+You are an expert in Svelte 5, SvelteKit, Javascript, and modern web development.
+
+Key Principles
+
+- Write concise, technical code with accurate Svelte 5 and SvelteKit examples.
+- Leverage SvelteKit's server-side rendering (SSR) and static site generation (SSG) capabilities.
+- Prioritize performance optimization and minimal JavaScript for optimal user experience.
+- Use descriptive variable names and follow Svelte and SvelteKit conventions.
+- Organize files using SvelteKit's file-based routing system.
+
+Code Style and Structure
+
+- Write concise, technical JavaScript code with accurate examples.
+- Use functional and declarative programming patterns; avoid unnecessary classes except for state machines.
+- Prefer iteration and modularization over code duplication.
+- Structure files: component logic, markup, styles, helpers, types.
+- Follow Svelte's official documentation for setup and configuration: https://svelte.dev/docs
+
+Naming Conventions
+
+- Use lowercase with hyphens for component files (e.g., `components/auth-form.svelte`).
+- Use PascalCase for component names in imports and usage.
+- Use camelCase for variables, functions, and props.
+
+Svelte Runes
+
+- `$state`: Declare reactive state
+  ```javascript
+  let count = $state(0);
+  ```
+- `$derived`: Compute derived values
+  ```javascript
+  let doubled = $derived(count * 2);
+  ```
+- `$effect`: Manage side effects and lifecycle
+  ```javascript
+  $effect(() => {
+  	console.log(`Count is now ${count}`);
+  });
+  ```
+- `$props`: Declare component props
+  ```javascript
+  let { optionalProp = 42, requiredProp } = $props();
+  ```
+- `$bindable`: Create two-way bindable props
+  ```javascript
+  let { bindableProp = $bindable() } = $props();
+  ```
+- `$inspect`: Debug reactive state (development only)
+  ```javascript
+  $inspect(count);
+  ```
+
+Svelte Components Composition
+
+- Use Svelte's component composition features to create reusable UI elements.
+- Implement proper prop passing and event handling between components.
+- Use Svelte's Snippets system for content distribution.
+
+  ```svelte
+  <LayoutComponent>
+  	{#snippet Summary(hiddenLineItems)}
+  		<SummaryContainer
+  			onQuantityChange={(item) => dispatch('update_line_item', item)}
+  			isUpdating={isPending['update_line_item']}
+  			{hiddenLineItems}
+  		/>
+  	{/snippet}
+  </LayoutComponent>
+  ```
+
+UI and Styling
+
+- Use Tailwind CSS for utility-first styling approach.
+- Use Svelte's built-in transition and animation features.
+
+SvelteKit Project Structure
+
+- Use the recommended SvelteKit project structure:
+  ```
+  - src/
+    - lib/
+    - routes/
+    - app.html
+  - static/
+  - svelte.config.js
+  - vite.config.js
+  ```
+
+Component Development
+
+- Create .svelte files for Svelte components.
+- Use .svelte.js files for component logic and state machines.
+- Implement proper component composition and reusability.
+- Use Svelte's props for data passing.
+- Leverage Svelte's reactive declarations for local state management.
+
+State Management
+
+- Use classes for complex state management (state machines):
+
+  ```javascript
+  // counter.svelte.js
+  class Counter {
+  	count = $state(0);
+  	incrementor = $state(1);
+
+  	increment() {
+  		this.count += this.incrementor;
+  	}
+
+  	resetCount() {
+  		this.count = 0;
+  	}
+
+  	resetIncrementor() {
+  		this.incrementor = 1;
+  	}
+  }
+
+  export const counter = new Counter();
+  ```
+
+- Use in components:
+
+  ```svelte
+  <script>
+  	import { counter } from './counter.svelte.js';
+  </script>
+
+  <button onclick={() => counter.increment()}>
+  	Count: {counter.count}
+  </button>
+  ```
+
+Internationalization (i18n) with Paraglide.js
+
+- Use Paraglide.js for internationalization: https://inlang.com/m/gerre34r/library-inlang-paraglideJs
+- Set up language files in the `languages` directory.
+- Always create a new message inside the messages/en.json file.
+- Use the `m` function to translate strings:
+
+  ```svelte
+  <script>
+  	import * as m from '$lib/paraglide/messages.js';
+  </script>
+
+  <h1>{m('welcome_message')}</h1>
+  ```
+
+- Support multiple languages and RTL layouts.
+- Ensure text scaling and font adjustments for accessibility.
+
+Accessibility
+
+- Ensure proper semantic HTML structure in Svelte components.
+- Implement ARIA attributes where necessary.
+- Ensure keyboard navigation support for interactive elements.
+- Use Svelte's bind:this for managing focus programmatically.
+
+Key Conventions
+
+1. Embrace Svelte's simplicity and avoid over-engineering solutions.
+2. Use SvelteKit for full-stack applications with SSR and API routes.
+3. Prioritize Web Vitals (LCP, FID, CLS) for performance optimization.
+4. Use environment variables for configuration management.
+5. Follow Svelte's best practices for component composition and state management.
+6. Ensure cross-browser compatibility by testing on multiple platforms.
+7. Keep your Svelte and SvelteKit versions up to date.
+
+Documentation
+
+- Svelte 5 Runes: https://svelte-5-preview.vercel.app/docs/runes
+- Svelte Documentation: https://svelte.dev/docs
+- SvelteKit Documentation: https://kit.svelte.dev/docs
+- Paraglide.js Documentation: https://inlang.com/m/gerre34r/library-inlang-paraglideJs/usage
+
+Refer to Svelte, SvelteKit, and Paraglide.js documentation for detailed information on components, internationalization, and best practices.
