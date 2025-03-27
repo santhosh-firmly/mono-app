@@ -1,0 +1,133 @@
+{
+	"cart_status": "active",
+	"platform_id": "shopify",
+	"shop_id": "shop.liquid-iv.com",
+	"shop_properties": {
+		"paypal": {
+			"clientId": "AfUEYT7nO4BwZQERn9Vym5TbHAG08ptiKa9gm8OARBYgoqiAJIjllRjeIMI4g294KAH1JdTnkzubt1fr",
+			"merchantId": "E5M7A2LTYY5CJ"
+		}
+	},
+	"cart_id": "cc324e0c-0cd0-4953-845a-ca2eddeea5ca",
+	"urls": {},
+	"line_items": [
+		{
+			"line_item_id": "f289ccc5-5fa4-4029-9bca-5b2b22ff779c",
+			"sku": "41854992941092",
+			"base_sku": "7712677953572",
+			"quantity": 1,
+			"msrp": {
+				"currency": "USD",
+				"value": 24.99,
+				"number": 2499,
+				"symbol": "$"
+			},
+			"price": {
+				"currency": "USD",
+				"value": 24.99,
+				"number": 2499,
+				"symbol": "$"
+			},
+			"line_price": {
+				"currency": "USD",
+				"value": 24.99,
+				"number": 2499,
+				"symbol": "$"
+			},
+			"requires_shipping": true,
+			"image": {
+				"type": "large",
+				"url": "https://cdn.shopify.com/s/files/1/1338/1013/files/EY_BP_14ct_PDP_bf83aa1f-f190-48fe-90ef-8687109775cc_large.jpg?v=1726869385"
+			},
+			"platform_line_item_id": "5f53b94b71d09592cd69e2404a6d71ea",
+			"description": "Blackberry Peach Hydration Multiplier® +Energy",
+			"variant_description": "Blackberry Peach / 14PK"
+		}
+	],
+	"sub_total": {
+		"currency": "USD",
+		"value": 24.99,
+		"number": 2499,
+		"symbol": "$"
+	},
+	"shipping_total": {
+		"value": 5.99,
+		"currency": "USD"
+	},
+	"tax": {
+		"currency": "USD",
+		"value": 0,
+		"number": 0,
+		"symbol": "$"
+	},
+	"total": {
+		"currency": "USD",
+		"value": 30.98,
+		"number": 3098,
+		"symbol": "$"
+	},
+	"shipping_info": {
+		"first_name": "test",
+		"last_name": "guest",
+		"phone": "5034440332",
+		"address1": "1 Microsoft Way",
+		"city": "Redmond",
+		"state_or_province": "WA",
+		"state_name": "Washington",
+		"country": "United States",
+		"postal_code": "98052",
+		"email": "testguest@firmly.ai"
+	},
+	"shipping_method_options": [
+		{
+			"sku": "4812205736fd36cfb1979b663ca5cf2c-8dd9458aa414391fbf2ab318403ad226",
+			"description": "Standard Shipping (4-6 Day)",
+			"price": {
+				"value": 5.99,
+				"currency": "USD"
+			}
+		},
+		{
+			"sku": "4812205736fd36cfb1979b663ca5cf2c-758d2997f5e77b93202596dcde8fbcf9",
+			"description": "UPS 3-Day (No P.O. Boxes)",
+			"price": {
+				"value": 20,
+				"currency": "USD"
+			}
+		}
+	],
+	"shipping_method": {
+		"sku": "4812205736fd36cfb1979b663ca5cf2c-8dd9458aa414391fbf2ab318403ad226",
+		"description": "Standard Shipping (4-6 Day)",
+		"price": {
+			"value": 5.99,
+			"currency": "USD"
+		}
+	},
+	"payment_method_options": [
+		{
+			"type": "CreditCard",
+			"wallet": "user"
+		},
+		{
+			"type": "PayPal",
+			"wallet": "paypal"
+		},
+		{
+			"type": "ShopPay",
+			"wallet": "shoppay"
+		}
+	],
+	"session": {
+		"requires_login": false,
+		"is_email_registered": false,
+		"is_logged_in": false,
+		"cookies": [
+			"cart=Z2NwLXVzLWVhc3QxOjAxSlA5SFdCMlA0UEVKNFhFR0hUUkVFR0RC%3Fkey%3D399e8c6d1fc834a62fe6cbd9ac07e55e; path=/; expires=Mon, 14 Apr 2025 05:26:23 GMT; secure; SameSite=None",
+			"cart_sig=8199c74bd29bf0c70aadd4347dd4f34b; path=/; expires=Mon, 14 Apr 2025 05:26:23 GMT; secure; HttpOnly; SameSite=None",
+			"cart_currency=USD; path=/; expires=Fri, 28 Mar 2025 05:26:24 GMT; secure; SameSite=None",
+			"checkout_session_token__cn__Z2NwLXVzLWVhc3QxOjAxSlA5SFdCMlA0UEVKNFhFR0hUUkVFR0RC=%7B%22token%22%3A%22b2EvY1hiOU4rZ1JKZEkxUTkrNDZjL1FYZ1V4VGFnb3FNQ3lubVZ2d0RqR1ZTTWVzMWMwcmlsaFpQL2g0UGprdEdaSjM1aG5EZEVGc2RTaUR4dCtwdHU4ZmpkNVN1RU51TkZxeHVTckNudytMcWQxK1hpQ3NFdE9PWUFWNjJ1YVlCQ0VzNU5ScERTbjl0TUpNZ1BoUytPZlZIbFNTRlM0M1l3VUFpVzNZeEhHci9Sb1ZoQjdMVUtma2d6M0JBZEQwb3g0L0NLUUpMT0p2NDdWVXkycGxtc0JFMCtSZ1hSQmh4cVdnUzd0Zm81L2dQYW1Ld29UVkh5ckZSb2JlMml0ZnpHdkl0TWdnQWRyajc1L0FPUWJtNmNva1BaazZXelpXZEE9PS0tMU1wZFhkS2RRdE5vekpNYS0tTkphSkFRa3MyUkVJVGYxMzlwbG1kZz09%22%2C%22locale%22%3A%22en-US%22%2C%22checkout_session_identifier%22%3A%224812205736fd36cfb1979b663ca5cf2c%22%7D; Priority=High; path=/; expires=Fri, 04 Apr 2025 05:26:23 GMT; secure; HttpOnly; SameSite=Lax"
+		]
+	},
+	"payment_handle": "e90fea27-1dab-46be-a1fc-ab35153b478a|eKit866JO2KE8XwWmGuG/n6f/QVdnKlFjfyB4w0mPgc/3b1HjB7+XOfE7+91wg9xSDPVln/Qh/QGUBSvdBRLPN4P35V/+jakaELrZ6fEiYOtOYyAThWA+IHyAga8JN4LfInexmGffgix+mZnq92BdNBCnzx+opv4F6Me0YgpjZ7JBU8GNw3qBo8Cp7P8WFOfwcXTMhqB9ijLrBt3d+xd2s1M3BvbkE5oU8Za4Xvlcv4hoJmbhBQVVkvQ42dHUSW8B3ShJcH/aFK8ULrB/GmLQMZyPnvNQJXgTY70FQVe4qvbSY43zP5eOoIPXWdtclT9x8xPnLDBD9BajkuKTQCvhammIfCmDxPr31yZyrxF/kBdrZNXwtk4dPCEyKWl7mrdahwxvNbfMARZDu6vpYpWkT05UMiXfb8KKVY9SVCL1/BiCBDW"
+}
