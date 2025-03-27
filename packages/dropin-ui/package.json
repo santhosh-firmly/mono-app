@@ -9,14 +9,20 @@
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"format": "prettier --write .",
+		"format-code": "prettier --write . && eslint . --fix",
 		"lint": "prettier --check . && eslint .",
 		"test:unit": "vitest",
 		"test": "npm run test:unit -- --run",
 		"storybook": "storybook dev -p 6006",
-		"build-storybook": "storybook build"
+		"build-storybook": "storybook build",
+		"deploy-dev": "npm run build && wrangler deploy --env dev",
+		"deploy-qa": "npm run build && wrangler deploy --env qa",
+		"deploy-uat": "npm run build && wrangler deploy --env uat",
+		"deploy-prod": "npm run build && wrangler deploy --env prod"
 	},
 	"devDependencies": {
 		"@chromatic-com/storybook": "^3.2.5",
+		"@cloudflare/vite-plugin": "^0.1.17",
 		"@eslint/compat": "^1.2.5",
 		"@eslint/js": "^9.18.0",
 		"@iconify/svelte": "^4.2.0",
