@@ -1,0 +1,14 @@
+{
+  "name": "dropin-service",
+  "compatibility_date": "2025-01-21",
+  "compatibility_flags": ["nodejs_compat"],
+  "send_metrics": false,
+
+  "main": ".svelte-kit/cloudflare/_worker.js",
+	"site": {
+		"bucket": "./.svelte-kit/cloudflare/public"
+	},
+  "observability": {
+    "enabled": true
+  }
+}
