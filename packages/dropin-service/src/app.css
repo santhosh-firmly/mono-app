@@ -1,3 +1,20 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+@import url('https://fonts.googleapis.com/css2?family=Inter&display=swap');
+@import 'tailwindcss';
+
+@theme {
+	--color-primary: #333333;
+	--color-background: white;
+	--color-text: black;
+	--color-danger: red;
+	--color-muted: #a2a2a2;
+	--color-border: #dddddd;
+
+	--color-surface: white;
+	--color-surface-alt: #f7f7f7;
+	--color-disabled: #a3a3a3;
+}
+
+:root {
+	font-family: Inter;
+	-webkit-font-smoothing: antialiased;
+}

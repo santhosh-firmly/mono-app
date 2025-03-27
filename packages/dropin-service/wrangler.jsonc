@@ -1,5 +1,5 @@
 {
-	"name": "dropin-service",
+	"name": "dropin-service-migration",
 	"compatibility_date": "2025-01-21",
 	"compatibility_flags": ["nodejs_compat"],
 	"send_metrics": false,
