@@ -59,7 +59,7 @@
 	}
 
 	let totalPrice = $derived(data.cart?.total?.value);
-	let itemsQuantity = $derived(data.cart?.line_items.reduce((acc, item) => acc + item.quantity, 0));
+	let itemsQuantity = $derived(data.cart?.line_items?.reduce((acc, item) => acc + item.quantity, 0));
 	let isFullCartUpdating = $derived(
 		data.pending['update_line_item'] ||
 			data.pending['add_promo_code'] ||
@@ -91,11 +91,12 @@
 		onQuantityChange={(item) => dispatch('update_line_item', item)}
 		isUpdating={isFullCartUpdating}
 		items={data.cart?.line_items?.map((item) => ({
+			sku: item?.sku,
 			image: item.image?.url,
 			title: item?.description,
 			description: item?.variant_description,
 			price: item?.line_price.value,
-			quantity: item?.quantity
+			quantity: item?.quantity,
 		}))}
 	>
 		{#snippet promocode()}
@@ -178,13 +179,13 @@
 				<CheckoutShippingEmailForm form={checkoutForm} />
 				<CheckoutShippingAddressForm
 					form={checkoutForm}
-					selectedCompletionAddress={data?.autocomplete.shippingAddress}
+					selectedCompletionAddress={data?.autocomplete?.shippingAddress}
 					onInputAddressCompletion={(value) => dispatch('input_shipping_address_completion', value)}
 					onSelectAddressCompletion={(value) =>
 						dispatch('select_shipping_address_completion', value)}
 					isAutocompleteLoading={data.pending['input_shipping_address_completion'] ||
 						data.pending['select_shipping_address_completion']}
-					addressCompletions={data?.autocomplete.shippingCompletions}
+					addressCompletions={data?.autocomplete?.shippingCompletions}
 				/>
 			</div>
 		{/snippet}
@@ -214,8 +215,8 @@
 							<CheckoutShippingAddressForm
 								useToBilling
 								form={billingForm}
-								addressCompletions={data?.autocomplete.billingCompletions}
-								selectedCompletionAddress={data?.autocomplete.billingAddress}
+								addressCompletions={data?.autocomplete?.billingCompletions}
+								selectedCompletionAddress={data?.autocomplete?.billingAddress}
 								onInputAddressCompletion={(value) =>
 									dispatch('input_billing_address_completion', value)}
 								onSelectAddressCompletion={(value) => {
