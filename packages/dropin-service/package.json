@@ -15,7 +15,7 @@
 		"test": "npm run test:unit -- --run",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
-		"deploy-dev": "npm run build && wrangler deploy --env dev",
+		"deploy-dev": "npm run build && wrangler deploy",
 		"deploy-qa": "npm run build && wrangler deploy --env qa",
 		"deploy-uat": "npm run build && wrangler deploy --env uat",
 		"deploy-prod": "npm run build && wrangler deploy --env prod"

@@ -5,9 +5,10 @@
 	"send_metrics": false,
 
 	"main": ".svelte-kit/cloudflare/_worker.js",
-	"site": {
-		"bucket": "./.svelte-kit/cloudflare/public"
-	},
+	"assets": {
+    "directory": "./.svelte-kit/cloudflare",
+    "binding": "ASSETS"
+  },
 	"observability": {
 		"enabled": true
 	}
