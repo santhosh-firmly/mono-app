@@ -70,7 +70,7 @@
 			{/each}
 		</ul>
 		{#if storesResults?.length === 0 && productsResults?.length === 0}
-			<div class="flex flex-col justify-center items-center">
+			<div class="flex flex-col items-center justify-center">
 				<LottiePlayer
 					width={150}
 					height={150}
@@ -81,7 +81,7 @@
 					renderer="svg"
 					background="transparent"
 				/>
-				<span class="font-semibold text-sm">No Results Found</span>
+				<span class="text-sm font-semibold">No Results Found</span>
 			</div>
 		{/if}
 	</div>

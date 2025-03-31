@@ -21,24 +21,24 @@
 </script>
 
 <div
-	class="flex @md:justify-around fixed bottom-10 @md:bottom-24 w-full z-[121] pointer-events-none"
+	class="pointer-events-none fixed bottom-10 z-[121] flex w-full @md:bottom-24 @md:justify-around"
 >
-	<div class="flex flex-col px-3 justify-center w-full @md:w-1/2 @md:max-w-[412px]">
+	<div class="flex w-full flex-col justify-center px-3 @md:w-1/2 @md:max-w-[412px]">
 		{#each notices as notice}
-			<div transition:fade class="py-1 pointer-events-auto">
+			<div transition:fade class="pointer-events-auto py-1">
 				<Notice text={notice.text} undoCallback={notice.undoCallback} closeable={notice.closeable}>
 					<div slot="icon">
 						{#if notice.image}
 							<div
-								class="h-8 aspect-square relative rounded bg-cover shadow bg-gray-300"
+								class="relative aspect-square h-8 rounded bg-gray-300 bg-cover shadow"
 								style={`background-image: url("${notice.image}");`}
 							/>
 						{:else}
 							<div
-								class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-orange-500 bg-orange-100 rounded-lg dark:bg-orange-700 dark:text-orange-200"
+								class="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-orange-100 text-orange-500 dark:bg-orange-700 dark:text-orange-200"
 							>
 								<svg
-									class="w-5 h-5"
+									class="h-5 w-5"
 									aria-hidden="true"
 									xmlns="http://www.w3.org/2000/svg"
 									fill="currentColor"

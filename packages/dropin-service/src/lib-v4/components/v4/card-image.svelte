@@ -41,7 +41,7 @@
 	{#if errored || !loaded}
 		<div
 			data-testid="card-image-placeholder"
-			class="aspect-square rounded-lg outline outline-1 image"
+			class="image aspect-square rounded-lg outline outline-1"
 			class:animate-pulse={!errored}
 		/>
 	{/if}

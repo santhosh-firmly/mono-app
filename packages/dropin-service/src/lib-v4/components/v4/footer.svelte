@@ -13,9 +13,9 @@
 	export let privacyPolicy;
 </script>
 
-<div class="text-center flex flex-col gap-4 pt-4">
+<div class="flex flex-col gap-4 pt-4 text-center">
 	{#if termsOfUse && privacyPolicy}
-		<span class="text-xs p-2 text-fy-on-primary-subtle">
+		<span class="text-fy-on-primary-subtle p-2 text-xs">
 			By selecting "Place Order", I agree to the merchant´s <a
 				class="underline"
 				target="_blank"
@@ -26,7 +26,7 @@
 	{/if}
 	<PaymentButton on:click {total} {disabled} {inProgress} {isOrderPlaced} />
 	<span
-		class="text-xs leading-normal text-fy-on-primary-subtle flex flex-row items-start justify-center gap-2"
+		class="text-fy-on-primary-subtle flex flex-row items-start justify-center gap-2 text-xs leading-normal"
 	>
 		<svg xmlns="http://www.w3.org/2000/svg" width="11" height="16" viewBox="0 0 11 16" fill="none">
 			<path
@@ -38,7 +38,7 @@
 		</svg>
 		Payments are secure and encrypted
 	</span>
-	<span class="text-xs mt-6 @md:hidden text-fy-on-primary-subtle">
+	<span class="text-fy-on-primary-subtle mt-6 text-xs @md:hidden">
 		<FooterLinks />
 	</span>
 </div>

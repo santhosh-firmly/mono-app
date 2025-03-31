@@ -8,7 +8,7 @@
 	export let cartsAndOrders = [];
 </script>
 
-<div class="mt-6 pb-4 border rounded-lg">
+<div class="mt-6 rounded-lg border pb-4">
 	{#each cartsAndOrders as cartOrOrder}
 		<MerchantSummary
 			{disabled}

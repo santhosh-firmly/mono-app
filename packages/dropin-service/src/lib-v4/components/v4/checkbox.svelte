@@ -38,7 +38,7 @@
 		type="checkbox"
 		bind:checked={isChecked}
 		on:change={handleCheckboxChange}
-		class="mr-3 h-5 w-5 rounded border-gray-300 text-fy-action disabled:text-fy-on-primary-subtle"
+		class="text-fy-action disabled:text-fy-on-primary-subtle mr-3 h-5 w-5 rounded border-gray-300"
 		{disabled}
 	/>
 	<div class="flex flex-col gap-1">
@@ -48,7 +48,7 @@
 			</span>
 		</slot>
 		{#if subtitle}
-			<span data-testid="checkbox-subtitle" class="font-normal text-fy-on-secondary-subtle text-xs">
+			<span data-testid="checkbox-subtitle" class="text-fy-on-secondary-subtle text-xs font-normal">
 				{subtitle}
 			</span>
 		{/if}

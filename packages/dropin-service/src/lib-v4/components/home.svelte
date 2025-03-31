@@ -1,15 +1,15 @@
-<div id="content" class="bg-white overflow-hidden rounded-md">
+<div id="content" class="overflow-hidden rounded-md bg-white">
 	<div class="flex h-full w-full flex-col">
-		<span class="text-xl font-bold underline text-center p-10">Home Content</span>
+		<span class="p-10 text-center text-xl font-bold underline">Home Content</span>
 
-		<div class="text-xs pb-10 px-2">
+		<div class="px-2 pb-10 text-xs">
 			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
 			labore et dolore magna aliqua. Sociis natoque penatibus et magnis dis parturient. Ut ornare
 			lectus sit amet est placerat in. Orci porta non pulvinar neque laoreet. Fringilla urna
 			porttitor rhoncus dolor purus non enim praesent elementum. Urna et pharetra pharetra massa
 			massa ultricies mi.
 		</div>
-		<div class="text-xs pb-10 px-4">
+		<div class="px-4 pb-10 text-xs">
 			Now, with all of this in mind, it’s time to drop a bombshell about the fancy fonts you’ll find
 			in this font generator: Fancy fonts aren’t actual fonts. Surprise! These fancy “fonts” are
 			actually the product of Unicode. Unicode is the IT standard for encoding and text expression
@@ -30,7 +30,7 @@
 			paragraphs of text that sound like a hipster, Trump, Game of Thrones’ Hodor, Zombies, bacon
 			and more.
 		</div>
-		<div class="text-md pb-10 px-2">
+		<div class="text-md px-2 pb-10">
 			How Font Generators Work The technical details are surprisingly complicated. Learn how these
 			fonts work, how to troubleshoot, and how fonts are different from text.
 		</div>

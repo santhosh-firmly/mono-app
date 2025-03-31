@@ -86,18 +86,18 @@
 	>
 		<Drawer.Overlay class="fixed inset-0 bg-black/40" />
 		<Drawer.Content
-			class="fixed flex flex-col bg-white border-b-none rounded-t-[20px] bottom-0 left-0 right-0 max-h-[95%] border-t-2 border-gray-100 outline-none {$$restProps.class}"
+			class="border-b-none fixed right-0 bottom-0 left-0 flex max-h-[95%] flex-col rounded-t-[20px] border-t-2 border-gray-100 bg-white outline-none {$$restProps.class}"
 		>
 			<slot name="close">
 				<div
 					bind:this={closeSlot}
-					class="mx-auto w-12 h-1.5 flex-shrink-0 rounded-full bg-zinc-300 mb-2 mt-3 sticky top-0"
+					class="sticky top-0 mx-auto mt-3 mb-2 h-1.5 w-12 flex-shrink-0 rounded-full bg-zinc-300"
 				></div>
 			</slot>
 
 			<div
 				bind:this={container}
-				class="grow relative h-screen bg-white"
+				class="relative h-screen grow bg-white"
 				class:overflow-y-auto={snapPoint === 1}
 				class:overflow-y-hidden={snapPoint !== 1}
 			>

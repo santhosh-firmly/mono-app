@@ -10,7 +10,7 @@
 <Meta title="Checkout V4/Checkout/Promo Codes" component={PromoCodes} tags={['autodocs']} />
 
 <Template let:args>
-	<div class="adoreme-dark bg-fy-primary p-8 rounded-lg">
+	<div class="adoreme-dark bg-fy-primary rounded-lg p-8">
 		<PromoCodes {...args} />
 	</div>
 </Template>

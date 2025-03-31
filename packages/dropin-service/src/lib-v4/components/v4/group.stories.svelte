@@ -41,11 +41,11 @@
 <Story name="Radio Example">
 	<Group>
 		<div class="col-span-2 flex flex-row items-center">
-			<input id="radio1" type="radio" class="my-4 mx-3" />
+			<input id="radio1" type="radio" class="mx-3 my-4" />
 			<span for="radio1"> First Element </span>
 		</div>
 		<div class="col-span-2 flex flex-row items-center">
-			<input id="radio1" type="radio" class="my-4 mx-3" />
+			<input id="radio1" type="radio" class="mx-3 my-4" />
 			<span for="radio1"> Second Element </span>
 		</div>
 	</Group>

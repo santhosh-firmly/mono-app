@@ -39,22 +39,22 @@
 </script>
 
 <div class="flex flex-row py-1">
-	<div class="flex basis-2/5 px-1 overflow-hidden">
+	<div class="flex basis-2/5 overflow-hidden px-1">
 		{#if shopId === 'adoreme.com'}
 			<div
 				id="image"
-				class="w-full h-full bg-contain bg-center bg-no-repeat bg-origin-border aspect-square"
+				class="aspect-square h-full w-full bg-contain bg-center bg-no-repeat bg-origin-border"
 				style="background-image: url('{lineItem.image.url}'); transform: scale(1.35);"
 			/>
 		{:else}
 			<div
 				id="image"
-				class="w-full h-full bg-contain bg-center bg-no-repeat bg-origin-border aspect-square"
+				class="aspect-square h-full w-full bg-contain bg-center bg-no-repeat bg-origin-border"
 				style="background-image: url('{lineItem.image.url}');"
 			/>
 		{/if}
 	</div>
-	<div class="flex flex-col basis-3/5 px-1 px-0:sm">
+	<div class="px-0:sm flex basis-3/5 flex-col px-1">
 		<svelte:component this={component} {lineItem} />
 	</div>
 </div>

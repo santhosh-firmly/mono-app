@@ -38,22 +38,22 @@
 
 {#if isModalOpen}
 	<div
-		class="fixed top-0 left-0 h-full w-full z-[999] flex flex-col items-center backdrop-blur-sm overflow-y-auto"
+		class="fixed top-0 left-0 z-[999] flex h-full w-full flex-col items-center overflow-y-auto backdrop-blur-sm"
 		data-testid="modal-overlay"
 	>
 		<button
-			class="fixed left-0 top-0 w-full h-full bg-[#d9d9d9] opacity-20 cursor-default"
+			class="fixed top-0 left-0 h-full w-full cursor-default bg-[#d9d9d9] opacity-20"
 			type="button"
 			aria-label="Close Modal"
 			data-testid="close-modal-button"
 			on:click={close}
 		/>
 		<div
-			class="relative pointer-events-none z-[1000] flex items-center justify-center min-h-full py-4"
+			class="pointer-events-none relative z-[1000] flex min-h-full items-center justify-center py-4"
 			transition:fade={{ duration: 150 }}
 		>
 			<div
-				class="bg-fy-surface border border-[#e0e0e0] rounded-lg shadow pointer-events-auto overflow-auto my-auto"
+				class="bg-fy-surface pointer-events-auto my-auto overflow-auto rounded-lg border border-[#e0e0e0] shadow"
 			>
 				<slot />
 			</div>

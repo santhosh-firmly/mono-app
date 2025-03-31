@@ -26,7 +26,7 @@
 			alt={name}
 			class="search-result-icon"
 			loading="lazy"
-			style="background-color:{'#fff'};object-position:{imagePosition ?? '50% 50%'}"
+			style="background-color:#fff;object-position:{imagePosition ?? '50% 50%'}"
 		/>
 		<div>
 			<span class="search-result-main-text">{name}</span>

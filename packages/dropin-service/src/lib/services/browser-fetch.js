@@ -66,7 +66,7 @@ export async function browserFetch(url, options = defaultOptions) {
 	let ret = { status: res.status };
 	try {
 		ret.data = await res.json();
-	} catch (e) {
+	} catch {
 		/* empty */
 	}
 
@@ -86,7 +86,7 @@ export async function browserFetch(url, options = defaultOptions) {
 				error_string: tempData.errorString,
 				res_headers: Object.fromEntries(res.headers)
 			});
-		} catch (ex) {
+		} catch {
 			/* empty */
 		}
 	}

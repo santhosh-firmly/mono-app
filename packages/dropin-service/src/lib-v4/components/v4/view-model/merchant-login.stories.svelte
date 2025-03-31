@@ -22,8 +22,8 @@
 	<div class="adoreme-dark h-screen w-full bg-zinc-200">
 		<MerchantLogin
 			isModalOpen={true}
-			merchantName={'AdoreMe'}
-			merchantLogo={'https://images.squarespace-cdn.com/content/v1/5ad8abaf697a98936f894da6/1577986279038-O9XM6YZZX3SZZCYHAPE9/AdoreMeLogo-01.png'}
+			merchantName="AdoreMe"
+			merchantLogo="https://images.squarespace-cdn.com/content/v1/5ad8abaf697a98936f894da6/1577986279038-O9XM6YZZX3SZZCYHAPE9/AdoreMeLogo-01.png"
 		/>
 	</div>
 </Template>
@@ -33,8 +33,8 @@
 		<FlowSinglePage />
 		<MerchantLogin
 			isModalOpen={true}
-			merchantName={'AdoreMe'}
-			merchantLogo={'https://images.squarespace-cdn.com/content/v1/5ad8abaf697a98936f894da6/1577986279038-O9XM6YZZX3SZZCYHAPE9/AdoreMeLogo-01.png'}
+			merchantName="AdoreMe"
+			merchantLogo="https://images.squarespace-cdn.com/content/v1/5ad8abaf697a98936f894da6/1577986279038-O9XM6YZZX3SZZCYHAPE9/AdoreMeLogo-01.png"
 		/>
 	</div>
 </Story>
@@ -44,9 +44,9 @@
 		<FlowSinglePage />
 		<MerchantLogin
 			isModalOpen={true}
-			merchantName={'AdoreMe'}
+			merchantName="AdoreMe"
 			currentStep={BASE_LOGIN_STEPS.PROCESSING_EMAIL}
-			merchantLogo={'https://images.squarespace-cdn.com/content/v1/5ad8abaf697a98936f894da6/1577986279038-O9XM6YZZX3SZZCYHAPE9/AdoreMeLogo-01.png'}
+			merchantLogo="https://images.squarespace-cdn.com/content/v1/5ad8abaf697a98936f894da6/1577986279038-O9XM6YZZX3SZZCYHAPE9/AdoreMeLogo-01.png"
 		/>
 	</div>
 </Story>

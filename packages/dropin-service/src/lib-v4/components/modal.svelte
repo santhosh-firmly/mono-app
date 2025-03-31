@@ -1,7 +1,6 @@
 <script context="module">
 	// @ts-nocheck
 	// TODO: Add ARIA role to <div> with mousedown, mouseup handlers
-	/* eslint-disable svelte/valid-compile */
 
 	/**
 	 * Create a Svelte component with props bound to it.

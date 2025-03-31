@@ -795,14 +795,14 @@
 </script>
 
 <div
-	class="autocomplete relative align-top inline-block w-full {uniqueId}"
+	class="autocomplete relative inline-block w-full align-top {uniqueId}"
 	class:hide-arrow={hideArrow || opened}
 	class:is-loading={showLoadingIndicator && loading}
 >
 	<div class="input-container relative" bind:this={inputContainer}>
 		<input
 			type="text"
-			class="px-2.5 pb-2.5 pt-4 block w-full text-sm text-gray-900 bg-transparent rounded-lg border appearance-none dark:text-white focus:outline-none focus:ring-0 peer border-gray-300 dark:border-gray-600 dark:focus:border-blue-500 focus:border-blue-600"
+			class="peer block w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-2.5 pt-4 pb-2.5 text-sm text-gray-900 focus:border-blue-600 focus:ring-0 focus:outline-none dark:border-gray-600 dark:text-white dark:focus:border-blue-500"
 			id={id ? id : ''}
 			{placeholder}
 			{name}
@@ -821,13 +821,13 @@
 		/>
 		<label
 			for={id}
-			class="absolute text-sm duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-gray-900 px-2 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-1 text-gray-500 dark:text-gray-400 peer-focus:text-blue-600 peer-focus:dark:text-blue-500"
+			class="absolute top-2 left-1 z-10 origin-[0] -translate-y-4 scale-75 transform bg-white px-2 text-sm text-gray-500 duration-300 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-blue-600 dark:bg-gray-900 dark:text-gray-400 peer-focus:dark:text-blue-500"
 		>
 			{label}
 		</label>
 	</div>
 	<div
-		class="autocomplete-list flex flex-col relative w-fullbg-white overflow-y-auto z-[99] py-2.5 rounded-lg border border-solid border-[#999] select-none {showList
+		class="autocomplete-list w-fullbg-white relative z-[99] flex flex-col overflow-y-auto rounded-lg border border-solid border-[#999] py-2.5 select-none {showList
 			? ''
 			: 'invisible hidden'} "
 		bind:this={list}
@@ -841,10 +841,10 @@
 						role="button"
 						tabindex="0"
 						aria-roledescription="test"
-						class="text-start py-1 px-4 leading-none cursor-pointer text-[#333] {i ===
+						class="cursor-pointer px-4 py-1 text-start leading-none text-[#333] {i ===
 						highlightIndex
-							? 'text-white bg-[#2e69e2]'
-							: ''} {isConfirmed(listItem.item) ? 'text-white bg-[#789fed]' : ''}"
+							? 'bg-[#2e69e2] text-white'
+							: ''} {isConfirmed(listItem.item) ? 'bg-[#789fed] text-white' : ''}"
 						on:click={() => onListItemClick(listItem)}
 						on:keypress={(e) => {
 							e.key == 'Enter' && onListItemClick(listItem);
@@ -871,7 +871,7 @@
 			<slot name="dropdown-footer" nbItems={filteredListItems.length} {maxItemsToShowInList}>
 				{#if maxItemsToShowInList > 0 && filteredListItems.length > maxItemsToShowInList}
 					{#if moreItemsText}
-						<div class="py-1 px-4 bg-secondary leading-none">
+						<div class="bg-secondary px-4 py-1 leading-none">
 							...{filteredListItems.length - maxItemsToShowInList}
 							{moreItemsText}
 						</div>
@@ -879,11 +879,11 @@
 				{/if}
 			</slot>
 		{:else if loading && loadingText}
-			<div class="py-1 px-4 leading-none">
+			<div class="px-4 py-1 leading-none">
 				<slot name="loading" {loadingText}>{loadingText}</slot>
 			</div>
 		{:else if noResultsText}
-			<div class="py-1 px-4 leading-none bg-secondary">
+			<div class="bg-secondary px-4 py-1 leading-none">
 				<slot name="no-results" {noResultsText}>{noResultsText}</slot>
 			</div>
 		{/if}

@@ -30,7 +30,7 @@
 
 <button
 	on:click
-	class="flex flex-row gap-2 p-3 items-center w-full pr-5 justify-center text-fy-on-action bg-fy-action rounded shadow"
+	class="text-fy-on-action bg-fy-action flex w-full flex-row items-center justify-center gap-2 rounded p-3 pr-5 shadow"
 	{disabled}
 >
 	{#if smallLogo && !largeLogo}

@@ -5,7 +5,7 @@
 
 <div
 	data-testid="group"
-	class="rounded-lg text-fy-on-surface"
+	class="text-fy-on-surface rounded-lg"
 	class:w-full={stretch}
 	class:grid
 	class:grid-cols-2={grid}

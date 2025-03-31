@@ -19,7 +19,7 @@
 <Template let:args>
 	<div class="adoreme-light">
 		<div
-			class="absolute w-full top-0 left-0 h-[2000px] bg-gray-300 text-center flex flex-col justify-center"
+			class="absolute top-0 left-0 flex h-[2000px] w-full flex-col justify-center bg-gray-300 text-center"
 		>
 			Space to scroll
 		</div>

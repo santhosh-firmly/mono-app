@@ -11,10 +11,10 @@
 </script>
 
 <div>
-	<div class="flex justify-between items-start">
+	<div class="flex items-start justify-between">
 		{#if collapsed}
 			<slot name="collapsed" />
-			<button {disabled} on:click={expandForm} class="text-blue-500 hover:underline mt-6 mr-4"
+			<button {disabled} on:click={expandForm} class="mt-6 mr-4 text-blue-500 hover:underline"
 				>Edit</button
 			>
 		{:else}

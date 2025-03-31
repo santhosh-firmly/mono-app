@@ -2,8 +2,8 @@
 	export let shippingInfo;
 </script>
 
-<div class="flex flex-col pt-2 pb-2 px-4">
-	<div class="flex text-lg flex-row h-10 mt-3 font-bold" data-testid="shipping-info-header">
+<div class="flex flex-col px-4 pt-2 pb-2">
+	<div class="mt-3 flex h-10 flex-row text-lg font-bold" data-testid="shipping-info-header">
 		Contact & Shipping Address
 	</div>
 	<div class="text-md">

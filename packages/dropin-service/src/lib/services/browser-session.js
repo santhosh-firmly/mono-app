@@ -144,7 +144,6 @@ export function getDeviceId() {
 	return null;
 }
 
-
 /**
  * Gets the headers for API requests, including the access token.
  * @returns {Promise<object>} The headers object with the access token.

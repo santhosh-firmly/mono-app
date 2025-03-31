@@ -20,13 +20,13 @@
 	on:click={onBackClicked}
 	type="button"
 	disabled={!showBackButton}
-	class="flex items-center py-5 px-2.5 text-fy-on-primary"
+	class="text-fy-on-primary flex items-center px-2.5 py-5"
 	class:group={showBackButton}
 	class:cursor-default={!showBackButton}
 >
 	<svg
 		data-testid="back-arrow"
-		class="inline fill-fy-on-primary-subtle transition duration-300 group-hover:-translate-x-1 group-hover:fill-fy-on-primary"
+		class="fill-fy-on-primary-subtle group-hover:fill-fy-on-primary inline transition duration-300 group-hover:-translate-x-1"
 		class:invisible={!showBackButton}
 		xmlns="http://www.w3.org/2000/svg"
 		width="17"

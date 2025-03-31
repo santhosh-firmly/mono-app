@@ -23,7 +23,7 @@
 	export let verticalOffsetPx = 16;
 </script>
 
-<div data-testid="card-stack" class="flex flex-row relative">
+<div data-testid="card-stack" class="relative flex flex-row">
 	{#if !images}
 		<div class="w-32">
 			<CardImage data-testid="card-stack-skeleton" />

@@ -20,7 +20,7 @@
 
 <button
 	{...$$restProps}
-	class="text-center font-medium focus:ring-4 focus:outline-none inline-flex items-center justify-center {sizeClasses[
+	class="inline-flex items-center justify-center text-center font-medium focus:ring-4 focus:outline-none {sizeClasses[
 		size
 	]} {colorClasses[color]} {pill ? 'rounded-full' : 'rounded-lg'} {$$props.class}"
 	on:click

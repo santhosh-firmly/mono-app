@@ -2,7 +2,6 @@
 	// @ts-nocheck
 
 	// TODO: Add ARIA role to <div> with keydown handler
-	/* eslint-disable svelte/valid-compile */
 
 	import { Kbd } from 'flowbite-svelte';
 	import { promotionalItems } from './data.js';

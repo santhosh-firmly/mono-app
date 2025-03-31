@@ -25,16 +25,16 @@
 {#if showNotice}
 	<div
 		transition:fade
-		class="col-span-2 flex items-center p-4 text-gray-500 bg-white outline-1 outline-fy-on-primary-subtle2 outline rounded-lg shadow-lg border-fy-primary border-solid dark:text-gray-400 dark:bg-gray-800"
+		class="outline-fy-on-primary-subtle2 border-fy-primary col-span-2 flex items-center rounded-lg border-solid bg-white p-4 text-gray-500 shadow-lg outline outline-1 dark:bg-gray-800 dark:text-gray-400"
 	>
 		<slot name="icon" />
 
-		<span class="ml-3 text-sm font-normal text-justify line-clamp-3">{text}</span>
-		<div class="flex-shrink-0 ml-auto flex flex-row items-center gap-1 pl-2">
+		<span class="ml-3 line-clamp-3 text-justify text-sm font-normal">{text}</span>
+		<div class="ml-auto flex flex-shrink-0 flex-row items-center gap-1 pl-2">
 			{#if undoCallback}
 				<button
 					disabled={undoInProgress}
-					class="p-2 text-sm font-medium text-blue-600 hover:bg-blue-100 disabled:bg-gray-200 disabled:text-gray-400 rounded-lg dark:text-blue-500 dark:hover:bg-gray-700"
+					class="rounded-lg p-2 text-sm font-medium text-blue-600 hover:bg-blue-100 disabled:bg-gray-200 disabled:text-gray-400 dark:text-blue-500 dark:hover:bg-gray-700"
 					on:click={undo}>Undo</button
 				>
 			{/if}
@@ -42,7 +42,7 @@
 			{#if undoInProgress}
 				<svg
 					aria-hidden="true"
-					class="w-6 h-6 m-1.5 animate-spin fill-fy-on-action text-gray-fy-on-action-subtle"
+					class="fill-fy-on-action text-gray-fy-on-action-subtle m-1.5 h-6 w-6 animate-spin"
 					viewBox="0 0 100 100"
 					fill="none"
 					xmlns="http://www.w3.org/2000/svg"
@@ -60,12 +60,12 @@
 				<button
 					type="button"
 					on:click={() => closeNotice()}
-					class="bg-white text-gray-400 p-3 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 hover:bg-gray-100 inline-flex items-center justify-center dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700"
+					class="inline-flex items-center justify-center rounded-lg bg-white p-3 text-gray-400 hover:bg-gray-100 hover:text-gray-900 focus:ring-2 focus:ring-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-white"
 					aria-label="Close"
 				>
 					<span class="sr-only">Close</span>
 					<svg
-						class="w-3 h-3"
+						class="h-3 w-3"
 						aria-hidden="true"
 						xmlns="http://www.w3.org/2000/svg"
 						fill="none"

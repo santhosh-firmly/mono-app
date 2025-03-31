@@ -103,7 +103,7 @@
 <Meta title="Checkout V4/View Models/ShopPay Popup" component={ShopPay} tags={['autodocs']} />
 
 <Template>
-	<div class="bg-zinc-200 w-full h-screen">
+	<div class="h-screen w-full bg-zinc-200">
 		<ShopPay
 			isModalOpen={true}
 			getHCaptcha={() => {

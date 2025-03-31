@@ -926,7 +926,7 @@
 							'font-bold'
 						)}
 					>
-						{'?'}
+						?
 					</span>
 				</div>
 				<div class="h-full overflow-scroll px-4">

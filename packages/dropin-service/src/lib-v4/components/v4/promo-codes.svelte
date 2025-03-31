@@ -76,20 +76,20 @@
 		<button
 			data-testid="add-promo-code-button"
 			on:click={() => promoCodeButtonClicked()}
-			class="promo-button col-span-2 border-0 py-2 px-2 rounded-lg text-sm text-fy-on-primary w-full bg-fy-primary"
+			class="promo-button text-fy-on-primary bg-fy-primary col-span-2 w-full rounded-lg border-0 px-2 py-2 text-sm"
 		>
 			Add promotion code
 		</button>
 		<!-- </Group> -->
 	{:else}
 		<Group>
-			<div class="relative col-span-2 rounded-lg h-9">
-				<div class="absolute right-0 z-[2] text-xs font-semibold text-fy-on-primary-subtle">
+			<div class="relative col-span-2 h-9 rounded-lg">
+				<div class="text-fy-on-primary-subtle absolute right-0 z-[2] text-xs font-semibold">
 					{#if showSpinner}
-						<div class="absolute inset-y-0 right-0 px-4 py-1.5 rounded-l-md">
+						<div class="absolute inset-y-0 right-0 rounded-l-md px-4 py-1.5">
 							<svg
 								aria-hidden="true"
-								class="absolute right-0 w-6 h-6 mr-2 animate-spin {spinnerClasses}"
+								class="absolute right-0 mr-2 h-6 w-6 animate-spin {spinnerClasses}"
 								viewBox="0 0 100 101"
 								fill="none"
 								xmlns="http://www.w3.org/2000/svg"
@@ -109,7 +109,7 @@
 							type="button"
 							disabled={showSpinner || removingPromoCodes}
 							data-testid="apply-promo-code-button"
-							class="rounded-full px-2 py-1 m-1.5 mx-2 shadow"
+							class="m-1.5 mx-2 rounded-full px-2 py-1 shadow"
 							on:click={() => addPromoCode()}
 						>
 							Apply
@@ -124,7 +124,7 @@
 					bind:this={inputElement}
 					bind:value={promoCode}
 					disabled={showSpinner}
-					class="w-full h-full border-0 rounded-lg text-sm"
+					class="h-full w-full rounded-lg border-0 text-sm"
 					class:error
 					placeholder="Add promotion code"
 					on:keyup={handleInputKeyPress}
@@ -144,9 +144,9 @@
 		{/if}
 	{/if}
 	{#if coupons?.length > 0}
-		<div transition:slide class="w-full flex flex-row mt-2 items-center relative">
+		<div transition:slide class="relative mt-2 flex w-full flex-row items-center">
 			<div
-				class="grow overflow-hidden relative"
+				class="relative grow overflow-hidden"
 				class:ov-gradient-to-r-primary={promoListContainerScrollLeft > 0}
 				class:ov-gradient-to-l-primary={promoListContainer?.scrollWidth -
 					promoListContainerScrollLeft >
@@ -157,13 +157,13 @@
 					on:scroll={() => {
 						promoListContainerScrollLeft = promoListContainer.scrollLeft;
 					}}
-					class="grow flex flex-row gap-2 py-2 px-0.5 overflow-scroll overflow-y-hidden no-scrollbar"
+					class="no-scrollbar flex grow flex-row gap-2 overflow-scroll overflow-y-hidden px-0.5 py-2"
 				>
 					{#each coupons || [] as coupon}
 						<Group grid={false} stretch={false}>
 							<div
 								data-testid="applied-promo-code"
-								class="bg-fy-surface text-xs p-1 rounded-lg text-center flex flex-row shrink items-center"
+								class="bg-fy-surface flex shrink flex-row items-center rounded-lg p-1 text-center text-xs"
 							>
 								<svg
 									version="1.1"
@@ -176,7 +176,7 @@
 									viewBox="0 0 24 24"
 									style="enable-background:new 0 0 24 24; vertical-align: middle;"
 									xml:space="preserve"
-									class="inline-block m-0.5 fill-fy-on-surface-subtle"
+									class="fill-fy-on-surface-subtle m-0.5 inline-block"
 								>
 									<g id="Icons" style="opacity:0.75;">
 										<g id="tag">
@@ -191,7 +191,7 @@
 										</g>
 									</g>
 								</svg>
-								<span class="leading-0 mr-1.5 text-fy-on-surface-subtle">
+								<span class="text-fy-on-surface-subtle mr-1.5 leading-0">
 									{coupon.toUpperCase()}
 								</span>
 							</div>
@@ -202,20 +202,20 @@
 			</div>
 
 			{#if coupons?.length > 0}
-				<div class="text-sm rounded-lg font-thin">
+				<div class="rounded-lg text-sm font-thin">
 					{#if !removingPromoCodes}
 						<button
 							type="button"
 							disabled={showSpinner || removingPromoCodes}
 							data-testid="remove-promo-codes-button"
-							class="text-fy-on-primary-subtle underline rounded-lg whitespace-nowrap p-1 ml-2"
+							class="text-fy-on-primary-subtle ml-2 rounded-lg p-1 whitespace-nowrap underline"
 							on:click={() => clearPromoCodes()}>Remove all</button
 						>
 					{:else}
-						<div class="pl-2 m-0.5 rounded-l-md">
+						<div class="m-0.5 rounded-l-md pl-2">
 							<svg
 								aria-hidden="true"
-								class="w-4 h-4 mr-1 animate-spin {spinnerClasses}"
+								class="mr-1 h-4 w-4 animate-spin {spinnerClasses}"
 								viewBox="0 0 100 101"
 								fill="none"
 								xmlns="http://www.w3.org/2000/svg"

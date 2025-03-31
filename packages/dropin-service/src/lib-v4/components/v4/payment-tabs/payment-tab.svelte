@@ -9,11 +9,11 @@
 <button
 	on:click
 	type="button"
-	class="w-20 min-w-[80px] py-2 px-3 border rounded-lg bg-fy-surface border-fy-on-surface hover:opacity-100 hover:shadow-lg flex flex-col justify-between"
+	class="bg-fy-surface border-fy-on-surface flex w-20 min-w-[80px] flex-col justify-between rounded-lg border px-3 py-2 hover:opacity-100 hover:shadow-lg"
 	class:shadow-lg={active}
 	class:opacity-50={!active}
 	{disabled}
 >
 	<slot />
-	<span class="pt-1 leading-none text-left text-xs text-fy-on-surface">{text}</span>
+	<span class="text-fy-on-surface pt-1 text-left text-xs leading-none">{text}</span>
 </button>

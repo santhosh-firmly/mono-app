@@ -5,7 +5,7 @@
 </script>
 
 <div
-	class="flex flex-col justify-start gap-1 text-xs text-flasht bg-flash py-2 px-2 border-l-4 border-flasht"
+	class="text-flasht bg-flash border-flasht flex flex-col justify-start gap-1 border-l-4 px-2 py-2 text-xs"
 >
 	<div class="font-semibold">{header}</div>
 	<div>{detail}</div>

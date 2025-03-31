@@ -20,8 +20,8 @@
 <Template let:args>
 	<div class="h-32">
 		<Header {...args} merchantInfo={{ displayName: 'Merchant Name', smallLogo }} on:back-click>
-			<div class="p-2 bg-gray-300 text-white w-full">This is the content</div>
-			<div slot="smallSummary" class="w-7 h-7 relative rounded bg-cover shadow mx-2 bg-gray-300">
+			<div class="w-full bg-gray-300 p-2 text-white">This is the content</div>
+			<div slot="smallSummary" class="relative mx-2 h-7 w-7 rounded bg-gray-300 bg-cover shadow">
 				<span
 					class={classNames(
 						'bg-fy-alert',

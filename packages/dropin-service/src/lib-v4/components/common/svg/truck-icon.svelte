@@ -11,7 +11,7 @@
 	viewBox="0 0 24 24"
 	stroke-width="1.5"
 	stroke="currentColor"
-	class="inline mr-2"
+	class="mr-2 inline"
 >
 	<path
 		stroke-linecap="round"

@@ -34,8 +34,8 @@
 	<FlowSinglePage />
 	<ClickToPay
 		isModalOpen={true}
-		otpEmailInfo={'samuelsmith@testing.com'}
-		otpPhoneInfo={'(•••) •••-•875'}
+		otpEmailInfo="samuelsmith@testing.com"
+		otpPhoneInfo="(•••) •••-•875"
 	/>
 </Story>
 
@@ -45,8 +45,8 @@
 		isModalOpen={true}
 		showC2pCheckbox={true}
 		popupStep={BASE_LOGIN_STEPS.WAITING_OTP}
-		otpEmailInfo={'samuelsmith@testing.com'}
-		otpPhoneInfo={'(•••) •••-•875'}
+		otpEmailInfo="samuelsmith@testing.com"
+		otpPhoneInfo="(•••) •••-•875"
 	/>
 </Story>
 
@@ -57,7 +57,7 @@
 		popupStep={BASE_LOGIN_STEPS.WAITING_C2P_OTP_STEPUP}
 		isWaitingStepupOtp={true}
 		showSecondSlot={true}
-		otpReference={'******8080'}
-		contentHeaderText={"Confirm it's you"}
+		otpReference="******8080"
+		contentHeaderText="Confirm it's you"
 	/>
 </Story>

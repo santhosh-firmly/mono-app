@@ -17,10 +17,10 @@
 	<Notice {...args}>
 		<div
 			slot="icon"
-			class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-orange-500 bg-orange-100 rounded-lg dark:bg-orange-700 dark:text-orange-200"
+			class="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-orange-100 text-orange-500 dark:bg-orange-700 dark:text-orange-200"
 		>
 			<svg
-				class="w-5 h-5"
+				class="h-5 w-5"
 				aria-hidden="true"
 				xmlns="http://www.w3.org/2000/svg"
 				fill="currentColor"
@@ -65,8 +65,8 @@
 	<Notice text="Item removed from the cart." undoCallback={undo} closeable={true}>
 		<div
 			slot="icon"
-			class="h-8 aspect-square relative rounded bg-cover shadow bg-gray-300"
-			style={`background-image: url("https://media-resize.adoreme.com/resize/1360/bundle/10/4/104828/gallery/5jk0zod9o_cinthia-black/full.jpeg?format=webp");`}
+			class="relative aspect-square h-8 rounded bg-gray-300 bg-cover shadow"
+			style="background-image: url(&quot;https://media-resize.adoreme.com/resize/1360/bundle/10/4/104828/gallery/5jk0zod9o_cinthia-black/full.jpeg?format=webp&quot;);"
 		/>
 	</Notice>
 </Story>
@@ -87,8 +87,8 @@
 	>
 		<div
 			slot="icon"
-			class="h-8 aspect-square relative rounded bg-cover shadow bg-gray-300"
-			style={`background-image: url("https://media-resize.adoreme.com/resize/1360/bundle/10/4/104828/gallery/5jk0zod9o_cinthia-black/full.jpeg?format=webp");`}
+			class="relative aspect-square h-8 rounded bg-gray-300 bg-cover shadow"
+			style="background-image: url(&quot;https://media-resize.adoreme.com/resize/1360/bundle/10/4/104828/gallery/5jk0zod9o_cinthia-black/full.jpeg?format=webp&quot;);"
 		/>
 	</Notice>
 </Story>

@@ -1,11 +1,11 @@
-import { telemetrySessionStart } from "./telemetry";
-import { getApiAccessToken } from "./browser-session";
+import { telemetrySessionStart } from './telemetry';
+import { getApiAccessToken } from './browser-session';
 
 export async function initialize(appId, apiServer, domain = null) {
 	if (!window.firmly) {
 		window.firmly = {};
 	}
-	
+
 	if (window.firmly.appId) {
 		return;
 	}

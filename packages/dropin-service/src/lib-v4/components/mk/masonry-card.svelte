@@ -36,7 +36,7 @@
 			</div>
 		{/if}
 	</div>
-	<div class="merchant-card-info w-full flex flex-row justify-between">
+	<div class="merchant-card-info flex w-full flex-row justify-between">
 		<div>
 			<div class="merchant-card-info-label text-left">{name}</div>
 			{#if store || promoText}
@@ -57,12 +57,12 @@
 				</div>
 			{/if}
 		</div>
-		<div class="flex flex-col justify-start mt-1 h-0">
+		<div class="mt-1 flex h-0 flex-col justify-start">
 			{#if price !== undefined}
 				<span class="font-semibold">$&nbsp;{price?.value?.toFixed?.(2)}</span>
 			{/if}
 			{#if msrp !== undefined}
-				<span class="pl-1 text-secondary font-thin line-through text-xs"
+				<span class="text-secondary pl-1 text-xs font-thin line-through"
 					>$&nbsp;{msrp?.value?.toFixed?.(2)}</span
 				>
 			{/if}

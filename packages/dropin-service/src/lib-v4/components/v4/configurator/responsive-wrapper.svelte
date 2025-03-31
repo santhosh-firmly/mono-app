@@ -55,9 +55,9 @@
 	});
 </script>
 
-<section class="dark:bg-[#0f172a] overflow-hidden h-screen min-h-max">
-	<div class="mt-16 border-b border-slate-100 xl:mb-0 block dark:border-slate-800">
-		<div bind:this={markerContainer} class="mb-[-3px] flex mx-auto px-6 sm:px-8 md:px-10">
+<section class="h-screen min-h-max overflow-hidden dark:bg-[#0f172a]">
+	<div class="mt-16 block border-b border-slate-100 xl:mb-0 dark:border-slate-800">
+		<div bind:this={markerContainer} class="mx-auto mb-[-3px] flex px-6 sm:px-8 md:px-10">
 			<Marker
 				width={browserWidth + markerOffset}
 				label="sm"
@@ -100,25 +100,25 @@
 		</div>
 	</div>
 	<div class="relative -mt-2.5 h-full">
-		<div class="mx-auto sm:px-6 md:px-8 mb-64 h-full">
-			<div class="sm:px-2 xl:mt-0 h-full">
-				<div bind:clientWidth={browserContainerWidth} class="flex flex-row items-center h-3/4">
+		<div class="mx-auto mb-64 h-full sm:px-6 md:px-8">
+			<div class="h-full sm:px-2 xl:mt-0">
+				<div bind:clientWidth={browserContainerWidth} class="flex h-3/4 flex-row items-center">
 					<Browser width={browserWidth}>
 						<iframe
 							bind:this={checkoutWindow}
 							{src}
 							{title}
-							class="w-full h-full"
+							class="h-full w-full"
 							style={`pointer-events: ${dragging ? 'none' : 'auto'};`}
 						/>
 					</Browser>
 					<div bind:clientWidth={draggerWidth} class="inset-y-0">
 						<!-- svelte-ignore a11y-no-static-element-interactions -->
 						<div
-							class="z-10 top-1/2 left-0 p-2 -mt-6 items-center justify-center pointer-events-auto cursor-ew-resize"
+							class="pointer-events-auto top-1/2 left-0 z-10 -mt-6 cursor-ew-resize items-center justify-center p-2"
 							on:mousedown={onDragStart}
 						>
-							<div class="w-1.5 h-8 bg-slate-500/60 rounded-full"></div>
+							<div class="h-8 w-1.5 rounded-full bg-slate-500/60"></div>
 						</div>
 					</div>
 				</div>

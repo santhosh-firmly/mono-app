@@ -3,30 +3,30 @@
 </script>
 
 <div
-	class="shadow-2xl sm:rounded-xl min-w-full max-w-full demo-sm:min-w-0 demo-sm:max-w-none h-full"
+	class="demo-sm:min-w-0 demo-sm:max-w-none h-full max-w-full min-w-full shadow-2xl sm:rounded-xl"
 	style={`width: ${width}px`}
 >
-	<div class="sm:rounded-xl ring-1 ring-slate-900/5 h-full flex flex-col">
+	<div class="flex h-full flex-col ring-1 ring-slate-900/5 sm:rounded-xl">
 		<div
-			class="sm:rounded-t-xl bg-gradient-to-b from-white to-[#FBFBFB] dark:bg-none dark:bg-slate-700 dark:highlight-white/10"
+			class="dark:highlight-white/10 bg-gradient-to-b from-white to-[#FBFBFB] sm:rounded-t-xl dark:bg-slate-700 dark:bg-none"
 		>
 			<div
-				class="py-2.5 grid items-center px-4 gap-6"
+				class="grid items-center gap-6 px-4 py-2.5"
 				style="grid-template-columns:2.625rem 1fr 2.625rem"
 			>
 				<div class="flex items-center">
-					<div class="w-2.5 h-2.5 rounded-full bg-[#EC6A5F]"></div>
-					<div class="ml-1.5 w-2.5 h-2.5 rounded-full bg-[#F4BF50]"></div>
-					<div class="ml-1.5 w-2.5 h-2.5 rounded-full bg-[#61C454]"></div>
+					<div class="h-2.5 w-2.5 rounded-full bg-[#EC6A5F]"></div>
+					<div class="ml-1.5 h-2.5 w-2.5 rounded-full bg-[#F4BF50]"></div>
+					<div class="ml-1.5 h-2.5 w-2.5 rounded-full bg-[#61C454]"></div>
 				</div>
 				<div>
 					<div
-						class="bg-slate-100 rounded-md font-medium text-xs leading-6 py-1 flex items-center justify-center ring-1 ring-inset ring-slate-900/5 mx-auto w-4/5 dark:bg-slate-800 dark:text-slate-500"
+						class="mx-auto flex w-4/5 items-center justify-center rounded-md bg-slate-100 py-1 text-xs leading-6 font-medium ring-1 ring-slate-900/5 ring-inset dark:bg-slate-800 dark:text-slate-500"
 					>
 						<svg
 							viewBox="0 0 20 20"
 							fill="currentColor"
-							class="text-slate-300 w-3.5 h-3.5 mr-1.5 dark:text-slate-500"
+							class="mr-1.5 h-3.5 w-3.5 text-slate-300 dark:text-slate-500"
 						>
 							<path
 								fill-rule="evenodd"
@@ -39,9 +39,9 @@
 					</div>
 				</div>
 			</div>
-			<div class="grid grid-cols-3 text-xs leading-5 overflow-hidden">
+			<div class="grid grid-cols-3 overflow-hidden text-xs leading-5">
 				<div
-					class="pointer-events-none select-none bg-slate-100 text-slate-400 rounded-tr border border-slate-900/5 px-4 py-1.5 -mb-px -ml-px flex items-center justify-center space-x-2 dark:bg-slate-800 dark:text-slate-500"
+					class="pointer-events-none -mb-px -ml-px flex items-center justify-center space-x-2 rounded-tr border border-slate-900/5 bg-slate-100 px-4 py-1.5 text-slate-400 select-none dark:bg-slate-800 dark:text-slate-500"
 				>
 					<svg
 						width="17"
@@ -57,7 +57,7 @@
 					<div class="truncate">Firmly Docs</div>
 				</div>
 				<div
-					class="pointer-events-none select-none text-slate-900 font-medium px-4 py-1.5 flex items-center justify-center space-x-2 dark:text-slate-200"
+					class="pointer-events-none flex items-center justify-center space-x-2 px-4 py-1.5 font-medium text-slate-900 select-none dark:text-slate-200"
 				>
 					<svg
 						width="15"
@@ -73,7 +73,7 @@
 					<div class="truncate">Edge</div>
 				</div>
 				<div
-					class="pointer-events-none select-none bg-slate-100 text-slate-400 rounded-tl border border-slate-900/5 pl-4 pr-8 py-1.5 -mb-px -mr-4 flex items-center justify-center space-x-2 dark:bg-slate-800 dark:text-slate-500"
+					class="pointer-events-none -mr-4 -mb-px flex items-center justify-center space-x-2 rounded-tl border border-slate-900/5 bg-slate-100 py-1.5 pr-8 pl-4 text-slate-400 select-none dark:bg-slate-800 dark:text-slate-500"
 				>
 					<svg
 						width="15"
@@ -93,7 +93,7 @@
 			</div>
 		</div>
 		<div
-			class="relative grow bg-white border-t border-slate-200 rounded-b-xl overflow-hidden -mb-8 dark:bg-slate-800 dark:border-slate-900/50"
+			class="relative -mb-8 grow overflow-hidden rounded-b-xl border-t border-slate-200 bg-white dark:border-slate-900/50 dark:bg-slate-800"
 		>
 			<slot />
 		</div>

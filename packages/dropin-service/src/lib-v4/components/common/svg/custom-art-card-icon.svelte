@@ -6,4 +6,4 @@
 	export let src;
 </script>
 
-<img {width} {height} {...$$restProps} {src} class="m-1 rounded" alt={'Cart Brand'} />
+<img {width} {height} {...$$restProps} {src} class="m-1 rounded" alt="Cart Brand" />

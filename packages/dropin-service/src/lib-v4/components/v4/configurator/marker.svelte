@@ -20,22 +20,22 @@
 	}
 </script>
 
-<div class="flex items-start flex-none {className}">
-	<div class="flex flex-col items-center ml-[-2px]">
+<div class="flex flex-none items-start {className}">
+	<div class="ml-[-2px] flex flex-col items-center">
 		<div
 			bind:this={markerRef}
-			class="w-px h-14 {active ? 'bg-indigo-600' : 'bg-slate-100 dark:bg-slate-800'}"
+			class="h-14 w-px {active ? 'bg-indigo-600' : 'bg-slate-100 dark:bg-slate-800'}"
 		/>
 		<div
-			class="mt-[3px] w-[5px] h-[5px] shadow-sm rounded-full ring-1 {active
+			class="mt-[3px] h-[5px] w-[5px] rounded-full shadow-sm ring-1 {active
 				? 'bg-indigo-600 ring-indigo-600'
 				: 'bg-white ring-slate-500/[0.15] dark:bg-slate-900 dark:ring-slate-700'}"
 		/>
 	</div>
 	<button
-		class="ml-1.5 rounded font-mono text-[0.625rem] leading-6 px-1.5 ring-1 ring-inset dark:ring-0 {active
-			? 'bg-indigo-50 text-indigo-600 ring-indigo-600 dark:bg-indigo-500 dark:text-white dark:highlight-white/10'
-			: 'bg-slate-100 ring-slate-100 dark:bg-slate-800 dark:text-white/50 dark:highlight-white/5'}"
+		class="ml-1.5 rounded px-1.5 font-mono text-[0.625rem] leading-6 ring-1 ring-inset dark:ring-0 {active
+			? 'dark:highlight-white/10 bg-indigo-50 text-indigo-600 ring-indigo-600 dark:bg-indigo-500 dark:text-white'
+			: 'dark:highlight-white/5 bg-slate-100 ring-slate-100 dark:bg-slate-800 dark:text-white/50'}"
 		on:click
 	>
 		{label}

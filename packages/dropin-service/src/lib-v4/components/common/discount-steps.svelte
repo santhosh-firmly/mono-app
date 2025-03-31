@@ -52,25 +52,25 @@
 	export let numberOfSets = 1;
 </script>
 
-<div class="flex flex-col gap-1 px-4 my-4 w-full items-start">
-	<span class="text-[#813571] text-sm font-bold leading-4">Buy More & Save!</span>
-	<div class="w-full flex flex-row justify-between items-center relative my-3">
-		<div class="absolute px-[12px] w-full h-1 left-0 flex flex-row">
+<div class="my-4 flex w-full flex-col items-start gap-1 px-4">
+	<span class="text-sm leading-4 font-bold text-[#813571]">Buy More & Save!</span>
+	<div class="relative my-3 flex w-full flex-row items-center justify-between">
+		<div class="absolute left-0 flex h-1 w-full flex-row px-[12px]">
 			<div
-				class="progress-bar bg-[#813571] h-full"
+				class="progress-bar h-full bg-[#813571]"
 				style:width={100 * getProgressPercentage(numberOfSets) + '%'}
 			></div>
-			<div class="bg-gray-100 grow shrink h-full"></div>
+			<div class="h-full shrink grow bg-gray-100"></div>
 		</div>
 		<!-- eslint-disable-next-line no-empty-pattern -->
 		{#each tiers as { }, index}
 			<CheckCircleIconAdoreme active={index <= getProgress(numberOfSets)} class="z-10" />
 		{/each}
 	</div>
-	<div class="w-full flex flex-row justify-between items-center relative">
+	<div class="relative flex w-full flex-row items-center justify-between">
 		{#each tiers as tier, index}
 			<span
-				class="font-bold text-xs"
+				class="text-xs font-bold"
 				class:text-[#813571]={index <= getProgress(numberOfSets)}
 				class:text-gray-800={index > getProgress(numberOfSets)}
 				class:text-center={isMiddleTier(index)}

@@ -61,25 +61,25 @@
 	}
 </script>
 
-<header class="w-full flex flex-col top-0 z-[120] shadow-sm @md:shadow-none @md:relative sticky">
+<header class="sticky top-0 z-[120] flex w-full flex-col shadow-sm @md:relative @md:shadow-none">
 	<button
 		bind:offsetHeight={headerOffset}
-		class="w-full flex flex-row justify-between items-center bg-fy-primary z-[101] @md:z-[1]"
+		class="bg-fy-primary z-[101] flex w-full flex-row items-center justify-between @md:z-[1]"
 		on:click={toggleExpanded}
 		type="button"
 	>
-		<div class="@md:w-full w-1/2 flex items-center">
+		<div class="flex w-1/2 items-center @md:w-full">
 			<BackButton {...merchantInfo} showBackButton={!expanded} {skeleton} on:back-click />
 			<div
-				class="h-full relative flex flex-row gap-2 items-center transition duration-300"
+				class="relative flex h-full flex-row items-center gap-2 transition duration-300"
 				class:-translate-x-6={expanded}
 			>
 				{#if skeleton}
 					<div
-						class="inline h-8 rounded-full duration-300 w-8 bg-fy-on-primary-subtle2 animate-pulse group-hover:-translate-x-1 group-hover:animate-none shrink-0"
+						class="bg-fy-on-primary-subtle2 inline h-8 w-8 shrink-0 animate-pulse rounded-full duration-300 group-hover:-translate-x-1 group-hover:animate-none"
 					/>
 					<div
-						class="inline leading-[normal] transition duration-300 group-hover:-translate-x-1 shrink w-32 h-8 rounded-lg bg-fy-on-primary-subtle2 animate-pulse group-hover:animate-none"
+						class="bg-fy-on-primary-subtle2 inline h-8 w-32 shrink animate-pulse rounded-lg leading-[normal] transition duration-300 group-hover:-translate-x-1 group-hover:animate-none"
 					/>
 				{:else if merchantInfo.largeLogo}
 					<img
@@ -92,13 +92,13 @@
 				{:else}
 					{#if merchantInfo.smallLogo}
 						<img
-							class="inline h-8 transition duration-300 group-hover:-translate-x-1 rounded-full"
+							class="inline h-8 rounded-full transition duration-300 group-hover:-translate-x-1"
 							src={merchantInfo.smallLogo}
 							alt="{merchantInfo.displayName} logo"
 						/>
 					{/if}
 					<span
-						class="inline uppercase align-middle leading-[normal] transition duration-300 group-hover:-translate-x-1 text-ellipsis overflow-hidden whitespace-nowrap"
+						class="inline overflow-hidden align-middle leading-[normal] text-ellipsis whitespace-nowrap uppercase transition duration-300 group-hover:-translate-x-1"
 					>
 						{merchantInfo.displayName || merchantName}
 					</span>
@@ -106,12 +106,12 @@
 			</div>
 		</div>
 		<div
-			class="text-fy-on-primary-subtle text-xs p-1 flex flex-row items-center justify-end h-full w-1/2"
+			class="text-fy-on-primary-subtle flex h-full w-1/2 flex-row items-center justify-end p-1 text-xs"
 		>
 			{#if !doNotExpand}
 				<div
-					class="text-right flex flex-row gap-1 relative items-center"
-					style={`min-width: max-content;`}
+					class="relative flex flex-row items-center gap-1 text-right"
+					style="min-width: max-content;"
 				>
 					{#if expanded}
 						<span class="min-w-max" style="min-width: max-content;">&nbsp;&nbsp;</span>
@@ -124,7 +124,7 @@
 						</span>
 					{:else if showMiniOverview}
 						<div
-							class="absolute flex flex-row items-center right-0"
+							class="absolute right-0 flex flex-row items-center"
 							transition:fade={{ duration: 150 }}
 						>
 							<slot name="smallSummary" />
@@ -156,7 +156,7 @@
 					{/if}
 				</div>
 				<svg
-					class="inline m-2 transition duration-300 fill-fy-on-primary-subtle"
+					class="fill-fy-on-primary-subtle m-2 inline transition duration-300"
 					class:rotate-180={!expanded}
 					xmlns="http://www.w3.org/2000/svg"
 					width="10"
@@ -173,7 +173,7 @@
 	{#if expanded}
 		<div
 			transition:slide={{ duration: 300, easing: cubicInOut }}
-			class="absolute left-0 top-0 w-full z-[100] bg-fy-primary max-h-screen ov-gradient-y-primary flex flex-col"
+			class="bg-fy-primary ov-gradient-y-primary absolute top-0 left-0 z-[100] flex max-h-screen w-full flex-col"
 			style="padding-top: {headerOffset}px;"
 		>
 			<slot />
@@ -183,7 +183,7 @@
 
 {#if expanded}
 	<button
-		class="absolute top-0 left-0 right-0 bottom-0 backdrop-blur-2xl bg-black opacity-30 z-[110]"
+		class="absolute top-0 right-0 bottom-0 left-0 z-[110] bg-black opacity-30 backdrop-blur-2xl"
 		on:click={toggleExpanded}
 	/>
 {/if}

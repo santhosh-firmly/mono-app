@@ -26,13 +26,13 @@
 </script>
 
 <div class="p-4">
-	<div class="text-sm font-bold text-[#5e5e5e] text-center">{contentHeaderText}</div>
+	<div class="text-center text-sm font-bold text-[#5e5e5e]">{contentHeaderText}</div>
 	{#if otpReference}
-		<div class="text-sm font-medium text-center pt-2">
+		<div class="pt-2 text-center text-sm font-medium">
 			Enter the code sent to <b>{otpReference}</b> to complete your order
 		</div>
 	{:else}
-		<div class="text-sm font-medium text-center pt-2">
+		<div class="pt-2 text-center text-sm font-medium">
 			Enter the code sent to your {device} to use your saved information
 		</div>
 	{/if}
@@ -43,7 +43,7 @@
 
 	{#if alternativeMethodText}
 		<hr class="my-3" />
-		<div class="text-sm text-fy-on-surface font-bold items-center justify-center">
+		<div class="text-fy-on-surface items-center justify-center text-sm font-bold">
 			<button
 				data-testid="alternative-text-button"
 				class:blue-button={isWaitingStepupOtp}

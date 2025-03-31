@@ -12,15 +12,15 @@
 	}
 </script>
 
-<div class="flex flex-row gap-2 justify-start items-start text-xs text-secondary w-full">
+<div class="text-secondary flex w-full flex-row items-start justify-start gap-2 text-xs">
 	<label class="flex flex-row items-start">
 		<input
-			class="rounded m-1"
+			class="m-1 rounded"
 			type="checkbox"
 			{checked}
 			on:change={(...args) => dispatch('change', ...args)}
 		/>
-		<div class="flex flex-col m-1">
+		<div class="m-1 flex flex-col">
 			<span class="text-primary">{shortText}</span>
 			{#if !collapsed}
 				<span class="text-secondary">{longText}</span>
@@ -30,7 +30,7 @@
 	<div class="grow" />
 	<button on:click={handleToggle} class="self-right p-[5px]">
 		<svg
-			class="w-3 h-3 text-blue-500 hover:ring-blue-200 dark:bg-blue-400 dark:hover:ring-blue-600 arrow {!collapsed
+			class="arrow h-3 w-3 text-blue-500 hover:ring-blue-200 dark:bg-blue-400 dark:hover:ring-blue-600 {!collapsed
 				? 'down'
 				: ''}"
 			aria-hidden="true"

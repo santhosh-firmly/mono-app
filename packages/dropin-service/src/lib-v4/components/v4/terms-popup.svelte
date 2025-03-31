@@ -41,9 +41,9 @@
 </script>
 
 <Modal bind:isModalOpen>
-	<div class="max-w-[720px] min-w-[300px] h-full flex flex-col">
-		<div class="p-4 pb-3 flex flex-row justify-between items-center">
-			<span class="text-lg font-bold leading-none"> {title} </span>
+	<div class="flex h-full max-w-[720px] min-w-[300px] flex-col">
+		<div class="flex flex-row items-center justify-between p-4 pb-3">
+			<span class="text-lg leading-none font-bold"> {title} </span>
 			<button on:click={() => (isModalOpen = false)}>
 				<svg
 					class="ml-2"
@@ -61,12 +61,12 @@
 			</button>
 		</div>
 		<hr />
-		<div class="p-4 pt-3 overflow-scroll shrink w-full text-sm text-justify">
+		<div class="w-full shrink overflow-scroll p-4 pt-3 text-justify text-sm">
 			{#if !termsAndConditions}
 				<div transition:slide class="w-full text-center">
 					<svg
 						aria-hidden="true"
-						class="w-6 h-6 animate-spin fill-white text-gray inline"
+						class="text-gray inline h-6 w-6 animate-spin fill-white"
 						viewBox="0 0 100 101"
 						fill="none"
 						xmlns="http://www.w3.org/2000/svg"
