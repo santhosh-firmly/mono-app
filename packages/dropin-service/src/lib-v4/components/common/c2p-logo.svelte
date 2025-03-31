@@ -1,0 +1,18 @@
+<script>
+	// @ts-nocheck
+
+	import AmexCardIcon from './svg/amex-card-icon.svelte';
+	import C2pIcon from './svg/c2p-icon.svelte';
+	import DiscoverCardIcon from './svg/discover-card-icon.svelte';
+	import MasterCardIcon from './svg/master-card-icon.svelte';
+	import VisaCardIcon from './svg/visa-card-icon.svelte';
+</script>
+
+<div class="flex flex-row gap-0.5 items-center">
+	<C2pIcon />
+	<div class="h-5 w-0.5 bg-black mr-1"></div>
+	<VisaCardIcon />
+	<MasterCardIcon />
+	<AmexCardIcon />
+	<DiscoverCardIcon />
+</div>

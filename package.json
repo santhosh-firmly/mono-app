@@ -1,40 +1,30 @@
 {
-  "name": "mono-app",
-  "private": true,
-  "type": "module",
-  "workspaces": [
-    "packages/*"
-  ],
-  "scripts": {
-    "build": "lerna run build",
-    "build-dev": "lerna run build-dev",
-    "build-qa": "lerna run build-qa",
-    "build-uat": "lerna run build-uat",
-    "build-prod": "lerna run build-prod",
-    "deploy-dev": "lerna run deploy-dev",
-    "deploy-qa": "lerna run deploy-qa",
-    "deploy-uat": "lerna run deploy-uat",
-    "deploy-prod": "lerna run deploy-prod",
-    "outdated": "npx check-outdated --prefer-wanted --ignore-packages @vitest,@vitest/ui,@vitest/coverage-istanbul,vitest",
-    "depcheck": "npx @tinkoff-monorepo/depscheck --depcheck-ignore-matches cloudflare:test",
-    "format-code": "lerna run format-code",
-    "test": "lerna run test:static",
-    "update-version": "lerna version --no-push --force-publish --yes",
-    "update-version-no-hooks": "lerna version --no-push --force-publish --no-commit-hooks --yes",
-    "prepare": "husky"
-  },
-  "devDependencies": {
-    "classnames": "^2.5.1",
-    "husky": "^9.1.7",
-    "lerna": "^8.1.2"
-  },
-  "dependencies": {
-    "@lottiefiles/svelte-lottie-player": "^0.3.1",
-    "concurrently": "^9.1.2",
-    "flowbite": "^3.1.2",
-    "flowbite-svelte": "^0.47.4",
-    "http-server": "^14.1.1",
-    "wait-on": "^8.0.2",
-    "yup": "^1.6.1"
-  }
+	"name": "mono-app",
+	"private": true,
+	"type": "module",
+	"workspaces": [
+		"packages/*"
+	],
+	"scripts": {
+		"build": "lerna run build",
+		"build-dev": "lerna run build-dev",
+		"build-qa": "lerna run build-qa",
+		"build-uat": "lerna run build-uat",
+		"build-prod": "lerna run build-prod",
+		"deploy-dev": "lerna run deploy-dev",
+		"deploy-qa": "lerna run deploy-qa",
+		"deploy-uat": "lerna run deploy-uat",
+		"deploy-prod": "lerna run deploy-prod",
+		"outdated": "npx check-outdated --prefer-wanted --ignore-packages @vitest,@vitest/ui,@vitest/coverage-istanbul,vitest",
+		"depcheck": "npx @tinkoff-monorepo/depscheck --depcheck-ignore-matches cloudflare:test",
+		"format-code": "lerna run format-code",
+		"test": "lerna run test:static",
+		"update-version": "lerna version --no-push --force-publish --yes",
+		"update-version-no-hooks": "lerna version --no-push --force-publish --no-commit-hooks --yes",
+		"prepare": "husky"
+	},
+	"devDependencies": {
+		"husky": "^9.1.7",
+		"lerna": "^8.1.2"
+	}
 }

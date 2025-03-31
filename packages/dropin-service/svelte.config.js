@@ -7,6 +7,9 @@ const config = {
 		adapter: adapter(),
 		version: {
 			name: process.env.npm_package_version
+		},
+		alias: {
+			'$lib-v4': './src/lib-v4'
 		}
 	},
 	preprocess: [vitePreprocess()]
