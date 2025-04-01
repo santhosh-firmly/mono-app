@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-/* @import './overlay-gradients.postcss'; */
+@plugin 'flowbite/plugin';
 
 @theme {
 	--color-fy-primary: #ff5722;
@@ -17,19 +17,14 @@
 	--color-fy-on-alert: #ffffff;
 	--color-fy-form-element-input-focus: #2196f3;
 	--color-fy-form-element-input-error: #f44336;
-	--color-fy-on-primary-subtle2: rgba(255, 255, 255, 0.5), --color-fy-on-primary-accent: #ffd54f;
+	--color-fy-on-primary-subtle2: rgba(255, 255, 255, 0.5);
+	--color-fy-on-primary-accent: #ffd54f;
 }
 
 html {
 	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 	font-family: 'Poppins';
-}
 
-body {
-	min-width: 320px;
-}
-
-@layer utilities {
 	/* Hide scrollbar for Chrome, Safari and Opera */
 	.no-scrollbar::-webkit-scrollbar {
 		display: none;
@@ -39,6 +34,10 @@ body {
 		-ms-overflow-style: none; /* IE and Edge */
 		scrollbar-width: none; /* Firefox */
 	}
+}
+
+body {
+	min-width: 320px;
 }
 
 /*

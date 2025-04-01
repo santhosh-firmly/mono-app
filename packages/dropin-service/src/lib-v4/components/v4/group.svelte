@@ -13,11 +13,9 @@
 	<slot />
 </div>
 
-<style lang="scss">
-	div {
-		& > :global(*) {
-			background-color: var(--fy-surface);
-			box-shadow: var(--fy-surface-box-shadow);
-		}
+<style>
+	div > :global(*) {
+		background-color: var(--fy-surface);
+		box-shadow: var(--fy-surface-box-shadow);
 	}
 </style>

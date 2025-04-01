@@ -237,7 +237,7 @@
 	{/if}
 </div>
 
-<style lang="scss">
+<style>
 	input.error {
 		color: var(--fy-alert);
 		box-shadow: var(--fy-form-element-input-error);

@@ -79,7 +79,7 @@
 </div>
 
 <style lang="postcss">
-	@reference '../../assets/firmly-edge.postcss'
+	@reference '../../assets/firmly-edge.css'
 
 	.container,
 	.container * {

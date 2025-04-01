@@ -1215,7 +1215,7 @@
 										{/if}
 										{#if isC2PAvailable()}
 											<div class="my-2 rounded-lg bg-[#F7F7F7] p-2">
-												<span class="text-fy-on-surface-subtle inline-block text-sm leading-1">
+												<span class="text-fy-on-surface-subtle inline-block text-sm">
 													By entering your email, you consent and direct firmly to send your
 													information to
 													<span class="font-bold">Click to Pay</span> to check if you have any saved

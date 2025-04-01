@@ -17,7 +17,6 @@
 	import '$lib-v4/components/v4/theme.scss';
 	import { fade } from 'svelte/transition';
 	import { writable } from 'svelte/store';
-	import '$lib-v4/assets/firmly-edge.postcss';
 	import { isActionDark, isPrimaryDark } from '$lib-v4/components/v4/theme-context';
 	import { colord } from 'colord';
 	import { sCartStoreInfo } from '$lib-v4/browser/api-manager';
