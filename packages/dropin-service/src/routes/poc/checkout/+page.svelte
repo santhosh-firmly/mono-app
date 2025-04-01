@@ -9,7 +9,6 @@
 	import { postCheckoutClosed } from '$lib-v4/browser/cross.js';
 	import { onMount } from 'svelte';
 	import FlowSinglePage from '$lib-v4/components/v4/flow-single-page.svelte';
-	import '$lib-v4/components/v4/theme.css';
 	import { writable } from 'svelte/store';
 	import ThankYouPage from '$lib-v4/components/v4/thank-you-page.svelte';
 	import { page } from '$app/stores';
@@ -22,6 +21,9 @@
 	import FullscreenLayout from './fullscreen-layout.svelte';
 	import PopupLayout from './popup-layout.svelte';
 	import BottomsheetLayout from './bottom-sheet-layout.svelte';
+	import '$lib-v4/components/v4/theme.css';
+	import '$lib-v4/assets/firmly-edge.css';
+	import '$lib-v4/assets/overlay-gradients.postcss';
 
 	let error = $state();
 	let skipPdp = $state(false);

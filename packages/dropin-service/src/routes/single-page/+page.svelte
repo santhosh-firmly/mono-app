@@ -14,13 +14,15 @@
 	import { PUBLIC_cf_server } from '$lib-v4/env.js';
 	import { onMount, tick } from 'svelte';
 	import FlowSinglePage from '$lib-v4/components/v4/flow-single-page.svelte';
-	import '$lib-v4/components/v4/theme.css';
 	import { fade } from 'svelte/transition';
 	import { writable } from 'svelte/store';
 	import { isActionDark, isPrimaryDark } from '$lib-v4/components/v4/theme-context';
 	import { colord } from 'colord';
 	import { sCartStoreInfo } from '$lib-v4/browser/api-manager';
 	import ThankYouPage from '$lib-v4/components/v4/thank-you-page.svelte';
+	import '$lib-v4/components/v4/theme.css';
+	import '$lib-v4/assets/firmly-edge.css';
+	import '$lib-v4/assets/overlay-gradients.postcss';
 
 	// Used when the UI loads with no cart information.
 	// In such scenario, the dropin performs a getCart call
