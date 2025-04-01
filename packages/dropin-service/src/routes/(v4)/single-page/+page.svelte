@@ -2,7 +2,6 @@
 	// @ts-nocheck
 	import { bindEvent } from '$lib-v4/browser/dash.js';
 	import { version } from '$app/environment';
-	import { PUBLIC_api_id, PUBLIC_firmly_deployment } from '$lib-v4/env.js';
 	import {
 		initialize,
 		initializeAppVersion,
@@ -11,7 +10,6 @@
 	} from '$lib-v4/browser/api-firmly.js';
 	import { postCheckoutClosed, postGetParentInfo } from '$lib-v4/browser/cross.js';
 	import Visa from '$lib-v4/clients/visa.svelte';
-	import { PUBLIC_cf_server } from '$lib-v4/env.js';
 	import { onMount, tick } from 'svelte';
 	import FlowSinglePage from '$lib-v4/components/v4/flow-single-page.svelte';
 	import { fade } from 'svelte/transition';
@@ -21,19 +19,21 @@
 	import { sCartStoreInfo } from '$lib-v4/browser/api-manager';
 	import ThankYouPage from '$lib-v4/components/v4/thank-you-page.svelte';
 
+	let { data } = $props();
+
 	// Used when the UI loads with no cart information.
 	// In such scenario, the dropin performs a getCart call
 	// to retrieve the current cart state
 	let cartInitialized = false;
 
 	let cart = writable();
-	let visible = false;
-	let largeLogo;
-	let smallLogo;
-	let privacyPolicy;
-	let termsOfUse;
-	let isParentIframed = false;
-	let order = null;
+	let visible = $state(false);
+	let largeLogo = $state(undefined);
+	let smallLogo = $state(undefined);
+	let privacyPolicy = $state(undefined);
+	let termsOfUse = $state(undefined);
+	let isParentIframed = $state(false);
+	let order = $state(null);
 
 	async function onAddToCart(transferPayload) {
 		cartInitialized = true;
@@ -62,7 +62,7 @@
 	}
 
 	// Close the checkout if the cart is empty
-	$: {
+	$effect(() => {
 		if ($cart?.line_items.length === 0) {
 			(async () => {
 				cart.set(undefined);
@@ -73,7 +73,7 @@
 				postCheckoutClosed();
 			})();
 		}
-	}
+	});
 
 	function initializeAttributes(attributes) {
 		privacyPolicy = attributes.privacyPolicy;
@@ -138,7 +138,7 @@
 			setVisibleTrue();
 			// Only in local mode, load the cart if the checkout is visible and it has no
 			// session transfer in progress
-			if (PUBLIC_firmly_deployment === 'local') {
+			if (data.PUBLIC_firmly_deployment === 'local') {
 				setTimeout(() => {
 					if (!cartInitialized) {
 						getCart();
@@ -159,7 +159,7 @@
 						privacyPolicy: data.privacyPolicyUrl,
 						termsOfUse: data.termsOfServiceUrl
 					});
-					if (PUBLIC_firmly_deployment === 'local' && !cartInitialized) {
+					if (data.PUBLIC_firmly_deployment === 'local' && !cartInitialized) {
 						getCart();
 					}
 				} else if (data.action == 'addToCart') {
@@ -175,7 +175,7 @@
 		postGetParentInfo();
 
 		// Initialize the session in the background.
-		initialize(PUBLIC_api_id, PUBLIC_cf_server);
+		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server);
 		initializeAppVersion(version);
 	});
 
@@ -189,7 +189,11 @@
 </script>
 
 <!-- <VisaUnified /> -->
-<Visa />
+<Visa
+	PUBLIC_c2p_dpa_id={data.PUBLIC_c2p_dpa_id}
+	PUBLIC_c2p_initiator_id={data.PUBLIC_c2p_initiator_id}
+	PUBLIC_c2p_sdk_url={data.PUBLIC_c2p_sdk_url}
+/>
 
 <!-- The following div helps detecting if the iframe is visible or not and correctly showing the contents. -->
 <div class="bottom-0 left-0 h-[1px] w-[1px]" />
@@ -207,6 +211,7 @@
 				{isParentIframed}
 				on:back-click={onBackClick}
 				on:orderPlacedEvent={onOrderPlacedEvent}
+				PUBLIC_DISABLE_HCAPTCHA={data.PUBLIC_DISABLE_HCAPTCHA}
 			/>
 		{/if}
 	</div>

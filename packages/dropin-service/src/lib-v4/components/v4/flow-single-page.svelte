@@ -45,6 +45,8 @@
 		optionalFields = $cart?.shop_properties?.optional_fields || {};
 	}
 
+	export let PUBLIC_DISABLE_HCAPTCHA = false;
+
 	// Progress control variables
 	export let shippingInfoInProgress = false;
 	export let shippingMethodInProgress = false;
@@ -1505,7 +1507,11 @@
 				{/if}
 			</section>
 		</form>
-		<Shoppay bind:isModalOpen={isShopPayOpen} on:login-successful={onShopPayLoginSuccess} />
+		<Shoppay
+			bind:isModalOpen={isShopPayOpen}
+			on:login-successful={onShopPayLoginSuccess}
+			{PUBLIC_DISABLE_HCAPTCHA}
+		/>
 
 		<!-- TODO: Pass termsOfServiceLink (Include it in AirTable all the way down here) -->
 		<MerchantLogin

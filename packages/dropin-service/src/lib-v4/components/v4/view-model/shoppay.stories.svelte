@@ -1,7 +1,5 @@
 <script>
 	// @ts-nocheck
-
-	import ShopPay from './shoppay.svelte';
 	import { Meta, Story, Template } from '@storybook/addon-svelte-csf';
 	import FlowSinglePage from '../flow-single-page.svelte';
 	import { http } from 'msw';
@@ -369,6 +367,7 @@
 >
 	<FlowSinglePage {cart} />
 	<Shoppay
+		PUBLIC_DISABLE_HCAPTCHA={false}
 		isModalOpen={true}
 		getHCaptcha={() => {
 			return {

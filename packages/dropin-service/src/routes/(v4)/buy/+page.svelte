@@ -399,6 +399,7 @@
 							{isParentIframed}
 							on:back-click={onBackClick}
 							on:orderPlacedEvent={onOrderPlacedEvent}
+							PUBLIC_DISABLE_HCAPTCHA={data.PUBLIC_DISABLE_HCAPTCHA}
 						/>
 					</div>
 				{/if}

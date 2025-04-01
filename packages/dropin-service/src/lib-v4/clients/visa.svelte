@@ -1,6 +1,8 @@
-<script context="module">
+<script module>
 	// @ts-nocheck
-	import { PUBLIC_c2p_dpa_id, PUBLIC_c2p_initiator_id, PUBLIC_c2p_sdk_url } from '$lib-v4/env.js';
+	let PUBLIC_c2p_sdk_url = '';
+	let PUBLIC_c2p_dpa_id = '';
+	let PUBLIC_c2p_initiator_id = '';
 
 	// Generate a unique transaction ID for this instance of the SDK
 	const uniqueTransactionId = crypto.randomUUID();
@@ -441,6 +443,18 @@
 			};
 		}
 	}
+</script>
+
+<script>
+	import { onMount } from 'svelte';
+
+	let props = $props();
+
+	onMount(() => {
+		PUBLIC_c2p_dpa_id = props.PUBLIC_c2p_dpa_id;
+		PUBLIC_c2p_initiator_id = props.PUBLIC_c2p_initiator_id;
+		PUBLIC_c2p_sdk_url = props.PUBLIC_c2p_sdk_url;
+	});
 </script>
 
 <svelte:head>

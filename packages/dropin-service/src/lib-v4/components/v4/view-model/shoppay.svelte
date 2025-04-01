@@ -1,15 +1,15 @@
 <script>
 	// @ts-nocheck
 
-	// BUGBUG: We should find a better way to disable captcha instead of changing the code
-	// in order to do testing. This is ill-advised.
-	import { PUBLIC_DISABLE_HCAPTCHA } from '$lib-v4/env';
-
 	import ShopPayIcon from '$lib-v4/components/common/svg/shop-pay-icon.svelte';
 	import BaseLogin from '../base-login.svelte';
 	import { BASE_LOGIN_STEPS } from '$lib-v4/constants.js';
 	import { createEventDispatcher } from 'svelte';
 	import Modal from '../modal.svelte';
+
+	// BUGBUG: We should find a better way to disable captcha instead of changing the code
+	// in order to do testing. This is ill-advised.
+	export let PUBLIC_DISABLE_HCAPTCHA;
 
 	const dispatch = createEventDispatcher();
 

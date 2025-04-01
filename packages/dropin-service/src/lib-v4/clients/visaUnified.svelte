@@ -1,6 +1,6 @@
 <script context="module">
 	// @ts-nocheck
-	import { PUBLIC_uc2p_sdk_url } from '$lib-v4/env.js';
+	export let PUBLIC_uc2p_sdk_url;
 
 	// Generate a unique transaction ID for this instance of the SDK
 	const uniqueTransactionId = crypto.randomUUID();
