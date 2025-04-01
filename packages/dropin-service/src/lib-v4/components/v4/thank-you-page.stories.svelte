@@ -2,7 +2,7 @@
 	// @ts-nocheck
 	import ThankYouPage from './thank-you-page.svelte';
 	import { Meta, Story } from '@storybook/addon-svelte-csf';
-	import './theme.scss';
+	import './theme.css';
 	import order from './data/order.json';
 	import { isPrimaryDark } from './theme-context';
 

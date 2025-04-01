@@ -3,7 +3,7 @@
 
 	import PaymentTabs from './payment-tabs.svelte';
 	import { Meta, Story, Template } from '@storybook/addon-svelte-csf';
-	import '../theme.scss';
+	import '../theme.css';
 	import { formatCurrency } from '$lib-v4/utils';
 	import Checkbox from '../checkbox.svelte';
 </script>

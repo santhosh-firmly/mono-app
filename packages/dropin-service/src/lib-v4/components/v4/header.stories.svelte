@@ -1,7 +1,7 @@
 <script>
 	import Header from './header.svelte';
 	import { Meta, Story, Template } from '@storybook/addon-svelte-csf';
-	import './theme.scss';
+	import './theme.css';
 	import classNames from 'classnames';
 
 	const smallLogo =

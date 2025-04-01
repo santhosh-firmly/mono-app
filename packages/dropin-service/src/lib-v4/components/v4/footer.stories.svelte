@@ -2,7 +2,7 @@
 	// @ts-nocheck
 	import Footer from './footer.svelte';
 	import { Meta, Story, Template } from '@storybook/addon-svelte-csf';
-	import './theme.scss';
+	import './theme.css';
 </script>
 
 <Meta title="Checkout V4/Checkout/Footer" component={Footer} tags={['autodocs']} />

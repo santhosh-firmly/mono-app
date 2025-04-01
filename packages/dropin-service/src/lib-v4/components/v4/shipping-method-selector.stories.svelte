@@ -3,7 +3,7 @@
 
 	import ShippingMethodSelector from './shipping-method-selector.svelte';
 	import { Meta, Story, Template } from '@storybook/addon-svelte-csf';
-	import './theme.scss';
+	import './theme.css';
 </script>
 
 <Meta

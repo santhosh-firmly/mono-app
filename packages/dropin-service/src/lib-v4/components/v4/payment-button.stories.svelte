@@ -2,7 +2,7 @@
 	// @ts-nocheck
 	import { Meta, Story, Template } from '@storybook/addon-svelte-csf';
 	import PaymentButton from './payment-button.svelte';
-	import './theme.scss';
+	import './theme.css';
 </script>
 
 <Meta title="Checkout V4/Payment/Payment Button" component={PaymentButton} tags={['autodocs']} />

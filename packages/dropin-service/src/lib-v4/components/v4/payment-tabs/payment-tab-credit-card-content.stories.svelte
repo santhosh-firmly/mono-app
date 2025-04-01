@@ -3,7 +3,7 @@
 
 	import CreditCardContent from './payment-tab-credit-card-content.svelte';
 	import { Meta, Story, Template } from '@storybook/addon-svelte-csf';
-	import '../theme.scss';
+	import '../theme.css';
 	import { userEvent, within } from '@storybook/testing-library';
 	import { expect } from '@storybook/jest';
 </script>

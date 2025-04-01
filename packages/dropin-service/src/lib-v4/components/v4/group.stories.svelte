@@ -3,7 +3,7 @@
 
 	import Group from './group.svelte';
 	import { Meta, Story, Template } from '@storybook/addon-svelte-csf';
-	import './theme.scss';
+	import './theme.css';
 </script>
 
 <Meta title="Checkout V4/Common/Group" component={Group} tags={['autodocs']} />

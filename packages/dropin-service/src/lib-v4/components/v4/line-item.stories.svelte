@@ -3,7 +3,7 @@
 
 	import LineItem from './line-item.svelte';
 	import { Meta, Story, Template } from '@storybook/addon-svelte-csf';
-	import './theme.scss';
+	import './theme.css';
 	import { http } from 'msw';
 
 	const defaultArgs = {

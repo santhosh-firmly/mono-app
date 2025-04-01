@@ -2,7 +2,7 @@
 	// @ts-ignore
 	import Checkbox from './checkbox.svelte';
 	import { Meta, Story, Template } from '@storybook/addon-svelte-csf';
-	import './theme.scss';
+	import './theme.css';
 
 	const title = 'This is the title text.';
 	const subtitle = 'This is the subtitle text.';

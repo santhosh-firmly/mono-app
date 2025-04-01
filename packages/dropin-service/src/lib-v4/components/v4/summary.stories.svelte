@@ -1,7 +1,7 @@
 <script>
 	import Summary from './summary.svelte';
 	import { Meta, Story, Template } from '@storybook/addon-svelte-csf';
-	import './theme.scss';
+	import './theme.css';
 	import { within } from '@storybook/testing-library';
 	import { expect } from '@storybook/jest';
 

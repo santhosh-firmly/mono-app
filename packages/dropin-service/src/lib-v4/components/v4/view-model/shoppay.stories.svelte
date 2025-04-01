@@ -8,7 +8,7 @@
 	import { userEvent, waitFor, within } from '@storybook/testing-library';
 	import { expect } from '@storybook/jest';
 
-	import '../theme.scss';
+	import '../theme.css';
 	import Shoppay from './shoppay.svelte';
 	import { writable } from 'svelte/store';
 

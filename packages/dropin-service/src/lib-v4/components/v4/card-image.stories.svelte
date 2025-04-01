@@ -2,7 +2,7 @@
 	import CardImage from './card-image.svelte';
 	import { Meta, Story, Template } from '@storybook/addon-svelte-csf';
 	import { http } from 'msw';
-	import './theme.scss';
+	import './theme.css';
 </script>
 
 <Meta title="Checkout V4/Header/Card Image" component={CardImage} tags={['autodocs']} />

@@ -14,7 +14,7 @@
 	import { PUBLIC_cf_server } from '$lib-v4/env.js';
 	import { onMount, tick } from 'svelte';
 	import FlowSinglePage from '$lib-v4/components/v4/flow-single-page.svelte';
-	import '$lib-v4/components/v4/theme.scss';
+	import '$lib-v4/components/v4/theme.css';
 	import { fade } from 'svelte/transition';
 	import { writable } from 'svelte/store';
 	import { isActionDark, isPrimaryDark } from '$lib-v4/components/v4/theme-context';

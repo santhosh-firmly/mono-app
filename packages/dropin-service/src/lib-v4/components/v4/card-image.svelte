@@ -32,7 +32,7 @@
 		{alt}
 		class:image={showImageBorder}
 		class:rounded-lg={showImageBorder}
-		class:outline={showImageBorder}
+		class:outline-fy-on-primary-subtle2={showImageBorder}
 		class:outline-1={showImageBorder}
 		class:hidden={!loaded}
 		on:error={onError}
@@ -41,7 +41,7 @@
 	{#if errored || !loaded}
 		<div
 			data-testid="card-image-placeholder"
-			class="image aspect-square rounded-lg outline outline-1"
+			class="image outline-fy-on-primary-subtle2 aspect-square rounded-lg outline outline-1"
 			class:animate-pulse={!errored}
 		/>
 	{/if}

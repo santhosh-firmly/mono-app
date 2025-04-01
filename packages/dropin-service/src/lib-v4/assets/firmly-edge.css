@@ -2,23 +2,27 @@
 @plugin 'flowbite/plugin';
 
 @theme {
-	--color-fy-primary: #ff5722;
-	--color-fy-on-primary: #ffffff;
-	--color-fy-on-primary-subtle: rgba(255, 255, 255, 0.7);
-	--color-fy-action: #2196f3;
-	--color-fy-on-action: #ffffff;
-	--color-fy-background: #f5f5f5;
-	--color-fy-on-background: #212121;
-	--color-fy-surface: #ffffff;
-	--color-fy-surface-subtle: #f0f0f0;
-	--color-fy-on-surface: #212121;
-	--color-fy-on-surface-subtle: #757575;
-	--color-fy-alert: #f44336;
-	--color-fy-on-alert: #ffffff;
-	--color-fy-form-element-input-focus: #2196f3;
-	--color-fy-form-element-input-error: #f44336;
-	--color-fy-on-primary-subtle2: rgba(255, 255, 255, 0.5);
-	--color-fy-on-primary-accent: #ffd54f;
+	--color-fy-primary: var(--fy-primary);
+	--color-fy-on-primary: var(--fy-on-primary);
+	--color-fy-on-primary-subtle: var(--fy-on-primary-subtle);
+	--color-fy-action: var(--fy-action);
+	--color-fy-on-action: var(--fy-on-action);
+	--color-fy-background: var(--fy-background);
+	--color-fy-on-background: var(--fy-on-background);
+	--color-fy-surface: var(--fy-surface);
+	--color-fy-surface-subtle: var(--fy-surface-subtle);
+	--color-fy-on-surface: var(--fy-on-surface);
+	--color-fy-on-surface-subtle: var(--fy-on-surface-subtle);
+	--color-fy-alert: var(--fy-alert);
+	--color-fy-on-alert: var(--fy-on-alert);
+	--color-fy-form-element-input-focus: var(--fy-form-element-input-focus);
+	--color-fy-form-element-input-error: var(--fy-form-element-input-error);
+	--color-fy-on-primary-subtle2: var(--fy-on-primary-subtle2);
+	--color-fy-on-primary-accent: var(--fy-on-primary-accent);
+}
+
+hr {
+	color: var(--fy-on-primary-subtle2);
 }
 
 html {

@@ -7,7 +7,7 @@
 	import { writable } from 'svelte/store';
 	import FlowSinglePage from '../v4/flow-single-page.svelte';
 
-	import '$lib-v4/components/v4/theme.scss';
+	import '$lib-v4/components/v4/theme.css';
 
 	const cartData = {
 		display_name: 'Young Rebelz',

@@ -3,7 +3,7 @@
 
 	import PayPalContent from './payment-tab-paypal-content.svelte';
 	import { Meta, Story, Template } from '@storybook/addon-svelte-csf';
-	import '../theme.scss';
+	import '../theme.css';
 </script>
 
 <Meta

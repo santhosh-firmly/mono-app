@@ -5,7 +5,7 @@
 	import { Meta, Story, Template } from '@storybook/addon-svelte-csf';
 	import FlowSinglePage from '../flow-single-page.svelte';
 
-	import '../theme.scss';
+	import '../theme.css';
 	import { BASE_LOGIN_STEPS } from '$lib-v4/constants';
 </script>
 

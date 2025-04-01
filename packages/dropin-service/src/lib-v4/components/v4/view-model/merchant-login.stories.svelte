@@ -7,7 +7,7 @@
 	import { userEvent, waitFor, within } from '@storybook/testing-library';
 	import { expect } from '@storybook/jest';
 
-	import '../theme.scss';
+	import '../theme.css';
 	import FlowSinglePage from '../flow-single-page.svelte';
 	import { BASE_LOGIN_STEPS } from '$lib-v4/constants';
 </script>

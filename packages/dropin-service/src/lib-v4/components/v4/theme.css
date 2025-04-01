@@ -1,7 +1,6 @@
 @import 'https://fonts.googleapis.com/css?family=Inter';
 
 :root {
-	// Default Theme
 	--fy-primary: white;
 	--fy-on-primary: black;
 	--fy-on-primary-subtle: #a2a2a2;
@@ -39,7 +38,6 @@
 }
 
 :root .light {
-	// Default Theme
 	--fy-primary: white;
 	--fy-primary-pay-button: var(--fy-primary);
 	--fy-primary-pay-button-text: var(--fy-on-primary);
@@ -73,7 +71,6 @@
 }
 
 :root .adoreme-dark {
-	// Default Theme
 	--fy-primary: #550c46;
 	--fy-primary-pay-button: var(--fy-primary);
 	--fy-primary-pay-button-text: var(--fy-on-primary);
@@ -92,7 +89,6 @@
 }
 
 :root .adoreme-light {
-	// Default Theme
 	--fy-primary: #faeeeb;
 	--fy-primary-pay-button: var(--fy-primary);
 	--fy-primary-pay-button-text: var(--fy-on-primary);
@@ -109,7 +105,6 @@
 }
 
 :root .red {
-	// Default Theme
 	--fy-primary: #a60000;
 	--fy-primary-pay-button: var(--fy-primary);
 	--fy-primary-pay-button-text: var(--fy-on-primary);

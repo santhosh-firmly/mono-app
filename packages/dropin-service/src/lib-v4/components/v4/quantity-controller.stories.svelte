@@ -2,7 +2,7 @@
 	// @ts-nocheck
 	import { Meta, Story, Template } from '@storybook/addon-svelte-csf';
 	import QuantityController from './quantity-controller.svelte';
-	import './theme.scss';
+	import './theme.css';
 </script>
 
 <Meta

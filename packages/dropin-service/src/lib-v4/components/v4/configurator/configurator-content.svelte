@@ -5,7 +5,7 @@
 	import { fade } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import { colord } from 'colord';
-	import '../theme.scss';
+	import '../theme.css';
 	import { isPrimaryDark, isActionDark } from '../theme-context.js';
 	import ThankYouPage from '../thank-you-page.svelte';
 

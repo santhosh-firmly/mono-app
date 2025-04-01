@@ -6,7 +6,7 @@
 	import { userEvent, waitFor, within } from '@storybook/testing-library';
 	import { expect } from '@storybook/jest';
 	import { http } from 'msw';
-	import './theme.scss';
+	import './theme.css';
 	import '$lib-v4/browser/api-firmly';
 </script>
 

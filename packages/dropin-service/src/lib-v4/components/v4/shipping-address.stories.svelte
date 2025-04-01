@@ -1,7 +1,7 @@
 <script>
 	import ShippingAddress from './shipping-address.svelte';
 	import { Meta, Story, Template } from '@storybook/addon-svelte-csf';
-	import './theme.scss';
+	import './theme.css';
 
 	const name = 'John Doe';
 	const savedAddresses = [

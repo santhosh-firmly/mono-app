@@ -3,7 +3,7 @@
 
 	import CardStack from './card-stack.svelte';
 	import { Meta, Story, Template } from '@storybook/addon-svelte-csf';
-	import './theme.scss';
+	import './theme.css';
 	import { http } from 'msw';
 </script>
 

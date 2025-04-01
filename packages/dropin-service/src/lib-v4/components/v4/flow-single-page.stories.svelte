@@ -4,10 +4,10 @@
 	import FlowSinglePage from './flow-single-page.svelte';
 	import ResponsiveWrapper from './configurator/responsive-wrapper.svelte';
 	import { Meta, Story, Template } from '@storybook/addon-svelte-csf';
-	import './theme.scss';
+	import './theme.css';
 	import { writable } from 'svelte/store';
 	import { http } from 'msw';
-	import './theme.scss';
+	import './theme.css';
 	import '$lib-v4/browser/api-firmly';
 
 	const cartData = {

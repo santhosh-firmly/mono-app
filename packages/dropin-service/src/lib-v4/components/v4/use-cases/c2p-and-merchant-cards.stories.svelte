@@ -3,7 +3,7 @@
 
 	import FlowSinglePage from '../flow-single-page.svelte';
 	import { Meta, Story } from '@storybook/addon-svelte-csf';
-	import '../theme.scss';
+	import '../theme.css';
 	import { writable } from 'svelte/store';
 	import { http } from 'msw';
 	import '$lib-v4/browser/api-firmly';

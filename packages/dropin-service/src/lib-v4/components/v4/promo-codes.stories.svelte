@@ -4,7 +4,7 @@
 	import PromoCodes from './promo-codes.svelte';
 	import { userEvent, waitFor, within } from '@storybook/testing-library';
 	import { expect } from '@storybook/jest';
-	import './theme.scss';
+	import './theme.css';
 </script>
 
 <Meta title="Checkout V4/Checkout/Promo Codes" component={PromoCodes} tags={['autodocs']} />

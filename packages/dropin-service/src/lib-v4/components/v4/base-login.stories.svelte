@@ -4,7 +4,7 @@
 	import BaseLogin from './base-login.svelte';
 	import AdoremeLogoLarge from '../common/svg/adoreme-logo-large.svelte';
 	import { Meta, Story, Template } from '@storybook/addon-svelte-csf';
-	import './theme.scss';
+	import './theme.css';
 	import { userEvent, within } from '@storybook/testing-library';
 	import { expect } from '@storybook/jest';
 	import { BASE_LOGIN_STEPS } from '$lib-v4/constants.js';
