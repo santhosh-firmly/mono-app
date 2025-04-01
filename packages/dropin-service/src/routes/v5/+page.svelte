@@ -1,6 +1,6 @@
 <script>
 	import SingleFlowView from '$lib/views/single-flow.svelte';
-	import MOCKED_CART from '../stories/assets/cart.json';
+	import MOCKED_CART from '../../stories/assets/cart.json';
 
 	const MOCKED_STORE_INFO = {
 		logoUrl:

@@ -1,7 +1,7 @@
 // @ts-nocheck
 // import { version } from '../../../package.json';
-import { initialize } from '$lib-v4/browser/api-firmly.js';
-import { bindEvent } from '$lib-v4/browser/dash.js';
+import { initialize } from '../browser/api-firmly.js';
+import { bindEvent } from '../browser/dash.js';
 import { CartHive } from './cart-hive.js';
 import { Cart } from './cart.js';
 import { getAllOrders } from './orders.js';

@@ -50,7 +50,6 @@
 <style lang="scss">
 	.image {
 		background-color: #e0e0e0;
-		outline-color: adjust-color($color: #e0e0e0, $alpha: -0.75);
 		outline-offset: -1px;
 		box-shadow: -2px 0px 6px 0px rgba(136, 136, 136, 0.25);
 	}

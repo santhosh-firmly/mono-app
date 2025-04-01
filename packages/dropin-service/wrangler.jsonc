@@ -2,14 +2,19 @@
 	"name": "dropin-service-migration",
 	"compatibility_date": "2025-01-21",
 	"compatibility_flags": ["nodejs_compat"],
+	"main": "src/app.html",
 	"send_metrics": false,
-
-	"main": ".svelte-kit/cloudflare/_worker.js",
 	"assets": {
 		"directory": "./.svelte-kit/cloudflare",
 		"binding": "ASSETS"
 	},
 	"observability": {
 		"enabled": true
+	},
+	"env": {
+		"dev": {
+			"name": "dropin-service-migration",
+			"main": ".svelte-kit/cloudflare/_worker.js"
+		}
 	}
 }

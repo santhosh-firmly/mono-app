@@ -3,7 +3,7 @@
 
 	// BUGBUG: We should find a better way to disable captcha instead of changing the code
 	// in order to do testing. This is ill-advised.
-	import { PUBLIC_DISABLE_HCAPTCHA } from '$env/static/public';
+	import { PUBLIC_DISABLE_HCAPTCHA } from '$lib-v4/env';
 
 	import ShopPayIcon from '$lib-v4/components/common/svg/shop-pay-icon.svelte';
 	import BaseLogin from '../base-login.svelte';

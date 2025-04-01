@@ -16,7 +16,7 @@ export default defineConfig((ctx) => {
 	];
 
 	// Only add the Cloudflare plugin if we are not building for production, SvelteKit is already bulding for Cloudflare Workers
-	if (!['build', 'serve'].includes(ctx.command)) {
+	if (!['build'].includes(ctx.command)) {
 		plugins.push(cloudflare());
 	}
 

@@ -9,7 +9,8 @@ const config = {
 			name: process.env.npm_package_version
 		},
 		alias: {
-			'$lib-v4': './src/lib-v4'
+			'$lib-v4': './src/lib-v4',
+			$dist: './dist'
 		}
 	},
 	preprocess: [vitePreprocess()]
