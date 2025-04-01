@@ -1,6 +1,6 @@
 <script>
 	import FloatingLabelInput from '../vendor/floating-label-input.svelte';
-	import Helper from '../vendor/helper.svelte';
+	import Helper from '../common/error.svelte';
 
 	export let style = 'outlined';
 	export let label = '';

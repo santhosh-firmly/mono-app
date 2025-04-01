@@ -74,7 +74,7 @@
 		{#each shippingMethods as shippingMethod, index (shippingMethod.sku)}
 			<label
 				class="col-span-2 flex w-full flex-row items-center gap-3 border-0 px-3 py-3"
-				class:disabled-label={disabled && selectedShippingMethod !== shippingMethod.sku}
+				class:bg-gray-100={disabled && selectedShippingMethod !== shippingMethod.sku}
 				class:rounded-t-lg={isFirst(shippingMethods, index)}
 				class:rounded-b-lg={isLast(shippingMethods, index)}
 			>
@@ -126,14 +126,8 @@
 	{/if}
 </Group>
 
-<style lang="postcss">
-	@reference '../../assets/firmly-edge.css'
-
+<style>
 	input[type='radio']:focus {
 		box-shadow: none;
-	}
-
-	.disabled-label {
-		@apply bg-gray-100;
 	}
 </style>

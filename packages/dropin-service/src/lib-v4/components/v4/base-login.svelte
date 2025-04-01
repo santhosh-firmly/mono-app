@@ -4,7 +4,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import OtpValidation from './otp-validation.svelte';
 	import * as Yup from 'yup';
-	import Helper from '../vendor/helper.svelte';
+	import Helper from '../common/error.svelte';
 	import { BASE_LOGIN_STEPS } from '$lib-v4/constants.js';
 	import { isActionDark } from './theme-context.js';
 	import VisaStepUpOptions from './visa-step-up-options.svelte';

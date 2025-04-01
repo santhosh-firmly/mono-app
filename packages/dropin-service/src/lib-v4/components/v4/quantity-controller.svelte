@@ -30,7 +30,7 @@
 	<Group stretch={false}>
 		<div
 			class="col-span-2 container flex flex-row items-center overflow-hidden rounded-lg"
-			class:disabled
+			class:bg-gray-100={disabled}
 		>
 			<button
 				class="h-full w-8 p-1 px-2 text-xs font-bold hover:bg-gray-100 disabled:bg-gray-100"
@@ -78,15 +78,9 @@
 	</Group>
 </div>
 
-<style lang="postcss">
-	@reference '../../assets/firmly-edge.css'
-
+<style>
 	.container,
 	.container * {
 		transition: background 0.25s ease;
-	}
-
-	.disabled {
-		@apply bg-gray-100;
 	}
 </style>

@@ -1,7 +1,7 @@
 <script>
 	// @ts-nocheck
 	import FloatingLabelInput from '$lib-v4/components/vendor/floating-label-input.svelte';
-	import Helper from '$lib-v4/components/vendor/helper.svelte';
+	import Helper from '$lib-v4/components/common/error.svelte';
 
 	import { getContext } from 'svelte';
 

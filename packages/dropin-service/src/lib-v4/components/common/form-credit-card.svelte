@@ -13,7 +13,7 @@
 		validateExpiryDate
 	} from '$lib-v4/browser/credit-card-helper.js';
 	import FloatingLabelInput from '$lib-v4/components/vendor/floating-label-input.svelte';
-	import Helper from '$lib-v4/components/vendor/helper.svelte';
+	import Helper from '$lib-v4/components/common/error.svelte';
 
 	export let key = Symbol();
 	let context = getContext(key);

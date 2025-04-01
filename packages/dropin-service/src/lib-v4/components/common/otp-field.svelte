@@ -1,7 +1,7 @@
 <script>
 	// @ts-nocheck
 	import { onMount } from 'svelte';
-	import Helper from '$lib-v4/components/vendor/helper.svelte';
+	import Helper from '$lib-v4/components/common/error.svelte';
 	import { OTPValidation } from '$lib-v4/browser/localization.js';
 
 	// Input to the this component

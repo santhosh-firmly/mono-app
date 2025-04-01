@@ -21,9 +21,6 @@
 	import FullscreenLayout from './fullscreen-layout.svelte';
 	import PopupLayout from './popup-layout.svelte';
 	import BottomsheetLayout from './bottom-sheet-layout.svelte';
-	import '$lib-v4/components/v4/theme.css';
-	import '$lib-v4/assets/firmly-edge.css';
-	import '$lib-v4/assets/overlay-gradients.postcss';
 
 	let error = $state();
 	let skipPdp = $state(false);

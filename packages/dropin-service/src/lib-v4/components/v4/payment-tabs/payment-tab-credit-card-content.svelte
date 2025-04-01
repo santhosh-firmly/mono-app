@@ -170,7 +170,7 @@
 			{#each filteredCards as savedCard, index}
 				<label
 					class="col-span-2 flex w-full flex-row items-center gap-3 border-0 px-3 py-3"
-					class:disabled-label={disabled}
+					class:bg-gray-100={disabled}
 					class:rounded-t-lg={index === 0}
 				>
 					<input
@@ -369,9 +369,7 @@
 	</div>
 {/if}
 
-<style lang="postcss">
-	@reference '../../../assets/firmly-edge.css'
-
+<style>
 	input.error {
 		color: var(--fy-alert);
 		box-shadow: var(--fy-form-element-input-error);
@@ -385,9 +383,5 @@
 
 		box-shadow: var(--fy-form-element-input-focus);
 		transition-property: box-shadow, color, filter;
-	}
-
-	.disabled-label {
-		@apply bg-gray-100;
 	}
 </style>

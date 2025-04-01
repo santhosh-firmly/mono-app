@@ -2,7 +2,7 @@
 	// @ts-nocheck
 
 	import { slide } from 'svelte/transition';
-	import Helper from '../vendor/helper.svelte';
+	import Helper from '../common/error.svelte';
 	import Group from './group.svelte';
 	import { isActionDark } from './theme-context.js';
 
