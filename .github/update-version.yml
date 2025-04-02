@@ -1,0 +1,61 @@
+name: '📌 Mono App Version Update'
+run-name: >-
+    ${{
+        (inputs.version_type == 'patch' && '🩹 Patch ') ||
+        (inputs.version_type == 'minor' && '✨ Minor ') ||
+        (inputs.version_type == 'major' && '💥 Major ')
+    }}
+    version bump
+    ${{ inputs.skip_update_dependencies == 'true' && '[Skip Deps] ' || '' }}
+    ${{ inputs.skip_precommit_hooks == 'true' && '[Skip Hooks] ' || '' }}
+    ${{ inputs.skip_release == 'true' && '[Skip Release] ' || '' }}
+    (by @${{ github.actor }})
+
+on:
+    workflow_dispatch:
+        inputs:
+            version_type:
+                description: '📦 Select version bump type (semver)'
+                required: true
+                default: 'patch'
+                type: choice
+                options:
+                    - 'patch'  # For backwards-compatible bug fixes (0.0.X)
+                    - 'minor'  # For new features, backwards-compatible (0.X.0)
+                    - 'major'  # For breaking changes (X.0.0)
+            skip_update_dependencies:
+                description: '⚡ Skip updating project dependencies'
+                required: true
+                default: 'false'
+                type: choice
+                options:
+                    - 'true'   # Skip dependency updates
+                    - 'false'  # Update dependencies (recommended)
+            skip_precommit_hooks:
+                description: '🔍 Skip pre-commit validation hooks'
+                required: true
+                default: 'false'
+                type: choice
+                options:
+                    - 'true'   # Skip validation checks
+                    - 'false'  # Run validation (recommended)
+            skip_release:
+                description: '📝 Skip GitHub release creation'
+                required: true
+                default: 'false'
+                type: choice
+                options:
+                    - 'true'   # Skip release (for hotfixes)
+                    - 'false'  # Create release (recommended)
+
+jobs:
+    trigger-update-version:
+        name: Update Version Process
+        uses: goyalu/.github/.github/workflows/update-version.yml@main
+        with:
+            version_type: ${{ inputs.version_type }}
+            skip_update_dependencies: ${{ inputs.skip_update_dependencies }}
+            skip_precommit_hooks: ${{ inputs.skip_precommit_hooks }}
+            skip_release: ${{ inputs.skip_release }}
+        secrets:
+            GH_TOKEN: ${{ secrets.GH_TOKEN }}

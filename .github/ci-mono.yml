@@ -1,0 +1,79 @@
+name: '🧪 CI Workflow for Mono App'
+run-name: 'CI Run - #${{ github.event.pull_request.number || github.run_number }} - ${{ github.event.pull_request.title || github.event.inputs.force_all_packages }}'
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_all_packages:
+        description: '🔄 Force run on all packages'
+        required: true
+        default: 'false'
+        type: choice
+        options:
+          - 'true'   # Run on all packages
+          - 'false'  # Run only on changed packages
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write  # Combined permissions here
+
+jobs:
+  # Call the base CI workflow from .github repo
+  run-base-ci:
+    name: '🔍 Run Base CI Checks'
+    uses: goyalu/.github/.github/workflows/ci-mono.yml@main
+    with:
+      pull-request: ${{ github.event.pull_request.number }}
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+  # Determine which packages have changed
+  get-changed-packages:
+    name: '🔍 Get Changed Packages'
+    runs-on: self-hosted
+    outputs:
+      packages: ${{ steps.get-changes.outputs.packages }}
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 🔍 Find Changed Packages
+        id: get-changes
+        run: |
+          # Setup git authentication
+          git config --global url."https://${{ secrets.GH_TOKEN }}@github.com/".insteadOf https://github.com/          
+          git fetch origin main:main || true
+          
+          # Capture packages list and format it as a simple array of names
+          PACKAGES=$(npx lerna list $([ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.event.inputs.force_all_packages || 'false' }}" != "true" ] && echo "--since origin/main") --json)
+          echo "packages=$(echo "$PACKAGES" | jq -c 'map(.name)')" >> "$GITHUB_OUTPUT"
+
+  # Run package-specific CI for each changed package
+  build-test-packages:
+    name: '🏗️ Build & Test '
+    needs: [get-changed-packages]
+    if: ${{ needs.get-changed-packages.outputs.packages != '[]' && needs.get-changed-packages.outputs.packages != '' }}
+    uses: goyalu/.github/.github/workflows/ci-package.yml@main
+    with:
+      package_name: ${{ matrix.package }}
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        package: ${{fromJSON(needs.get-changed-packages.outputs.packages)}}
