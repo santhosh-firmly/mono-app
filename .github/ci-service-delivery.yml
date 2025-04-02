@@ -1,0 +1,39 @@
+name: 🚀 Continuous Delivery Workflow
+run-name: >-
+  ${{ github.event_name == 'pull_request' 
+            && github.event.pull_request.merged == true 
+            && format('Pull Request merged - #{0} workflow run', github.event.pull_request.number) 
+    || github.event_name == 'push' 
+            && startsWith(github.ref, 'refs/tags/') 
+            && format('Tag Created - {0} workflow run', github.ref_name) 
+    || github.event_name == 'workflow_dispatch'
+            && format('Manual CD Workflow run on {0}', github.ref_name)
+    || 'Workflow Run' 
+    }}
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch or tag to deploy'
+        required: true
+        type: string
+        default: 'main'
+    
+jobs:
+  service-delivery:
+    name: 📦 Service Deployment
+    uses: goyalu/.github/.github/workflows/service-delivery.yml@main
+    with:
+      ref: ${{ github.event.inputs.ref || github.ref }}
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      CF_API_TOKEN_QA: ${{ secrets.CF_API_TOKEN_QA }}
+      TEAMS_WEBHOOK_URL_QA: ${{ secrets.TEAMS_WEBHOOK_URL_QA }}
