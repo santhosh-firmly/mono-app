@@ -18,6 +18,9 @@ export default [
 	prettier,
 	...svelte.configs.prettier,
 	{
+		ignores: ['**/src/lib-v4/**']
+	},
+	{
 		languageOptions: {
 			globals: {
 				...globals.browser,
@@ -34,7 +37,6 @@ export default [
 	},
 	{
 		files: ['**/*.svelte', '**/*.svelte.js'],
-
 		languageOptions: {
 			parserOptions: {
 				svelteConfig

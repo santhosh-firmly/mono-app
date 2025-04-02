@@ -38,6 +38,7 @@
 
 	// Forms
 	import { useCheckoutForm } from '$lib/states/forms.svelte';
+	import { ACTIONS } from './single-flow.svelte.js';
 
 	let { data, dispatch } = $props();
 
@@ -59,19 +60,21 @@
 	}
 
 	let totalPrice = $derived(data.cart?.total?.value);
-	let itemsQuantity = $derived(data.cart?.line_items.reduce((acc, item) => acc + item.quantity, 0));
+	let itemsQuantity = $derived(
+		data.cart?.line_items?.reduce((acc, item) => acc + item.quantity, 0)
+	);
 	let isFullCartUpdating = $derived(
-		data.pending['update_line_item'] ||
-			data.pending['add_promo_code'] ||
-			data.pending['remove_all_codes'] ||
-			data.pending['calculate_shipping'] ||
-			data.pending['set_shipping_address'] ||
-			data.pending['update_shipping_method']
+		data.pending[ACTIONS.UPDATE_LINE_ITEM] ||
+			data.pending[ACTIONS.ADD_PROMO_CODE] ||
+			data.pending[ACTIONS.REMOVE_ALL_CODES] ||
+			data.pending[ACTIONS.CALCULATE_SHIPPING] ||
+			data.pending[ACTIONS.SET_SHIPPING_ADDRESS] ||
+			data.pending[ACTIONS.UPDATE_SHIPPING_METHOD]
 	);
 
 	$effect(() => {
 		if (checkoutForm.isFullFilled && !checkoutForm.startedFullFilled) {
-			dispatch('set_shipping_address', {
+			dispatch(ACTIONS.SET_SHIPPING_ADDRESS, {
 				email: checkoutForm.email.value,
 				first_name: checkoutForm.name.value.split(' ')[0],
 				last_name: checkoutForm.name.value.split(' ')[1],
@@ -88,9 +91,10 @@
 {#snippet CartSummary({ isCheckoutSummary = false, hiddenLineItems = false } = {})}
 	<CartSummaryContainer
 		{hiddenLineItems}
-		onQuantityChange={(item) => dispatch('update_line_item', item)}
+		onQuantityChange={(item) => dispatch(ACTIONS.UPDATE_LINE_ITEM, item)}
 		isUpdating={isFullCartUpdating}
 		items={data.cart?.line_items?.map((item) => ({
+			sku: item?.sku,
 			image: item.image?.url,
 			title: item?.description,
 			description: item?.variant_description,
@@ -101,10 +105,10 @@
 		{#snippet promocode()}
 			<CartSummaryPromoCode
 				promocodes={data.cart?.promo_codes}
-				isSubmitting={data.pending['add_promo_code']}
-				isRemovingAll={data.pending['remove_all_codes']}
-				onSubmit={(promocode) => dispatch('add_promo_code', promocode)}
-				onRemoveAll={() => dispatch('remove_all_codes')}
+				isSubmitting={data.pending[ACTIONS.ADD_PROMO_CODE]}
+				isRemovingAll={data.pending[ACTIONS.REMOVE_ALL_CODES]}
+				onSubmit={(promocode) => dispatch(ACTIONS.ADD_PROMO_CODE, promocode)}
+				onRemoveAll={() => dispatch(ACTIONS.REMOVE_ALL_CODES)}
 			/>
 		{/snippet}
 		{#snippet resume()}
@@ -151,7 +155,7 @@
 {#snippet RightSide()}
 	<CheckoutFastButtons
 		use={['shoppay', 'paypal']}
-		onclick={(method) => dispatch('use_fast_checkout', method)}
+		onclick={(method) => dispatch(ACTIONS.USE_FAST_CHECKOUT, method)}
 	/>
 	<CheckoutContainer
 		addresses={data.storage?.shipping_addresses}
@@ -167,7 +171,7 @@
 				{selectedAddress}
 				disabled={isFullCartUpdating}
 				onSelect={(shippingAddress) => {
-					dispatch('set_shipping_address', shippingAddress);
+					dispatch(ACTIONS.SET_SHIPPING_ADDRESS, shippingAddress);
 					handleSelectAddress();
 				}}
 				onAddNewAddress={handleAddNewAddress}
@@ -178,13 +182,14 @@
 				<CheckoutShippingEmailForm form={checkoutForm} />
 				<CheckoutShippingAddressForm
 					form={checkoutForm}
-					selectedCompletionAddress={data?.autocomplete.shippingAddress}
-					onInputAddressCompletion={(value) => dispatch('input_shipping_address_completion', value)}
+					selectedCompletionAddress={data?.autocomplete?.shippingAddress}
+					onInputAddressCompletion={(value) =>
+						dispatch(ACTIONS.INPUT_SHIPPING_ADDRESS_COMPLETION, value)}
 					onSelectAddressCompletion={(value) =>
-						dispatch('select_shipping_address_completion', value)}
-					isAutocompleteLoading={data.pending['input_shipping_address_completion'] ||
-						data.pending['select_shipping_address_completion']}
-					addressCompletions={data?.autocomplete.shippingCompletions}
+						dispatch(ACTIONS.SELECT_SHIPPING_ADDRESS_COMPLETION, value)}
+					isAutocompleteLoading={data.pending[ACTIONS.INPUT_SHIPPING_ADDRESS_COMPLETION] ||
+						data.pending[ACTIONS.SELECT_SHIPPING_ADDRESS_COMPLETION]}
+					addressCompletions={data?.autocomplete?.shippingCompletions}
 				/>
 			</div>
 		{/snippet}
@@ -192,9 +197,10 @@
 			<CheckoutShippingMethods
 				{shippingMethods}
 				{selectedShippingMethod}
-				onSelect={(shippingMethod) => dispatch('update_shipping_method', shippingMethod)}
+				onSelect={(shippingMethod) => dispatch(ACTIONS.UPDATE_SHIPPING_METHOD, shippingMethod)}
 				isUpdating={isFullCartUpdating}
-				isLoading={data.pending['calculate_shipping'] || data.pending['set_shipping_address']}
+				isLoading={data.pending[ACTIONS.CALCULATE_SHIPPING] ||
+					data.pending[ACTIONS.SET_SHIPPING_ADDRESS]}
 			/>
 		{/snippet}
 		{#snippet cardsList({ cards, selectedCard, handleAddNewCard })}
@@ -202,7 +208,7 @@
 				{cards}
 				{selectedCard}
 				disabled={isFullCartUpdating}
-				onSelect={(card) => dispatch('set_credit_card', card)}
+				onSelect={(card) => dispatch(ACTIONS.SET_CREDIT_CARD, card)}
 				onAddNewCard={handleAddNewCard}
 			/>
 		{/snippet}
@@ -214,21 +220,21 @@
 							<CheckoutShippingAddressForm
 								useToBilling
 								form={billingForm}
-								addressCompletions={data?.autocomplete.billingCompletions}
-								selectedCompletionAddress={data?.autocomplete.billingAddress}
+								addressCompletions={data?.autocomplete?.billingCompletions}
+								selectedCompletionAddress={data?.autocomplete?.billingAddress}
 								onInputAddressCompletion={(value) =>
-									dispatch('input_billing_address_completion', value)}
+									dispatch(ACTIONS.INPUT_BILLING_ADDRESS_COMPLETION, value)}
 								onSelectAddressCompletion={(value) => {
-									dispatch('select_billing_address_completion', value);
+									dispatch(ACTIONS.SELECT_BILLING_ADDRESS_COMPLETION, value);
 								}}
-								isAutocompleteLoading={data.pending['input_billing_address_completion'] ||
-									data.pending['select_billing_address_completion']}
+								isAutocompleteLoading={data.pending[ACTIONS.INPUT_BILLING_ADDRESS_COMPLETION] ||
+									data.pending[ACTIONS.SELECT_BILLING_ADDRESS_COMPLETION]}
 							/>
 						{/snippet}
 					</CheckoutPaymentForm>
 				{/snippet}
 				{#snippet paypal()}
-					<CheckoutPaymentPaypal onclick={() => dispatch('use_fast_checkout', 'paypal')} />
+					<CheckoutPaymentPaypal onclick={() => dispatch(ACTIONS.USE_FAST_CHECKOUT, 'paypal')} />
 				{/snippet}
 			</CheckoutPaymentContainer>
 		{/snippet}
@@ -248,11 +254,11 @@
 
 <!-- Back button used in both the left and right side of the UI -->
 {#snippet BackButton()}
-	<HeaderGoback logoUrl={data.store?.logoUrl} onclick={() => dispatch('go_back')} />
+	<HeaderGoback logoUrl={data.store?.logoUrl} onclick={() => dispatch(ACTIONS.GO_BACK)} />
 {/snippet}
 
 <!-- The main layout of the UI -->
-<LayoutSingleFlow isLoading={data.pending['cart']}>
+<LayoutSingleFlow isLoading={data.pending[ACTIONS.CART]}>
 	{#snippet asection()}{@render LeftSide()}{/snippet}
 	{#snippet bsection()}{@render RightSide()}{/snippet}
 </LayoutSingleFlow>
