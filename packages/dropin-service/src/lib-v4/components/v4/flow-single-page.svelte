@@ -557,23 +557,10 @@
 			billing_info: billingInfo
 		};
 
-		if ($cart.shop_properties?.place_order_vault) {
-			completeOrderResponse = await window.firmly.paymentCompleteOrderV2(
-				ccInfo,
-				$cart.payment_handle
-			);
-		} else {
-			const tokenizeResponse = await window.firmly.paymentCreditCardTokenize(
-				ccInfo,
-				$cart.payment_handle
-			);
-			if (tokenizeResponse.status !== 200) {
-				place_order_error = tokenizeResponse.data.description || tokenizeResponse.data;
-				return;
-			}
-
-			completeOrderResponse = await window.firmly.cartCompleteOrder(tokenizeResponse.data.token);
-		}
+		completeOrderResponse = await window.firmly.paymentCompleteOrderV2(
+			ccInfo,
+			$cart.payment_handle
+		);
 
 		if (completeOrderResponse.status !== 200) {
 			place_order_error = completeOrderResponse.data.description || completeOrderResponse.data;
