@@ -357,6 +357,7 @@ export function bootstrap() {
 				dropinBuyNowUrl.searchParams.set('url', checkoutConfig.pdp_url);
 				dropinBuyNowUrl.searchParams.set('ui_mode', checkoutConfig.ui_mode);
 				dropinBuyNowUrl.searchParams.set('skip_pdp', checkoutConfig.skip_pdp);
+				dropinBuyNowUrl.searchParams.set('custom_properties', checkoutConfig.custom_properties);
 				window.firmly.dropinIframe = createIframe(dropinBuyNowUrl.toString(), checkoutConfig);
 				window.firmly.dropinIframe.style.display = 'block';
 			} else if (checkoutConfig.mode === 'full-pdp') {

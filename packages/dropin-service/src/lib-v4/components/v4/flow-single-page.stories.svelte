@@ -683,6 +683,15 @@
 				}
 			},
 			{
+				sku: '456',
+				description: 'Express Shipping',
+				estimated_delivery: '1-2 business days',
+				price: {
+					currency: 'USD',
+					value: 2
+				}
+			},
+			{
 				sku: 'shopify-Economy-2.00',
 				description: 'Economy',
 				price: {

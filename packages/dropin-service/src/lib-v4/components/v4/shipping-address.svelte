@@ -61,7 +61,7 @@
 	{#if savedAddresses}
 		<div class="col-span-2 flex flex-col rounded-lg">
 			{#each savedAddresses as address, index (index)}
-				<div class="border-0 border-b-2 px-3 py-3">
+				<div class="border-0 border-b-2 border-[#e5e7eb] px-3 py-3">
 					<label>
 						<span class="text-fy-on-surface text-sm font-semibold">
 							<span>
@@ -113,7 +113,10 @@
 		{@const mockEntries = [0, 1]}
 		<div class="col-span-2 flex flex-col rounded-lg">
 			{#each mockEntries as index}
-				<div class="border-0 border-b-2 px-5 py-4" class:border-none={isLast(mockEntries, index)}>
+				<div
+					class="border-0 border-b-2 border-[#e5e7eb] px-5 py-4"
+					class:border-none={isLast(mockEntries, index)}
+				>
 					<label>
 						<span class="block font-bold">
 							<div class="bg-fy-on-primary-subtle my-2 h-3 w-1/2 animate-pulse rounded"></div>

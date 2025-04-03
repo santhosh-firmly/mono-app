@@ -218,7 +218,10 @@
 			setFirstCard = false;
 		}
 
-		if ($cart && !previousCart) {
+		if (
+			($cart && !previousCart) ||
+			($cart && paypalConnected && !previousCart?.payment_method?.attributes?.paypal_token)
+		) {
 			setEmail();
 			// A cart got added to the page. i.e., Session Transfer has just been performed.
 			// Collapse the shipping info if there is already one set to the cart.
@@ -385,11 +388,25 @@
 		} else if (contactAndShippingChanged(shippingInfo) && (await validateEmail())) {
 			try {
 				shippingInfoInProgress = true;
+
+				// Store the original cart state to restore if the API call fails
+				const originalCart = $cart;
+
+				// Create a temporary optimistic update for the UI
+				// This clones the current cart and updates the shipping info
+				const optimisticCart = { ...$cart, shipping_info: { ...shippingInfo } };
+				cart.set(optimisticCart);
+
+				// Make the actual API call
 				const result = await window.firmly.cartUpdateShippingInfo(shippingInfo);
+
 				if (result.status === 200) {
+					// Real update from the server
 					cart.set(result.data);
 					shipping_info_error = '';
 				} else {
+					// Restore the original cart state if there's an error
+					cart.set(originalCart);
 					shipping_info_error = result.data?.description || 'Please, verify your shipping address';
 					selectedShippingAddress = NEW_SHIPPING_ADDRESS;
 					collapsedStateShipping = false;
@@ -1001,12 +1018,12 @@
 							<div class="flex justify-center">
 								<div
 									class="bg-fy-on-primary-subtle2 h-8 w-full animate-pulse rounded-lg px-4 py-2"
-								/>
+								></div>
 							</div>
 							<div class="flex justify-center">
 								<div
 									class="bg-fy-on-primary-subtle2 h-8 w-full animate-pulse rounded-lg px-4 py-2"
-								/>
+								></div>
 							</div>
 						</div>
 						<div class="text-fy-on-primary-subtle relative flex w-full flex-row justify-center">
@@ -1018,42 +1035,44 @@
 							</div>
 						</div>
 						<div>
-							<div class="bg-fy-on-primary-subtle2 my-1 h-4 w-40 animate-pulse rounded px-4" />
+							<div class="bg-fy-on-primary-subtle2 my-1 h-4 w-40 animate-pulse rounded px-4"></div>
 						</div>
 						<div>
-							<div class="bg-fy-on-primary-subtle2 my-1 h-3 w-12 animate-pulse rounded px-4" />
+							<div class="bg-fy-on-primary-subtle2 my-1 h-3 w-12 animate-pulse rounded px-4"></div>
 							<div
 								class="bg-fy-on-primary-subtle2 my-1 h-10 w-full animate-pulse rounded-lg px-4"
-							/>
+							></div>
 						</div>
 						<div class="my-1 grid grid-cols-2 gap-1">
 							<div
 								class="bg-fy-on-primary-subtle2 col-span-2 my-1 h-3 w-32 animate-pulse rounded px-4"
-							/>
+							></div>
 
 							<div
 								class="bg-fy-on-primary-subtle2 col-span-2 h-10 w-full animate-pulse rounded-lg px-4"
-							/>
+							></div>
 							<div
 								class="bg-fy-on-primary-subtle2 col-span-2 h-10 w-full animate-pulse rounded-lg px-4"
-							/>
+							></div>
 							<div
 								class="bg-fy-on-primary-subtle2 col-span-2 h-10 w-full animate-pulse rounded-lg px-4"
-							/>
-							<div class="bg-fy-on-primary-subtle2 h-10 w-full animate-pulse rounded-lg px-4" />
-							<div class="bg-fy-on-primary-subtle2 h-10 w-full animate-pulse rounded-lg px-4" />
+							></div>
+							<div class="bg-fy-on-primary-subtle2 h-10 w-full animate-pulse rounded-lg px-4"></div>
+							<div class="bg-fy-on-primary-subtle2 h-10 w-full animate-pulse rounded-lg px-4"></div>
 							<div
 								class="bg-fy-on-primary-subtle2 col-span-2 h-10 w-full animate-pulse rounded-lg px-4"
-							/>
+							></div>
 							<div
 								class="bg-fy-on-primary-subtle2 col-span-2 h-10 w-full animate-pulse rounded-lg px-4"
-							/>
+							></div>
 						</div>
 						<div class="mt-4 flex flex-col items-center justify-center">
 							<div
 								class="bg-fy-on-primary-subtle2 h-16 w-full animate-pulse rounded-lg px-4 py-2"
-							/>
-							<div class="bg-fy-on-primary-subtle2 my-3 h-4 w-64 animate-pulse rounded-lg px-4" />
+							></div>
+							<div
+								class="bg-fy-on-primary-subtle2 my-3 h-4 w-64 animate-pulse rounded-lg px-4"
+							></div>
 						</div>
 					</div>
 				{:else}
@@ -1145,15 +1164,23 @@
 											</button>
 										{:else}
 											<div class="w-full">
-												<div class="bg-fy-on-primary-subtle2 m-1 h-4 w-48 animate-pulse rounded" />
+												<div
+													class="bg-fy-on-primary-subtle2 m-1 h-4 w-48 animate-pulse rounded"
+												></div>
 												<hr />
-												<div class="bg-fy-on-primary-subtle2 m-1 h-4 w-48 animate-pulse rounded" />
-												<div class="bg-fy-on-primary-subtle2 m-1 h-4 w-32 animate-pulse rounded" />
-												<div class="bg-fy-on-primary-subtle2 m-1 h-4 w-24 animate-pulse rounded" />
+												<div
+													class="bg-fy-on-primary-subtle2 m-1 h-4 w-48 animate-pulse rounded"
+												></div>
+												<div
+													class="bg-fy-on-primary-subtle2 m-1 h-4 w-32 animate-pulse rounded"
+												></div>
+												<div
+													class="bg-fy-on-primary-subtle2 m-1 h-4 w-24 animate-pulse rounded"
+												></div>
 											</div>
 											<div
 												class="bg-fy-on-primary-subtle2 m-1 ml-5 h-4 w-16 animate-pulse rounded"
-											/>
+											></div>
 										{/if}
 									</div>
 								</Group>
@@ -1204,7 +1231,7 @@
 										{/if}
 										{#if isC2PAvailable()}
 											<div class="my-2 rounded-lg bg-[#F7F7F7] p-2">
-												<span class="text-fy-on-surface-subtle inline-block text-sm">
+												<span class="text-fy-on-surface-subtle inline-block text-sm leading-normal">
 													By entering your email, you consent and direct firmly to send your
 													information to
 													<span class="font-bold">Click to Pay</span> to check if you have any saved
@@ -1293,10 +1320,16 @@
 											</button>
 										{:else}
 											<div class="w-full">
-												<div class="bg-fy-on-primary-subtle2 m-1 h-4 w-56 animate-pulse rounded" />
-												<div class="bg-fy-on-primary-subtle2 m-1 h-4 w-24 animate-pulse rounded" />
+												<div
+													class="bg-fy-on-primary-subtle2 m-1 h-4 w-56 animate-pulse rounded"
+												></div>
+												<div
+													class="bg-fy-on-primary-subtle2 m-1 h-4 w-24 animate-pulse rounded"
+												></div>
 											</div>
-											<div class="bg-fy-on-primary-subtle2 m-1 h-4 w-16 animate-pulse rounded" />
+											<div
+												class="bg-fy-on-primary-subtle2 m-1 h-4 w-16 animate-pulse rounded"
+											></div>
 										{/if}
 									</div>
 								</Group>

@@ -89,8 +89,6 @@
 
 <Story name="Multi addresses header with name" args={{ savedAddresses, headerDisplay: 'name' }} />
 
-<Story name="Multi addresses header with name" args={{ savedAddresses, headerDisplay: 'name' }} />
-
 <Story
 	name="Address without phone"
 	args={{ savedAddresses: addressWithoutPhone, headerDisplay: 'name' }}
