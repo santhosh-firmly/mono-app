@@ -350,7 +350,7 @@ export function bootstrap() {
 			}
 
 			const dropinBuyNowUrl = new URL(dropInUrl);
-			dropinBuyNowUrl.pathname = '/poc/checkout';
+			dropinBuyNowUrl.pathname = '/buy';
 
 			if (checkoutConfig.mode === 'minimal-pdp') {
 				console.log('firmly - minimal pdp mode');
