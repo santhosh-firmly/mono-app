@@ -46,7 +46,7 @@
 		<!-- eslint-ignore no-unused-vars -->
 		{#each mockEntries as index}
 			<label
-				class="col-span-2 flex w-full flex-row items-center gap-3 rounded-t-lg border px-3 py-2"
+				class="col-span-2 flex w-full flex-row items-center gap-3 rounded-t-lg border-0 border-[#e5e7eb] px-3 py-2"
 				class:rounded-t-lg={isFirst(mockEntries, index)}
 				class:rounded-b-lg={isLast(mockEntries, index)}
 			>
@@ -74,7 +74,7 @@
 		{#each shippingMethods as shippingMethod, index (shippingMethod.sku)}
 			<label
 				class="col-span-2 flex w-full flex-row items-center gap-3 border-0 px-3 py-3"
-				class:bg-gray-100={disabled && selectedShippingMethod !== shippingMethod.sku}
+				class:group-item-custom-bg={disabled && selectedShippingMethod !== shippingMethod.sku}
 				class:rounded-t-lg={isFirst(shippingMethods, index)}
 				class:rounded-b-lg={isLast(shippingMethods, index)}
 			>
@@ -129,5 +129,10 @@
 <style>
 	input[type='radio']:focus {
 		box-shadow: none;
+	}
+
+	.group-item-custom-bg {
+		background-color: rgb(243 244 246 / var(--tw-bg-opacity, 1));
+		box-shadow: var(--fy-surface-box-shadow);
 	}
 </style>

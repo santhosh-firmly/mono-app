@@ -40,10 +40,11 @@
 		'www.lovevery.com': 'lovevery.firmly.in',
 		'www.meetlalo.com': 'meetlalo.firmly.in',
 		'meetlalo.com': 'meetlalo.firmly.in',
-		'test.victoriassecret.com': 'test-victoriassecret.firmly.in'
+		'test.victoriassecret.com': 'test-victoriassecret.firmly.in',
+		'www.dermstore.com': 'dermstore.firmly.in'
 	};
 
-	const bypassCatalogApiMerchants = ['test.victoriassecret.com'];
+	const bypassCatalogApiMerchants = ['test.victoriassecret.com', 'dermstore.com'];
 
 	let partnerInfo = {
 		largeLogo:
@@ -385,7 +386,16 @@
 
 				{#if order}
 					<div class="absolute top-0 left-0 h-full w-full">
-						<ThankYouPage {order} on:back-click={onBackClick}></ThankYouPage>
+						<ThankYouPage
+							merchantInfo={{
+								largeLogo,
+								smallLogo
+							}}
+							{privacyPolicy}
+							{termsOfUse}
+							{order}
+							on:back-click={onBackClick}
+						></ThankYouPage>
 					</div>
 				{:else if showCheckout}
 					<div class="absolute top-0 left-0 z-[999] h-full w-full">

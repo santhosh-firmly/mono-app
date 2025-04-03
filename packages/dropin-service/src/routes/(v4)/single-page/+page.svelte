@@ -68,7 +68,7 @@
 				cart.set(undefined);
 				// Make sure the cart set to undefined gets processed before we continue to hide the checkout.
 				await tick();
-				// eslint-disable-next-line svelte/infinite-reactive-loop -- I'm migrating the project and I don't know exactly what it is doing.
+				 
 				visible = false;
 				postCheckoutClosed();
 			})();

@@ -160,7 +160,7 @@
 				{merchantName}
 			</span>
 			<span class="text-fy-on-primary-subtle text-start text-sm font-normal"> Order Number </span>
-			<span class="text-end text-sm font-medium">
+			<span class="text-end text-sm font-medium break-words">
 				{orderNumber}
 			</span>
 			<span class="text-fy-on-primary-subtle text-start text-sm font-normal"> Order Total </span>
@@ -176,7 +176,7 @@
 				/>
 			</div>
 			<span class="text-fy-on-primary-subtle text-start text-sm font-normal"> Email </span>
-			<span class="text-end text-sm font-medium">
+			<span class="text-end text-sm font-medium break-words">
 				{shippingInfo.email}
 			</span>
 			<span class="text-fy-on-primary-subtle text-start text-sm font-normal"> Shipping to </span>
@@ -189,7 +189,7 @@
 			</span>
 		</div>
 	</div>
-	<div class="text-fy-on-primary-subtle pt-10 text-center text-xs">
+	<div class="text-fy-on-primary-subtle text-md pt-10 text-center">
 		<FooterLinks />
 	</div>
 </div>
