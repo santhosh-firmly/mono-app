@@ -68,7 +68,7 @@
 				cart.set(undefined);
 				// Make sure the cart set to undefined gets processed before we continue to hide the checkout.
 				await tick();
-				 
+
 				visible = false;
 				postCheckoutClosed();
 			})();
