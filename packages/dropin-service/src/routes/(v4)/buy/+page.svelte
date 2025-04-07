@@ -250,6 +250,20 @@
 		if (domain) {
 			initializeDomain(domain);
 
+			if (data.merchantPresentation) {
+				termsOfUse = data.merchantPresentation.termsOfUse;
+				privacyPolicy = data.merchantPresentation.privacyPolicy;
+
+				largeLogo = data.merchantPresentation.largeLogo;
+				smallLogo = data.merchantPresentation.smallLogo;
+
+				// Initialize theme if available
+				if (data.merchantPresentation.theme) {
+					initializeTheme(data.merchantPresentation.theme);
+				}
+				return;
+			}
+			// Fallback to hard-coded merchant info
 			termsOfUse = merchantInfo[domain]?.termsOfUse;
 			privacyPolicy = merchantInfo[domain]?.privacyPolicy;
 
