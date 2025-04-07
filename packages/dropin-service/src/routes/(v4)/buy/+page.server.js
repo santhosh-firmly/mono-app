@@ -1,8 +1,13 @@
+import { getDomain } from 'foundation/utils/url.js';
 import { getMerchantPresentation } from '$lib-v4/server/db-acessor.js';
 
 export const load = async ({ url, platform }) => {
-	const domain = url.searchParams.get('domain')?.replace(/^www\./, '');
+	let domain = getDomain(url);
 	const urlParam = url.searchParams.get('url');
+
+	if (domain.includes('firmly')) {
+		domain = url.searchParams.get('domain').replace('www.', '');
+	}
 
 	let merchantPresentation = null;
 

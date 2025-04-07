@@ -1,3 +1,6 @@
+import { accessData } from 'foundation/data-management/data-accessor.js';
+import { getLogger } from 'foundation/utils/log.js';
+
 /**
  * Fetch merchant presentation data from D1 database
  * @param {string} domain - The merchant domain to fetch data for
@@ -7,41 +10,32 @@
 
 export const getMerchantPresentation = async (domain, env) => {
 	if (!domain || !env?.firmlyConfigs) {
-		console.error('Missing domain or D1 database binding');
+		getLogger('Data Accessor Error').error('Missing domain or D1 database binding');
 		return null;
 	}
 
-	try {
-		const { results } = await env.firmlyConfigs
-			.prepare('SELECT info FROM merchant_presentation WHERE key = ?')
-			.bind(domain)
-			.all();
+	let context = {
+		env: { DATA_ACCESS_STRATEGY: 'd1', firmlyConfigs: env?.firmlyConfigs }
+	};
 
-		if (results && results.length > 0) {
-			let info = results[0].info;
-			if (typeof info === 'string') {
-				try {
-					info = JSON.parse(info);
-				} catch (e) {
-					console.error('Error parsing info JSON:', e);
-					return null;
-				}
-			}
+	try {
+		const data = await accessData(context, 'merchant_presentation', domain);
+		let presentationData = null;
+
+		if (data) {
+			presentationData = typeof data === 'string' ? JSON.parse(data) : data;
 
 			return {
 				domain,
-				theme: info.theme,
-				largeLogo: info.theme?.largeLogo,
-				smallLogo: info.theme?.smallLogo,
-				termsOfUse: info.termsOfUse,
-				privacyPolicy: info.privacyPolicy
+				theme: presentationData.theme,
+				largeLogo: presentationData.theme?.largeLogo,
+				smallLogo: presentationData.theme?.smallLogo,
+				termsOfUse: presentationData.termsOfUse,
+				privacyPolicy: presentationData.privacyPolicy
 			};
 		}
-
-		console.warn(`No presentation data found for domain: ${domain}`);
-		return null;
 	} catch (error) {
-		console.error('Error fetching merchant presentation:', error);
+		getLogger('Data access error').error('Error fetching presentation data:', error);
 		return null;
 	}
 };
