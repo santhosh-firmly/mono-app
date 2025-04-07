@@ -1,4 +1,4 @@
-import { getMerchantPresentation } from './db-acessor.js';
+import { getMerchantPresentation } from '$lib-v4/server/db-acessor.js';
 
 export const load = async ({ url, platform }) => {
 	const domain = url.searchParams.get('domain')?.replace(/^www\./, '');
