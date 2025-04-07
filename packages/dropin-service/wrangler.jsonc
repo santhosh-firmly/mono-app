@@ -25,7 +25,8 @@
 		"PUBLIC_c2p_dpa_id": "FirmlyTest",
 		"PUBLIC_c2p_dpa_presentation_name": "Firmly",
 		"PUBLIC_c2p_dpa_uri": "https://firmly.ai",
-		"PUBLIC_c2p_sdk_url": "https://sandbox.secure.checkout.visa.com/checkout-widget/resources/js/src-i-adapter/visaSdk.js?v2"
+		"PUBLIC_c2p_sdk_url": "https://sandbox.secure.checkout.visa.com/checkout-widget/resources/js/src-i-adapter/visaSdk.js?v2",
+		"HONEYCOMB_DATASET": "requests-dev"
 	},
 	"d1_databases": [
 		{
@@ -60,7 +61,8 @@
 				"PUBLIC_c2p_dpa_id": "FirmlyTest",
 				"PUBLIC_c2p_dpa_presentation_name": "Firmly",
 				"PUBLIC_c2p_dpa_uri": "https://firmly.ai",
-				"PUBLIC_c2p_sdk_url": "https://sandbox.secure.checkout.visa.com/checkout-widget/resources/js/src-i-adapter/visaSdk.js?v2"
+				"PUBLIC_c2p_sdk_url": "https://sandbox.secure.checkout.visa.com/checkout-widget/resources/js/src-i-adapter/visaSdk.js?v2",
+				"HONEYCOMB_DATASET": "requests-dev"
 			},
 			"d1_databases": [
 				{
@@ -95,7 +97,8 @@
 				"PUBLIC_c2p_dpa_id": "FirmlyTest",
 				"PUBLIC_c2p_dpa_presentation_name": "Firmly",
 				"PUBLIC_c2p_dpa_uri": "https://firmly.ai",
-				"PUBLIC_c2p_sdk_url": "https://sandbox.secure.checkout.visa.com/checkout-widget/resources/js/src-i-adapter/visaSdk.js?v2"
+				"PUBLIC_c2p_sdk_url": "https://sandbox.secure.checkout.visa.com/checkout-widget/resources/js/src-i-adapter/visaSdk.js?v2",
+				"HONEYCOMB_DATASET": "requests-qa"
 			},
 			"d1_databases": [
 				{
@@ -130,7 +133,8 @@
 				"PUBLIC_c2p_dpa_id": "FirmlyTest",
 				"PUBLIC_c2p_dpa_presentation_name": "Firmly",
 				"PUBLIC_c2p_dpa_uri": "https://firmly.ai",
-				"PUBLIC_c2p_sdk_url": "https://sandbox.secure.checkout.visa.com/checkout-widget/resources/js/src-i-adapter/visaSdk.js?v2"
+				"PUBLIC_c2p_sdk_url": "https://sandbox.secure.checkout.visa.com/checkout-widget/resources/js/src-i-adapter/visaSdk.js?v2",
+				"HONEYCOMB_DATASET": "requests-uat"
 			},
 			"d1_databases": [
 				{
@@ -165,7 +169,8 @@
 				"PUBLIC_c2p_dpa_id": "FirmlyTest",
 				"PUBLIC_c2p_dpa_presentation_name": "Firmly",
 				"PUBLIC_c2p_dpa_uri": "https://firmly.ai",
-				"PUBLIC_c2p_sdk_url": "https://secure.checkout.visa.com/checkout-widget/resources/js/src-i-adapter/visaSdk.js?v2"
+				"PUBLIC_c2p_sdk_url": "https://secure.checkout.visa.com/checkout-widget/resources/js/src-i-adapter/visaSdk.js?v2",
+				"HONEYCOMB_DATASET": "requests-prod"
 			},
 			"d1_databases": [
 				{
