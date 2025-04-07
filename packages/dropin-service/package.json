@@ -45,6 +45,7 @@
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "^3.0.0",
+		"foundation": "github:goyalu/foundation#v1.3.23",
 		"globals": "^16.0.0",
 		"jsdom": "^26.0.0",
 		"prettier": "^3.4.2",
