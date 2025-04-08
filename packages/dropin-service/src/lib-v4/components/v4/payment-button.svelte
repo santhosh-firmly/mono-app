@@ -39,7 +39,7 @@
 		<button
 			disabled={disabled || inProgress}
 			type="submit"
-			class="bg-fy-action relative flex w-full flex-row items-center justify-center rounded-lg p-3 shadow hover:shadow-lg"
+			class="bg-fy-action relative flex w-full cursor-pointer flex-row items-center justify-center rounded-lg p-3 shadow hover:shadow-lg"
 			class:button-disabled={disabled}
 			class:smaller-button={inProgress}
 			class:text-fy-on-action-subtle={disabled}
@@ -86,5 +86,6 @@
 		background-color: var(--fy-background-disabled);
 		pointer-events: none;
 		color: var(--fy-color-disabled);
+		cursor: not-allowed;
 	}
 </style>

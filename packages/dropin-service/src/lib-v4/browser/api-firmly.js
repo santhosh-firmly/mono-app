@@ -2,6 +2,7 @@
 
 import { platformsToMakeCartHealthCheck } from './api-config';
 import { postUpdateCart } from './cross';
+import * as jose from 'jose';
 
 //#region Session Storage
 
@@ -567,6 +568,43 @@ async function getRSAKey(jwkKey) {
 	return { publicKey, version };
 }
 
+async function importJWKKey(jwkKey) {
+	try {
+		return await jose.importJWK(jwkKey, 'RSA-OAEP-256');
+	} catch (error) {
+		console.error('Error importing JWK:', error);
+		throw new Error(`Failed to import JWK: ${error.message}`);
+	}
+}
+
+async function encryptJWEPayloadWithKey(payload, publicKey, options = {}) {
+	try {
+		// Default encryption options
+		const { alg = 'RSA-OAEP-256', enc = 'A256GCM', kid } = options;
+
+		// Create the JWE encryption configuration
+		const jweConfig = {
+			alg,
+			enc
+		};
+
+		// Add key ID to header if provided
+		if (kid) {
+			jweConfig.kid = kid;
+		}
+
+		// Encrypt the payload
+		const jwe = new jose.CompactEncrypt(new TextEncoder().encode(JSON.stringify(payload)))
+			.setProtectedHeader(jweConfig)
+			.encrypt(publicKey);
+
+		return jwe;
+	} catch (error) {
+		console.error('Error encrypting JWE payload:', error);
+		throw new Error(`Failed to encrypt JWE payload: ${error.message}`);
+	}
+}
+
 async function gcmEncrypt(inputData) {
 	try {
 		const firmly = window.firmly;
@@ -668,6 +706,10 @@ function getCCUrl(suffix) {
 
 function getCCUrlV2(suffix) {
 	return `${window.firmly.ccServer}/api/v2/payment/${suffix}`;
+}
+
+function getCCUrlV3(suffix) {
+	return `${window.firmly.ccServer}/api/v3/payment/${suffix}`;
 }
 
 function getPaymentHeaders() {
@@ -1280,12 +1322,45 @@ async function encryptCCInfo(ccInfo) {
 	return ccInfo;
 }
 
+async function encryptCCInfoAsJWE(ccInfo) {
+	const firmly = window.firmly;
+	const jwkKey = firmly.paymentJWKKey;
+	console.log('jwkKey', jwkKey);
+
+	const publicKey = await importJWKKey(jwkKey);
+	console.log('publicKey', publicKey);
+
+	const jwe = await encryptJWEPayloadWithKey(ccInfo.credit_card, publicKey, {
+		kid: jwkKey.kid
+	});
+	console.log('jwe', jwe);
+	const placeOrderV3Payload = {
+		billing_info: ccInfo.billing_info,
+		encrypted_card: jwe
+	};
+	console.log('placeOrderV3Payload', placeOrderV3Payload);
+	return placeOrderV3Payload;
+}
+
 async function paymentCompleteOrderV2(ccInfo, paymentHandle) {
 	const body = await encryptCCInfo(ccInfo);
 	body.handle = paymentHandle;
 
 	const headers = await getHeaders();
 	const res = await browserFetch(getCCUrlV2('complete-order'), {
+		...headers,
+		method: 'POST',
+		body: JSON.stringify(body)
+	});
+	return res;
+}
+
+async function paymentCompleteOrderV3(ccInfo, paymentHandle) {
+	const body = await encryptCCInfoAsJWE(ccInfo);
+	body.handle = paymentHandle;
+
+	const headers = await getHeaders();
+	const res = await browserFetch(getCCUrlV3('complete-order'), {
 		...headers,
 		method: 'POST',
 		body: JSON.stringify(body)
@@ -1561,6 +1636,7 @@ if (typeof window !== 'undefined') {
 	// Cart Payment functions
 	firmly.paymentCompleteOrder = paymentCompleteOrder;
 	firmly.paymentCompleteOrderV2 = paymentCompleteOrderV2;
+	firmly.paymentCompleteOrderV3 = paymentCompleteOrderV3;
 
 	// Wallet Click to Pay functions
 	firmly.c2pWalletUnlockStart = c2pWalletUnlockStart;
