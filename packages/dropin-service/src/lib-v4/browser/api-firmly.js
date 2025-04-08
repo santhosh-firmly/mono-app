@@ -1325,20 +1325,18 @@ async function encryptCCInfo(ccInfo) {
 async function encryptCCInfoAsJWE(ccInfo) {
 	const firmly = window.firmly;
 	const jwkKey = firmly.paymentJWKKey;
-	console.log('jwkKey', jwkKey);
 
 	const publicKey = await importJWKKey(jwkKey);
-	console.log('publicKey', publicKey);
 
 	const jwe = await encryptJWEPayloadWithKey(ccInfo.credit_card, publicKey, {
 		kid: jwkKey.kid
 	});
-	console.log('jwe', jwe);
+
 	const placeOrderV3Payload = {
 		billing_info: ccInfo.billing_info,
 		encrypted_card: jwe
 	};
-	console.log('placeOrderV3Payload', placeOrderV3Payload);
+
 	return placeOrderV3Payload;
 }
 
