@@ -5,6 +5,7 @@
 
 	import { isActionDark } from './theme-context.js';
 	import { LottiePlayer } from '@lottiefiles/svelte-lottie-player';
+	import orderPlacedAnimation from '$lib-v4/assets/order-placed-animation.json';
 
 	/**
 	 * Total price of the current order
@@ -29,7 +30,7 @@
 		<LottiePlayer
 			width={48}
 			height={48}
-			src="/order-placed-animation.json"
+			src={orderPlacedAnimation}
 			autoplay={true}
 			loop={false}
 			renderer="svg"
