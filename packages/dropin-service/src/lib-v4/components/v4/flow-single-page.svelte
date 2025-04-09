@@ -574,7 +574,7 @@
 			billing_info: billingInfo
 		};
 
-		completeOrderResponse = await window.firmly.paymentCompleteOrderV2(
+		completeOrderResponse = await window.firmly.paymentCompleteOrderV3(
 			ccInfo,
 			$cart.payment_handle
 		);
