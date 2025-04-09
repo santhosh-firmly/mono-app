@@ -5,7 +5,7 @@ export const load = async ({ url, platform }) => {
 	let domain = getDomain(url);
 	const urlParam = url.searchParams.get('url');
 
-	if (domain.includes('firmly')) {
+	if (domain.includes('firmly') && url.searchParams.has('domain')) {
 		domain = url.searchParams.get('domain').replace('www.', '');
 	}
 
