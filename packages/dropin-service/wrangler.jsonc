@@ -72,6 +72,42 @@
 				}
 			]
 		},
+		"ci": {
+			"account_id": "4e6de22bab2c64884e178b0be7559230",
+			"name": "dropin",
+			"main": ".svelte-kit/cloudflare/_worker.js",
+			"routes": [
+				{
+					"pattern": "dropin.firmlyci.com/*",
+					"zone_name": "firmlyci.com"
+				},
+				{
+					"pattern": "firmlyci.com/*",
+					"zone_name": "firmlyci.com"
+				}
+			],
+			"vars": {
+				"PUBLIC_firmly_deployment": "ci",
+				"PUBLIC_cf_server": "https://api.firmlyci.com",
+				"PUBLIC_api_id": "382597c1-e66e-4d5c-9a88-2b245b8eb8cf",
+				"PUBLIC_DISABLE_HCAPTCHA": "false",
+				"PUBLIC_uc2p_sdk_url": "https://sandbox.secure.checkout.visa.com/checkout-widget/resources/js/integration/v2/sdk.js?dpaId=I8U21OZVATGCWWL44QML21VYApxq34kiZJnVeUSzriVONtv7Y&locale=en_US&cardBrands=visa,mastercard",
+				"PUBLIC_use_c2p_api": "false",
+				"PUBLIC_c2p_initiator_id": "I8U21OZVATGCWWL44QML21VYApxq34kiZJnVeUSzriVONtv7Y",
+				"PUBLIC_c2p_dpa_id": "FirmlyTest",
+				"PUBLIC_c2p_dpa_presentation_name": "Firmly",
+				"PUBLIC_c2p_dpa_uri": "https://firmly.ai",
+				"PUBLIC_c2p_sdk_url": "https://sandbox.secure.checkout.visa.com/checkout-widget/resources/js/src-i-adapter/visaSdk.js?v2",
+				"HONEYCOMB_DATASET": "requests-ci"
+			},
+			"d1_databases": [
+				{
+					"binding": "firmlyConfigs",
+					"database_name": "firmly-configs",
+					"database_id": "c4b58390-6682-46ab-8c3c-17c3efc8ef88"
+				}
+			]
+		},
 		"qa": {
 			"account_id": "c90aa8c275f60c00fc3844f2ecbb84a1",
 			"name": "dropin",
