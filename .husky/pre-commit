@@ -11,17 +11,21 @@ die() {
 # npm run depcheck || die 'There are unused libraries in the project. Please, remove them before committing';
 
 # Verify for outdated libraries
-npm run outdated || die 'There are outdated libraries in the project. Please, update them before commiting with "npm update"';
+npm run outdated || die '✋ There are outdated libraries in the project. Please, update them before commiting with "npm update"';
+  # Verify the dependencies and unused files/exports
+npm run depcheck || die '✋ There are unused or unlisted dependencies in the project. Please, update them before committing.';
 # TODO: Fix lint formatting for all projects
-npx lerna run format-code --since origin/main || die 'Is the code formatted properly?';
+npx lerna run format-code --since origin/main || die '✋ Is the code formatted properly?';
 #Verify if debugging functionality is forgotten in the tests folder
 for testFolder in $(ls -d1 ./packages/*/tests/); do
     if grep -E '(\.only|[\s]fit)\(' "$testFolder" -r; then
-        printf "\n\n\tDid you forget any test with the \".only\" attribute? 👆\n\n"
+        printf "\n\n\t✋ Did you forget any test with the \".only\" attribute? 👆\n\n"
         exit 1
     fi
 done;
 # Verify if the build runs as expected
-npx lerna run build --since origin/main || die 'Cannot build the project for Dev'
+npx lerna run build --since origin/main || die '✋ Cannot build the project for Dev'
 # Execute the tests
-npx lerna run test:static --since origin/main || die 'Some tests failed. Please, review your code.';
+npx lerna run test:static --since origin/main || die '✋ Some tests failed. Please, review your code.';
+
+printf "\n\n\t All checks passed, you can go ahead 🫡\n\n"

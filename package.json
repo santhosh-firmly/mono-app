@@ -16,7 +16,7 @@
 		"deploy-uat": "lerna run deploy-uat",
 		"deploy-prod": "lerna run deploy-prod",
 		"outdated": "npx check-outdated --prefer-wanted --ignore-packages @vitest,@vitest/ui,@vitest/coverage-istanbul,vitest",
-		"depcheck": "knip -c knip.json",
+		"depcheck": "knip -c knip.config.js --no-config-hints",
 		"format-code": "lerna run format-code",
 		"test": "lerna run test:static",
 		"update-version": "lerna version --no-push --force-publish --yes",
