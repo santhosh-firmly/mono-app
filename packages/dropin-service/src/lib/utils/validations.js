@@ -36,19 +36,6 @@ export function isValidEmail(value) {
 	}
 }
 
-function isString(value) {
-	const String = string();
-	if (!value) {
-		throw new Error(m.validation_value_required());
-	}
-	try {
-		String.assert(value);
-		return true;
-	} catch {
-		throw new Error(m.validation_value_string());
-	}
-}
-
 export function isValidPhone(value, { locale = 'en-US' } = {}) {
 	const Phone = string();
 	if (!value) {

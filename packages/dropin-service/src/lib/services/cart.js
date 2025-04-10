@@ -34,7 +34,7 @@ function createOrResetCartHealtCheckTimer(platform, domain, minutes = 15) {
  * Gets the session cart from session storage.
  * @returns {object|null} The session cart object, or null if not found.
  */
-function getSessionCart() {
+export function getSessionCart() {
 	const value = sessionStorage.getItem(SESSION_CART);
 	if (value) {
 		return JSON.parse(value);
@@ -46,7 +46,7 @@ function getSessionCart() {
  * Sets the session cart in session storage.
  * @param {object} value The session cart object to set.
  */
-function setSessionCart(value) {
+export function setSessionCart(value) {
 	const js = JSON.stringify(value);
 	sessionStorage.setItem(SESSION_CART, js);
 }
@@ -67,7 +67,7 @@ function getDomainUrl(suffix, domain) {
  * @param {string} domain The domain.
  * @returns {Promise<object>} The response from the server.
  */
-async function cartSessionTransfer(body, domain) {
+export async function cartSessionTransfer(body, domain) {
 	const headers = await getHeaders();
 	const res = await browserFetch(getDomainUrl('session/transfer', domain), {
 		...headers,
@@ -111,7 +111,7 @@ export async function cartGetCart(domain, healthCheckCall = false) {
  * @param {boolean} flushCart Indicates if the cart should be flushed.
  * @returns {Promise<object>} The response from the server.
  */
-async function cartAddLineItem(
+export async function cartAddLineItem(
 	sku,
 	quantity,
 	variantHandles = [],
@@ -171,7 +171,7 @@ export async function cartUpdateSku(sku, quantity, variantHandles = [], domain =
  * @param {string} domain The domain.
  * @returns {Promise<object>} The response from the server.
  */
-async function cartClear(domain = undefined) {
+export async function cartClear(domain = undefined) {
 	const headers = await getHeaders();
 	const res = await browserFetch(getDomainUrl(`cart/line-items`, domain), {
 		...headers,
@@ -192,7 +192,7 @@ async function cartClear(domain = undefined) {
  * @param {string} domain The domain.
  * @returns {Promise<object>} The response from the server.
  */
-async function cartUpdateShippingInfo(body, domain) {
+export async function cartUpdateShippingInfo(body, domain) {
 	const headers = await getHeaders();
 	const res = await browserFetch(getDomainUrl('cart/shipping-info', domain), {
 		...headers,
@@ -213,7 +213,7 @@ async function cartUpdateShippingInfo(body, domain) {
  * @param {string} domain The domain.
  * @returns {Promise<object>} The response from the server.
  */
-async function cartUpdateDelivery(sku, domain) {
+export async function cartUpdateDelivery(sku, domain) {
 	const headers = await getHeaders();
 	const body = {
 		shipping_method: sku
@@ -237,7 +237,7 @@ async function cartUpdateDelivery(sku, domain) {
  * @param {string} domain The domain.
  * @returns {Promise<object>} The response from the server.
  */
-async function cartCompleteOrder(paymentToken, domain) {
+export async function cartCompleteOrder(paymentToken, domain) {
 	const headers = await getHeaders();
 	const body = {
 		payment_token: { id: paymentToken },
@@ -260,7 +260,7 @@ async function cartCompleteOrder(paymentToken, domain) {
  * Gets the consents for the cart.
  * @returns {Promise<object>} The response from the server.
  */
-async function getConsents() {
+export async function getConsents() {
 	const headers = await getHeaders();
 
 	const res = await browserFetch(getDomainUrl('cart/consents'), {
@@ -276,7 +276,7 @@ async function getConsents() {
  * @param {object} consents The consents to set.
  * @returns {Promise<object>} The response from the server.
  */
-async function setConsents(consents) {
+export async function setConsents(consents) {
 	const headers = await getHeaders();
 
 	const res = await browserFetch(getDomainUrl('cart/consents'), {
@@ -293,7 +293,7 @@ async function setConsents(consents) {
  * @param {string} password The session password.
  * @returns {Promise<object>} The response from the server.
  */
-async function sessionJoin(password) {
+export async function sessionJoin(password) {
 	const headers = await getHeaders();
 	const body = {
 		password
@@ -316,7 +316,7 @@ async function sessionJoin(password) {
  * @param {string} email The email address.
  * @returns {Promise<object>} The response from the server.
  */
-async function sessionCreateOtp(email) {
+export async function sessionCreateOtp(email) {
 	const headers = await getHeaders();
 	const body = {
 		email
@@ -335,7 +335,7 @@ async function sessionCreateOtp(email) {
  * @param {string} otp The OTP.
  * @returns {Promise<object>} The response from the server.
  */
-async function sessionValidateOtp(email, otp) {
+export async function sessionValidateOtp(email, otp) {
 	const headers = await getHeaders();
 	const body = {
 		email,
@@ -359,7 +359,7 @@ async function sessionValidateOtp(email, otp) {
  * @param {string} paymentId The payment ID.
  * @returns {Promise<object>} The response from the server.
  */
-async function cartSavedPaymentCompleteOrder(paymentId) {
+export async function cartSavedPaymentCompleteOrder(paymentId) {
 	const headers = await getHeaders();
 	const body = {
 		payment_id: paymentId

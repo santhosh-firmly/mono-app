@@ -18,7 +18,10 @@ export default {
 		...globalConfig.workspaces,
 		'packages/dropin-service': {
 			...globalConfig.workspaces['packages/*'],
-			ignore: './src/lib-v4/sdk/*'
+			ignore: [
+				'./src/lib-v4/sdk/*',
+				'./src/lib/services/*' // Temporary when migrating to v5
+			]
 		}
 	}
 };

@@ -134,8 +134,7 @@ const ReviewContact = 'Contact';
 const ReviewDeliveryMethod = 'Method';
 const ReviewPayment = 'Payment';
 const ReviewCVV = 'For additional security please enter the security code';
-const ReviewCVVToolTip =
-	"3 digits CVV from the back of your card (4 digits if it's an AmEx)";
+const ReviewCVVToolTip = "3 digits CVV from the back of your card (4 digits if it's an AmEx)";
 
 const ReviewShippingAddress = 'Shipping';
 const ReviewDelivery = 'Delivery';
@@ -152,8 +151,7 @@ const InfoStoreLoginHeader = (storeName) => `Welcome back to ${storeName}`;
 const InfoStoreLoginDetail = (email) => `Enter the password for ${email}`;
 
 // Order Placed
-const OrderPlacedNotes =
-	'You will receive an email with order confirmation from the merchant.';
+const OrderPlacedNotes = 'You will receive an email with order confirmation from the merchant.';
 const OrderPlaced = 'Order Placed !';
 const OrderNumber = 'Order Number:';
 const OrderPlacedBuffer = 'Please wait, we are taking you to the thank you page...';
