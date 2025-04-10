@@ -25,10 +25,9 @@
 		"deploy-prod": "npm run build && wrangler deploy --env prod"
 	},
 	"devDependencies": {
+		"@mono-app/eslint-config": "*",
 		"@chromatic-com/storybook": "^3.2.5",
 		"@cloudflare/vite-plugin": "^0.1.17",
-		"@eslint/compat": "^1.2.5",
-		"@eslint/js": "^9.18.0",
 		"@iconify/svelte": "^4.2.0",
 		"@storybook/addon-essentials": "^8.6.4",
 		"@storybook/addon-interactions": "^8.6.4",
@@ -45,10 +44,7 @@
 		"@testing-library/svelte": "^5.2.4",
 		"esbuild": "^0.25.2",
 		"eslint": "^9.18.0",
-		"eslint-config-prettier": "^10.0.1",
-		"eslint-plugin-svelte": "^3.0.0",
 		"foundation": "github:goyalu/foundation#v1.3.23",
-		"globals": "^16.0.0",
 		"jsdom": "^26.0.0",
 		"prettier": "^3.4.2",
 		"prettier-plugin-svelte": "^3.3.3",
