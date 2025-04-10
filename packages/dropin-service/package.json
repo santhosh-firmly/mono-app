@@ -19,6 +19,7 @@
 		"build-storybook": "storybook build",
 		"build-sdk": "node tools/build-sdk.mjs",
 		"deploy-dev": "npm run build && wrangler deploy --env dev",
+		"deploy-ci": "npm run build && wrangler deploy --env ci",
 		"deploy-qa": "npm run build && wrangler deploy --env qa",
 		"deploy-uat": "npm run build && wrangler deploy --env uat",
 		"deploy-prod": "npm run build && wrangler deploy --env prod"
