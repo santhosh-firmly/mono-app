@@ -722,7 +722,7 @@ function getPaymentHeaders() {
 	return ret;
 }
 
-export async function paymentInitialize(ccServer) {
+async function paymentInitialize(ccServer) {
 	const firmly = window.firmly;
 
 	if (!firmly.paymentRSAKey) {

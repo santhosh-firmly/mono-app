@@ -36,7 +36,7 @@ export function isValidEmail(value) {
 	}
 }
 
-export function isString(value) {
+function isString(value) {
 	const String = string();
 	if (!value) {
 		throw new Error(m.validation_value_required());

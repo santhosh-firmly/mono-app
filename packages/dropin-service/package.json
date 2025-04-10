@@ -34,7 +34,6 @@
 		"@storybook/addon-interactions": "^8.6.4",
 		"@storybook/addon-postcss": "^2.0.0",
 		"@storybook/addon-svelte-csf": "^5.0.0-next.27",
-		"@storybook/blocks": "^8.6.4",
 		"@storybook/svelte": "^8.6.4",
 		"@storybook/sveltekit": "^8.6.4",
 		"@storybook/test": "^8.6.4",
@@ -68,12 +67,10 @@
 		"classnames": "^2.5.1",
 		"colord": "^2.9.3",
 		"flowbite": "^3.1.2",
-		"flowbite-svelte": "^0.48.4",
 		"foundation": "github:goyalu/foundation#v1.3.23",
 		"msw": "^2.7.3",
 		"sass-embedded": "^1.86.1",
 		"superstruct": "^2.0.2",
-		"svelte-forms-lib": "^2.0.1",
 		"vaul-svelte": "^0.3.2",
 		"yup": "^1.6.1"
 	}

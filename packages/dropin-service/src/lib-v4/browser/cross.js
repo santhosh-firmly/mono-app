@@ -15,7 +15,7 @@ export function postGetParentInfo() {
 	window.parent.postMessage(jData, '*');
 }
 
-export function postGetDynamoInfo() {
+function postGetDynamoInfo() {
 	window.parent.postMessage({ action: 'firmly::getDynamoInfo' }, '*');
 }
 
@@ -29,7 +29,7 @@ export function postQuantityUpdated(totalQuantity) {
 	window.parent.postMessage(jData, '*');
 }
 
-export function postRefresh() {
+function postRefresh() {
 	const jData = JSON.stringify({ action: 'firmlyRefresh' });
 	window.parent.postMessage(jData, '*');
 }

@@ -14,7 +14,7 @@ let currentBrowserSession;
  * Gets the browser session from local storage or the current session.
  * @returns {object|null} The browser session object, or null if not found.
  */
-export function getBrowserSession() {
+function getBrowserSession() {
 	const lbs = localStorage.getItem(BROWSER_SESSION);
 	let lbj = null;
 	if (lbs) {
@@ -27,7 +27,7 @@ export function getBrowserSession() {
  * Sets the browser session in local storage and the current session.
  * @param {object} browserSession The browser session object to set.
  */
-export function setBrowserSession(browserSession) {
+function setBrowserSession(browserSession) {
 	currentBrowserSession = browserSession;
 	const stringifiedBrowserSession = JSON.stringify(browserSession);
 	localStorage.setItem(BROWSER_SESSION, stringifiedBrowserSession);
@@ -37,7 +37,7 @@ export function setBrowserSession(browserSession) {
  * Gets the session ID from session storage.
  * @returns {string|null} The session ID, or null if not found.
  */
-export function getSessionId() {
+function getSessionId() {
 	const value = sessionStorage.getItem(SESSION_ID);
 	if (value) {
 		return value;
@@ -49,7 +49,7 @@ export function getSessionId() {
  * Sets the session ID in session storage.
  * @param {string} value The session ID to set.
  */
-export function setSessionId(value) {
+function setSessionId(value) {
 	sessionStorage.setItem(SESSION_ID, value);
 }
 
@@ -57,7 +57,7 @@ export function setSessionId(value) {
  * Initializes the session ID, creating a new one if it doesn't exist.
  * @returns {string} The initialized session ID.
  */
-export function initSessionId() {
+function initSessionId() {
 	let id = getSessionId();
 	if (!id) {
 		id = 's' + crypto.randomUUID();
@@ -74,7 +74,7 @@ export function initSessionId() {
  * Gets the number of seconds since the epoch.
  * @returns {number} The number of seconds since the epoch.
  */
-export function getSecondsSinceEpoch() {
+function getSecondsSinceEpoch() {
 	return ~~(Date.now() / 1000);
 }
 
@@ -82,7 +82,7 @@ export function getSecondsSinceEpoch() {
  * Fetches the browser session from the server.
  * @returns {Promise<object|null>} The browser session object, or null if the fetch fails.
  */
-export async function fetchBrowserSession() {
+async function fetchBrowserSession() {
 	const firmly = window.firmly;
 
 	const requestOptions = {
@@ -136,7 +136,7 @@ export async function getApiAccessToken() {
  * Gets the device ID from the browser session.
  * @returns {string|null} The device ID, or null if not found.
  */
-export function getDeviceId() {
+function getDeviceId() {
 	let session = getBrowserSession();
 	if (session) {
 		return session.device_id;

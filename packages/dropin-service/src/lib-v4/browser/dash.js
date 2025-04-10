@@ -1,20 +1,20 @@
 // @ts-nocheck
-export function filterObjectBy(
+function filterObjectBy(
 	obj,
 	filterFunction = ([, value]) => value !== undefined && value !== null
 ) {
 	return Object.fromEntries(Object.entries(obj).filter(filterFunction));
 }
 
-export function pick(input, ...pick) {
+function pick(input, ...pick) {
 	return Object.fromEntries(pick.filter((key) => key in input).map((key) => [key, input[key]]));
 }
 
-export function omit(input, ...omit) {
+function omit(input, ...omit) {
 	return Object.fromEntries(Object.entries(input).filter(([key]) => !omit.includes(key)));
 }
 
-export function isChanged(left, right, keys) {
+function isChanged(left, right, keys) {
 	let isChanged = keys.reduce((a, k) => {
 		a |= left[k] != right[k];
 		return a;
@@ -30,7 +30,7 @@ export function isEqual(left, right) {
 	return _isEqual(left, right, 0);
 }
 
-export function isEmpty(value) {
+function isEmpty(value) {
 	return (
 		value === undefined ||
 		value === null ||

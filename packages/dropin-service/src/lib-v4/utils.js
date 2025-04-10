@@ -1,5 +1,5 @@
 // @ts-nocheck
-export function getSLDomain(hostname) {
+function getSLDomain(hostname) {
 	if (hostname) {
 		const split = hostname.split('.');
 		if (split.length === 3) {
@@ -10,7 +10,7 @@ export function getSLDomain(hostname) {
 	return hostname;
 }
 
-export function getCurrency(c) {
+function getCurrency(c) {
 	if (!c) {
 		return `$\u00A0-`;
 	}

@@ -2,10 +2,10 @@
  * @fileoverview Telemetry export functions for tracking user behavior and application performance.
  */
 
-export const EVENT_TYPE_API = 'api';
-export const EVENT_TYPE_UX = 'ux';
-export const EVENT_TYPE_DEVICE = 'device';
-export const EVENT_TYPE_SESSION = 'session';
+const EVENT_TYPE_API = 'api';
+const EVENT_TYPE_UX = 'ux';
+const EVENT_TYPE_DEVICE = 'device';
+const EVENT_TYPE_SESSION = 'session';
 export const EVENT_TYPE_ERROR = 'error';
 
 let _telemetryTimeout = null;
@@ -15,7 +15,7 @@ let _telemetryOrder = 0;
 /**
  * Pushes the telemetry queue to the server.
  */
-export function telemetryPush() {
+function telemetryPush() {
 	if (_telemetryQueue.length > 0) {
 		telemetry(_telemetryQueue);
 	}
@@ -26,7 +26,7 @@ export function telemetryPush() {
  * Retrieves header properties for telemetry events.
  * @returns {object} Header properties.
  */
-export function getHeaderProp() {
+function getHeaderProp() {
 	const firmly = window.firmly;
 	let headerProp = {
 		browser_id: firmly.browserId,
@@ -52,7 +52,7 @@ export function getHeaderProp() {
  * Generates the next event ID for telemetry events.
  * @returns {string} The next event ID.
  */
-export function getNextEventId() {
+function getNextEventId() {
 	return `${window.firmly.traceId}_${_telemetryOrder.toString()}_${Date.now()}`;
 }
 
@@ -101,7 +101,7 @@ const EVENT_VIEW_PAGE = 'viewPage';
 /**
  * Sends a page visit telemetry event.
  */
-export function telemetryPageVisit() {
+function telemetryPageVisit() {
 	const firmly = window.firmly;
 	const headerProp = getHeaderProp();
 	delete headerProp['parent_id'];
@@ -127,7 +127,7 @@ export function telemetryPageVisit() {
  * Sends a button click telemetry event.
  * @param {string} name The name of the button clicked.
  */
-export function telemetryButtonClick(name) {
+function telemetryButtonClick(name) {
 	const firmly = window.firmly;
 	const headerProp = getHeaderProp();
 
@@ -152,7 +152,7 @@ export function telemetryButtonClick(name) {
  * Sends a Visa event telemetry event.
  * @param {string} name The name of the Visa event.
  */
-export function telemetryVisaEvent(name) {
+function telemetryVisaEvent(name) {
 	const firmly = window.firmly;
 	const headerProp = getHeaderProp();
 
@@ -181,7 +181,7 @@ export function telemetryVisaEvent(name) {
  * @param {string} transactionId The transaction ID.
  * @param {object} additionalData Additional data to include in the event.
  */
-export function telemetryVisaApiPerformance(
+function telemetryVisaApiPerformance(
 	durationMs,
 	apiName,
 	apiResponse,
@@ -214,7 +214,7 @@ export function telemetryVisaApiPerformance(
  * Sends Visa error telemetry events.
  * @param {object} response The error response.
  */
-export function telemetryVisaErrors(response) {
+function telemetryVisaErrors(response) {
 	telemetryEnqueue({
 		event_type: EVENT_TYPE_ERROR,
 		timestamp: Date.now(),
@@ -230,7 +230,7 @@ export function telemetryVisaErrors(response) {
  * Sends a telemetry message to the server.
  * @param {object|array} message The telemetry message or an array of messages.
  */
-export async function telemetry(message) {
+async function telemetry(message) {
 	const firmly = window.firmly;
 	if (!message) {
 		return;

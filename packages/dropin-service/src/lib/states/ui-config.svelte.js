@@ -1,5 +1,5 @@
-export let locale = $state('en-US');
-export let currency = $state('USD');
+let locale = $state('en-US');
+let currency = $state('USD');
 
 export function toCurrency(value) {
 	return new Intl.NumberFormat(locale, {
