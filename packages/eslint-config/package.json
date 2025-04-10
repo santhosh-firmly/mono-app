@@ -6,10 +6,11 @@
 		".": "./index.js"
 	},
 	"dependencies": {
-		"@eslint/js": "^9.18.0",
 		"@eslint/compat": "^1.2.5",
+		"@eslint/js": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "^3.0.0",
+		"eslint-plugin-prettier": "^5.2.6",
 		"globals": "^16.0.0"
 	},
 	"peerDependencies": {

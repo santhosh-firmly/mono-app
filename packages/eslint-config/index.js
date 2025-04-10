@@ -1,4 +1,4 @@
-import prettier from 'eslint-config-prettier';
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import js from '@eslint/js';
 import { includeIgnoreFile } from '@eslint/compat';
 import svelte from 'eslint-plugin-svelte';
@@ -14,9 +14,9 @@ import noRelativeLibImports from './rules/no-relative-lib-imports.js';
 export default function createConfig({ gitignorePath, svelteConfig, ignores = [] }) {
 	return [
 		includeIgnoreFile(gitignorePath),
+		eslintPluginPrettierRecommended,
 		js.configs.recommended,
 		...svelte.configs.recommended,
-		prettier,
 		...svelte.configs.prettier,
 		{
 			ignores
