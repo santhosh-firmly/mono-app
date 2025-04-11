@@ -5,13 +5,6 @@
 	import { createEventDispatcher, onMount } from 'svelte';
 	import Modal from '../modal.svelte';
 	import C2pLogo from '$lib-v4/components/common/c2p-logo.svelte';
-	import {
-		getVisaCardToken,
-		isRecognized,
-		unlockComplete,
-		unlockStart,
-		visaAuthenticate
-	} from '$lib-v4/clients/visa.svelte';
 	import Checkbox from '../checkbox.svelte';
 	import { InfoC2PRememberMeLong } from '$lib-v4/browser/localization';
 	const dispatch = createEventDispatcher();
@@ -64,7 +57,7 @@
 	export async function c2pUnlockStart(email) {
 		isC2PInProgress = true;
 		EmailC2P = email;
-		const res = await unlockStart(email);
+		const res = await window.firmly.visa.unlockStart(email);
 		if (res.status === 200 && res.data.otp_destination) {
 			c2pOTPDestination = res.data.otp_destination;
 			otpEmailInfo = otpPhoneInfo = null;
@@ -89,11 +82,11 @@
 		let res;
 		if (!otpReference) {
 			popupStep = BASE_LOGIN_STEPS.PROCESSING_OTP;
-			res = await unlockComplete(event.detail.otpValue);
+			res = await window.firmly.visa.unlockComplete(event.detail.otpValue);
 		} else {
 			const cloneAuthenticationMethod = structuredClone(selectedAuthenticationMethod);
 			cloneAuthenticationMethod.methodAttributes.otpValue = event.detail.otpValue;
-			res = await visaAuthenticate(cloneAuthenticationMethod);
+			res = await window.firmly.visa.visaAuthenticate(cloneAuthenticationMethod);
 		}
 		if (res.status === 200 && res.data.payment_method_options) {
 			sendVisaEventToTelemetry('C2pOTPSucceeded');
@@ -119,7 +112,7 @@
 		} else if (event.authenticationMethodType) {
 			selectedAuthenticationMethod = event;
 		}
-		const res = await visaAuthenticate(selectedAuthenticationMethod);
+		const res = await window.firmly.visa.visaAuthenticate(selectedAuthenticationMethod);
 		if (res.status === 200) {
 			contentHeaderText = "Confirm it's you";
 			showSecondSlot = true;
@@ -132,7 +125,7 @@
 		}
 	}
 	export async function tokenizeC2P(selectedCard, additionalData = {}) {
-		const tokenizeResponse = await getVisaCardToken(
+		const tokenizeResponse = await window.firmly.visa.getVisaCardToken(
 			selectedCard.id,
 			null,
 			isChecked,
@@ -166,13 +159,36 @@
 	}
 	onMount(async () => {
 		try {
-			const res = await isRecognized();
-			if (res?.status === 200 && res?.data.recognized) {
-				sendVisaEventToTelemetry('login-c2p-successful');
-				dispatch('login-c2p-successful', Object.assign(res.data));
-			}
+			let attempts = 0;
+			const maxAttempts = 50; // 5 seconds
+
+			const checkVisaApi = async () => {
+				if (window.firmly?.visa?.isRecognized) {
+					const res = await window.firmly.visa.isRecognized();
+					if (res?.status === 200 && res?.data.recognized) {
+						sendVisaEventToTelemetry('login-c2p-successful');
+						dispatch('login-c2p-successful', Object.assign(res.data));
+					}
+					return true;
+				}
+				return false;
+			};
+
+			const isAvailable = await checkVisaApi();
+			if (isAvailable) return;
+
+			const interval = setInterval(async () => {
+				attempts++;
+				const isAvailable = await checkVisaApi();
+
+				if (isAvailable || attempts >= maxAttempts) {
+					clearInterval(interval);
+				}
+			}, 100);
+
+			return () => clearInterval(interval);
 		} catch (ex) {
-			console.log('Should throw an error');
+			console.error('Error checking Visa recognition:', ex);
 		}
 	});
 </script>

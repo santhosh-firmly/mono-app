@@ -1,45 +1,5 @@
 <script module>
 	// @ts-nocheck
-	let PUBLIC_c2p_sdk_url = '';
-	let PUBLIC_c2p_dpa_id = '';
-	let PUBLIC_c2p_initiator_id = '';
-
-	// Generate a unique transaction ID for this instance of the SDK
-	const uniqueTransactionId = crypto.randomUUID();
-	const skdUrl = PUBLIC_c2p_sdk_url;
-	let vSrc;
-	const initOptions = {
-		srciTransactionId: uniqueTransactionId,
-		srciDpaId: PUBLIC_c2p_dpa_id,
-		srcInitiatorId: PUBLIC_c2p_initiator_id,
-		dpaTransactionOptions: {
-			dpaLocale: 'US',
-			dpaAcceptedBillingCountries: ['US', 'CA'],
-			dpaAcceptedShippingCountries: ['US', 'CA'],
-			dpaBillingPreference: 'FULL',
-			dpaShippingPreference: 'FULL',
-			consumerNameRequested: true,
-			consumerEmailAddressRequested: true,
-			consumerPhoneNumberRequested: true,
-			paymentOptions: {
-				dpaDynamicDataTtlMinutes: 2,
-				dynamicDataType: 'DYNAMIC_CARD_SECURITY_CODE',
-				dpaPanRequested: false
-			},
-			reviewAction: 'continue',
-			transactionType: 'PURCHASE',
-			payloadTypeIndicator: 'FULL',
-			threeDsPreference: 'NONE',
-			threeDsInputData: {
-				requestorId: 'requestorId',
-				acquirerId: 'acquirerId',
-				acquirerMid: 'acquirerMid'
-			},
-			customInputData: {
-				checkoutOrchestrator: 'merchant'
-			}
-		}
-	};
 
 	/**
 	 * Helper function to wait for another promise resolution
@@ -83,7 +43,7 @@
 				durationMs,
 				apiName,
 				response,
-				uniqueTransactionId,
+				window.visaUniqueTransactionId,
 				additionalData
 			);
 		}
@@ -93,22 +53,7 @@
 		window.firmly?.telemetryVisaErrors?.(response);
 	}
 
-	const onSDKLoaded = async () => {
-		if (vSrc) {
-			return;
-		}
-
-		// If this function is called too fast, there is a chance
-		// Visa SDK is not fully loaded yet.
-		// Wait for the script to be loaded.
-		await waitScriptLoaded();
-
-		const vSrcAdapter = window.vAdapters.VisaSRCI;
-		vSrc = new vSrcAdapter();
-		await performanceObserver(() => vSrc.init(initOptions), 'init');
-	};
-
-	export async function visaUnlockStart(email) {
+	export async function visaUnlockStart(email, vSrc) {
 		const { consumerPresent } = await performanceObserver(
 			() =>
 				vSrc.identityLookup({
@@ -133,11 +78,7 @@
 		}
 	}
 
-	export async function isRecognized() {
-		if (!vSrc) {
-			await onSDKLoaded();
-		}
-
+	export async function isRecognized(vSrc) {
 		const { recognized } = await performanceObserver(() => vSrc.isRecognized(), 'isRecognized');
 		// TODO: How to know that the recognized one matches the input email?
 		if (recognized) {
@@ -179,18 +120,14 @@
 		}
 	}
 
-	export async function unlockStart(email) {
-		if (!vSrc) {
-			await onSDKLoaded();
-		}
-
+	export async function unlockStart(email, vSrc) {
 		try {
-			const isRecognizedResponse = await isRecognized();
+			const isRecognizedResponse = await isRecognized(vSrc);
 			if (isRecognizedResponse) {
 				return isRecognizedResponse;
 			}
 
-			const res = await performanceObserver(() => visaUnlockStart(email), 'visaUnlockStart');
+			const res = await performanceObserver(() => visaUnlockStart(email, vSrc), 'visaUnlockStart');
 			if (res) {
 				return {
 					status: 200,
@@ -213,7 +150,7 @@
 		}
 	}
 
-	export async function visaUnlockComplete(otpValue) {
+	export async function visaUnlockComplete(otpValue, vSrc) {
 		const resp = await performanceObserver(
 			() =>
 				vSrc.completeIdentityValidation({
@@ -303,10 +240,10 @@
 		return error;
 	}
 
-	export async function unlockComplete(otpValue) {
+	export async function unlockComplete(otpValue, vSrc) {
 		try {
 			const res = await performanceObserver(
-				() => visaUnlockComplete(otpValue),
+				() => visaUnlockComplete(otpValue, vSrc),
 				'visaUnlockComplete'
 			);
 			return {
@@ -323,7 +260,7 @@
 		}
 	}
 
-	async function visaCheckout(cardId, rememberMe, additionalData) {
+	async function visaCheckout(cardId, rememberMe, additionalData, vSrc, initOptions) {
 		const rememberMeOptions = {
 			complianceSettings: {
 				complianceResources: [
@@ -357,16 +294,30 @@
 		return resp;
 	}
 
+	// This is kept at module level because it needs to persist across component instances
 	let jwsCache = {};
 
-	export async function getVisaCardToken(cardId, cvv, rememberMe, additionalData) {
+	export async function getVisaCardToken(
+		cardId,
+		cvv,
+		rememberMe,
+		additionalData,
+		vSrc,
+		initOptions
+	) {
 		try {
 			let visaCheckoutResponse;
 			let jws;
 			if (cvv) {
 				jws = jwsCache[cardId];
 			} else {
-				visaCheckoutResponse = await visaCheckout(cardId, rememberMe, additionalData);
+				visaCheckoutResponse = await visaCheckout(
+					cardId,
+					rememberMe,
+					additionalData,
+					vSrc,
+					initOptions
+				);
 				jws = visaCheckoutResponse.checkoutResponse;
 				if (!jws) {
 					// Customer cancelled the flow on Visa pop-up
@@ -416,7 +367,7 @@
 		}
 	}
 
-	export async function visaAuthenticate(authenticationMethod) {
+	export async function visaAuthenticate(authenticationMethod, vSrc) {
 		try {
 			const response = await performanceObserver(
 				() =>
@@ -448,15 +399,96 @@
 <script>
 	import { onMount } from 'svelte';
 
-	let props = $props();
+	// Declare props with runes
+	let { PUBLIC_c2p_sdk_url, PUBLIC_c2p_dpa_id, PUBLIC_c2p_initiator_id } = $props();
 
-	onMount(() => {
-		PUBLIC_c2p_dpa_id = props.PUBLIC_c2p_dpa_id;
-		PUBLIC_c2p_initiator_id = props.PUBLIC_c2p_initiator_id;
-		PUBLIC_c2p_sdk_url = props.PUBLIC_c2p_sdk_url;
-	});
+	let isScriptLoaded = $state(false);
+	let vSrc = $state(null);
+	let uniqueTransactionId;
+	let initOptions;
+
+	// Svelte action to load the SDK script
+	function loadVisaScript(node) {
+		// Only proceed if we have the SDK URL
+		if (!PUBLIC_c2p_sdk_url) {
+			console.error('Visa SDK URL is undefined');
+			return;
+		}
+
+		// Generate a unique transaction ID at component level
+		uniqueTransactionId = crypto.randomUUID();
+		// Store it globally so performanceObserver can access it
+		window.visaUniqueTransactionId = uniqueTransactionId;
+
+		// Initialize options using props
+		initOptions = {
+			srciTransactionId: uniqueTransactionId,
+			srciDpaId: PUBLIC_c2p_dpa_id,
+			srcInitiatorId: PUBLIC_c2p_initiator_id,
+			dpaTransactionOptions: {
+				dpaLocale: 'US',
+				dpaAcceptedBillingCountries: ['US', 'CA'],
+				dpaAcceptedShippingCountries: ['US', 'CA'],
+				dpaBillingPreference: 'FULL',
+				dpaShippingPreference: 'FULL',
+				consumerNameRequested: true,
+				consumerEmailAddressRequested: true,
+				consumerPhoneNumberRequested: true,
+				paymentOptions: {
+					dpaDynamicDataTtlMinutes: 2,
+					dynamicDataType: 'DYNAMIC_CARD_SECURITY_CODE',
+					dpaPanRequested: false
+				},
+				reviewAction: 'continue',
+				transactionType: 'PURCHASE',
+				payloadTypeIndicator: 'FULL',
+				threeDsPreference: 'NONE',
+				threeDsInputData: {
+					requestorId: 'requestorId',
+					acquirerId: 'acquirerId',
+					acquirerMid: 'acquirerMid'
+				},
+				customInputData: {
+					checkoutOrchestrator: 'merchant'
+				}
+			}
+		};
+
+		// Create and append the script element
+		const script = document.createElement('script');
+		script.src = PUBLIC_c2p_sdk_url;
+		script.async = true;
+		script.onload = onSDKLoaded;
+		document.head.appendChild(script);
+	}
+
+	// Script load handler that initializes the SDK
+	async function onSDKLoaded() {
+		try {
+			await waitScriptLoaded();
+
+			const vSrcAdapter = window.vAdapters.VisaSRCI;
+			vSrc = new vSrcAdapter();
+			await performanceObserver(() => vSrc.init(initOptions), 'init');
+
+			isScriptLoaded = true;
+
+			// Expose methods for the parent component to call
+			window.firmly = window.firmly || {};
+			window.firmly.visa = {
+				unlockStart: (email) => unlockStart(email, vSrc),
+				unlockComplete: (otpValue) => unlockComplete(otpValue, vSrc),
+				isRecognized: () => isRecognized(vSrc),
+				getVisaCardToken: (cardId, cvv, rememberMe, additionalData) =>
+					getVisaCardToken(cardId, cvv, rememberMe, additionalData, vSrc, initOptions),
+				visaAuthenticate: (authenticationMethod) => visaAuthenticate(authenticationMethod, vSrc)
+			};
+		} catch (error) {
+			console.error('Failed to initialize Visa SDK:', error);
+		}
+	}
 </script>
 
-<svelte:head>
-	<script src={skdUrl} on:load={onSDKLoaded} async></script>
-</svelte:head>
+<!-- Empty div with the action to load the Visa SDK -->
+<!-- In Svelte, the use: directive is a way to apply a Svelte action to a DOM element. -->
+<div use:loadVisaScript style="display: none;"></div>
