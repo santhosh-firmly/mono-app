@@ -1,3 +1,8 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
 Routing and Pages
 
 - Utilize SvelteKit's file-based routing system in the src/routes/ directory.
