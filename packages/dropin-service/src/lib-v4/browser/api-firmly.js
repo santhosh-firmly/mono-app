@@ -2,7 +2,7 @@
 
 import { platformsToMakeCartHealthCheck } from './api-config';
 import { postUpdateCart } from './cross';
-import * as jose from 'jose';
+import { importJWK, CompactEncrypt } from 'foundation/auth/jose.js';
 
 //#region Session Storage
 
@@ -570,7 +570,7 @@ async function getRSAKey(jwkKey) {
 
 async function importJWKKey(jwkKey) {
 	try {
-		return await jose.importJWK(jwkKey, 'RSA-OAEP-256');
+		return await importJWK(jwkKey, 'RSA-OAEP-256');
 	} catch (error) {
 		console.error('Error importing JWK:', error);
 		throw new Error(`Failed to import JWK: ${error.message}`);
@@ -594,7 +594,7 @@ async function encryptJWEPayloadWithKey(payload, publicKey, options = {}) {
 		}
 
 		// Encrypt the payload
-		const jwe = new jose.CompactEncrypt(new TextEncoder().encode(JSON.stringify(payload)))
+		const jwe = new CompactEncrypt(new TextEncoder().encode(JSON.stringify(payload)))
 			.setProtectedHeader(jweConfig)
 			.encrypt(publicKey);
 
