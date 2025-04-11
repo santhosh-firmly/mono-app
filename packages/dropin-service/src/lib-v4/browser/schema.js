@@ -124,15 +124,15 @@ const FirstAndLastName = {
 		.default('')
 };
 
-export const EmailSchema = Yup.object().shape(Email);
+const EmailSchema = Yup.object().shape(Email);
 
 const Phone = {
 	phone: Yup.string().phone().required(Required).default('')
 };
 
-export const PhoneSchema = Yup.object().shape(Phone);
+const PhoneSchema = Yup.object().shape(Phone);
 
-export const ContactSchema = Yup.object().shape({
+const ContactSchema = Yup.object().shape({
 	...Email,
 	...Phone
 });
@@ -150,11 +150,11 @@ const address = {
 	country: Yup.string().required(Required).default('United States').max(50, maximum(50))
 };
 
-export const CVCSchema = Yup.object().shape({
+const CVCSchema = Yup.object().shape({
 	cvc: Yup.string().required(Required).max(4, maximum(4)).default('')
 });
 
-export const creditCard = {
+const creditCard = {
 	cardType: Yup.mixed().default(''),
 	cardName: Yup.string().required(Required).min(3, minumum(3)).max(30, maximum(30)).default(''),
 	cardNumber: Yup.string().required(Required).cardnumber().default(''),
@@ -162,7 +162,7 @@ export const creditCard = {
 	cvc: Yup.string().required(Required).max(4, maximum(4)).default('')
 };
 
-export const CreditCardSchema = Yup.object().shape({
+const CreditCardSchema = Yup.object().shape({
 	...creditCard
 });
 
@@ -211,4 +211,4 @@ const Password = {
 	password: Yup.string().trim().required(Required).default('')
 };
 
-export const PasswordSchema = Yup.object().shape(Password);
+const PasswordSchema = Yup.object().shape(Password);

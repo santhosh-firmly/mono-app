@@ -32,25 +32,25 @@ import { postUpdateCart } from './cross.js';
 const DEFAULT_PHONE = '0000000000';
 //#region Storage
 
-export const sApiError = writable({});
-export const sApiProgressInfo = writable({});
-export const sApiDynamoProgress = writable(false);
+const sApiError = writable({});
+const sApiProgressInfo = writable({});
+const sApiDynamoProgress = writable(false);
 
 export const sIsApiMock = writable(false);
 
-export const sPaymentInfo = writable(PaymentInfoSchema.cast());
-export const sShippingInfo = writable(ShippingInfoSchema.cast());
+const sPaymentInfo = writable(PaymentInfoSchema.cast());
+const sShippingInfo = writable(ShippingInfoSchema.cast());
 
 // Cart
 
-export const sCart = writable({});
+const sCart = writable({});
 let cartData = null;
 sCart.subscribe((value) => {
 	cartData = value;
 	cartLocalStorageRefresh();
 });
 
-export const sCartPayment = writable({});
+const sCartPayment = writable({});
 let cartPaymentData = null;
 sCartPayment.subscribe((value) => {
 	cartPaymentData = value;
@@ -64,25 +64,25 @@ sCartStoreInfo.subscribe((value) => {
 });
 
 // Wallet
-export const sWallet = writable({});
+const sWallet = writable({});
 
-export const sWalletInfo = writable(null);
+const sWalletInfo = writable(null);
 
-export const sWalletReview = writable(null);
+const sWalletReview = writable(null);
 
-export const sWalletRememberMe = writable(true);
+const sWalletRememberMe = writable(true);
 
-export const sC2PAuthenticate = writable({});
+const sC2PAuthenticate = writable({});
 
-export const sSavedPayment = writable(null);
+const sSavedPayment = writable(null);
 
-export const sMaskedOtpDestinations = writable({});
+const sMaskedOtpDestinations = writable({});
 //#endregion
 
 // Sign in
-export const sSignedInOnThisSession = writable(false);
+const sSignedInOnThisSession = writable(false);
 
-export function getFirstUnexpiredCard(cart, wallet = 'merchant') {
+function getFirstUnexpiredCard(cart, wallet = 'merchant') {
 	const options = wallet
 		? cart.payment_method_options.filter((e) => e.wallet == wallet && e.id)
 		: cart.payment_method_options;
@@ -135,7 +135,7 @@ let mockC2PData;
 let c2pAuthenticated = false;
 
 let isMock = false;
-export function mockSetup(data, c2pData) {
+function mockSetup(data, c2pData) {
 	isMock = true;
 	sIsApiMock.set(true);
 	mockData = data;
@@ -145,7 +145,7 @@ export function mockSetup(data, c2pData) {
 
 //#region Payment
 
-export async function cartUpdatePayment(paymentInfo) {
+async function cartUpdatePayment(paymentInfo) {
 	if (isMock) {
 		await mockDelay(ProgressPaymentToken);
 		return cartData;
@@ -225,7 +225,7 @@ async function getCCInfoV2(paymentInfo) {
 	return ccInfo;
 }
 
-export async function paymentCompleteOrder(paymentInfo) {
+async function paymentCompleteOrder(paymentInfo) {
 	if (isMock) {
 		await mockDelay(ProgressOrderPlacement);
 		return cartData;
@@ -251,7 +251,7 @@ export async function paymentCompleteOrder(paymentInfo) {
 	return res.status == 200 ? res.data : null;
 }
 
-export async function paymentCompleteOrderV2(paymentInfo) {
+async function paymentCompleteOrderV2(paymentInfo) {
 	if (isMock) {
 		await mockDelay(ProgressOrderPlacement);
 		return cartData;
@@ -281,7 +281,7 @@ export async function paymentCompleteOrderV2(paymentInfo) {
 //#region Wallet
 
 // Click to Pay
-export async function c2pWalletUnlockStart(emailAddress) {
+async function c2pWalletUnlockStart(emailAddress) {
 	const progress = ProgressC2PUnlockStart;
 	if (isMock) {
 		await mockDelay(progress);
@@ -306,7 +306,7 @@ export async function c2pWalletUnlockStart(emailAddress) {
 	return res.status == 200 ? res.data : null;
 }
 
-export async function c2pWalletUnlockComplete(otp) {
+async function c2pWalletUnlockComplete(otp) {
 	if (isMock) {
 		await mockDelay(ProgressUnlockComplete);
 		sWallet.set(mockData.mockUnlockComplete);
@@ -330,7 +330,7 @@ export async function c2pWalletUnlockComplete(otp) {
 	return res.status == 200 ? res.data : null;
 }
 
-export async function cartC2PWallet(cardId, rememberMe = false, cvv = null, additionalData = {}) {
+async function cartC2PWallet(cardId, rememberMe = false, cvv = null, additionalData = {}) {
 	if (isMock) {
 		await mockDelay(ProgressC2PTokenize);
 		if (cvv) {
@@ -368,7 +368,7 @@ export async function cartC2PWallet(cardId, rememberMe = false, cvv = null, addi
 	return res.status == 200 ? res.data : null;
 }
 
-export async function c2pVisaAuthenticate(authenticationMethod) {
+async function c2pVisaAuthenticate(authenticationMethod) {
 	if (isMock) {
 		await mockDelay(ProgressSessionCreateOtp);
 
@@ -401,7 +401,7 @@ export async function c2pVisaAuthenticate(authenticationMethod) {
 //#endregion
 
 // Shop Pay
-export async function shopPayWalletUnlockStart(emailAddress, captcha) {
+async function shopPayWalletUnlockStart(emailAddress, captcha) {
 	const progress = ProgressShoppayUnlockStart;
 	if (isMock) {
 		await mockDelay(progress);
@@ -423,7 +423,7 @@ export async function shopPayWalletUnlockStart(emailAddress, captcha) {
 	return res.status == 200 ? res.data : null;
 }
 
-export async function shopPayWalletUnlockComplete(otp) {
+async function shopPayWalletUnlockComplete(otp) {
 	if (isMock) {
 		await mockDelay(ProgressUnlockComplete);
 		sWallet.set(mockData.mockUnlockComplete);
@@ -444,7 +444,7 @@ export async function shopPayWalletUnlockComplete(otp) {
 	return res.status == 200 ? res.data : null;
 }
 
-export async function cartShoppayWallet(cardId) {
+async function cartShoppayWallet(cardId) {
 	if (isMock) {
 		await mockDelay(ProgressShoppayTokenize);
 		return mockData.mockC2PCVV;
@@ -503,7 +503,7 @@ export async function paypalApprove(attributes) {
 	return res.status == 200 ? res.data : null;
 }
 
-export async function paypalCompleteOrder(attributes) {
+async function paypalCompleteOrder(attributes) {
 	if (isMock) {
 		await mockDelay(ProgressOrderPlacement);
 		return cartData;
@@ -525,7 +525,7 @@ export async function paypalCompleteOrder(attributes) {
 //#endregion
 
 //#region Cart API's
-export async function cartSessionTransfer(body) {
+async function cartSessionTransfer(body) {
 	if (isMock) {
 		await mockDelay(ProgressTransferCart);
 		return cartData;
@@ -545,7 +545,7 @@ export async function cartSessionTransfer(body) {
 	return res.status == 200 ? res.data : null;
 }
 
-export async function cartUpdateShippingInfo(shippingInfo) {
+async function cartUpdateShippingInfo(shippingInfo) {
 	if (isMock) {
 		if (cartData.session) {
 			//Coming from Login Merchant
@@ -586,7 +586,7 @@ export async function cartUpdateShippingInfo(shippingInfo) {
 	return res.status == 200 ? res.data : null;
 }
 
-export async function cartUpdateDelivery(sku) {
+async function cartUpdateDelivery(sku) {
 	if (isMock) {
 		await mockDelay(ProgressDelivery);
 		return cartData;
@@ -606,7 +606,7 @@ export async function cartUpdateDelivery(sku) {
 	return res.status == 200 ? res.data : null;
 }
 
-export async function cartCompleteOrder() {
+async function cartCompleteOrder() {
 	if (isMock) {
 		await mockDelay(ProgressOrderPlacement);
 		return cartData;
@@ -629,7 +629,7 @@ export async function cartCompleteOrder() {
 	return res.status == 200 ? res.data : null;
 }
 
-export async function cartUpdateSku(sku, quantity, variantHandles = []) {
+async function cartUpdateSku(sku, quantity, variantHandles = []) {
 	if (isMock) {
 		await mockDelay(ProgressCartUpdate);
 		return cartData;
@@ -650,7 +650,7 @@ export async function cartUpdateSku(sku, quantity, variantHandles = []) {
 	return res.status == 200 ? res.data : null;
 }
 
-export async function sessionJoin(password) {
+async function sessionJoin(password) {
 	if (isMock) {
 		await mockDelay(ProgressSessionJoin);
 		return cartData;
@@ -670,7 +670,7 @@ export async function sessionJoin(password) {
 	return res.status == 200 ? res.data : null;
 }
 
-export async function sessionCreateOtp(email) {
+async function sessionCreateOtp(email) {
 	if (isMock) {
 		await mockDelay(ProgressSessionCreateOtp);
 		sLoginOtpFlow.set(cLoginOtpValidation);
@@ -689,7 +689,7 @@ export async function sessionCreateOtp(email) {
 	return res.status == 200 ? res.data : null;
 }
 
-export async function sessionValidateOtp(email, otp) {
+async function sessionValidateOtp(email, otp) {
 	if (isMock) {
 		await mockDelay(ProgressUnlockComplete);
 		return cartData;
@@ -707,7 +707,7 @@ export async function sessionValidateOtp(email, otp) {
 	return res.status == 200 ? res.data : null;
 }
 
-export async function cartSavedPaymentCompleteOrder(paymentId) {
+async function cartSavedPaymentCompleteOrder(paymentId) {
 	if (isMock) {
 		await mockDelay(ProgressOrderPlacement);
 		return cartData;
@@ -740,7 +740,7 @@ function mapAddress(e) {
 	return e;
 }
 
-export async function searchAddress(prefix, domain = null) {
+async function searchAddress(prefix, domain = null) {
 	const res = await window.firmly.searchAddress(prefix, domain);
 	if (res.status == 200) {
 		const add = res.data.predictions.map(mapAddress);
@@ -750,7 +750,7 @@ export async function searchAddress(prefix, domain = null) {
 	return [];
 }
 
-export async function getAddress(id, domain) {
+async function getAddress(id, domain) {
 	const res = await window.firmly.getAddress(id, domain);
 	if (res.status == 200) {
 		return res.data;

@@ -13,9 +13,9 @@ import UnionpayCardIcon from '$lib-v4/components/common/svg/unionpay-card-icon.s
 import VisaCardIcon from '$lib-v4/components/common/svg/visa-card-icon.svelte';
 import VisaCardIconV4 from '$lib-v4/components/common/svg/visa-card-icon-v4.svelte';
 
-export const DEFAULT_CVC_LENGTH = 3;
-export const DEFAULT_ZIP_LENGTH = 5;
-export const DEFAULT_CARD_FORMAT = /(\d{1,4})/g;
+const DEFAULT_CVC_LENGTH = 3;
+const DEFAULT_ZIP_LENGTH = 5;
+const DEFAULT_CARD_FORMAT = /(\d{1,4})/g;
 export const CARD_ICON_COMPONENTS = [
 	VisaCardIconV4,
 	MasterCardIconV4,
@@ -23,7 +23,7 @@ export const CARD_ICON_COMPONENTS = [
 	AmexCardIconV4
 ];
 
-export const CARD_TYPES = {
+const CARD_TYPES = {
 	visa: {
 		component: VisaCardIcon,
 		displayName: 'Visa',
@@ -110,7 +110,7 @@ export const CARD_TYPES = {
 	}
 };
 
-export const CARD_TYPES_CHECKOUT_V4 = {
+const CARD_TYPES_CHECKOUT_V4 = {
 	visa: {
 		component: VisaCardIconV4,
 		displayName: 'Visa',
@@ -224,7 +224,7 @@ export function getCardTypeByType(type, origin) {
 
 const expirySeparator = '/';
 
-export function formatExpiry(event) {
+function formatExpiry(event) {
 	const eventData = event.nativeEvent && event.nativeEvent.data;
 	const prevExpiry = event.target.value;
 
@@ -291,7 +291,7 @@ export function formatCardNumberRaw(cardNumber) {
 	return ret;
 }
 
-export function formatCardNumber(event) {
+function formatCardNumber(event) {
 	return formatCardNumberRaw(event.target.value || '');
 }
 
@@ -309,20 +309,20 @@ export function validateLuhn(cardNumber) {
 	);
 }
 
-export function isCardMaxLength(cardNumber) {
+function isCardMaxLength(cardNumber) {
 	const cardType = getCardTypeByValue(cardNumber);
 	return cardType && cardNumber.length >= cardType.lengths[cardType.lengths.length - 1];
 }
 
 //0-9 Number keys 48-57
 //0-9 Number Pad keys 96-105
-export const CreditCardNumbers = [
+const CreditCardNumbers = [
 	8, 46, 35, 36, 37, 39, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 96, 97, 98, 99, 100, 101, 102, 103,
 	104, 105
 ];
-export const ExpiryDateNumbers = [...CreditCardNumbers, 191];
+const ExpiryDateNumbers = [...CreditCardNumbers, 191];
 
-export function validateNumber(evt, validCodes) {
+function validateNumber(evt, validCodes) {
 	const keyCode = evt.keyCode || evt.which;
 	// Ctrl+A, Ctrl+C, Ctrl+V
 	if ((keyCode == 65 || keyCode == 67 || keyCode == 86) && (evt.ctrlKey || evt.metaKey)) {
@@ -336,14 +336,14 @@ export function validateNumber(evt, validCodes) {
 	}
 }
 
-export function validateCreditCard(evt) {
+function validateCreditCard(evt) {
 	return validateNumber(evt, CreditCardNumbers);
 }
 
-export function validateExpiryDate(evt) {
+function validateExpiryDate(evt) {
 	return validateNumber(evt, ExpiryDateNumbers);
 }
 
-export function validateCVC(evt) {
+function validateCVC(evt) {
 	return validateNumber(evt, CreditCardNumbers);
 }

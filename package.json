@@ -16,7 +16,7 @@
 		"deploy-uat": "lerna run deploy-uat",
 		"deploy-prod": "lerna run deploy-prod",
 		"outdated": "npx check-outdated --prefer-wanted --ignore-packages @vitest,@vitest/ui,@vitest/coverage-istanbul,vitest",
-		"depcheck": "npx @tinkoff-monorepo/depscheck --depcheck-ignore-matches cloudflare:test",
+		"depcheck": "knip -c knip.config.js --no-config-hints",
 		"format-code": "lerna run format-code",
 		"test": "lerna run test:static",
 		"update-version": "lerna version --no-push --force-publish --yes",
@@ -25,7 +25,8 @@
 	},
 	"devDependencies": {
 		"husky": "^9.1.7",
-		"lerna": "^8.1.2"
+		"lerna": "^8.1.2",
+		"knip": "^5.50.1"
 	},
 	"dependencies": {
 		"jose": "^6.0.10"
