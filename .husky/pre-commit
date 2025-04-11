@@ -8,7 +8,6 @@ die() {
 }
 # We're skipping this step for now in order to clarify which dependencies are required
 # Verify for library dependency inconsistencies
-# npm run depcheck || die 'There are unused libraries in the project. Please, remove them before committing';
 
 # Verify for outdated libraries
 npm run outdated || die '✋ There are outdated libraries in the project. Please, update them before commiting with "npm update"';
