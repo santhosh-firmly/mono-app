@@ -1,7 +1,30 @@
-node_modules/
-*storybook.log
+node_modules
 
+# Output
+dist
+.output
+.vercel
+.netlify
+.wrangler
+.svelte-kit
+build
 
-packages/**/storybook-static/
-packages/**/.storybook/static/*
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.*
+!.env.example
+!.env.test
 .dev.vars
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# Paraglide
+src/lib/paraglide
+*storybook.log
+/storybook-static
