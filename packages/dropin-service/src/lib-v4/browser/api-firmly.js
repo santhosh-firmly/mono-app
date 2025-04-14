@@ -2,7 +2,7 @@
 
 import { platformsToMakeCartHealthCheck } from './api-config';
 import { postUpdateCart } from './cross';
-import { importJWK, CompactEncrypt } from 'foundation/auth/jose.js';
+import { importJWK, CompactEncrypt } from 'foundation/auth/ext-jose.js';
 
 //#region Session Storage
 
