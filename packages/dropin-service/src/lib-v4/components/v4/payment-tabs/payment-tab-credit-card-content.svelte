@@ -51,7 +51,11 @@
 	}
 	$: {
 		filteredCards = savedCreditCards.filter((c) => c.last_four);
-		selectedCardOption = selectedCardOption || filteredCards?.[0]?.id || NEW_CARD_OPTION;
+		selectedCardOption =
+			selectedCardOption ||
+			filteredCards?.[0]?.id ||
+			filteredCards?.[0]?.pan ||
+			NEW_CARD_OPTION;
 	}
 
 	$: {
@@ -178,7 +182,7 @@
 						class="disabled:bg-fy-on-primary-subtle text-fy-action"
 						type="radio"
 						{disabled}
-						value={savedCard.id}
+						value={savedCard.id || savedCard.pan}
 						bind:group={selectedCardOption}
 					/>
 					<ExistingCreditCard
@@ -186,7 +190,7 @@
 						number={savedCard.last_four}
 						customArtUrl={savedCard.art}
 					/>
-					{#if isCvvRequired && selectedCardOption === savedCard.id}
+					{#if isCvvRequired && (selectedCardOption === savedCard.id || selectedCardOption === savedCard.pan)}
 						<div class="mb-2 flex items-center gap-2">
 							<span class="text-fy-alert text-sm">Please confirm your CVV</span>
 						</div>

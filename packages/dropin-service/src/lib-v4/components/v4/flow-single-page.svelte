@@ -208,7 +208,10 @@
 			(!selectedCardOption || setFirstCard || savedCreditCards.length !== 0) &&
 			!savedCreditCardAutoSelected
 		) {
-			selectedCardOption = savedCreditCards.filter((c) => c.last_four)?.[0]?.id || NEW_CARD_OPTION;
+			selectedCardOption =
+				savedCreditCards.filter((c) => c.last_four)?.[0]?.id ||
+				savedCreditCards.filter((c) => c.last_four)?.[0]?.pan ||
+				NEW_CARD_OPTION;
 
 			// set this flag to true so that we don't keep selecting the first credit card all the time
 			if (selectedCardOption !== NEW_CARD_OPTION) {
@@ -617,7 +620,9 @@
 	}
 
 	async function placeOrderMerchant(selectedCard) {
-		const placeOrderResponse = await window.firmly.cartSavedPaymentCompleteOrder(selectedCard.id);
+		const placeOrderResponse = await window.firmly.cartSavedPaymentCompleteOrder(
+			selectedCard.id || selectedCard.pan
+		);
 		if (placeOrderResponse.status !== 200) {
 			place_order_error = placeOrderResponse.data?.description || placeOrderResponse.data;
 			return;
@@ -689,12 +694,18 @@
 				return placeOrderManualCreditCard();
 			}
 		} else {
-			const selectedCard = savedCreditCards.find((c) => c.id === selectedCardOption);
+			const selectedCard =
+				savedCreditCards.find((c) => c.id === selectedCardOption) ||
+				savedCreditCards.find((c) => c.pan === selectedCardOption);
 			if (selectedCard.wallet === 'shoppay' && isEmailvalid && isShippingValid) {
 				return placeOrderShopPay();
 			} else if (selectedCard.wallet === 'c2p' && isEmailvalid && isShippingValid) {
 				return placeOrderC2P(selectedCard, additionalData);
-			} else if (selectedCard.wallet === 'merchant' && isEmailvalid && isShippingValid) {
+			} else if (
+				(selectedCard.wallet === 'merchant' || selectedCard.wallet === 'test') &&
+				isEmailvalid &&
+				isShippingValid
+			) {
 				return placeOrderMerchant(selectedCard);
 			}
 		}
@@ -810,7 +821,10 @@
 		savedAddresses = savedAddresses.concat(eventDetail.shipping_info_options);
 
 		// Automatically select the first card on the list
-		selectedCardOption = savedCreditCards.filter((c) => c.last_four)?.[0]?.id || NEW_CARD_OPTION;
+		selectedCardOption =
+			savedCreditCards.filter((c) => c.last_four)?.[0]?.id ||
+			savedCreditCards.filter((c) => c.pan)?.[0]?.pan ||
+			NEW_CARD_OPTION;
 
 		// Automatically set the shipping info if there is none yet set.
 		if (!$cart.shipping_info && savedAddresses[0]) {
@@ -1356,7 +1370,7 @@
 						{/if}
 						{#if collapsedStatePayment}
 							{@const selectedCard = savedCreditCards.find(
-								(c) => selectedCardOption && c.id === selectedCardOption
+								(c) => selectedCardOption && (c.id || c.pan) === selectedCardOption
 							)}
 							<div class="pb-6" class:pt-2={!collapsedStateShippingMethod} transition:fadeSlide>
 								<Group>
