@@ -94,13 +94,13 @@
 				wallet: 'shoppay'
 			},
 			{
+				type: 'DemoCreditCard',
+				wallet: 'test',
 				art: '',
 				card_type: 'Visa',
 				last_four: '1111',
 				month: '12',
 				pan: '4111111111111111',
-				type: 'DemoCreditCard',
-				wallet: 'test',
 				year: '2030'
 			}
 		]
@@ -256,13 +256,13 @@
 				}
 			},
 			{
+				type: 'DemoCreditCard',
+				wallet: 'test',
 				art: '',
 				card_type: 'Visa',
 				last_four: '1111',
 				month: '12',
 				pan: '4111111111111111',
-				type: 'DemoCreditCard',
-				wallet: 'test',
 				year: '2030',
 				billing_info: {
 					first_name: 'Romeu',
@@ -477,13 +477,13 @@
 				wallet: 'user'
 			},
 			{
+				type: 'DemoCreditCard',
+				wallet: 'test',
 				art: '',
 				card_type: 'Visa',
 				last_four: '1111',
 				month: '12',
 				pan: '4111111111111111',
-				type: 'DemoCreditCard',
-				wallet: 'test',
 				year: '2030',
 				billing_info: {
 					first_name: 'Romeu',
@@ -698,13 +698,13 @@
 				wallet: 'user'
 			},
 			{
+				type: 'DemoCreditCard',
+				wallet: 'test',
 				art: '',
 				card_type: 'Visa',
 				last_four: '1111',
 				month: '12',
 				pan: '4111111111111111',
-				type: 'DemoCreditCard',
-				wallet: 'test',
 				year: '2030',
 				billing_info: {
 					first_name: 'Romeu',
@@ -810,13 +810,13 @@
 				}
 			},
 			{
+				type: 'DemoCreditCard',
+				wallet: 'test',
 				art: '',
 				card_type: 'Visa',
 				last_four: '1111',
 				month: '12',
 				pan: '4111111111111111',
-				type: 'DemoCreditCard',
-				wallet: 'test',
 				year: '2030',
 				billing_info: {
 					first_name: 'Romeu',
