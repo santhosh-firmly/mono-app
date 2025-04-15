@@ -94,10 +94,10 @@
 				wallet: 'shoppay'
 			},
 			{
-                art: '',
-                card_type: 'Visa',
-                last_four: '1111',
-                month: '12',
+				art: '',
+				card_type: 'Visa',
+				last_four: '1111',
+				month: '12',
 				pan: '4111111111111111',
 				type: 'DemoCreditCard',
 				wallet: 'test',
@@ -256,10 +256,10 @@
 				}
 			},
 			{
-                art: '',
-                card_type: 'Visa',
-                last_four: '1111',
-                month: '12',
+				art: '',
+				card_type: 'Visa',
+				last_four: '1111',
+				month: '12',
 				pan: '4111111111111111',
 				type: 'DemoCreditCard',
 				wallet: 'test',
@@ -477,10 +477,10 @@
 				wallet: 'user'
 			},
 			{
-                art: '',
-                card_type: 'Visa',
-                last_four: '1111',
-                month: '12',
+				art: '',
+				card_type: 'Visa',
+				last_four: '1111',
+				month: '12',
 				pan: '4111111111111111',
 				type: 'DemoCreditCard',
 				wallet: 'test',
@@ -698,10 +698,10 @@
 				wallet: 'user'
 			},
 			{
-                art: '',
-                card_type: 'Visa',
-                last_four: '1111',
-                month: '12',
+				art: '',
+				card_type: 'Visa',
+				last_four: '1111',
+				month: '12',
 				pan: '4111111111111111',
 				type: 'DemoCreditCard',
 				wallet: 'test',
@@ -810,10 +810,10 @@
 				}
 			},
 			{
-                art: '',
-                card_type: 'Visa',
-                last_four: '1111',
-                month: '12',
+				art: '',
+				card_type: 'Visa',
+				last_four: '1111',
+				month: '12',
 				pan: '4111111111111111',
 				type: 'DemoCreditCard',
 				wallet: 'test',
