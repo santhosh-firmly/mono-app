@@ -92,6 +92,16 @@
 			{
 				type: 'ShopPay',
 				wallet: 'shoppay'
+			},
+			{
+                art: '',
+                card_type: 'Visa',
+                last_four: '1111',
+                month: '12',
+				pan: '4111111111111111',
+				type: 'DemoCreditCard',
+				wallet: 'test',
+				year: '2030'
 			}
 		]
 	};
@@ -232,6 +242,28 @@
 				month: 3,
 				year: 2030,
 				card_type: 'jcb',
+				billing_info: {
+					first_name: 'Romeu',
+					last_name: 'Palos de Gouvea',
+					address1: '7367 126th Pl SE',
+					address2: '',
+					city: 'Newcastle',
+					state_or_province: 'WA',
+					state_name: 'Washington',
+					postal_code: '98056',
+					country: 'United States',
+					phone: '+14253368875'
+				}
+			},
+			{
+                art: '',
+                card_type: 'Visa',
+                last_four: '1111',
+                month: '12',
+				pan: '4111111111111111',
+				type: 'DemoCreditCard',
+				wallet: 'test',
+				year: '2030',
 				billing_info: {
 					first_name: 'Romeu',
 					last_name: 'Palos de Gouvea',
@@ -443,6 +475,28 @@
 			{
 				type: 'CreditCard',
 				wallet: 'user'
+			},
+			{
+                art: '',
+                card_type: 'Visa',
+                last_four: '1111',
+                month: '12',
+				pan: '4111111111111111',
+				type: 'DemoCreditCard',
+				wallet: 'test',
+				year: '2030',
+				billing_info: {
+					first_name: 'Romeu',
+					last_name: 'Palos de Gouvea',
+					address1: '7367 126th Pl SE',
+					address2: '',
+					city: 'Newcastle',
+					state_or_province: 'WA',
+					state_name: 'Washington',
+					postal_code: '98056',
+					country: 'United States',
+					phone: '+14253368875'
+				}
 			}
 		]
 	};
@@ -642,6 +696,28 @@
 			{
 				type: 'CreditCard',
 				wallet: 'user'
+			},
+			{
+                art: '',
+                card_type: 'Visa',
+                last_four: '1111',
+                month: '12',
+				pan: '4111111111111111',
+				type: 'DemoCreditCard',
+				wallet: 'test',
+				year: '2030',
+				billing_info: {
+					first_name: 'Romeu',
+					last_name: 'Palos de Gouvea',
+					address1: '7367 126th Pl SE',
+					address2: '',
+					city: 'Newcastle',
+					state_or_province: 'WA',
+					state_name: 'Washington',
+					postal_code: '98056',
+					country: 'United States',
+					phone: '+14253368875'
+				}
 			}
 		]
 	};
@@ -731,6 +807,28 @@
 					state_or_province: 'DF',
 					postal_code: '*****',
 					country: 'BR'
+				}
+			},
+			{
+                art: '',
+                card_type: 'Visa',
+                last_four: '1111',
+                month: '12',
+				pan: '4111111111111111',
+				type: 'DemoCreditCard',
+				wallet: 'test',
+				year: '2030',
+				billing_info: {
+					first_name: 'Romeu',
+					last_name: 'Palos de Gouvea',
+					address1: '7367 126th Pl SE',
+					address2: '',
+					city: 'Newcastle',
+					state_or_province: 'WA',
+					state_name: 'Washington',
+					postal_code: '98056',
+					country: 'United States',
+					phone: '+14253368875'
 				}
 			}
 		]
