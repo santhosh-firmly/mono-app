@@ -50,6 +50,28 @@
 				}
 			},
 			{
+				art: '',
+				card_type: 'Visa',
+				last_four: '1111',
+				month: '12',
+				pan: '4111111111111111',
+				type: 'DemoCreditCard',
+				wallet: 'test',
+				year: '2030',
+				billing_info: {
+					first_name: 'John',
+					last_name: 'Smith',
+					address1: '123 Beautiful St.',
+					address2: '',
+					city: 'Newcastle',
+					state_or_province: 'WA',
+					state_name: 'Washington',
+					postal_code: '98056',
+					country: 'United States',
+					phone: '+14255551234'
+				}
+			},
+			{
 				type: 'CreditCard',
 				art: '',
 				id: '249351883',
@@ -233,7 +255,29 @@
 					country: 'United States',
 					phone: '+14255551234'
 				}
-			}
+			},
+			{
+				art: '',
+				card_type: 'Visa',
+				last_four: '1111',
+				month: '12',
+				pan: '4111111111111111',
+				type: 'DemoCreditCard',
+				wallet: 'test',
+				year: '2030',
+				billing_info: {
+					first_name: 'John',
+					last_name: 'Smith',
+					address1: '123 Beautiful St.',
+					address2: '',
+					city: 'Newcastle',
+					state_or_province: 'WA',
+					state_name: 'Washington',
+					postal_code: '98056',
+					country: 'United States',
+					phone: '+14255551234'
+				}
+			},
 		]
 	}}
 />
