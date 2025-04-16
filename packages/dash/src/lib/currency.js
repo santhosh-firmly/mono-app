@@ -1,31 +1,33 @@
 const currencies = {
-    USD: {
-        symbol: '$',
-        decimalPlaces: 2,
-    },
-}
+	USD: {
+		symbol: '$',
+		decimalPlaces: 2
+	}
+};
 
 function currencyWithThousandSeparator(x) {
-    x = x.toString();
-    var pattern = /(-?\d+)(\d{3})/;
-    while (pattern.test(x))
-        x = x.replace(pattern, "$1,$2");
-    return x;
+	x = x.toString();
+	var pattern = /(-?\d+)(\d{3})/;
+	while (pattern.test(x)) x = x.replace(pattern, '$1,$2');
+	return x;
 }
 
 export function formatCurrencyObject(currencyEntry) {
-    const currency = currencies[currencyEntry.currency];
-    return currency.symbol + currencyWithThousandSeparator(currencyEntry.value.toFixed(currency.decimalPlaces));
+	const currency = currencies[currencyEntry.currency];
+	return (
+		currency.symbol +
+		currencyWithThousandSeparator(currencyEntry.value.toFixed(currency.decimalPlaces))
+	);
 }
 
 export function formatCurrency(value) {
-    try {
-        if (value.currency) {
-            return formatCurrencyObject(value);
-        }
+	try {
+		if (value.currency) {
+			return formatCurrencyObject(value);
+		}
 
-        return '$' + currencyWithThousandSeparator(value.toFixed(2));
-    } catch (e) {
-        return '';
-    }
+		return '$' + currencyWithThousandSeparator(value.toFixed(2));
+	} catch (e) {
+		return '';
+	}
 }
