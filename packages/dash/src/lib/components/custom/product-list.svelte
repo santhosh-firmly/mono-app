@@ -44,7 +44,7 @@
 			</Table.Header>
 			<Table.Body>
 				{#each products as product (product.base_sku)}
-					<Table.Row class="cursor-pointer" on:click={() => window.location = ''}>
+					<Table.Row class="cursor-pointer" on:click={() => (window.location = '')}>
 						<Table.Cell class="hidden sm:table-cell">
 							<img
 								alt="Product example"

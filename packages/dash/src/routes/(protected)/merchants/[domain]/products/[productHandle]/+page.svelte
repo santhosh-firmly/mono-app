@@ -78,7 +78,11 @@
 									</Table.Cell>
 									{#each data.product.variant_option_values as option}
 										<Table.Cell>
-											<ToggleGroup.Root type="single" value={variant[option.property_accessor]} variant="outline">
+											<ToggleGroup.Root
+												type="single"
+												value={variant[option.property_accessor]}
+												variant="outline"
+											>
 												<!-- <ToggleGroup.Item disabled value={variant[option.property_accessor]}>{variant[option.property_accessor]}</ToggleGroup.Item> -->
 												{#each option.option_values as value}
 													<ToggleGroup.Item disabled {value}>{value}</ToggleGroup.Item>

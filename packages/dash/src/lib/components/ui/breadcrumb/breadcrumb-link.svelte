@@ -1,5 +1,5 @@
 <script>
-	import { cn } from "$lib/utils.js";
+	import { cn } from '$lib/utils.js';
 	export let href = undefined;
 	export let el = undefined;
 	export let asChild = false;
@@ -7,9 +7,9 @@
 	export { className as class };
 	let attrs;
 	$: attrs = {
-		class: cn("hover:text-foreground transition-colors", className),
+		class: cn('hover:text-foreground transition-colors', className),
 		href,
-		...$$restProps,
+		...$$restProps
 	};
 </script>
 

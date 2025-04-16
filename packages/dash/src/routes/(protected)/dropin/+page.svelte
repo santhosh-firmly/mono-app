@@ -17,7 +17,7 @@
 </script>
 
 <main class="grid flex-1 gap-4 overflow-auto p-4 md:grid-cols-2 lg:grid-cols-3">
-	<div class="relative hidden flex-col items-start gap-8 md:flex pt-[30px]">
+	<div class="relative hidden flex-col items-start gap-8 pt-[30px] md:flex">
 		<form class="grid w-full items-start gap-6">
 			<fieldset class="grid gap-6 rounded-lg border bg-white/50 p-4">
 				<legend class="-ml-1 px-1 text-sm font-medium"> Settings </legend>
@@ -106,7 +106,7 @@
 			</fieldset>
 		</form>
 	</div>
-	<div class="relative flex h-full min-h-[50vh] flex-col lg:col-span-2 items-center gap-3">
+	<div class="relative flex h-full min-h-[50vh] flex-col items-center gap-3 lg:col-span-2">
 		<BlockToolbar {resizablePaneRef} />
 		<Resizable.PaneGroup direction="horizontal" class="relative z-10 ">
 			<Resizable.Pane

@@ -25,9 +25,9 @@
 	</Avatar.Root> -->
 	</div>
 	<div class="flex flex-col">
-		<span class="font-semibold text-ellipsis overflow-hidden text-nowrap">{name || domain}</span>
+		<span class="overflow-hidden text-ellipsis text-nowrap font-semibold">{name || domain}</span>
 		{#if name}
-			<span class="text-muted-foreground text-ellipsis overflow-hidden text-nowrap">{domain}</span>
+			<span class="overflow-hidden text-ellipsis text-nowrap text-muted-foreground">{domain}</span>
 		{/if}
 	</div>
 </div>

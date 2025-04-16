@@ -86,7 +86,7 @@
 							<Table.Body>
 								{#each orders as order, index}
 									<Table.Row
-										class="{selectedOrderIndex === index ? 'bg-accent' : ''}"
+										class={selectedOrderIndex === index ? 'bg-accent' : ''}
 										on:click={() => {
 											selectedOrderIndex = index;
 										}}
