@@ -36,4 +36,4 @@ jobs:
     secrets:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
       CF_API_TOKEN_QA: ${{ secrets.CF_API_TOKEN_QA }}
-      TEAMS_WEBHOOK_URL_QA: ${{ secrets.TEAMS_WEBHOOK_URL_QA }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL_QA }}
