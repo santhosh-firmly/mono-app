@@ -14,13 +14,11 @@
 	import DataTableColumnHeader from './data-table-column-header.svelte';
 	import DataTableToolbar from './data-table-toolbar.svelte';
 	import DataTablePagination from './data-table-pagination.svelte';
-	// import DataTableCheckbox from './data-table-checkbox.svelte';
 	import DataTableRowActions from './data-table-row-actions.svelte';
 	import Merchant from './cells/merchant.svelte';
 	import BadgeCell from './cells/badge-cell.svelte';
 
-	export let data;
-	export let columnFilters;
+	let { data, columnFilters } = $props();
 
 	const table = createTable(readable(data), {
 		select: addSelectedRows(),
@@ -39,30 +37,6 @@
 	});
 
 	const columns = table.createColumns([
-		// table.display({
-		// 	id: 'select',
-		// 	header: (_, { pluginStates }) => {
-		// 		const { allPageRowsSelected } = pluginStates.select;
-		// 		return createRender(DataTableCheckbox, {
-		// 			checked: allPageRowsSelected,
-		// 			'aria-label': 'Select all'
-		// 		});
-		// 	},
-		// 	cell: ({ row }, { pluginStates }) => {
-		// 		const { getRowState } = pluginStates.select;
-		// 		const { isSelected } = getRowState(row);
-		// 		return createRender(DataTableCheckbox, {
-		// 			checked: isSelected,
-		// 			'aria-label': 'Select row',
-		// 			class: 'translate-y-[2px]'
-		// 		});
-		// 	},
-		// 	plugins: {
-		// 		sort: {
-		// 			disable: true
-		// 		}
-		// 	}
-		// }),
 		table.display({
 			id: 'merchant',
 			header: 'Merchant',
@@ -143,7 +117,6 @@
 	]);
 
 	const tableModel = table.createViewModel(columns);
-
 	const { headerRows, pageRows, tableAttrs, tableBodyAttrs } = tableModel;
 </script>
 

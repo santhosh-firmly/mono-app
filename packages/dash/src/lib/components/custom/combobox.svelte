@@ -33,7 +33,7 @@
 				aria-expanded={isOpen}
 				class="w-full justify-between"
 			>
-				{selected.label ?? placeholder}
+				{selected?.label ?? placeholder}
 				<ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
 			</Button>
 		</Popover.Trigger>

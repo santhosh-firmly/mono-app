@@ -5,28 +5,29 @@
 	import DataTableFacetedFilter from './data-table-faceted-filter.svelte';
 	import DataTableViewOptions from './data-table-view-options.svelte';
 
-	export let tableModel;
-	export let columnFilters;
-	export let data;
-
-	const counts = data.reduce(
-		(acc, { platform_id, psp }) => {
-			acc.platform[platform_id] = (acc.platform[platform_id] || 0) + 1;
-			acc.psp[psp] = (acc.psp[psp] || 0) + 1;
-			return acc;
-		},
-		{
-			platform: {},
-			psp: {}
-		}
-	);
+	let { tableModel, columnFilters, data } = $props();
 
 	const { pluginStates } = tableModel;
 	const { filterValue } = pluginStates.filter;
-
 	const { filterValues } = pluginStates.colFilter;
 
-	$: showReset = Object.values({ ...$filterValues, $filterValue }).some((v) => v.length > 0);
+	let counts = $derived(
+		data.reduce(
+			(acc, { platform_id, psp }) => {
+				acc.platform[platform_id] = (acc.platform[platform_id] || 0) + 1;
+				acc.psp[psp] = (acc.psp[psp] || 0) + 1;
+				return acc;
+			},
+			{
+				platform: {},
+				psp: {}
+			}
+		)
+	);
+
+	let showReset = $derived(
+		Object.values({ ...$filterValues, $filterValue }).some((v) => v.length > 0)
+	);
 </script>
 
 <div class="flex items-center justify-between">
@@ -39,13 +40,13 @@
 		/>
 
 		<DataTableFacetedFilter
-			bind:filterValues={$filterValues.platform}
+			bind:selectedOptions={$filterValues.platform}
 			title="Platform"
 			options={columnFilters.platform_id}
 			counts={counts.platform}
 		/>
 		<DataTableFacetedFilter
-			bind:filterValues={$filterValues.psp}
+			bind:selectedOptions={$filterValues.psp}
 			title="PSP"
 			options={columnFilters.psp}
 			counts={counts.psp}

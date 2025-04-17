@@ -23,13 +23,6 @@
 	// Track if form is being submitted
 	let isSubmitting = $state(false);
 
-	// States for each combobox
-	let currencyOpen = $state(false);
-	let platformOpen = $state(false);
-	let pspOpen = $state(false);
-
-	// This function is now directly implemented in each combobox
-
 	// Handle save with loading state
 	async function handleSave() {
 		isSubmitting = true;
