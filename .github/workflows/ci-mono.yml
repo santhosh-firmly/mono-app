@@ -77,3 +77,15 @@ jobs:
       max-parallel: 8
       matrix:
         package: ${{fromJSON(needs.get-changed-packages.outputs.packages)}}
+
+  ci-service-deployment:
+    name: 📦 CI Service Deployment
+    needs: run-base-ci
+    uses: goyalu/.github/.github/workflows/service-delivery.yml@main
+    with:
+      environment: 'ci'
+      ref: ${{ github.event.inputs.ref || github.ref }}
+    secrets:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      CF_API_TOKEN_CI: ${{ secrets.CF_API_TOKEN_CI }}
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL_CI }}
