@@ -1,6 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import { FIRMLY_AUTH_COOKIE } from '$env/static/private';
 import { enforceSSOAuth } from '$lib/server/auth.js';
+import { dev } from '$app/environment';
 
 export async function handle({ event, resolve }) {
 	if (
@@ -15,8 +16,16 @@ export async function handle({ event, resolve }) {
 	try {
 		event.locals.authInfo = (await enforceSSOAuth(jwt)).authInfo;
 		return resolve(event);
-		// eslint-disable-next-line no-unused-vars
-	} catch (e) {
+	} catch {
+		if (dev) {
+			event.locals.authInfo = {
+				userId: 'dev-user',
+				email: 'dev@firmly.ai',
+				name: 'Development User'
+			};
+
+			return resolve(event);
+		}
 		return redirect(302, '/auth/sign-in');
 	}
 }
