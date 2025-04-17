@@ -42,10 +42,8 @@
 	"dependencies": {
 		"autoprefixer": "^10.4.21",
 		"clsx": "^2.1.1",
-		"cmdk-sv": "^0.0.18",
 		"date-fns": "^4.1.0",
 		"jose": "^5.9.2",
-		"lucide-svelte": "^0.441.0",
 		"paneforge": "^0.0.6",
 		"svelte-headless-table": "^0.18.2",
 		"svelte-radix": "^1.1.1",

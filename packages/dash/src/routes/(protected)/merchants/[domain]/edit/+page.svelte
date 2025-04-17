@@ -6,41 +6,23 @@
 	import GeneralSection from './general.svelte';
 	import AdvancedSection from './advanced.svelte';
 
-	let data;
-
-	// Navigation items for sidebar
 	const navItems = [
 		{ id: 'general', title: 'General' },
 		{ id: 'advanced', title: 'Advanced' }
 	];
 
-	// Track active section with Svelte 5 runes
+	let { data } = $props();
+
 	let activeSection = $state('general');
+	let merchant = $state(data.merchant);
 
-	// Create merchant state with Svelte 5 runes
-	let merchant = $state(
-		data?.merchant || {
-			display_name: '',
-			url_name: [],
-			store_id: '',
-			is_disabled: false,
-			shop_currency: 'USD',
-			platform_id: '',
-			psp: '',
-			base_url: '',
-			store_info: {
-				checkout_base_url: '',
-				paypal: { clientId: '', merchantId: '' }
-			}
-		}
-	);
+	const platformOptions = data.platformOptions;
+	const pspOptions = data.pspOptions;
 
-	// Handle section change
 	function handleSectionChange(section) {
 		activeSection = section;
 	}
 
-	// Array helpers
 	function addUrlName() {
 		merchant.url_name = [...merchant.url_name, ''];
 	}
@@ -55,32 +37,13 @@
 		merchant.url_name = newUrls;
 	}
 
-	// Field update handlers
 	function updateField(field, value) {
 		merchant[field] = value;
 	}
 
-	// Save function
 	function saveMerchant() {
-		// Logic to save merchant data goes here
 		console.log('Saving merchant:', merchant);
 	}
-
-	// Platform options
-	const platformOptions = [
-		{ value: 'plt', label: 'Pretty Little Thing' },
-		{ value: 'shopify', label: 'Shopify' },
-		{ value: 'magento', label: 'Magento' },
-		{ value: 'custom', label: 'Custom' }
-	];
-
-	// PSP options
-	const pspOptions = [
-		{ value: 'plt-worldpay', label: 'PLT Worldpay' },
-		{ value: 'stripe', label: 'Stripe' },
-		{ value: 'paypal', label: 'PayPal' },
-		{ value: 'adyen', label: 'Adyen' }
-	];
 
 	// Currency options - USD only
 	const currencyOptions = [{ value: 'USD', label: 'USD - US Dollar' }];

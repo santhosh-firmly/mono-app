@@ -1,3 +1,5 @@
+import merchants from '$lib/assets/data.json';
+
 /** @type {import('./$types').PageLoad} */
 export async function load() {
 	// const { results } = await platform.env.firmlyConfigs.prepare(`SELECT info FROM stores`).all();

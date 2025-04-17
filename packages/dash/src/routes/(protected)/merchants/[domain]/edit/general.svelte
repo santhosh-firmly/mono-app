@@ -3,9 +3,9 @@
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Switch from '$lib/components/ui/switch/index.js';
-	import * as Select from '$lib/components/ui/select/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Save } from 'lucide-svelte';
+	import Combobox from '$lib/components/custom/combobox.svelte';
 
 	// Using $props rune for component properties
 	let {
@@ -22,6 +22,13 @@
 
 	// Track if form is being submitted
 	let isSubmitting = $state(false);
+
+	// States for each combobox
+	let currencyOpen = $state(false);
+	let platformOpen = $state(false);
+	let pspOpen = $state(false);
+
+	// This function is now directly implemented in each combobox
 
 	// Handle save with loading state
 	async function handleSave() {
@@ -142,19 +149,12 @@
 					<p class="text-sm text-muted-foreground">Currency used by the merchant's store.</p>
 				</div>
 				<div class="md:col-span-3">
-					<Select.Root
+					<Combobox
 						value={merchant.shop_currency}
-						onValueChange={(value) => updateField('shop_currency', value)}
-					>
-						<Select.Trigger class="w-full">
-							<Select.Value placeholder="Select a currency" />
-						</Select.Trigger>
-						<Select.Content>
-							{#each currencyOptions as currency (currency.value)}
-								<Select.Item value={currency.value}>{currency.label}</Select.Item>
-							{/each}
-						</Select.Content>
-					</Select.Root>
+						options={currencyOptions}
+						onSelect={(value) => updateField('shop_currency', value)}
+						placeholder="Select a currency"
+					/>
 				</div>
 			</div>
 
@@ -165,19 +165,12 @@
 					<p class="text-sm text-muted-foreground">Platform on which the merchant operates.</p>
 				</div>
 				<div class="md:col-span-3">
-					<Select.Root
+					<Combobox
 						value={merchant.platform_id}
-						onValueChange={(value) => updateField('platform_id', value)}
-					>
-						<Select.Trigger class="w-full">
-							<Select.Value placeholder="Select a platform" />
-						</Select.Trigger>
-						<Select.Content>
-							{#each platformOptions as platform (platform.value)}
-								<Select.Item value={platform.value}>{platform.label}</Select.Item>
-							{/each}
-						</Select.Content>
-					</Select.Root>
+						options={platformOptions}
+						onSelect={(value) => updateField('platform_id', value)}
+						placeholder="Select a platform"
+					/>
 				</div>
 			</div>
 
@@ -190,16 +183,12 @@
 					</p>
 				</div>
 				<div class="md:col-span-3">
-					<Select.Root value={merchant.psp} onValueChange={(value) => updateField('psp', value)}>
-						<Select.Trigger class="w-full">
-							<Select.Value placeholder="Select a payment provider" />
-						</Select.Trigger>
-						<Select.Content>
-							{#each pspOptions as psp (psp.value)}
-								<Select.Item value={psp.value}>{psp.label}</Select.Item>
-							{/each}
-						</Select.Content>
-					</Select.Root>
+					<Combobox
+						value={merchant.psp}
+						options={pspOptions}
+						onSelect={(value) => updateField('psp', value)}
+						placeholder="Select a payment provider"
+					/>
 				</div>
 			</div>
 		</Card.Content>
