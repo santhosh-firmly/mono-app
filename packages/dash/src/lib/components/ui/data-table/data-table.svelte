@@ -1,5 +1,5 @@
 <script>
-	import { get, readable, writable } from 'svelte/store';
+	import { get, readable } from 'svelte/store';
 	import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
 	import {
 		addColumnFilters,
@@ -14,8 +14,7 @@
 	import DataTableColumnHeader from './data-table-column-header.svelte';
 	import DataTableToolbar from './data-table-toolbar.svelte';
 	import DataTablePagination from './data-table-pagination.svelte';
-	import DataTableCheckbox from './data-table-checkbox.svelte';
-	import DataTableTitleCell from './data-table-title-cell.svelte';
+	// import DataTableCheckbox from './data-table-checkbox.svelte';
 	import DataTableRowActions from './data-table-row-actions.svelte';
 	import Merchant from './cells/merchant.svelte';
 	import BadgeCell from './cells/badge-cell.svelte';
@@ -40,30 +39,30 @@
 	});
 
 	const columns = table.createColumns([
-		table.display({
-			id: 'select',
-			header: (_, { pluginStates }) => {
-				const { allPageRowsSelected } = pluginStates.select;
-				return createRender(DataTableCheckbox, {
-					checked: allPageRowsSelected,
-					'aria-label': 'Select all'
-				});
-			},
-			cell: ({ row }, { pluginStates }) => {
-				const { getRowState } = pluginStates.select;
-				const { isSelected } = getRowState(row);
-				return createRender(DataTableCheckbox, {
-					checked: isSelected,
-					'aria-label': 'Select row',
-					class: 'translate-y-[2px]'
-				});
-			},
-			plugins: {
-				sort: {
-					disable: true
-				}
-			}
-		}),
+		// table.display({
+		// 	id: 'select',
+		// 	header: (_, { pluginStates }) => {
+		// 		const { allPageRowsSelected } = pluginStates.select;
+		// 		return createRender(DataTableCheckbox, {
+		// 			checked: allPageRowsSelected,
+		// 			'aria-label': 'Select all'
+		// 		});
+		// 	},
+		// 	cell: ({ row }, { pluginStates }) => {
+		// 		const { getRowState } = pluginStates.select;
+		// 		const { isSelected } = getRowState(row);
+		// 		return createRender(DataTableCheckbox, {
+		// 			checked: isSelected,
+		// 			'aria-label': 'Select row',
+		// 			class: 'translate-y-[2px]'
+		// 		});
+		// 	},
+		// 	plugins: {
+		// 		sort: {
+		// 			disable: true
+		// 		}
+		// 	}
+		// }),
 		table.display({
 			id: 'merchant',
 			header: 'Merchant',
@@ -73,9 +72,7 @@
 					logoSvg: row.original.logo_svg,
 					name: row.original.display_name,
 					domain: row.original.store_id
-					// class: 'translate-y-[2px]'
 				});
-				// return 'test';
 			},
 			plugins: {
 				sort: {
@@ -84,32 +81,12 @@
 			}
 		}),
 		table.column({
-			accessor: 'store_id',
-			header: 'Domain',
-			id: 'domain'
-		}),
-		table.column({
-			accessor: 'display_name',
-			header: 'Display Name',
-			id: 'display_name',
-			cell: ({ value, row }) => {
-				if (row.isData()) {
-					return createRender(DataTableTitleCell, {
-						value: value || '',
-						labelValue: row.original.label
-					});
-				}
-				return value || '';
-			}
-		}),
-		table.column({
 			accessor: 'is_disabled',
-			header: 'Enabled',
+			header: 'State',
 			id: 'is_disabled',
 			cell: ({ value }) => {
-				const isSelected = writable(!value);
-				return createRender(DataTableCheckbox, {
-					checked: isSelected
+				return createRender(BadgeCell, {
+					value: value ? 'Disabled' : 'Enabled'
 				});
 			}
 		}),

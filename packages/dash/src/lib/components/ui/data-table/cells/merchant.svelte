@@ -7,9 +7,9 @@
 	export let domain = '';
 </script>
 
-<div class="flex flex-row items-center gap-2">
+<div class="flex flex-row items-center gap-x-4">
 	<div
-		class="flex aspect-square h-12 w-12 flex-row items-center justify-center overflow-hidden rounded-full border shadow"
+		class="flex aspect-square h-12 w-12 flex-row items-center justify-center overflow-hidden rounded-xl border shadow"
 	>
 		{#if logoUrl}
 			<img src={logoUrl} alt="Merchant logo" class="p-1" />

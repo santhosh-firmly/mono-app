@@ -69,13 +69,13 @@
 						>
 							<div
 								class={cn(
-									'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+									'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-black',
 									filterValues.includes(value)
-										? 'bg-primary text-primary-foreground'
+										? 'bg-black text-white'
 										: 'opacity-50 [&_svg]:invisible'
 								)}
 							>
-								<!-- <Check className={cn('h-4 w-4')} /> -->
+								<Check class="h-4 w-4" />
 							</div>
 							{#if Icon}
 								<Icon class="mr-2 h-4 w-4 text-muted-foreground" />
