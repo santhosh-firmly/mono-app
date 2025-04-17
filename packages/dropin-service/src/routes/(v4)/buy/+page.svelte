@@ -17,7 +17,6 @@
 	import { bindEvent } from '$lib-v4/browser/dash';
 	import Header from '$lib-v4/components/v4/header.svelte';
 	import SidebarLayout from './sidebar-layout.svelte';
-	import merchantInfoDemo from './merchant-info-demo.json';
 	import FullscreenLayout from './fullscreen-layout.svelte';
 	import PopupLayout from './popup-layout.svelte';
 	import BottomsheetLayout from './bottom-sheet-layout.svelte';
@@ -100,10 +99,6 @@
 			smallLogo = theme.smallLogo;
 		}
 	}
-
-	// Temporary demo information for some of the merchants.
-	// This info must come from the cart once we have the cart data.
-	const merchantInfo = merchantInfoDemo;
 
 	let cart = writable();
 	let largeLogo = $state();
@@ -262,14 +257,6 @@
 					initializeTheme(data.merchantPresentation.theme);
 				}
 				return;
-			}
-			// Fallback to hard-coded merchant info
-			termsOfUse = merchantInfo[domain]?.termsOfUse;
-			privacyPolicy = merchantInfo[domain]?.privacyPolicy;
-
-			const theme = merchantInfo[domain]?.theme;
-			if (theme) {
-				initializeTheme(theme);
 			}
 		}
 	}
