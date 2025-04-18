@@ -4,7 +4,6 @@
 	import * as Command from '$lib/components/ui/command/index.js';
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
-	import { cn } from '$lib/utils.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import { Badge } from '$lib/components/ui/badge/index.js';
 
@@ -12,6 +11,14 @@
 
 	let open = $state(false);
 	let searchCriteria = $state('');
+
+	function handleSelect(currentValue) {
+		if (Array.isArray(selectedOptions) && selectedOptions?.includes(currentValue)) {
+			selectedOptions = selectedOptions?.filter((v) => v !== currentValue);
+		} else {
+			selectedOptions = [...(Array.isArray(selectedOptions) ? selectedOptions : []), currentValue];
+		}
+	}
 
 	$effect(() => {
 		if (!open) searchCriteria = '';
@@ -26,14 +33,6 @@
 			return option.toLowerCase().includes(searchCriteria.toLowerCase());
 		});
 	});
-
-	function handleSelect(currentValue) {
-		if (Array.isArray(selectedOptions) && selectedOptions?.includes(currentValue)) {
-			selectedOptions = selectedOptions?.filter((v) => v !== currentValue);
-		} else {
-			selectedOptions = [...(Array.isArray(selectedOptions) ? selectedOptions : []), currentValue];
-		}
-	}
 </script>
 
 <Popover.Root bind:open>
@@ -78,12 +77,12 @@
 								}}
 							>
 								<div
-									class={cn(
+									class={[
 										'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
 										selectedOptions?.includes(value)
 											? 'bg-primary text-primary-foreground'
 											: 'opacity-50 [&_svg]:invisible'
-									)}
+									]}
 								>
 									<Check class="h-4 w-4" />
 								</div>

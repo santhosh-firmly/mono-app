@@ -1,5 +1,5 @@
 <script>
-	import { get, readable } from 'svelte/store';
+	import { readable } from 'svelte/store';
 	import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
 	import {
 		addColumnFilters,
@@ -17,6 +17,26 @@
 	import DataTableRowActions from './data-table-row-actions.svelte';
 	import Merchant from './cells/merchant.svelte';
 	import BadgeCell from './cells/badge-cell.svelte';
+
+	function createColumnFilter() {
+		return {
+			fn: ({ filterValue, value }) => {
+				if (!filterValue || !Array.isArray(filterValue) || filterValue.length === 0) {
+					return true;
+				}
+
+				if (value === undefined || value === null || typeof value !== 'string') {
+					return false;
+				}
+
+				return filterValue.includes(value);
+			},
+			initialFilterValue: [],
+			render: ({ filterValue }) => {
+				return filterValue;
+			}
+		};
+	}
 
 	let { data, columnFilters } = $props();
 
@@ -37,8 +57,9 @@
 	});
 
 	const columns = table.createColumns([
-		table.display({
+		table.column({
 			id: 'merchant',
+			accessor: 'store_id',
 			header: 'Merchant',
 			cell: ({ row }) => {
 				return createRender(Merchant, {
@@ -55,28 +76,39 @@
 			}
 		}),
 		table.column({
+			id: 'is_disabled',
 			accessor: 'is_disabled',
 			header: 'State',
-			id: 'is_disabled',
 			cell: ({ value }) => {
 				return createRender(BadgeCell, {
 					value: value ? 'Disabled' : 'Enabled'
 				});
+			},
+			plugins: {
+				filter: {
+					exclude: true
+				}
 			}
 		}),
 		table.column({
-			accessor: 'platform_id',
 			id: 'platform_id',
+			accessor: 'platform_id',
 			header: 'Platform',
 			cell: ({ value }) => {
 				return createRender(BadgeCell, {
 					value
 				});
+			},
+			plugins: {
+				filter: {
+					exclude: true
+				},
+				colFilter: createColumnFilter()
 			}
 		}),
 		table.column({
-			accessor: 'psp',
 			id: 'psp',
+			accessor: 'psp',
 			header: 'PSP',
 			cell: ({ value }) => {
 				return createRender(BadgeCell, {
@@ -84,20 +116,10 @@
 				});
 			},
 			plugins: {
-				colFilter: {
-					fn: ({ filterValue, value }) => {
-						if (filterValue.length === 0) return true;
-						if (!Array.isArray(filterValue) || typeof value !== 'string') return true;
-
-						return filterValue.some((filter) => {
-							return value === filter;
-						});
-					},
-					initialFilterValue: [],
-					render: ({ filterValue }) => {
-						return get(filterValue);
-					}
-				}
+				filter: {
+					exclude: true
+				},
+				colFilter: createColumnFilter()
 			}
 		}),
 		table.display({

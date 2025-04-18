@@ -14,12 +14,12 @@
 	let counts = $derived(
 		data.reduce(
 			(acc, { platform_id, psp }) => {
-				acc.platform[platform_id] = (acc.platform[platform_id] || 0) + 1;
+				acc.platform_id[platform_id] = (acc.platform_id[platform_id] || 0) + 1;
 				acc.psp[psp] = (acc.psp[psp] || 0) + 1;
 				return acc;
 			},
 			{
-				platform: {},
+				platform_id: {},
 				psp: {}
 			}
 		)
@@ -40,10 +40,10 @@
 		/>
 
 		<DataTableFacetedFilter
-			bind:selectedOptions={$filterValues.platform}
+			bind:selectedOptions={$filterValues['platform_id']}
 			title="Platform"
 			options={columnFilters.platform_id}
-			counts={counts.platform}
+			counts={counts.platform_id}
 		/>
 		<DataTableFacetedFilter
 			bind:selectedOptions={$filterValues.psp}
@@ -55,7 +55,7 @@
 			<Button
 				on:click={() => {
 					$filterValue = '';
-					$filterValues.platform = [];
+					$filterValues['platform_id'] = [];
 					$filterValues.psp = [];
 				}}
 				variant="ghost"
