@@ -3,8 +3,7 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 
-	export let row;
-	const task = null;
+	let { onEdit, onOpenProducts } = $props();
 </script>
 
 <DropdownMenu.Root>
@@ -19,26 +18,7 @@
 		</Button>
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Content class="w-[160px]" align="end">
-		<DropdownMenu.Item>Edit</DropdownMenu.Item>
-		<DropdownMenu.Item>Make a copy</DropdownMenu.Item>
-		<DropdownMenu.Item>Favorite</DropdownMenu.Item>
-		<DropdownMenu.Separator />
-		<DropdownMenu.Sub>
-			<DropdownMenu.SubTrigger>Labels</DropdownMenu.SubTrigger>
-			<DropdownMenu.SubContent>
-				<DropdownMenu.RadioGroup value={task.label}>
-					<!-- {#each labels as label}
-						<DropdownMenu.RadioItem value={label.value}>
-							{label.label}
-						</DropdownMenu.RadioItem>
-					{/each} -->
-				</DropdownMenu.RadioGroup>
-			</DropdownMenu.SubContent>
-		</DropdownMenu.Sub>
-		<DropdownMenu.Separator />
-		<DropdownMenu.Item>
-			Delete
-			<DropdownMenu.Shortcut>⌘⌫</DropdownMenu.Shortcut>
-		</DropdownMenu.Item>
+		<DropdownMenu.Item on:click={onEdit}>Edit</DropdownMenu.Item>
+		<DropdownMenu.Item on:click={onOpenProducts}>Products</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>

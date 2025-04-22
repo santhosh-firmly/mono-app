@@ -1,5 +1,6 @@
 <script>
 	import { readable } from 'svelte/store';
+	import { goto } from '$app/navigation';
 	import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
 	import {
 		addColumnFilters,
@@ -129,8 +130,11 @@
 			},
 			cell: ({ row }) => {
 				if (row.isData() && row.original) {
+					const { store_id } = row.original;
+
 					return createRender(DataTableRowActions, {
-						row: row.original
+						onEdit: () => goto(`/merchants/${store_id}/edit`),
+						onOpenProducts: () => goto(`/merchants/${store_id}/products`)
 					});
 				}
 				return '';
