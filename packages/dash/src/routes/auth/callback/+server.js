@@ -1,23 +1,17 @@
 import { redirect } from '@sveltejs/kit';
-import {
-	PUBLIC_AZURE_AD_CLIENT_ID,
-	PUBLIC_AZURE_AD_TENANT_ID,
-	PUBLIC_AZURE_REDIRECT_URL
-} from '$env/static/public';
-import { AZURE_AD_CLIENT_SECRET, FIRMLY_AUTH_COOKIE } from '$env/static/private';
 
-export async function GET({ url, cookies }) {
+export async function GET({ url, cookies, platform }) {
 	const payload = new URLSearchParams({
 		grant_type: 'authorization_code',
-		client_id: PUBLIC_AZURE_AD_CLIENT_ID,
+		client_id: platform.env.PUBLIC_AZURE_AD_CLIENT_ID,
 		scope: 'openid profile email',
 		code: url.searchParams.get('code'),
-		redirect_uri: PUBLIC_AZURE_REDIRECT_URL,
-		client_secret: AZURE_AD_CLIENT_SECRET
+		redirect_uri: platform.env.PUBLIC_AZURE_REDIRECT_URL,
+		client_secret: platform.env.AZURE_AD_CLIENT_SECRET
 	});
 
 	const response = await fetch(
-		`https://login.microsoftonline.com/${PUBLIC_AZURE_AD_TENANT_ID}/oauth2/v2.0/token`,
+		`https://login.microsoftonline.com/${platform.env.PUBLIC_AZURE_AD_TENANT_ID}/oauth2/v2.0/token`,
 		{
 			method: 'POST',
 			body: payload,
@@ -38,7 +32,7 @@ export async function GET({ url, cookies }) {
 	// }
 	if (response.ok) {
 		const userDetails = await response.json();
-		cookies.set(FIRMLY_AUTH_COOKIE, userDetails.id_token, {
+		cookies.set(platform.env.FIRMLY_AUTH_COOKIE, userDetails.id_token, {
 			path: '/',
 			maxAge: userDetails.expires_in
 		});
