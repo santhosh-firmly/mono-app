@@ -7,7 +7,7 @@
 		"dev": "vite dev",
 		"build": "echo 'skipping build'",
 		"preview": "vite preview",
-		"preview:cloudflare": "wrangler pages dev",
+		"preview:cloudflare": "wrangler dev --env dev --remote",
 		"prepare": "svelte-kit sync || echo ''",
 		"format-code": "eslint . --fix",
 		"format-code:check": "eslint . --fix=false",

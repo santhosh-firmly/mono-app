@@ -1,11 +1,17 @@
 {
 	"name": "dash",
-	"compatibility_date": "2024-04-03",
+	"compatibility_date": "2025-01-21",
 	"compatibility_flags": ["nodejs_compat"],
 	"send_metrics": false,
-	"pages_build_output_dir": "./.svelte-kit/cloudflare",
-	"dev": {
-		"port": 8840
+	"workers_dev": false,
+	"preview_urls": false,
+	"logpush": true,
+	"assets": {
+		"directory": "./.svelte-kit/cloudflare",
+		"binding": "ASSETS"
+	},
+	"observability": {
+		"enabled": true
 	},
 	"d1_databases": [
 		{
@@ -23,6 +29,7 @@
 		"dev": {
 			"account_id": "edefa8570f305f587d4a564abd8bdc80",
 			"project_name": "dash",
+			"main": ".svelte-kit/cloudflare/_worker.js",
 			"d1_databases": [
 				{
 					"binding": "firmlyConfigs",
@@ -38,11 +45,13 @@
 		},
 		"uat": {
 			"account_id": "e7638306f2807c7feef461c785b712c1",
+			"main": ".svelte-kit/cloudflare/_worker.js",
 			"project_name": "dash"
 		},
 		"prod": {
 			"account_id": "71f2b81ee4789578e28a5fbf03a935e8",
 			"project_name": "dash",
+			"main": ".svelte-kit/cloudflare/_worker.js",
 			"d1_databases": [
 				{
 					"binding": "firmlyConfigs",

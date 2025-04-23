@@ -1,8 +1,9 @@
-import merchants from '$lib/assets/data.json';
+// import merchants from '$lib/assets/data.json';
 
 /** @type {import('./$types').PageLoad} */
-export async function load() {
-	// const { results } = await platform.env.firmlyConfigs.prepare(`SELECT info FROM stores`).all();
+export async function load({ platform }) {
+	const { results } = await platform.env.firmlyConfigs.prepare(`SELECT info FROM stores`).all();
+	const merchants = results.map((e) => JSON.parse(e.info));
 
 	// return {
 	//     merchants: results.map(e => JSON.parse(e.info)),
