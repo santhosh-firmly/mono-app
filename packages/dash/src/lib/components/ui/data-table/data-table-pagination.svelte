@@ -1,14 +1,12 @@
-<script lang="ts">
-	import ChevronRight from "svelte-radix/ChevronRight.svelte";
-	import ChevronLeft from "svelte-radix/ChevronLeft.svelte";
-	import DoubleArrowRight from "svelte-radix/DoubleArrowRight.svelte";
-	import DoubleArrowLeft from "svelte-radix/DoubleArrowLeft.svelte";
-	import type { TableViewModel } from "svelte-headless-table";
-	import type { Task } from "../(data)/schemas.js";
-	import * as Select from "$lib/components/ui/select/index.js";
-	import { Button } from "$lib/components/ui/button/index.js";
+<script>
+	import ChevronRight from 'svelte-radix/ChevronRight.svelte';
+	import ChevronLeft from 'svelte-radix/ChevronLeft.svelte';
+	import DoubleArrowRight from 'svelte-radix/DoubleArrowRight.svelte';
+	import DoubleArrowLeft from 'svelte-radix/DoubleArrowLeft.svelte';
+	import * as Select from '$lib/components/ui/select/index.js';
+	import { Button } from '$lib/components/ui/button/index.js';
 
-	export let tableModel: TableViewModel<Task>;
+	export let tableModel;
 
 	const { pageRows, pluginStates, rows } = tableModel;
 
@@ -18,7 +16,7 @@
 </script>
 
 <div class="flex items-center justify-between px-2">
-	<div class="text-muted-foreground flex-1 text-sm">
+	<div class="flex-1 text-sm text-muted-foreground">
 		{Object.keys($selectedDataIds).length} of {$rows.length} row(s) selected.
 	</div>
 	<div class="flex items-center space-x-6 lg:space-x-8">
@@ -26,7 +24,7 @@
 			<p class="text-sm font-medium">Rows per page</p>
 			<Select.Root
 				onSelectedChange={(selected) => pageSize.set(Number(selected?.value))}
-				selected={{ value: 10, label: "10" }}
+				selected={{ value: 10, label: '10' }}
 			>
 				<Select.Trigger class="h-8 w-[70px]">
 					<Select.Value placeholder="Select page size" />

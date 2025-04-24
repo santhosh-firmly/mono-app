@@ -1,5 +1,5 @@
 /** @type {import('./$types').PageLoad} */
-export async function load({ platform }) {
+export async function load() {
 	// const { results } = await platform.env.firmlyConfigs.prepare(`SELECT info FROM stores`).all();
 
 	// return {

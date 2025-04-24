@@ -1,5 +1,3 @@
-import { startOfWeek, startOfMonth, startOfYear } from 'date-fns';
-
 /** @type {import('./$types').PageLoad} */
 export async function load({ platform }) {
 	const lastOrdersStmt = platform.env.reporting.prepare(

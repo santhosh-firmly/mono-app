@@ -27,7 +27,7 @@ export function formatCurrency(value) {
 		}
 
 		return '$' + currencyWithThousandSeparator(value.toFixed(2));
-	} catch (e) {
+	} catch {
 		return '';
 	}
 }

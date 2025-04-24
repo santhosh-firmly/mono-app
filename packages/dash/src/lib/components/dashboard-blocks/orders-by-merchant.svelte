@@ -32,7 +32,7 @@
 				</Table.Row>
 			</Table.Header>
 			<Table.Body>
-				{#each ordersByMerchant.results as order, index}
+				{#each ordersByMerchant.results as order, index (index)}
 					<Table.Row class="">
 						<Table.Cell>
 							<div class="font-medium">{getMerchantName(order.shop_id)}</div>

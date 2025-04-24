@@ -25,7 +25,9 @@
 				setTimeout(() => {
 					copied = false;
 				}, 3000);
-			} catch (e) {}
+			} catch {
+				console.error('Failed to copy to clipboard');
+			}
 		}}
 	>
 		{#if copied}

@@ -67,7 +67,7 @@
 		table.display({
 			id: 'merchant',
 			header: 'Merchant',
-			cell: ({ row }, { pluginStates }) => {
+			cell: ({ row }) => {
 				return createRender(Merchant, {
 					logoUrl: row.original.edge_small_logo,
 					logoSvg: row.original.logo_svg,
@@ -175,7 +175,7 @@
 	<div class="rounded-md border">
 		<Table.Root {...$tableAttrs}>
 			<Table.Header>
-				{#each $headerRows as headerRow}
+				{#each $headerRows as headerRow, index (index)}
 					<Subscribe rowAttrs={headerRow.attrs()}>
 						<Table.Row>
 							{#each headerRow.cells as cell (cell.id)}

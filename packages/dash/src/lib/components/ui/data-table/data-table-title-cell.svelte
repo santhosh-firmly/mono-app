@@ -1,8 +1,8 @@
-<script lang="ts">
-	import { Badge } from "$lib/components/ui/badge/index.js";
+<script>
+	import { Badge } from '$lib/components/ui/badge/index.js';
 
-	export let value: string;
-	export let labelValue: string;
+	export let value;
+	export let labelValue;
 	// const label = labels.find((label) => label.value === labelValue);
 	const label = null;
 </script>

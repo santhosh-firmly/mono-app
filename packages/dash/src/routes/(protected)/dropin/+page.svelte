@@ -11,7 +11,7 @@
 	import BlockToolbar from '$lib/components/custom/block-toolbar.svelte';
 
 	let resizablePaneRef;
-	let block;
+	// let block;
 
 	let isLoading = false;
 </script>
