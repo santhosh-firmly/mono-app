@@ -1,15 +1,18 @@
-<script lang="ts">
+<script>
 	import * as Card from '$lib/components/ui/card/index.js';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import OrdersByMerchant from '$lib/components/dashboard-blocks/orders-by-merchant.svelte';
 	import { formatCurrency } from '$lib/currency.js';
 	import OrdersByDestination from '$lib/components/dashboard-blocks/orders-by-destination.svelte';
 	import DebugPopover from '$lib/components/custom/debug-popover.svelte';
+	import PageHeader from '$lib/components/app/page-header.svelte';
 
 	export let data;
 </script>
 
 <main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-4">
+	<PageHeader title="Dashboard" />
+
 	<div class="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-4">
 		<div class="flex flex-wrap gap-4">
 			<Card.Root class="min-w-[300px]">
