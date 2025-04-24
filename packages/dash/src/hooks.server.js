@@ -21,6 +21,7 @@ export async function handle({ event, resolve }) {
 				azureClientId: platform.env.PUBLIC_AZURE_AD_CLIENT_ID
 			})
 		).authInfo;
+
 		return resolve(event);
 	} catch {
 		if (dev) {
@@ -32,6 +33,7 @@ export async function handle({ event, resolve }) {
 
 			return resolve(event);
 		}
+
 		return redirect(302, '/auth/sign-in');
 	}
 }

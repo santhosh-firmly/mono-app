@@ -25,6 +25,12 @@
 			"database_id": "d269cace-932c-41e0-bf7c-b852db8e83f1"
 		}
 	],
+	"vars": {
+		"PUBLIC_AZURE_AD_CLIENT_ID": "194f24d1-f48d-401e-acaa-b0e2900bce67",
+		"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
+		"PUBLIC_AZURE_REDIRECT_URL": "http://localhost:5173/auth/callback",
+		"HONEYCOMB_DATASET": "requests-dev"
+	},
 	"env": {
 		"dev": {
 			"account_id": "edefa8570f305f587d4a564abd8bdc80",
@@ -41,7 +47,13 @@
 					"database_name": "reporting",
 					"database_id": "d269cace-932c-41e0-bf7c-b852db8e83f1"
 				}
-			]
+			],
+			"vars": {
+				"PUBLIC_AZURE_AD_CLIENT_ID": "194f24d1-f48d-401e-acaa-b0e2900bce67",
+				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
+				"PUBLIC_AZURE_REDIRECT_URL": "http://localhost:5173/auth/callback",
+				"HONEYCOMB_DATASET": "requests-dev"
+			}
 		},
 		"uat": {
 			"account_id": "e7638306f2807c7feef461c785b712c1",

@@ -1,17 +1,18 @@
 <script>
-	let { azureAdClientId, azureAdTenantId, azureAdRedirectUrl } = $props();
+	let { azureAdClientId, azureAdRedirectUrl, azureAdTenantId } = $props();
 
 	let altSignInWithMS = $state('Sign In with Microsoft');
 
-	let MSUrl = $derived(
-		new URL(`https://login.microsoftonline.com/${azureAdTenantId}/oauth2/v2.0/authorize`)
-	);
+	let MSUrl = $derived.by(() => {
+		const url = new URL(
+			`https://login.microsoftonline.com/${azureAdTenantId}/oauth2/v2.0/authorize`
+		);
+		url.searchParams.set('client_id', azureAdClientId);
+		url.searchParams.set('scope', 'openid profile email');
+		url.searchParams.set('response_type', 'code');
+		url.searchParams.set('redirect_uri', azureAdRedirectUrl);
 
-	$effect(() => {
-		MSUrl.searchParams.set('client_id', azureAdClientId);
-		MSUrl.searchParams.set('scope', 'openid profile email');
-		MSUrl.searchParams.set('response_type', 'code');
-		MSUrl.searchParams.set('redirect_uri', azureAdRedirectUrl);
+		return url;
 	});
 </script>
 
