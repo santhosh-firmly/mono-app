@@ -1,33 +1,34 @@
 {
-	"name": "mono-app",
-	"private": true,
-	"type": "module",
-	"workspaces": [
-		"packages/*"
-	],
-	"scripts": {
-		"build": "lerna run build",
-		"build-dev": "lerna run build-dev",
-		"build-ci": "lerna run build-ci",
-		"build-qa": "lerna run build-qa",
-		"build-uat": "lerna run build-uat",
-		"build-prod": "lerna run build-prod",
-		"deploy-dev": "lerna run deploy-dev",
-		"deploy-ci": "lerna run deploy-ci",
-		"deploy-qa": "lerna run deploy-qa",
-		"deploy-uat": "lerna run deploy-uat",
-		"deploy-prod": "lerna run deploy-prod",
-		"outdated": "npx check-outdated --prefer-wanted --ignore-packages @vitest,@vitest/ui,@vitest/coverage-istanbul,vitest",
-		"depcheck": "knip -c knip.config.js --no-config-hints",
-		"format-code": "lerna run format-code",
-		"test": "lerna run test:static",
-		"update-version": "lerna version --no-push --force-publish --yes",
-		"update-version-no-hooks": "lerna version --no-push --force-publish --no-commit-hooks --yes",
-		"prepare": "husky"
-	},
-	"devDependencies": {
-		"husky": "^9.1.7",
-		"lerna": "^8.1.2",
-		"knip": "^5.50.1"
-	}
+  "name": "mono-app",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "lerna run build",
+    "build-dev": "lerna run build-dev",
+    "build-ci": "lerna run build-ci",
+    "build-qa": "lerna run build-qa",
+    "build-uat": "lerna run build-uat",
+    "build-prod": "lerna run build-prod",
+    "deploy-dev": "lerna run deploy-dev",
+    "deploy-ci": "lerna run deploy-ci",
+    "deploy-qa": "lerna run deploy-qa",
+    "deploy-uat": "lerna run deploy-uat",
+    "deploy-prod": "lerna run deploy-prod",
+    "outdated": "npx check-outdated --prefer-wanted --ignore-packages @vitest,@vitest/ui,@vitest/coverage-istanbul,vitest",
+    "depcheck": "knip -c knip.config.js --no-config-hints",
+    "format-code": "lerna run format-code",
+    "test": "lerna run test:static",
+    "update-version": "lerna version --no-push --force-publish --yes",
+    "update-version-no-hooks": "lerna version --no-push --force-publish --no-commit-hooks --yes",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lerna": "^8.1.2",
+    "knip": "^5.50.1",
+    "wrangler": "^4.9.1"
+  }
 }

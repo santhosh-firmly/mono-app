@@ -1,0 +1,60 @@
+{
+	"name": "dash",
+	"compatibility_date": "2024-04-03",
+	"compatibility_flags": ["nodejs_compat"],
+	"send_metrics": false,
+	"pages_build_output_dir": "./.svelte-kit/cloudflare",
+	"dev": {
+		"port": 8840
+	},
+	"d1_databases": [
+		{
+			"binding": "firmlyConfigs",
+			"database_name": "firmly-configs",
+			"database_id": "f1e42435-758a-4abf-842d-2303131a96a1"
+		},
+		{
+			"binding": "reporting",
+			"database_name": "reporting",
+			"database_id": "d269cace-932c-41e0-bf7c-b852db8e83f1"
+		}
+	],
+	"env": {
+		"dev": {
+			"account_id": "edefa8570f305f587d4a564abd8bdc80",
+			"project_name": "dash",
+			"d1_databases": [
+				{
+					"binding": "firmlyConfigs",
+					"database_name": "firmly-configs",
+					"database_id": "f1e42435-758a-4abf-842d-2303131a96a1"
+				},
+				{
+					"binding": "reporting",
+					"database_name": "reporting",
+					"database_id": "d269cace-932c-41e0-bf7c-b852db8e83f1"
+				}
+			]
+		},
+		"uat": {
+			"account_id": "e7638306f2807c7feef461c785b712c1",
+			"project_name": "dash"
+		},
+		"prod": {
+			"account_id": "71f2b81ee4789578e28a5fbf03a935e8",
+			"project_name": "dash",
+			"d1_databases": [
+				{
+					"binding": "firmlyConfigs",
+					"database_name": "firmly-configs",
+					"database_id": "e6db9dd4-9b04-464f-8d4a-527c256859f3"
+				},
+				{
+					"binding": "reporting",
+					"database_name": "reporting",
+					"database_id": "bf2df3ce-3973-4dd4-9fcd-57c11297d57c"
+				}
+			]
+		}
+	}
+}
