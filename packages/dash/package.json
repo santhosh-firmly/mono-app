@@ -30,8 +30,9 @@
 		"@sveltejs/adapter-auto": "^4.0.0",
 		"@sveltejs/kit": "^2.16.0",
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",
-		"eslint": "^9.0.0",
+		"eslint": "*",
 		"monaco-editor": "^0.52.0",
+		"prettier": "*",
 		"storybook": "^8.4.5",
 		"svelte": "^5.27.0",
 		"tailwindcss": "^3.4.9",
@@ -39,6 +40,7 @@
 		"wrangler": "*"
 	},
 	"dependencies": {
+		"autoprefixer": "^10.4.21",
 		"bits-ui": "^0.21.15",
 		"clsx": "^2.1.1",
 		"cmdk-sv": "^0.0.18",

@@ -12,7 +12,9 @@ export class LineItem extends Subscribable {
 
 	#_enforceReadOnly() {
 		if (this.readOnly) {
-			throw new Error('This Cart is not longer active. An order may have been placed already.');
+			throw new Error(
+				'This Cart is not longer active. An order may have been placed already.'
+			);
 		}
 	}
 

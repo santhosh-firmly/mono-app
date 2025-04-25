@@ -24,7 +24,10 @@
 				<div class="grid gap-3">
 					<Label for="model">Model</Label>
 					<Select.Root>
-						<Select.Trigger id="model" class="items-start [&_[data-description]]:hidden">
+						<Select.Trigger
+							id="model"
+							class="items-start [&_[data-description]]:hidden"
+						>
 							<Select.Value placeholder="Select a model" />
 						</Select.Trigger>
 						<Select.Content>
@@ -34,9 +37,13 @@
 									<div class="grid gap-0.5">
 										<p>
 											Neural
-											<span class="font-medium text-foreground"> Genesis </span>
+											<span class="font-medium text-foreground">
+												Genesis
+											</span>
 										</p>
-										<p class="text-xs" data-description>Our fastest model for general use cases.</p>
+										<p class="text-xs" data-description>
+											Our fastest model for general use cases.
+										</p>
 									</div>
 								</div>
 							</Select.Item>
@@ -46,9 +53,13 @@
 									<div class="grid gap-0.5">
 										<p>
 											Neural
-											<span class="font-medium text-foreground"> Explorer </span>
+											<span class="font-medium text-foreground">
+												Explorer
+											</span>
 										</p>
-										<p class="text-xs" data-description>Performance and speed for efficiency.</p>
+										<p class="text-xs" data-description>
+											Performance and speed for efficiency.
+										</p>
 									</div>
 								</div>
 							</Select.Item>
@@ -58,7 +69,9 @@
 									<div class="grid gap-0.5">
 										<p>
 											Neural
-											<span class="font-medium text-foreground"> Quantum </span>
+											<span class="font-medium text-foreground">
+												Quantum
+											</span>
 										</p>
 										<p class="text-xs" data-description>
 											The most powerful model for complex computations.

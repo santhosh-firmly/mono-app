@@ -128,7 +128,10 @@
 			</div>
 		</div>
 		<div class="text-border relative flex w-full flex-row justify-center">
-			<div class="absolute left-0 flex h-full w-full flex-col justify-center" style="z-index: -1;">
+			<div
+				class="absolute left-0 flex h-full w-full flex-col justify-center"
+				style="z-index: -1;"
+			>
 				<hr class="h-[1px] w-full" />
 			</div>
 		</div>
@@ -179,7 +182,10 @@
 					{@render asection?.()}
 				{/if}
 			</section>
-			<section bind:this={sectionB} class="flex flex-col px-4 pt-10 md:w-1/2 md:py-8 lg:px-14">
+			<section
+				bind:this={sectionB}
+				class="flex flex-col px-4 pt-10 md:w-1/2 md:py-8 lg:px-14"
+			>
 				{#if isLoading}
 					{@render rightSkeleton()}
 				{:else}

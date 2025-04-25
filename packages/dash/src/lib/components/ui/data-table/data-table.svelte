@@ -179,10 +179,19 @@
 					<Subscribe rowAttrs={headerRow.attrs()}>
 						<Table.Row>
 							{#each headerRow.cells as cell (cell.id)}
-								<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
+								<Subscribe
+									attrs={cell.attrs()}
+									let:attrs
+									props={cell.props()}
+									let:props
+								>
 									<Table.Head {...attrs}>
 										{#if cell.id !== 'select' && cell.id !== 'actions'}
-											<DataTableColumnHeader {props} {tableModel} cellId={cell.id}>
+											<DataTableColumnHeader
+												{props}
+												{tableModel}
+												cellId={cell.id}
+											>
 												<Render of={cell.render()} /></DataTableColumnHeader
 											>
 										{:else}
@@ -218,7 +227,9 @@
 					{/each}
 				{:else}
 					<Table.Row>
-						<Table.Cell colspan={columns.length} class="h-24 text-center">No results.</Table.Cell>
+						<Table.Cell colspan={columns.length} class="h-24 text-center"
+							>No results.</Table.Cell
+						>
 					</Table.Row>
 				{/if}
 			</Table.Body>

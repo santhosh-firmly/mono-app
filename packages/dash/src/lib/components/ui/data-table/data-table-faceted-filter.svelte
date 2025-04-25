@@ -84,7 +84,9 @@
 								{label || '(Blank)'}
 							</span>
 							{#if counts[value]}
-								<span class="ml-auto flex h-4 w-4 items-center justify-center font-mono text-xs">
+								<span
+									class="ml-auto flex h-4 w-4 items-center justify-center font-mono text-xs"
+								>
 									{counts[value]}
 								</span>
 							{/if}

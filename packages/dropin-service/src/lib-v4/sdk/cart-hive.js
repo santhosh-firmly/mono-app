@@ -140,7 +140,12 @@ export class CartHive extends Subscribable {
 
 	async addLineItem(domain, variantId, quantity, variantHandles) {
 		// TODO: If cart already exists, there is no need to recreate Cart class.
-		const res = await window.firmly.cartAddLineItem(variantId, quantity, variantHandles, domain);
+		const res = await window.firmly.cartAddLineItem(
+			variantId,
+			quantity,
+			variantHandles,
+			domain
+		);
 		if (res.status !== 200) {
 			throw res.data;
 		}

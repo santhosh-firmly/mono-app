@@ -68,14 +68,22 @@ export function telemetryEnqueue(message) {
 			const order = ++_telemetryOrder;
 			const event_id = getNextEventId();
 			_telemetryQueue.push(
-				Object.assign(iterator, { order: order, span_id: event_id, event_id: event_id }, headerProp)
+				Object.assign(
+					iterator,
+					{ order: order, span_id: event_id, event_id: event_id },
+					headerProp
+				)
 			);
 		}
 	} else {
 		const order = ++_telemetryOrder;
 		const event_id = getNextEventId();
 		_telemetryQueue.push(
-			Object.assign(message, { order: order, span_id: event_id, event_id: event_id }, headerProp)
+			Object.assign(
+				message,
+				{ order: order, span_id: event_id, event_id: event_id },
+				headerProp
+			)
 		);
 	}
 	clearTimeout(_telemetryTimeout);
@@ -86,14 +94,22 @@ export function telemetryEnqueue(message) {
  * Sends a session start telemetry event.
  */
 export function telemetrySessionStart() {
-	telemetryEnqueue({ timestamp: Date.now(), name: 'sessionStart', event_type: EVENT_TYPE_SESSION });
+	telemetryEnqueue({
+		timestamp: Date.now(),
+		name: 'sessionStart',
+		event_type: EVENT_TYPE_SESSION
+	});
 }
 
 /**
  * Sends a device created telemetry event.
  */
 export function telemetryDeviceCreated() {
-	telemetryEnqueue({ timestamp: Date.now(), name: 'deviceCreated', event_type: EVENT_TYPE_DEVICE });
+	telemetryEnqueue({
+		timestamp: Date.now(),
+		name: 'deviceCreated',
+		event_type: EVENT_TYPE_DEVICE
+	});
 }
 
 const EVENT_VIEW_PAGE = 'viewPage';

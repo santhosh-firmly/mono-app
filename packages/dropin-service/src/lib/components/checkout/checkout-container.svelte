@@ -82,7 +82,10 @@
 
 		<!-- Address -->
 		{#if modes.address === MODES.PREVIEW}
-			<div class="group-item flex items-center justify-between text-sm" out:blur={{ duration: 5 }}>
+			<div
+				class="group-item flex items-center justify-between text-sm"
+				out:blur={{ duration: 5 }}
+			>
 				<span class="flex flex-col gap-1 p-5">
 					<p class="border-border border-b font-bold">{selectedAddress.email}</p>
 					<p>
@@ -155,8 +158,9 @@
 					<Icon icon="fa6-brands:cc-visa" class="text-2xl" />
 					<p class="font-bold">Visa *** 1111</p>
 				</div>
-				<button class="h-full cursor-pointer p-5 text-sm text-blue-500" onclick={handleChangeCard}
-					>{m.change()}</button
+				<button
+					class="h-full cursor-pointer p-5 text-sm text-blue-500"
+					onclick={handleChangeCard}>{m.change()}</button
 				>
 			</div>
 		{:else if modes.payment === MODES.LIST}

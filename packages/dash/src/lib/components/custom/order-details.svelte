@@ -65,7 +65,8 @@
 				{#each order.order_info.line_items || [] as item, index (index)}
 					<li class="flex items-center justify-between">
 						<span class="text-ellipsis text-muted-foreground">
-							<span class="overflow-hidden">{item.description}</span> x <span>{item.quantity}</span>
+							<span class="overflow-hidden">{item.description}</span> x
+							<span>{item.quantity}</span>
 						</span>
 						<span>{formatCurrency(item.line_price.value)}</span>
 					</li>

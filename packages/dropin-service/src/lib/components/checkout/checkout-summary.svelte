@@ -25,7 +25,9 @@
 			{hiddenLineItems ? 'Show' : 'Hide'}
 			<Icon
 				icon="mdi:chevron-down"
-				class="{!hiddenLineItems ? 'rotate-180' : ''} text-md transition-transform duration-400"
+				class="{!hiddenLineItems
+					? 'rotate-180'
+					: ''} text-md transition-transform duration-400"
 			/>
 		</div>
 	</button>

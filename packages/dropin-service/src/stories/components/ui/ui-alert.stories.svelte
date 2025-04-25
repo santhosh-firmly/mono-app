@@ -35,7 +35,8 @@
 
 <Story name="With HTML Content">
 	<UiAlert>
-		Please note: <b>Important information</b> that requires attention. <b>Multiple bold sections</b>
+		Please note: <b>Important information</b> that requires attention.
+		<b>Multiple bold sections</b>
 		can be included.
 	</UiAlert>
 </Story>

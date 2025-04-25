@@ -11,7 +11,8 @@
 		<pre class="text-xs">
         <dl class="grid grid-cols-2">
             {#each Object.entries(objToDebug) as [key, value] (key)}
-					<dt class="text-right font-semibold">{key}: </dt>
+					<dt
+						class="text-right font-semibold">{key}: </dt>
                 <dd>{value}</dd>
 				{/each}
         </dl>

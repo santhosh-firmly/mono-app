@@ -165,7 +165,12 @@
 		selectedShippingMethod={data.cart?.shipping_method}
 		selectedCard={data.storage?.credit_cards?.[0]}
 	>
-		{#snippet addressList({ addresses, selectedAddress, handleAddNewAddress, handleSelectAddress })}
+		{#snippet addressList({
+			addresses,
+			selectedAddress,
+			handleAddNewAddress,
+			handleSelectAddress
+		})}
 			<CheckoutShippingList
 				{addresses}
 				{selectedAddress}
@@ -187,8 +192,9 @@
 						dispatch(ACTIONS.INPUT_SHIPPING_ADDRESS_COMPLETION, value)}
 					onSelectAddressCompletion={(value) =>
 						dispatch(ACTIONS.SELECT_SHIPPING_ADDRESS_COMPLETION, value)}
-					isAutocompleteLoading={data.pending[ACTIONS.INPUT_SHIPPING_ADDRESS_COMPLETION] ||
-						data.pending[ACTIONS.SELECT_SHIPPING_ADDRESS_COMPLETION]}
+					isAutocompleteLoading={data.pending[
+						ACTIONS.INPUT_SHIPPING_ADDRESS_COMPLETION
+					] || data.pending[ACTIONS.SELECT_SHIPPING_ADDRESS_COMPLETION]}
 					addressCompletions={data?.autocomplete?.shippingCompletions}
 				/>
 			</div>
@@ -197,7 +203,8 @@
 			<CheckoutShippingMethods
 				{shippingMethods}
 				{selectedShippingMethod}
-				onSelect={(shippingMethod) => dispatch(ACTIONS.UPDATE_SHIPPING_METHOD, shippingMethod)}
+				onSelect={(shippingMethod) =>
+					dispatch(ACTIONS.UPDATE_SHIPPING_METHOD, shippingMethod)}
 				isUpdating={isFullCartUpdating}
 				isLoading={data.pending[ACTIONS.CALCULATE_SHIPPING] ||
 					data.pending[ACTIONS.SET_SHIPPING_ADDRESS]}
@@ -227,14 +234,17 @@
 								onSelectAddressCompletion={(value) => {
 									dispatch(ACTIONS.SELECT_BILLING_ADDRESS_COMPLETION, value);
 								}}
-								isAutocompleteLoading={data.pending[ACTIONS.INPUT_BILLING_ADDRESS_COMPLETION] ||
-									data.pending[ACTIONS.SELECT_BILLING_ADDRESS_COMPLETION]}
+								isAutocompleteLoading={data.pending[
+									ACTIONS.INPUT_BILLING_ADDRESS_COMPLETION
+								] || data.pending[ACTIONS.SELECT_BILLING_ADDRESS_COMPLETION]}
 							/>
 						{/snippet}
 					</CheckoutPaymentForm>
 				{/snippet}
 				{#snippet paypal()}
-					<CheckoutPaymentPaypal onclick={() => dispatch(ACTIONS.USE_FAST_CHECKOUT, 'paypal')} />
+					<CheckoutPaymentPaypal
+						onclick={() => dispatch(ACTIONS.USE_FAST_CHECKOUT, 'paypal')}
+					/>
 				{/snippet}
 			</CheckoutPaymentContainer>
 		{/snippet}

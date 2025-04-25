@@ -67,8 +67,14 @@ export async function load() {
 				enable_sandbox: true,
 				locale: 'en_US',
 				client: 'public-api',
-				captcha: { type: 'recaptcha-v3', url: 'https://dev.famousfootwear.com/account/sign-in' },
-				custom_properties: { braintree_version: '2018-05-10', paypal_store_id: 'rs3s3ppvfsd4cpyd' }
+				captcha: {
+					type: 'recaptcha-v3',
+					url: 'https://dev.famousfootwear.com/account/sign-in'
+				},
+				custom_properties: {
+					braintree_version: '2018-05-10',
+					paypal_store_id: 'rs3s3ppvfsd4cpyd'
+				}
 			},
 			created_dt: '2023-03-01T12:16:03.000Z',
 			updated_dt: '2023-08-29T18:25:10.000Z'
@@ -1255,8 +1261,7 @@ export async function load() {
 				accepts_membership: ['vip'],
 				clean_payment_info: true,
 				vip_info: {
-					image:
-						'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIiA/Pgo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZlcnNpb249IjEuMSIgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHZpZXdCb3g9IjAgMCAxMDgwIDEwODAiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8ZGVmcz4KPC9kZWZzPgo8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJyZ2IoMTQ5LDAsMTA2KSI+PC9yZWN0Pgo8ZyB0cmFuc2Zvcm09Im1hdHJpeCgyNSAwIDAgMjUgNTQwIDU0MCkiPgo8cGF0aCBzdHlsZT0ic3Ryb2tlOiBub25lOyBzdHJva2Utd2lkdGg6IDE7IHN0cm9rZS1kYXNoYXJyYXk6IG5vbmU7IHN0cm9rZS1saW5lY2FwOiBidXR0OyBzdHJva2UtZGFzaG9mZnNldDogMDsgc3Ryb2tlLWxpbmVqb2luOiBtaXRlcjsgc3Ryb2tlLW1pdGVybGltaXQ6IDQ7IGZpbGw6IHJnYigyNTUsMjU1LDI1NSk7IGZpbGwtcnVsZTogbm9uemVybzsgb3BhY2l0eTogMTsiICB0cmFuc2Zvcm09IiB0cmFuc2xhdGUoLTEyLjU2LCAtOC4xKSIgZD0iTSAyMy4xNzI0IDAuMDk5NjA5NCBMIDE4LjM1OTggMTMuMTcwMSBMIDEyLjY5MTMgMC4wOTk2MDk0IEwgMTAuMjE1OCAwLjA5OTYwOTQgTCAxMC4yMTU4IDAuMTc5MjQ4IEMgMTAuNzYzNSAwLjY3ODUyIDExLjI5MjcgMS42Mzg0NyAxMS43NjMyIDIuNjcyNTUgTCAxNy41ODczIDE2LjA5OTYgTCAxNy43OTU1IDE2LjA5OTYgTCAyMy4yMDA2IDEuNzA2NDcgTCAyMy4yMDA2IDE1LjgzNzQgTCAyNS4xMTMxIDE1LjgzNzQgTCAyNS4xMTMxIDAuMDk5NjA5NCBMIDIzLjE3MjQgMC4wOTk2MDk0IFogTSAzLjIxMjUgOS42NTkzIEwgNi4yNjkzOSAyLjYwMDg3IEwgOS4zMzQ4NiA5LjY1OTMgTCAzLjIxMjUgOS42NTkzIFogTSA0Ljc1NjI2IDAuMDk5NjA5NCBMIDQuNzU2MjYgMC4xNzkyNDggQyA1LjI4MzEgMC42NDQ4MjcgNS42OTk2NyAxLjM4MzAyIDUuOTkzNzIgMS45OTEzMyBMIDAgMTUuODM3NCBMIDAuNTgzODEyIDE1LjgzNzQgTCAzLjAyOTk0IDEwLjE4ODYgTCA5LjU2MzM3IDEwLjE4ODYgTCAxMi4wMTQ0IDE1LjgzNzQgTCAxNC4wNTYyIDE1LjgzNzQgTCA3LjIzMTc5IDAuMDk5NjA5NCBMIDQuNzU2MjYgMC4wOTk2MDk0IFoiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgLz4KPC9nPgo8L3N2Zz4K',
+					image: 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIiA/Pgo8IURPQ1RZUEUgc3ZnIFBVQkxJQyAiLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4iICJodHRwOi8vd3d3LnczLm9yZy9HcmFwaGljcy9TVkcvMS4xL0RURC9zdmcxMS5kdGQiPgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZlcnNpb249IjEuMSIgd2lkdGg9IjUxMiIgaGVpZ2h0PSI1MTIiIHZpZXdCb3g9IjAgMCAxMDgwIDEwODAiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8ZGVmcz4KPC9kZWZzPgo8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJyZ2IoMTQ5LDAsMTA2KSI+PC9yZWN0Pgo8ZyB0cmFuc2Zvcm09Im1hdHJpeCgyNSAwIDAgMjUgNTQwIDU0MCkiPgo8cGF0aCBzdHlsZT0ic3Ryb2tlOiBub25lOyBzdHJva2Utd2lkdGg6IDE7IHN0cm9rZS1kYXNoYXJyYXk6IG5vbmU7IHN0cm9rZS1saW5lY2FwOiBidXR0OyBzdHJva2UtZGFzaG9mZnNldDogMDsgc3Ryb2tlLWxpbmVqb2luOiBtaXRlcjsgc3Ryb2tlLW1pdGVybGltaXQ6IDQ7IGZpbGw6IHJnYigyNTUsMjU1LDI1NSk7IGZpbGwtcnVsZTogbm9uemVybzsgb3BhY2l0eTogMTsiICB0cmFuc2Zvcm09IiB0cmFuc2xhdGUoLTEyLjU2LCAtOC4xKSIgZD0iTSAyMy4xNzI0IDAuMDk5NjA5NCBMIDE4LjM1OTggMTMuMTcwMSBMIDEyLjY5MTMgMC4wOTk2MDk0IEwgMTAuMjE1OCAwLjA5OTYwOTQgTCAxMC4yMTU4IDAuMTc5MjQ4IEMgMTAuNzYzNSAwLjY3ODUyIDExLjI5MjcgMS42Mzg0NyAxMS43NjMyIDIuNjcyNTUgTCAxNy41ODczIDE2LjA5OTYgTCAxNy43OTU1IDE2LjA5OTYgTCAyMy4yMDA2IDEuNzA2NDcgTCAyMy4yMDA2IDE1LjgzNzQgTCAyNS4xMTMxIDE1LjgzNzQgTCAyNS4xMTMxIDAuMDk5NjA5NCBMIDIzLjE3MjQgMC4wOTk2MDk0IFogTSAzLjIxMjUgOS42NTkzIEwgNi4yNjkzOSAyLjYwMDg3IEwgOS4zMzQ4NiA5LjY1OTMgTCAzLjIxMjUgOS42NTkzIFogTSA0Ljc1NjI2IDAuMDk5NjA5NCBMIDQuNzU2MjYgMC4xNzkyNDggQyA1LjI4MzEgMC42NDQ4MjcgNS42OTk2NyAxLjM4MzAyIDUuOTkzNzIgMS45OTEzMyBMIDAgMTUuODM3NCBMIDAuNTgzODEyIDE1LjgzNzQgTCAzLjAyOTk0IDEwLjE4ODYgTCA5LjU2MzM3IDEwLjE4ODYgTCAxMi4wMTQ0IDE1LjgzNzQgTCAxNC4wNTYyIDE1LjgzNzQgTCA3LjIzMTc5IDAuMDk5NjA5NCBMIDQuNzU2MjYgMC4wOTk2MDk0IFoiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgLz4KPC9nPgo8L3N2Zz4K',
 					description: 'VIP Membership',
 					variant_description:
 						'Flexible monthly lingerie membership where you get first access and member-only discounts on exclusive monthly drops.',
@@ -1370,7 +1375,10 @@ export async function load() {
 				site_id: 'FamousFootWear',
 				locale: 'en_US',
 				client: 'public-api',
-				captcha: { type: 'recaptcha-v3', url: 'https://www.famousfootwear.com/account/sign-in' },
+				captcha: {
+					type: 'recaptcha-v3',
+					url: 'https://www.famousfootwear.com/account/sign-in'
+				},
 				custom_properties: { braintree_version: '2018-05-10' }
 			},
 			created_dt: '2023-03-01T12:05:08.000Z',
@@ -1879,7 +1887,10 @@ export async function load() {
 			platform_id: 'sfcc',
 			url_name: ['sfcc-demo'],
 			base_url: 'https://zyep-001.dx.commercecloud.salesforce.com',
-			store_info: { site_id: 'SiteGenesis', client_id: 'bb8c6ee2-19e4-4ca8-95af-278b61c7894b' },
+			store_info: {
+				site_id: 'SiteGenesis',
+				client_id: 'bb8c6ee2-19e4-4ca8-95af-278b61c7894b'
+			},
 			display_name: 'SFCC Demo',
 			created_dt: '2023-01-07T00:44:33.000Z',
 			updated_dt: '2023-09-13T03:43:00.000Z'
@@ -2032,7 +2043,8 @@ export async function load() {
 			base_url: 'https://superfiliate-demo-2.myshopify.com',
 			store_info: {
 				use_graphql: true,
-				storefront_digest: 'e4e490cc0e364aca62fdd0980b99939ab21a7b0fc8e0e4b59ae0c8cf82b79cfe',
+				storefront_digest:
+					'e4e490cc0e364aca62fdd0980b99939ab21a7b0fc8e0e4b59ae0c8cf82b79cfe',
 				shopifyCheckoutApiToken: 'ae148927e06ee5dbbce6d2703590b7ef',
 				paypal: null,
 				shopify_shop_id: 84261601599,
@@ -2552,7 +2564,11 @@ export async function load() {
 					adyen_environment: 'test',
 					psp_base_url: 'https://payments.bigcommerce.com',
 					checkout_shopper_url: 'https://checkoutshopper-test.adyen.com',
-					payment_store_info: { hash: 'tnw7k0ssup', id: '1003117397', name: 'lakridsbybulow.us' }
+					payment_store_info: {
+						hash: 'tnw7k0ssup',
+						id: '1003117397',
+						name: 'lakridsbybulow.us'
+					}
 				}
 			},
 			updated_dt: '2023-05-09T10:35:53.000Z',
@@ -2628,7 +2644,8 @@ export async function load() {
 				paypal: null,
 				shopify_shop_id: 87847043383,
 				shopifyCheckoutApiToken: 'bd4edf95b12f3fa0292bcd63773d4951',
-				storefront_digest: '6ccb0335f9d9967f60a837934b0f048ea9a9d01b07cba39d5e272b00fcffa6ea',
+				storefront_digest:
+					'6ccb0335f9d9967f60a837934b0f048ea9a9d01b07cba39d5e272b00fcffa6ea',
 				use_graphql: true
 			}
 		},
@@ -2657,7 +2674,11 @@ export async function load() {
 					auth_key_version: '4.8.0',
 					adyen_environment: 'prod',
 					psp_base_url: 'https://payments.bigcommerce.com',
-					payment_store_info: { hash: 'tnw7k0ssup', id: '1003117397', name: 'lakridsbybulow.us' }
+					payment_store_info: {
+						hash: 'tnw7k0ssup',
+						id: '1003117397',
+						name: 'lakridsbybulow.us'
+					}
 				}
 			},
 			url_name: ['lakrids']
@@ -2730,7 +2751,8 @@ export async function load() {
 				locale: 'default',
 				set_shipping_info:
 					'on/demandware.store/Sites-madewellUS-Site/default/COShipping-SingleShipping',
-				post_payment_info: 'on/demandware.store/Sites-madewellUS-Site/default/COBilling-Billing',
+				post_payment_info:
+					'on/demandware.store/Sites-madewellUS-Site/default/COBilling-Billing',
 				cart_page: 'cart',
 				checkout_page: '/s/madewell/checkout/',
 				place_order_page: '/s/madewell/checkout?stage=placeOrder#placeOrder',
@@ -2862,7 +2884,8 @@ export async function load() {
 				locale: 'default',
 				set_shipping_info:
 					'on/demandware.store/Sites-madewellUS-Site/default/COShipping-SingleShipping',
-				post_payment_info: 'on/demandware.store/Sites-madewellUS-Site/default/COBilling-Billing',
+				post_payment_info:
+					'on/demandware.store/Sites-madewellUS-Site/default/COBilling-Billing',
 				cart_page: 'cart',
 				checkout_page: '/s/madewell/checkout/',
 				place_order_page: '/s/madewell/checkout?stage=placeOrder#placeOrder',
@@ -3296,7 +3319,8 @@ export async function load() {
 			platform_id: 'shopify',
 			store_info: {
 				use_graphql: true,
-				thank_you_page_url: 'https://checkout.staging.vicegolf.com/checkouts?meta_thank_you=true',
+				thank_you_page_url:
+					'https://checkout.staging.vicegolf.com/checkouts?meta_thank_you=true',
 				shopifyCheckoutApiToken: 'b1d4bb37bbcb6566873bff3fff2f7f20',
 				paypal: {
 					clientId:
@@ -3410,7 +3434,9 @@ export async function load() {
 	];
 
 	const uniquePsp = Array.from(new Set(merchants.map((m) => m.psp).filter((e) => e)));
-	const uniquePlatforms = Array.from(new Set(merchants.map((m) => m.platform_id).filter((e) => e)));
+	const uniquePlatforms = Array.from(
+		new Set(merchants.map((m) => m.platform_id).filter((e) => e))
+	);
 
 	return {
 		merchants,

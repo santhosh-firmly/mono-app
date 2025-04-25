@@ -251,7 +251,10 @@ export function bootstrap() {
 						status,
 						async () => {
 							if (status === 'trigger') {
-								window.parent.postMessage({ action: 'firmly:closeCart:start' }, '*');
+								window.parent.postMessage(
+									{ action: 'firmly:closeCart:start' },
+									'*'
+								);
 								await cb();
 								window.parent.postMessage({ action: 'firmly:closeCart:end' }, '*');
 							} else {
@@ -305,7 +308,9 @@ export function bootstrap() {
 					if (typeof config.container === 'string') {
 						const selectedContainer = document.querySelector(config.container);
 						if (!selectedContainer) {
-							throw new Error(`Container not found with selector: ${config.container}`);
+							throw new Error(
+								`Container not found with selector: ${config.container}`
+							);
 						}
 						targetContainer = selectedContainer;
 					} else if (config.container instanceof HTMLElement) {
@@ -357,8 +362,14 @@ export function bootstrap() {
 				dropinBuyNowUrl.searchParams.set('url', checkoutConfig.pdp_url);
 				dropinBuyNowUrl.searchParams.set('ui_mode', checkoutConfig.ui_mode);
 				dropinBuyNowUrl.searchParams.set('skip_pdp', checkoutConfig.skip_pdp);
-				dropinBuyNowUrl.searchParams.set('custom_properties', checkoutConfig.custom_properties);
-				window.firmly.dropinIframe = createIframe(dropinBuyNowUrl.toString(), checkoutConfig);
+				dropinBuyNowUrl.searchParams.set(
+					'custom_properties',
+					checkoutConfig.custom_properties
+				);
+				window.firmly.dropinIframe = createIframe(
+					dropinBuyNowUrl.toString(),
+					checkoutConfig
+				);
 				window.firmly.dropinIframe.style.display = 'block';
 			} else if (checkoutConfig.mode === 'full-pdp') {
 				console.log('firmly - full pdp mode');
@@ -404,7 +415,10 @@ export function bootstrap() {
 
 					if (currentShippingInfo) {
 						try {
-							window.parent.postMessage({ action: 'firmly:setShippingInfo:start' }, '*');
+							window.parent.postMessage(
+								{ action: 'firmly:setShippingInfo:start' },
+								'*'
+							);
 
 							await cartHive.merchants[event.data.merchant.store_id].setShippingInfo(
 								currentShippingInfo
@@ -412,7 +426,10 @@ export function bootstrap() {
 						} catch (e) {
 							console.error('Set shipping info error', e);
 						} finally {
-							window.parent.postMessage({ action: 'firmly:setShippingInfo:end' }, '*');
+							window.parent.postMessage(
+								{ action: 'firmly:setShippingInfo:end' },
+								'*'
+							);
 						}
 					}
 				}

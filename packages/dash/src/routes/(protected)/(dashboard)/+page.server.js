@@ -51,7 +51,9 @@ export async function load({ platform }) {
 		orderSumStmt.bind(startOfWeek(today).toISOString()).all(),
 		orderSumStmt.bind(startOfMonth(today).toISOString()).all(),
 		orderSumStmt.bind(startOfYear(today).toISOString()).all(),
-		orderSumStmt2.bind(lastYearStartOfYear.toISOString(), lastYearEndOfYear.toISOString()).all(),
+		orderSumStmt2
+			.bind(lastYearStartOfYear.toISOString(), lastYearEndOfYear.toISOString())
+			.all(),
 		orderByMerchantStmt.bind(startOfWeek(today).toISOString()).all(),
 		orderByMerchantStmt.bind(startOfMonth(today).toISOString()).all(),
 		orderByMerchantStmt.bind(startOfYear(today).toISOString()).all(),

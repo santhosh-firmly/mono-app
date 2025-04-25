@@ -21,7 +21,9 @@
 			<ChevronLeft class="h-4 w-4" />
 			<span class="sr-only">Back</span>
 		</Button>
-		<h1 class="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
+		<h1
+			class="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0"
+		>
 			{data.product.title}
 		</h1>
 		<Badge variant="outline" class="ml-auto sm:ml-0">In stock</Badge>
@@ -68,7 +70,9 @@
 									<Table.Cell class="font-semibold">{variant.sku}</Table.Cell>
 									<Table.Cell>
 										<Badge variant={variant.available ? 'outline' : 'secondary'}
-											>{variant.available ? 'In Stock' : 'Out Of Stock'}</Badge
+											>{variant.available
+												? 'In Stock'
+												: 'Out Of Stock'}</Badge
 										>
 									</Table.Cell>
 									{#each data.product.variant_option_values as option (option.option_name)}
@@ -80,7 +84,9 @@
 											>
 												<!-- <ToggleGroup.Item disabled value={variant[option.property_accessor]}>{variant[option.property_accessor]}</ToggleGroup.Item> -->
 												{#each option.option_values as value (value)}
-													<ToggleGroup.Item disabled {value}>{value}</ToggleGroup.Item>
+													<ToggleGroup.Item disabled {value}
+														>{value}</ToggleGroup.Item
+													>
 												{/each}
 											</ToggleGroup.Root>
 										</Table.Cell>

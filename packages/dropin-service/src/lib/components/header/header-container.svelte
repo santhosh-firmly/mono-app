@@ -54,7 +54,9 @@
 		</p>
 		<Icon
 			icon="mdi:chevron-up"
-			class="{!isSummaryVisible ? 'rotate-180' : ''} text-md transition-transform duration-400"
+			class="{!isSummaryVisible
+				? 'rotate-180'
+				: ''} text-md transition-transform duration-400"
 		/>
 	</button>
 
@@ -65,7 +67,10 @@
 			transition:fly
 			onclick={handleBackgroundClick}
 		>
-			<div class="bg-background min-h-40 w-full cursor-default self-start p-4" transition:slide>
+			<div
+				class="bg-background min-h-40 w-full cursor-default self-start p-4"
+				transition:slide
+			>
 				{@render summary?.()}
 			</div>
 		</button>
