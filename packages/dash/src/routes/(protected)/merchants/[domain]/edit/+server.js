@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import merchantsData from '$lib/assets/data.json';
+import { merchants as data } from '$lib/assets/merchants-data.json';
 
 /** @type {import('./$types').RequestHandler} */
 export async function POST({ request, params }) {
@@ -13,7 +13,7 @@ export async function POST({ request, params }) {
 		}
 
 		// Find the merchant in the data array
-		const index = merchantsData.findIndex((m) => m.store_id === domain);
+		const index = data.findIndex((m) => m.store_id === domain);
 
 		if (index === -1) {
 			return json({ success: false, message: 'Merchant not found' }, { status: 404 });
