@@ -372,7 +372,7 @@ export function bootstrap() {
 			} else {
 				console.log('firmly - dropin mode');
 				dropinBuyNowUrl.searchParams.set('url', checkoutConfig.pdp_url);
-				createIframe(dropinBuyNowUrl.toString(), 'firmly-drawer-frame');
+				createIframe(dropinBuyNowUrl.toString(), checkoutConfig, 'firmly-drawer-frame');
 			}
 
 			window.firmly.callbacks = {};
