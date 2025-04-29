@@ -44,7 +44,7 @@
 			</Table.Header>
 			<Table.Body>
 				{#each products as product (product.base_sku)}
-					<Table.Row class="cursor-pointer" on:click={() => window.location = ''}>
+					<Table.Row class="cursor-pointer" on:click={() => (window.location = '')}>
 						<Table.Cell class="hidden sm:table-cell">
 							<img
 								alt="Product example"
@@ -56,17 +56,29 @@
 						</Table.Cell>
 						<Table.Cell class="font-medium">{product.title}</Table.Cell>
 						<Table.Cell>
-							<Badge variant={product.variants?.[0]?.available ? 'primary' : 'secondary'}
-								>{product.variants?.[0]?.available ? 'In Stock' : 'Out Of Stock'}</Badge
+							<Badge
+								variant={product.variants?.[0]?.available ? 'primary' : 'secondary'}
+								>{product.variants?.[0]?.available
+									? 'In Stock'
+									: 'Out Of Stock'}</Badge
 							>
 						</Table.Cell>
-						<Table.Cell class="hidden md:table-cell">${product.variants?.[0]?.price}</Table.Cell>
-						<Table.Cell class="hidden md:table-cell">{product.variants?.length ?? 0}</Table.Cell>
+						<Table.Cell class="hidden md:table-cell"
+							>${product.variants?.[0]?.price}</Table.Cell
+						>
+						<Table.Cell class="hidden md:table-cell"
+							>{product.variants?.length ?? 0}</Table.Cell
+						>
 						<Table.Cell class="hidden md:table-cell">{product.handle}</Table.Cell>
 						<Table.Cell>
 							<DropdownMenu.Root>
 								<DropdownMenu.Trigger asChild let:builder>
-									<Button aria-haspopup="true" size="icon" variant="ghost" builders={[builder]}>
+									<Button
+										aria-haspopup="true"
+										size="icon"
+										variant="ghost"
+										builders={[builder]}
+									>
 										<Ellipsis class="h-4 w-4" />
 										<span class="sr-only">Toggle menu</span>
 									</Button>

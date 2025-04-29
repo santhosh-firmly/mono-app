@@ -1,23 +1,18 @@
 <script>
 	import ChevronLeft from 'lucide-svelte/icons/chevron-left';
 	import CirclePlus from 'lucide-svelte/icons/circle-plus';
-	import Upload from 'lucide-svelte/icons/upload';
 
 	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
-	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
-	import * as Select from '$lib/components/ui/select/index.js';
 	import * as Table from '$lib/components/ui/table/index.js';
-	import { Textarea } from '$lib/components/ui/textarea/index.js';
 	import * as ToggleGroup from '$lib/components/ui/toggle-group/index.js';
 
 	export let data;
 
-	let productAvailable = false;
-
-	$: productAvailable = data.product.variants?.some((v) => v.available);
+	// Keep the variable as it might be used elsewhere outside this component
+	// $: productAvailable = data.product.variants?.some((v) => v.available);
 </script>
 
 <div class="mx-auto grid flex-1 auto-rows-max gap-4">
@@ -26,7 +21,9 @@
 			<ChevronLeft class="h-4 w-4" />
 			<span class="sr-only">Back</span>
 		</Button>
-		<h1 class="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
+		<h1
+			class="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0"
+		>
 			{data.product.title}
 		</h1>
 		<Badge variant="outline" class="ml-auto sm:ml-0">In stock</Badge>
@@ -46,7 +43,7 @@
 						</div>
 						<div class="grid gap-3">
 							<Label for="description">Description</Label>
-							<span>{@html data.product.description}</span>
+							<span>{data.product.description}</span>
 						</div>
 					</div>
 				</Card.Content>
@@ -62,7 +59,7 @@
 							<Table.Row>
 								<Table.Head class="w-[100px]">SKU</Table.Head>
 								<Table.Head>Status</Table.Head>
-								{#each data.product.variant_option_values as option}
+								{#each data.product.variant_option_values as option (option.option_name)}
 									<Table.Head class="w-[100px]">{option.option_name}</Table.Head>
 								{/each}
 							</Table.Row>
@@ -73,15 +70,23 @@
 									<Table.Cell class="font-semibold">{variant.sku}</Table.Cell>
 									<Table.Cell>
 										<Badge variant={variant.available ? 'outline' : 'secondary'}
-											>{variant.available ? 'In Stock' : 'Out Of Stock'}</Badge
+											>{variant.available
+												? 'In Stock'
+												: 'Out Of Stock'}</Badge
 										>
 									</Table.Cell>
-									{#each data.product.variant_option_values as option}
+									{#each data.product.variant_option_values as option (option.option_name)}
 										<Table.Cell>
-											<ToggleGroup.Root type="single" value={variant[option.property_accessor]} variant="outline">
+											<ToggleGroup.Root
+												type="single"
+												value={variant[option.property_accessor]}
+												variant="outline"
+											>
 												<!-- <ToggleGroup.Item disabled value={variant[option.property_accessor]}>{variant[option.property_accessor]}</ToggleGroup.Item> -->
-												{#each option.option_values as value}
-													<ToggleGroup.Item disabled {value}>{value}</ToggleGroup.Item>
+												{#each option.option_values as value (value)}
+													<ToggleGroup.Item disabled {value}
+														>{value}</ToggleGroup.Item
+													>
 												{/each}
 											</ToggleGroup.Root>
 										</Table.Cell>
@@ -106,10 +111,10 @@
 				</Card.Header>
 				<Card.Content>
 					<div class="grid gap-6">
-						{#each data.product.variant_option_values as option}
+						{#each data.product.variant_option_values as option (option.option_name)}
 							<span>{option.option_name}</span>
 							<div class="flex flex-row flex-wrap items-center gap-3">
-								{#each option.option_values as value}
+								{#each option.option_values as value (value)}
 									<Button variant="outline">{value}</Button>
 								{/each}
 							</div>
@@ -131,7 +136,7 @@
 							width="300"
 						/>
 						<div class="grid grid-cols-3 gap-2">
-							{#each data.product.images as image}
+							{#each data.product.images as image, i (image.url || i)}
 								<button>
 									<img
 										alt="Product"

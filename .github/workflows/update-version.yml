@@ -20,33 +20,33 @@ on:
                 default: 'patch'
                 type: choice
                 options:
-                    - 'patch'  # For backwards-compatible bug fixes (0.0.X)
-                    - 'minor'  # For new features, backwards-compatible (0.X.0)
-                    - 'major'  # For breaking changes (X.0.0)
+                    - 'patch' # For backwards-compatible bug fixes (0.0.X)
+                    - 'minor' # For new features, backwards-compatible (0.X.0)
+                    - 'major' # For breaking changes (X.0.0)
             skip_update_dependencies:
                 description: '⚡ Skip updating project dependencies'
                 required: true
                 default: 'false'
                 type: choice
                 options:
-                    - 'true'   # Skip dependency updates
-                    - 'false'  # Update dependencies (recommended)
+                    - 'true' # Skip dependency updates
+                    - 'false' # Update dependencies (recommended)
             skip_precommit_hooks:
                 description: '🔍 Skip pre-commit validation hooks'
                 required: true
                 default: 'false'
                 type: choice
                 options:
-                    - 'true'   # Skip validation checks
-                    - 'false'  # Run validation (recommended)
+                    - 'true' # Skip validation checks
+                    - 'false' # Run validation (recommended)
             skip_release:
                 description: '📝 Skip GitHub release creation'
                 required: true
                 default: 'false'
                 type: choice
                 options:
-                    - 'true'   # Skip release (for hotfixes)
-                    - 'false'  # Create release (recommended)
+                    - 'true' # Skip release (for hotfixes)
+                    - 'false' # Create release (recommended)
 
 jobs:
     trigger-update-version:

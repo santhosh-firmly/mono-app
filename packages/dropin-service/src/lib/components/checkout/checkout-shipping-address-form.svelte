@@ -89,13 +89,20 @@
 					{#snippet suffix()}
 						<div class="flex items-center gap-x-1">
 							{#if isAutocompleteLoading}
-								<Icon icon="eos-icons:loading" class="text-muted h-4 w-4 animate-spin" />
+								<Icon
+									icon="eos-icons:loading"
+									class="text-muted h-4 w-4 animate-spin"
+								/>
 							{/if}
 							{#if !isManualMode}
-								<UiSmallButton onclick={toggleManualMode}>{m.enter_manually()}</UiSmallButton>
+								<UiSmallButton onclick={toggleManualMode}
+									>{m.enter_manually()}</UiSmallButton
+								>
 							{/if}
 							{#if form.address.filled && form.city.filled && form.stateOrProvince.filled && form.zipCode.filled}
-								<UiSmallButton onclick={form.resetAddress}>{m.clear()}</UiSmallButton>
+								<UiSmallButton onclick={form.resetAddress}
+									>{m.clear()}</UiSmallButton
+								>
 							{/if}
 						</div>
 					{/snippet}

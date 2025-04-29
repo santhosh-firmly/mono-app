@@ -73,7 +73,9 @@
 					{#if isSubmitting || isRemovingAll}
 						{@render loadingSpinner()}
 					{:else}
-						<UiSmallButton onclick={() => onSubmit(promocode)}>{m.apply()}</UiSmallButton>
+						<UiSmallButton onclick={() => onSubmit(promocode)}
+							>{m.apply()}</UiSmallButton
+						>
 					{/if}
 				{/snippet}
 			</UiInput>

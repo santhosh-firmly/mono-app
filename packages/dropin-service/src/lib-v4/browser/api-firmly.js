@@ -182,14 +182,22 @@ function telemetryEnqueue(message) {
 			const order = ++_telemetryOrder;
 			const event_id = getNextEventId();
 			_telemetryQueue.push(
-				Object.assign(iterator, { order: order, span_id: event_id, event_id: event_id }, headerProp)
+				Object.assign(
+					iterator,
+					{ order: order, span_id: event_id, event_id: event_id },
+					headerProp
+				)
 			);
 		}
 	} else {
 		const order = ++_telemetryOrder;
 		const event_id = getNextEventId();
 		_telemetryQueue.push(
-			Object.assign(message, { order: order, span_id: event_id, event_id: event_id }, headerProp)
+			Object.assign(
+				message,
+				{ order: order, span_id: event_id, event_id: event_id },
+				headerProp
+			)
 		);
 	}
 	clearTimeout(_telemetryTimeout);
@@ -197,11 +205,19 @@ function telemetryEnqueue(message) {
 }
 
 function telemetrySessionStart() {
-	telemetryEnqueue({ timestamp: Date.now(), name: 'sessionStart', event_type: EVENT_TYPE_SESSION });
+	telemetryEnqueue({
+		timestamp: Date.now(),
+		name: 'sessionStart',
+		event_type: EVENT_TYPE_SESSION
+	});
 }
 
 function telemetryDeviceCreated() {
-	telemetryEnqueue({ timestamp: Date.now(), name: 'deviceCreated', event_type: EVENT_TYPE_DEVICE });
+	telemetryEnqueue({
+		timestamp: Date.now(),
+		name: 'deviceCreated',
+		event_type: EVENT_TYPE_DEVICE
+	});
 }
 
 const EVENT_VIEW_PAGE = 'viewPage';
@@ -342,7 +358,9 @@ async function performanceInit() {
 						dns: entry.domainLookupEnd - entry.domainLookupStart,
 						inital_connection: entry.connectEnd - entry.connectStart,
 						ssl:
-							entry.secureConnectionStart > 0 ? entry.connectEnd - entry.secureConnectionStart : 0,
+							entry.secureConnectionStart > 0
+								? entry.connectEnd - entry.secureConnectionStart
+								: 0,
 						content_download: entry.responseEnd - entry.responseStart,
 						stalled: entry.domainLookupStart - entry.fetchStart,
 						request_sent: entry.requestStart - entry.connectEnd,

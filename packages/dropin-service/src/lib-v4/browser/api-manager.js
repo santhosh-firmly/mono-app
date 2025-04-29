@@ -204,7 +204,9 @@ async function getCCInfoV2(paymentInfo) {
 	const ccInfo = {
 		credit_card: {
 			name: await window.firmly.paymentRsaEncrypt(paymentInfo.cardName.trim()),
-			number: await window.firmly.paymentRsaEncrypt(paymentInfo.cardNumber.replaceAll(' ', '')),
+			number: await window.firmly.paymentRsaEncrypt(
+				paymentInfo.cardNumber.replaceAll(' ', '')
+			),
 			month: await window.firmly.paymentRsaEncrypt(month),
 			year: await window.firmly.paymentRsaEncrypt(year),
 			verification_value: await window.firmly.paymentRsaEncrypt(paymentInfo.cvc)

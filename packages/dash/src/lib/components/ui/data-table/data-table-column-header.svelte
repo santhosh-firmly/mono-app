@@ -1,38 +1,29 @@
-<script lang="ts">
-	import EyeNone from "svelte-radix/EyeNone.svelte";
-	import ArrowDown from "svelte-radix/ArrowDown.svelte";
-	import ArrowUp from "svelte-radix/ArrowUp.svelte";
-	import CaretSort from "svelte-radix/CaretSort.svelte";
-	import { cn } from "$lib/utils.js";
-	import { Button } from "$lib/components/ui/button/index.js";
-	import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
+<script>
+	import EyeNone from 'svelte-radix/EyeNone.svelte';
+	import ArrowDown from 'svelte-radix/ArrowDown.svelte';
+	import ArrowUp from 'svelte-radix/ArrowUp.svelte';
+	import CaretSort from 'svelte-radix/CaretSort.svelte';
+	import { cn } from '$lib/utils.js';
+	import { Button } from '$lib/components/ui/button/index.js';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 
-	let className: string | undefined | null = undefined;
+	let className = undefined;
 	export { className as class };
-	export let props: {
-		select: never;
-		sort: {
-			order: "desc" | "asc" | undefined;
-			toggle: (_: Event) => void;
-			clear: () => void;
-			disabled: boolean;
-		};
-		filter: never;
-	};
+	export let props;
 	export let tableModel;
-	export let cellId: string;
+	export let cellId;
 
 	const { hiddenColumnIds } = tableModel.pluginStates.hide;
 
-	function handleAscSort(e: Event) {
-		if (props.sort.order === "asc") {
+	function handleAscSort(e) {
+		if (props.sort.order === 'asc') {
 			return;
 		}
 		props.sort.toggle(e);
 	}
 
-	function handleDescSort(e: Event) {
-		if (props.sort.order === "desc") {
+	function handleDescSort(e) {
+		if (props.sort.order === 'desc') {
 			return;
 		}
 		if (props.sort.order === undefined) {
@@ -43,7 +34,7 @@
 	}
 
 	function handleHide() {
-		hiddenColumnIds.update((ids: string[]) => {
+		hiddenColumnIds.update((ids) => {
 			if (ids.includes(cellId)) {
 				return ids;
 			}
@@ -53,19 +44,19 @@
 </script>
 
 {#if !props.sort.disabled}
-	<div class={cn("flex items-center", className)}>
+	<div class={cn('flex items-center', className)}>
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger asChild let:builder>
 				<Button
 					variant="ghost"
 					builders={[builder]}
-					class="data-[state=open]:bg-accent -ml-3 h-8"
+					class="-ml-3 h-8 data-[state=open]:bg-accent"
 					size="sm"
 				>
 					<slot />
-					{#if props.sort.order === "desc"}
+					{#if props.sort.order === 'desc'}
 						<ArrowDown class="ml-2 h-4 w-4" />
-					{:else if props.sort.order === "asc"}
+					{:else if props.sort.order === 'asc'}
 						<ArrowUp class="ml-2 h-4 w-4" />
 					{:else}
 						<CaretSort class="ml-2 h-4 w-4" />
@@ -74,16 +65,16 @@
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content align="start">
 				<DropdownMenu.Item on:click={handleAscSort}>
-					<ArrowUp class="text-muted-foreground/70 mr-2 h-3.5 w-3.5" />
+					<ArrowUp class="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
 					Asc
 				</DropdownMenu.Item>
 				<DropdownMenu.Item on:click={handleDescSort}>
-					<ArrowDown class="text-muted-foreground/70 mr-2 h-3.5 w-3.5" />
+					<ArrowDown class="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
 					Desc
 				</DropdownMenu.Item>
 				<DropdownMenu.Separator />
 				<DropdownMenu.Item on:click={handleHide}>
-					<EyeNone class="text-muted-foreground/70 mr-2 h-3.5 w-3.5" />
+					<EyeNone class="mr-2 h-3.5 w-3.5 text-muted-foreground/70" />
 					Hide
 				</DropdownMenu.Item>
 			</DropdownMenu.Content>

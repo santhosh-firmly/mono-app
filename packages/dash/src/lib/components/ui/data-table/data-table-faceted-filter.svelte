@@ -1,6 +1,6 @@
 <script>
 	import PlusCircled from 'svelte-radix/PlusCircled.svelte';
-	import Check from 'svelte-radix/Check.svelte';
+	// import Check from 'svelte-radix/Check.svelte';
 	import * as Command from '$lib/components/ui/command/index.js';
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
@@ -41,7 +41,7 @@
 							{filterValues.length} Selected
 						</Badge>
 					{:else}
-						{#each filterValues as option}
+						{#each filterValues as option (option)}
 							<Badge variant="secondary" class="rounded-sm px-1 font-normal">
 								{option}
 							</Badge>
@@ -57,7 +57,7 @@
 			<Command.List>
 				<Command.Empty>No results found.</Command.Empty>
 				<Command.Group>
-					{#each options as option}
+					{#each options as option, index (index)}
 						{@const Icon = option.icon}
 						{@const value = option.value || option}
 						{@const label = option.label || option}
@@ -84,7 +84,9 @@
 								{label || '(Blank)'}
 							</span>
 							{#if counts[value]}
-								<span class="ml-auto flex h-4 w-4 items-center justify-center font-mono text-xs">
+								<span
+									class="ml-auto flex h-4 w-4 items-center justify-center font-mono text-xs"
+								>
 									{counts[value]}
 								</span>
 							{/if}

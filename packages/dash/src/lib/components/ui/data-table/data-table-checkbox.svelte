@@ -1,12 +1,6 @@
-<script lang="ts">
-	import type { HTMLButtonAttributes } from "svelte/elements";
-	import type { Writable } from "svelte/store";
-	import { Checkbox } from "$lib/components/ui/checkbox/index.js";
-
-	type $$Props = HTMLButtonAttributes & {
-		checked: Writable<boolean>;
-	};
-	export let checked: Writable<boolean>;
+<script>
+	import { Checkbox } from '$lib/components/ui/checkbox/index.js';
+	export let checked;
 </script>
 
 <Checkbox bind:checked={$checked} {...$$restProps} />

@@ -1,16 +1,14 @@
-<script lang="ts">
-	import MixerHorizontal from "svelte-radix/MixerHorizontal.svelte";
-	import type { TableViewModel } from "svelte-headless-table";
-	import type { Task } from "../(data)/schemas.js";
-	import { Button } from "$lib/components/ui/button/index.js";
-	import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
+<script>
+	import MixerHorizontal from 'svelte-radix/MixerHorizontal.svelte';
+	import { Button } from '$lib/components/ui/button/index.js';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 
-	export let tableModel: TableViewModel<Task>;
+	export let tableModel;
 	const { pluginStates, flatColumns } = tableModel;
 	const { hiddenColumnIds } = pluginStates.hide;
 
-	function handleHide(id: string) {
-		hiddenColumnIds.update((ids: string[]) => {
+	function handleHide(id) {
+		hiddenColumnIds.update((ids) => {
 			if (ids.includes(id)) {
 				return ids.filter((i) => i !== id);
 			}
@@ -18,7 +16,7 @@
 		});
 	}
 
-	const hidableCols = ["title", "status", "priority"];
+	const hidableCols = ['title', 'status', 'priority'];
 </script>
 
 <DropdownMenu.Root>
@@ -31,7 +29,7 @@
 	<DropdownMenu.Content>
 		<DropdownMenu.Label>Toggle columns</DropdownMenu.Label>
 		<DropdownMenu.Separator />
-		{#each flatColumns as col}
+		{#each flatColumns as col (col.id)}
 			{#if hidableCols.includes(col.id)}
 				<DropdownMenu.CheckboxItem
 					checked={!$hiddenColumnIds.includes(col.id)}

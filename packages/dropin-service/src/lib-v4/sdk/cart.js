@@ -27,7 +27,12 @@ export class Cart extends Subscribable {
 	}
 
 	async addLineItem(sku, quantity, variantHandles) {
-		const res = await window.firmly.cartAddLineItem(sku, quantity, variantHandles, this.shop_id);
+		const res = await window.firmly.cartAddLineItem(
+			sku,
+			quantity,
+			variantHandles,
+			this.shop_id
+		);
 		if (res.status !== 200) {
 			throw res.data;
 		}
@@ -37,7 +42,9 @@ export class Cart extends Subscribable {
 
 	#_enforceStatusActive() {
 		if (this.cart_status !== 'active') {
-			throw new Error('This Cart is not longer active. An order may have been placed already.');
+			throw new Error(
+				'This Cart is not longer active. An order may have been placed already.'
+			);
 		}
 	}
 
@@ -47,7 +54,9 @@ export class Cart extends Subscribable {
 			(l) => new LineItem(l, this.shop_id, this.cart_status !== 'active')
 		);
 		// If line items are changed, this cart must be updated
-		this.line_items.forEach((l) => l.internalSubscribe((newCart) => this.#_updateCart(newCart)));
+		this.line_items.forEach((l) =>
+			l.internalSubscribe((newCart) => this.#_updateCart(newCart))
+		);
 		await this.dispatch();
 		return this;
 	}
@@ -111,7 +120,10 @@ export class Cart extends Subscribable {
 			billing_info: billingInfo
 		};
 
-		let resp = await window.firmly.paymentCreditCardTokenize(tokenizeInput, this.payment_handle);
+		let resp = await window.firmly.paymentCreditCardTokenize(
+			tokenizeInput,
+			this.payment_handle
+		);
 		if (resp.status !== 200) {
 			throw resp.data;
 		}

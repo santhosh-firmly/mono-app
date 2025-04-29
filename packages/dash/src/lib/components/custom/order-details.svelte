@@ -1,23 +1,23 @@
 <script>
 	import ChevronLeft from 'lucide-svelte/icons/chevron-left';
 	import ChevronRight from 'lucide-svelte/icons/chevron-right';
-	import Copy from 'lucide-svelte/icons/copy';
+	// import Copy from 'lucide-svelte/icons/copy';
 	import CreditCard from 'lucide-svelte/icons/credit-card';
-	import File from 'lucide-svelte/icons/file';
-	import ListFilter from 'lucide-svelte/icons/list-filter';
-	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
-	import Truck from 'lucide-svelte/icons/truck';
-	import { Badge } from '$lib/components/ui/badge/index.js';
+	// import File from 'lucide-svelte/icons/file';
+	// import ListFilter from 'lucide-svelte/icons/list-filter';
+	// import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
+	// import Truck from 'lucide-svelte/icons/truck';
+	// import { Badge } from '$lib/components/ui/badge/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
+	// import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Pagination from '$lib/components/ui/pagination/index.js';
-	import { Progress } from '$lib/components/ui/progress/index.js';
+	// import { Progress } from '$lib/components/ui/progress/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
-	import * as Table from '$lib/components/ui/table/index.js';
-	import * as Tabs from '$lib/components/ui/tabs/index.js';
+	// import * as Table from '$lib/components/ui/table/index.js';
+	// import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import { formatCurrency } from '$lib/currency.js';
-	import OrderDetails from '$lib/components/custom/order-details.svelte';
+	// import OrderDetails from '$lib/components/custom/order-details.svelte';
 	import { formatDate } from 'date-fns';
 	import CopyToClipboard from './copy-to-clipboard.svelte';
 
@@ -62,10 +62,11 @@
 		<div class="grid gap-3">
 			<div class="font-semibold">Order Details</div>
 			<ul class="grid gap-3">
-				{#each order.order_info.line_items || [] as item}
+				{#each order.order_info.line_items || [] as item, index (index)}
 					<li class="flex items-center justify-between">
 						<span class="text-ellipsis text-muted-foreground">
-							<span class="overflow-hidden">{item.description}</span> x <span>{item.quantity}</span>
+							<span class="overflow-hidden">{item.description}</span> x
+							<span>{item.quantity}</span>
 						</span>
 						<span>{formatCurrency(item.line_price.value)}</span>
 					</li>

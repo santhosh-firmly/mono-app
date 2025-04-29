@@ -46,7 +46,10 @@
 		</div>
 	</div>
 	<div class="ml-2 flex flex-col gap-1">
-		<label for={id} class="{disabled ? 'text-muted cursor-not-allowed' : 'text-primary'} text-sm">
+		<label
+			for={id}
+			class="{disabled ? 'text-muted cursor-not-allowed' : 'text-primary'} text-sm"
+		>
 			{title}
 			{@render children?.()}
 		</label>

@@ -16,8 +16,7 @@
 			items: [
 				{
 					sku: 'EY_BP_14ct',
-					image:
-						'https://cdn.shopify.com/s/files/1/1338/1013/files/EY_BP_14ct_PDP_bf83aa1f-f190-48fe-90ef-8687109775cc_large.jpg?v=1726869385',
+					image: 'https://cdn.shopify.com/s/files/1/1338/1013/files/EY_BP_14ct_PDP_bf83aa1f-f190-48fe-90ef-8687109775cc_large.jpg?v=1726869385',
 					title: 'Blackberry Peach Hydration Multiplier® +Energy',
 					description: 'Blackberry Peach / 14PK',
 					price: 24.99,
@@ -25,8 +24,7 @@
 				},
 				{
 					sku: 'LM_GC_30ct',
-					image:
-						'https://cdn.shopify.com/s/files/1/0123/4567/files/LM_GC_30ct_PDP_a7b8c9d0-e1f2-3g4h-5i6j-7k8l9m0n1o2p_large.jpg?v=1726123456',
+					image: 'https://cdn.shopify.com/s/files/1/0123/4567/files/LM_GC_30ct_PDP_a7b8c9d0-e1f2-3g4h-5i6j-7k8l9m0n1o2p_large.jpg?v=1726123456',
 					title: 'Green Citrus Wellness Booster® +Immunity',
 					description: 'Lime Mint / 30PK',
 					price: 34.99,

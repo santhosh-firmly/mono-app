@@ -11,20 +11,23 @@
 	import BlockToolbar from '$lib/components/custom/block-toolbar.svelte';
 
 	let resizablePaneRef;
-	let block;
+	// let block;
 
 	let isLoading = false;
 </script>
 
 <main class="grid flex-1 gap-4 overflow-auto p-4 md:grid-cols-2 lg:grid-cols-3">
-	<div class="relative hidden flex-col items-start gap-8 md:flex pt-[30px]">
+	<div class="relative hidden flex-col items-start gap-8 pt-[30px] md:flex">
 		<form class="grid w-full items-start gap-6">
 			<fieldset class="grid gap-6 rounded-lg border bg-white/50 p-4">
 				<legend class="-ml-1 px-1 text-sm font-medium"> Settings </legend>
 				<div class="grid gap-3">
 					<Label for="model">Model</Label>
 					<Select.Root>
-						<Select.Trigger id="model" class="items-start [&_[data-description]]:hidden">
+						<Select.Trigger
+							id="model"
+							class="items-start [&_[data-description]]:hidden"
+						>
 							<Select.Value placeholder="Select a model" />
 						</Select.Trigger>
 						<Select.Content>
@@ -34,9 +37,13 @@
 									<div class="grid gap-0.5">
 										<p>
 											Neural
-											<span class="font-medium text-foreground"> Genesis </span>
+											<span class="font-medium text-foreground">
+												Genesis
+											</span>
 										</p>
-										<p class="text-xs" data-description>Our fastest model for general use cases.</p>
+										<p class="text-xs" data-description>
+											Our fastest model for general use cases.
+										</p>
 									</div>
 								</div>
 							</Select.Item>
@@ -46,9 +53,13 @@
 									<div class="grid gap-0.5">
 										<p>
 											Neural
-											<span class="font-medium text-foreground"> Explorer </span>
+											<span class="font-medium text-foreground">
+												Explorer
+											</span>
 										</p>
-										<p class="text-xs" data-description>Performance and speed for efficiency.</p>
+										<p class="text-xs" data-description>
+											Performance and speed for efficiency.
+										</p>
 									</div>
 								</div>
 							</Select.Item>
@@ -58,7 +69,9 @@
 									<div class="grid gap-0.5">
 										<p>
 											Neural
-											<span class="font-medium text-foreground"> Quantum </span>
+											<span class="font-medium text-foreground">
+												Quantum
+											</span>
 										</p>
 										<p class="text-xs" data-description>
 											The most powerful model for complex computations.
@@ -106,7 +119,7 @@
 			</fieldset>
 		</form>
 	</div>
-	<div class="relative flex h-full min-h-[50vh] flex-col lg:col-span-2 items-center gap-3">
+	<div class="relative flex h-full min-h-[50vh] flex-col items-center gap-3 lg:col-span-2">
 		<BlockToolbar {resizablePaneRef} />
 		<Resizable.PaneGroup direction="horizontal" class="relative z-10 ">
 			<Resizable.Pane

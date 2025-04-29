@@ -62,7 +62,9 @@
 			{#if isCalculating}
 				{@render skeleton()}
 			{:else}
-				<p class="text-sm">{shipping?.price ? toCurrency(tax) : m.enter_shipping_address()}</p>
+				<p class="text-sm">
+					{shipping?.price ? toCurrency(tax) : m.enter_shipping_address()}
+				</p>
 			{/if}
 		</span>
 	</div>

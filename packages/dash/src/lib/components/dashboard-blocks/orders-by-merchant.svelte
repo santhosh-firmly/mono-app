@@ -32,7 +32,7 @@
 				</Table.Row>
 			</Table.Header>
 			<Table.Body>
-				{#each ordersByMerchant.results as order, index}
+				{#each ordersByMerchant.results as order, index (index)}
 					<Table.Row class="">
 						<Table.Cell>
 							<div class="font-medium">{getMerchantName(order.shop_id)}</div>
@@ -41,7 +41,8 @@
 							</div>
 						</Table.Cell>
 						<Table.Cell class="text-right">{order.total_orders}</Table.Cell>
-						<Table.Cell class="text-right">{formatCurrency(order.net_sales)}</Table.Cell>
+						<Table.Cell class="text-right">{formatCurrency(order.net_sales)}</Table.Cell
+						>
 						<Table.Cell class="text-right">{formatCurrency(order.aov)}</Table.Cell>
 					</Table.Row>
 				{/each}

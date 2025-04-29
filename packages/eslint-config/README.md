@@ -38,9 +38,9 @@ import createConfig from '@mono-app/eslint-config';
 import svelteConfig from './svelte.config.js';
 
 export default createConfig({
-  svelteConfig,
-  // Optional: Add paths to ignore
-  ignores: ['**/build/**', '**/node_modules/**']
+	svelteConfig,
+	// Optional: Add paths to ignore
+	ignores: ['**/build/**', '**/node_modules/**']
 });
 ```
 
@@ -52,8 +52,8 @@ Create a `.prettierrc.js` file in your project root:
 import prettierConfig from '@mono-app/eslint-config/prettier';
 
 export default {
-  ...prettierConfig,
-  // Override any settings here if needed
+	...prettierConfig
+	// Override any settings here if needed
 };
 ```
 
@@ -66,7 +66,7 @@ export default {
 - 🔗 Integration with Prettier
 - 🌐 Browser and Node.js globals
 - 🛠️ Custom rules:
-  - `no-relative-lib-imports`: Enforces usage of `$lib` alias instead of relative paths
+    - `no-relative-lib-imports`: Enforces usage of `$lib` alias instead of relative paths
 
 ### Prettier Configuration
 
@@ -84,11 +84,13 @@ export default {
 This rule prevents using relative imports for files inside `src/lib` and encourages the use of the `$lib` alias instead. This makes imports cleaner and more maintainable across your project.
 
 ✅ Correct usage:
+
 ```javascript
 import { Button } from '$lib/components/Button.svelte';
 ```
 
 ❌ Incorrect usage:
+
 ```javascript
 import { Button } from '../../lib/components/Button.svelte';
 ```

@@ -1,6 +1,6 @@
 <script>
-	import ChevronRight from "lucide-svelte/icons/chevron-right";
-	import { cn } from "$lib/utils.js";
+	import ChevronRight from 'lucide-svelte/icons/chevron-right';
+	import { cn } from '$lib/utils.js';
 	export let el = undefined;
 	let className = undefined;
 	export { className as class };
@@ -9,7 +9,7 @@
 <li
 	role="presentation"
 	aria-hidden="true"
-	class={cn("[&>svg]:size-3.5", className)}
+	class={cn('[&>svg]:size-3.5', className)}
 	bind:this={el}
 	{...$$restProps}
 >

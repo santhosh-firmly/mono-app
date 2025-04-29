@@ -1,19 +1,10 @@
-<script lang="ts">
-	import ChevronLeft from 'lucide-svelte/icons/chevron-left';
-	import ChevronRight from 'lucide-svelte/icons/chevron-right';
-	import Copy from 'lucide-svelte/icons/copy';
-	import CreditCard from 'lucide-svelte/icons/credit-card';
+<script>
+	// Import only what's used
 	import File from 'lucide-svelte/icons/file';
 	import ListFilter from 'lucide-svelte/icons/list-filter';
-	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
-	import Truck from 'lucide-svelte/icons/truck';
-	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-	import * as Pagination from '$lib/components/ui/pagination/index.js';
-	import { Progress } from '$lib/components/ui/progress/index.js';
-	import { Separator } from '$lib/components/ui/separator/index.js';
 	import * as Table from '$lib/components/ui/table/index.js';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import { formatCurrency } from '$lib/currency.js';
@@ -22,7 +13,7 @@
 	let selectedOrderIndex = 0;
 	export let data;
 
-	let orders;
+	let orders = [];
 
 	$: {
 		orders = data?.orders?.results?.map((o) => ({
@@ -48,7 +39,12 @@
 				<div class="ml-auto flex items-center gap-2">
 					<DropdownMenu.Root>
 						<DropdownMenu.Trigger asChild let:builder>
-							<Button variant="outline" size="sm" class="h-7 gap-1 text-sm" builders={[builder]}>
+							<Button
+								variant="outline"
+								size="sm"
+								class="h-7 gap-1 text-sm"
+								builders={[builder]}
+							>
 								<ListFilter class="h-3.5 w-3.5" />
 								<span class="sr-only sm:not-sr-only">Filter</span>
 							</Button>
@@ -84,24 +80,32 @@
 								</Table.Row>
 							</Table.Header>
 							<Table.Body>
-								{#each orders as order, index}
+								{#each orders as order, index (order.id || index)}
 									<Table.Row
-										class="{selectedOrderIndex === index ? 'bg-accent' : ''}"
+										class={selectedOrderIndex === index ? 'bg-accent' : ''}
 										on:click={() => {
 											selectedOrderIndex = index;
 										}}
 									>
 										<Table.Cell>
-											<div class="font-medium">{order.display_name || order.shop_id}</div>
-											<div class="hidden text-sm text-muted-foreground md:inline">
+											<div class="font-medium">
+												{order.display_name || order.shop_id}
+											</div>
+											<div
+												class="hidden text-sm text-muted-foreground md:inline"
+											>
 												{order.shop_id}
 											</div>
 										</Table.Cell>
 										<Table.Cell class="hidden sm:table-cell"
 											>{order.platform_order_number}</Table.Cell
 										>
-										<Table.Cell class="hidden md:table-cell">{order.created_dt}</Table.Cell>
-										<Table.Cell class="text-right">{formatCurrency(order.order_total)}</Table.Cell>
+										<Table.Cell class="hidden md:table-cell"
+											>{order.created_dt}</Table.Cell
+										>
+										<Table.Cell class="text-right"
+											>{formatCurrency(order.order_total)}</Table.Cell
+										>
 									</Table.Row>
 								{/each}
 							</Table.Body>

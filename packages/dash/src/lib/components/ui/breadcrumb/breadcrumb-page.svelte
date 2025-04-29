@@ -1,5 +1,5 @@
 <script>
-	import { cn } from "$lib/utils.js";
+	import { cn } from '$lib/utils.js';
 	export let el = undefined;
 	export let className = undefined;
 	export { className as class };
@@ -10,7 +10,7 @@
 	role="link"
 	aria-disabled="true"
 	aria-current="page"
-	class={cn("text-foreground font-normal", className)}
+	class={cn('font-normal text-foreground', className)}
 	{...$$restProps}
 >
 	<slot />

@@ -204,8 +204,8 @@
 						data.cart.promo_codes = [];
 						break;
 					case 'input_shipping_address_completion':
-						data.autocomplete.shippingCompletions = MOCKED_ADDRESS_COMPLETIONS.filter((address) =>
-							address.value.toLowerCase().includes(payload.toLowerCase())
+						data.autocomplete.shippingCompletions = MOCKED_ADDRESS_COMPLETIONS.filter(
+							(address) => address.value.toLowerCase().includes(payload.toLowerCase())
 						);
 						break;
 					case 'select_shipping_address_completion':
@@ -214,8 +214,8 @@
 						);
 						break;
 					case 'input_billing_address_completion':
-						data.autocomplete.billingCompletions = MOCKED_ADDRESS_COMPLETIONS.filter((address) =>
-							address.value.toLowerCase().includes(payload.toLowerCase())
+						data.autocomplete.billingCompletions = MOCKED_ADDRESS_COMPLETIONS.filter(
+							(address) => address.value.toLowerCase().includes(payload.toLowerCase())
 						);
 						break;
 					case 'select_billing_address_completion':

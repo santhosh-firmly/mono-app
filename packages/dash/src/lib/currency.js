@@ -12,7 +12,7 @@ function currencyWithThousandSeparator(x) {
 	return x;
 }
 
-export function formatCurrencyObject(currencyEntry) {
+function formatCurrencyObject(currencyEntry) {
 	const currency = currencies[currencyEntry.currency];
 	return (
 		currency.symbol +
@@ -27,7 +27,7 @@ export function formatCurrency(value) {
 		}
 
 		return '$' + currencyWithThousandSeparator(value.toFixed(2));
-	} catch (e) {
+	} catch {
 		return '';
 	}
 }

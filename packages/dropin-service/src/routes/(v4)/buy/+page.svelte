@@ -370,7 +370,11 @@
 				{#if multipleVariants && !skipPdp}
 					<div class="flex h-full w-full flex-col">
 						<div class="border-fy-border border-b">
-							<Header merchantInfo={partnerInfo} doNotExpand={true} on:back-click={onBackClick} />
+							<Header
+								merchantInfo={partnerInfo}
+								doNotExpand={true}
+								on:back-click={onBackClick}
+							/>
 						</div>
 						{#if iframeDisplay === 'none'}
 							<FlowSinglePage cart={writable(null)} />

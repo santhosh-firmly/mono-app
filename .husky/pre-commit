@@ -13,8 +13,7 @@ die() {
 npm run outdated || die '✋ There are outdated libraries in the project. Please, update them before commiting with "npm update"';
   # Verify the dependencies and unused files/exports
 npm run depcheck || die '✋ There are unused or unlisted dependencies in the project. Please, update them before committing.';
-# TODO: Fix lint formatting for all projects
-npx lerna run format-code --since origin/main || die '✋ Is the code formatted properly?';
+npx lerna run format-code --since origin/main && npm run format || die '✋ Is the code formatted properly?';
 #Verify if debugging functionality is forgotten in the tests folder
 for testFolder in $(ls -d1 ./packages/*/tests/); do
     if grep -E '(\.only|[\s]fit)\(' "$testFolder" -r; then
