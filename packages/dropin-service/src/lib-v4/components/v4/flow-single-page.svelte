@@ -949,7 +949,7 @@
 						?
 					</span>
 				</div>
-				<div class="h-full overflow-scroll px-4">
+				<div class="h-full overflow-auto px-4">
 					<div class="bg-fy-primary w-full">
 						<!--  Hack for showing to kardiel. This should become a configurations of the merchant's theme
 					  It should be passed to the UI along with the colors, etc. -->
