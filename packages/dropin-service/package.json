@@ -41,7 +41,7 @@
 		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/svelte": "^5.2.4",
 		"esbuild": "^0.25.3",
-		"eslint": "^9.18.0",
+		"eslint": "*",
 		"jsdom": "^26.0.0",
 		"prettier": "*",
 		"storybook": "^8.6.4",
