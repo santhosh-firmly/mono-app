@@ -35,5 +35,8 @@
 		"prettier": "^3.4.2",
 		"wrangler": "^4.9.1"
 	},
-	"prettier": "@firmly/eslint-config/prettier"
+	"prettier": "@firmly/eslint-config/prettier",
+	"resolutions": {
+		"svelte-headless-table/svelte": "^5.27.0"
+	}
 }
