@@ -34,8 +34,8 @@
 		<AlertTriangle class="mr-2 h-4 w-4" />
 		<Alert.Title>Exercise caution</Alert.Title>
 		<Alert.Description>
-			Changes to these settings may affect the merchant's functionality and could result in service
-			disruption. Please ensure you understand the implications before making changes.
+			Changes to these settings may affect the merchant's functionality and could result in
+			service disruption. Please ensure you understand the implications before making changes.
 		</Alert.Description>
 	</Alert.Root>
 
@@ -54,7 +54,8 @@
 					readonly
 				></textarea>
 				<p class="mt-2 text-xs text-muted-foreground">
-					This is the complete configuration for this merchant. For safety, this view is read-only.
+					This is the complete configuration for this merchant. For safety, this view is
+					read-only.
 				</p>
 			</div>
 		</Card.Content>

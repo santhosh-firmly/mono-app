@@ -9,7 +9,9 @@ export async function load({ params }) {
 
 	const platformOptions = Array.from(
 		new Set(
-			data.map(({ platform_id }) => JSON.stringify({ value: platform_id, label: platform_id }))
+			data.map(({ platform_id }) =>
+				JSON.stringify({ value: platform_id, label: platform_id })
+			)
 		)
 	).map((item) => JSON.parse(item));
 

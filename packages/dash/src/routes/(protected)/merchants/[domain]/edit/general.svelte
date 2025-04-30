@@ -69,7 +69,9 @@
 			<div class="grid grid-cols-1 items-start gap-4 md:grid-cols-5">
 				<div class="md:col-span-2">
 					<Label for="store_id" class="text-sm font-medium">Store ID</Label>
-					<p class="text-sm text-muted-foreground">Unique identifier for the merchant's store.</p>
+					<p class="text-sm text-muted-foreground">
+						Unique identifier for the merchant's store.
+					</p>
 				</div>
 				<div class="md:col-span-3">
 					<Input
@@ -85,7 +87,9 @@
 			<div class="grid grid-cols-1 items-start gap-4 md:grid-cols-5">
 				<div class="md:col-span-2">
 					<Label for="base_url" class="text-sm font-medium">Base URL</Label>
-					<p class="text-sm text-muted-foreground">URL used to access the merchant's website.</p>
+					<p class="text-sm text-muted-foreground">
+						URL used to access the merchant's website.
+					</p>
 				</div>
 				<div class="md:col-span-3">
 					<Input
@@ -124,7 +128,9 @@
 					</Button>
 				</div>
 			{/each}
-			<Button variant="outline" on:click={addUrlName} size="sm" class="mt-2">Add Domain</Button>
+			<Button variant="outline" on:click={addUrlName} size="sm" class="mt-2"
+				>Add Domain</Button
+			>
 		</Card.Content>
 	</Card.Root>
 
@@ -139,7 +145,9 @@
 			<div class="grid grid-cols-1 items-start gap-4 md:grid-cols-5">
 				<div class="md:col-span-2">
 					<Label for="shop_currency" class="text-sm font-medium">Currency</Label>
-					<p class="text-sm text-muted-foreground">Currency used by the merchant's store.</p>
+					<p class="text-sm text-muted-foreground">
+						Currency used by the merchant's store.
+					</p>
 				</div>
 				<div class="md:col-span-3">
 					<Combobox
@@ -155,7 +163,9 @@
 			<div class="grid grid-cols-1 items-start gap-4 md:grid-cols-5">
 				<div class="md:col-span-2">
 					<Label for="platform_type" class="text-sm font-medium">Platform</Label>
-					<p class="text-sm text-muted-foreground">Platform on which the merchant operates.</p>
+					<p class="text-sm text-muted-foreground">
+						Platform on which the merchant operates.
+					</p>
 				</div>
 				<div class="md:col-span-3">
 					<Combobox
@@ -197,7 +207,9 @@
 			<div class="flex items-center justify-between">
 				<div>
 					<h4 class="font-medium">Active Status</h4>
-					<p class="text-sm text-muted-foreground">Disable to temporarily prevent operations</p>
+					<p class="text-sm text-muted-foreground">
+						Disable to temporarily prevent operations
+					</p>
 				</div>
 				<Switch.Root
 					checked={!merchant.is_disabled}
