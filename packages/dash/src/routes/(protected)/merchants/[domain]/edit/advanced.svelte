@@ -1,36 +1,38 @@
 <script>
-	import { Button } from '$lib/components/ui/button/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
 	import * as Alert from '$lib/components/ui/alert/index.js';
 	import { Checkbox } from '$lib/components/ui/checkbox/index.js';
-	import { Save, AlertTriangle, Code } from 'lucide-svelte';
+	import { AlertTriangle, Code } from 'lucide-svelte';
 	import FeatureCard from '$lib/components/custom/feature-card.svelte';
 
-	let { merchant, saveMerchant } = $props();
+	let { merchant } = $props();
 
-	let isSubmitting = $state(false);
 	let isEditable = $state(false);
 	let configValue = $state(JSON.stringify(merchant, null, 2));
 
-	async function handleSave() {
-		isSubmitting = true;
-		try {
-			if (isEditable) {
-				try {
-					JSON.parse(configValue);
-				} catch {
-					alert('Invalid JSON configuration. Please check your syntax.');
-					return;
-				}
+	function applyJsonChanges() {
+		if (isEditable) {
+			try {
+				const parsed = JSON.parse(configValue);
+				Object.assign(merchant, parsed);
+			} catch {
+				alert('Invalid JSON configuration. Please check your syntax.');
 			}
-			await saveMerchant();
-		} finally {
-			isSubmitting = false;
 		}
 	}
 
 	$effect(() => {
 		configValue = JSON.stringify(merchant, null, 2);
+	});
+
+	$effect(() => {
+		if (isEditable && configValue) {
+			try {
+				JSON.parse(configValue);
+			} catch (e) {
+				console.error('Error when parse JSON', e);
+			}
+		}
 	});
 </script>
 
@@ -60,7 +62,15 @@
 			<div class="flex items-center justify-between">
 				<Label for="raw_config" class="text-sm font-medium">Configuration JSON</Label>
 				<div class="flex items-center space-x-2">
-					<Checkbox id="editable-toggle" on:click={(isEditable = !isEditable)} />
+					<Checkbox
+						id="editable-toggle"
+						on:click={() => {
+							isEditable = !isEditable;
+							if (!isEditable) {
+								applyJsonChanges();
+							}
+						}}
+					/>
 					<label
 						for="editable-toggle"
 						class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -87,12 +97,4 @@
 			</p>
 		</div>
 	</FeatureCard>
-
-	<!-- Save Button -->
-	<div class="flex justify-end pt-6">
-		<Button on:click={handleSave} disabled={isSubmitting} class="flex items-center gap-2">
-			<Save class="h-4 w-4" />
-			Save Changes
-		</Button>
-	</div>
 </div>

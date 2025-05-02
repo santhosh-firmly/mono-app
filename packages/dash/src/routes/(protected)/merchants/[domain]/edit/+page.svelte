@@ -1,6 +1,8 @@
 <script>
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
+	import { Button } from '$lib/components/ui/button/index.js';
+	import { Save } from 'lucide-svelte';
 	import SidebarNav from '$lib/components/ui/sidebar-nav/sidebar-nav.svelte';
 
 	import GeneralSection from './general.svelte';
@@ -18,9 +20,17 @@
 
 	let activeSection = $state('general');
 	let merchant = $state(data.merchant);
+	let originalMerchantData = $state(JSON.stringify(data.merchant));
+	let hasChanges = $state(false);
+	let isSubmitting = $state(false);
 
 	let pspOptions = $state();
 	let platformOptions = $state();
+
+	$effect(() => {
+		const currentMerchant = JSON.stringify(merchant);
+		hasChanges = originalMerchantData !== currentMerchant;
+	});
 
 	function handleSectionChange(section) {
 		activeSection = section;
@@ -44,8 +54,18 @@
 		merchant[field] = value;
 	}
 
-	function saveMerchant() {
-		console.log('Saving merchant:', merchant);
+	async function saveMerchant() {
+		isSubmitting = true;
+		try {
+			console.log('Saving merchant:', merchant);
+			// After successful save, update the original data
+			originalMerchantData = JSON.stringify(merchant);
+			hasChanges = false;
+		} catch (error) {
+			console.error('Error saving merchant:', error);
+		} finally {
+			isSubmitting = false;
+		}
 	}
 
 	// Currency options - USD only
@@ -82,7 +102,7 @@
 		</div>
 
 		<!-- Main Content -->
-		<div class="flex-1">
+		<div class="max-w-4xl flex-1">
 			<!-- Tabs Navigation (visible on mobile/tablet) -->
 			<div class="mb-6 w-fit lg:hidden">
 				<Tabs.Root value={activeSection} onValueChange={handleSectionChange}>
@@ -106,14 +126,23 @@
 						{currencyOptions}
 						{platformOptions}
 						{pspOptions}
-						{saveMerchant}
 					/>
 				{:else if activeSection === 'presentation'}
-					<PresentationSection {merchant} {saveMerchant} />
+					<PresentationSection {merchant} />
 				{:else if activeSection === 'advanced'}
-					<AdvancedSection {merchant} {saveMerchant} />
+					<AdvancedSection {merchant} />
 				{/if}
 			</div>
+
+			<!-- Centralized Save Button -->
+			<Button
+				on:click={saveMerchant}
+				disabled={isSubmitting || !hasChanges}
+				class="mb-4 mt-6 flex items-center gap-2"
+			>
+				<Save class="h-4 w-4" />
+				{isSubmitting ? 'Saving...' : 'Save Changes'}
+			</Button>
 		</div>
 	</div>
 </div>

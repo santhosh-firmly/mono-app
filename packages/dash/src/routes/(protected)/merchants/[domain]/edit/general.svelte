@@ -2,7 +2,7 @@
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Switch from '$lib/components/ui/switch/index.js';
-	import { Save, Store, Globe, Cog, ToggleLeft } from 'lucide-svelte';
+	import { Store, Globe, Cog, ToggleLeft } from 'lucide-svelte';
 	import Combobox from '$lib/components/custom/combobox.svelte';
 	import FeatureCard from '$lib/components/custom/feature-card.svelte';
 	import FormField from '$lib/components/custom/form-field.svelte';
@@ -15,20 +15,8 @@
 		updateUrlName,
 		currencyOptions,
 		platformOptions,
-		pspOptions,
-		saveMerchant
+		pspOptions
 	} = $props();
-
-	let isSubmitting = $state(false);
-
-	async function handleSave() {
-		isSubmitting = true;
-		try {
-			await saveMerchant();
-		} finally {
-			isSubmitting = false;
-		}
-	}
 </script>
 
 <div class="space-y-8">
@@ -182,12 +170,4 @@
 			</Switch.Root>
 		</div>
 	</FeatureCard>
-
-	<!-- Save Button -->
-	<div class="flex justify-end pt-6">
-		<Button on:click={handleSave} disabled={isSubmitting} class="flex items-center gap-2">
-			<Save class="h-4 w-4" />
-			{isSubmitting ? 'Saving...' : 'Save Changes'}
-		</Button>
-	</div>
 </div>

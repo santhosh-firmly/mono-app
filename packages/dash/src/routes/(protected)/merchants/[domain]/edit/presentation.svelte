@@ -2,13 +2,12 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
-	import { Save, Image, PaintBucket, FileText } from 'lucide-svelte';
+	import { Image, PaintBucket, FileText } from 'lucide-svelte';
 	import FeatureCard from '$lib/components/custom/feature-card.svelte';
 	import FormField from '$lib/components/custom/form-field.svelte';
 
-	let { merchant, saveMerchant } = $props();
+	let { merchant } = $props();
 
-	let isSubmitting = $state(false);
 	let previewLogoVisible = $state(false);
 
 	function updateThemeColor(colorType, value) {
@@ -29,15 +28,6 @@
 
 	function updateTermsOfService(value) {
 		merchant.presentation.termsOfUse = value;
-	}
-
-	async function handleSave() {
-		isSubmitting = true;
-		try {
-			await saveMerchant();
-		} finally {
-			isSubmitting = false;
-		}
 	}
 
 	function toggleLogoPreview() {
@@ -194,12 +184,4 @@
 			/>
 		</FormField>
 	</FeatureCard>
-
-	<!-- Save Button -->
-	<div class="flex justify-end pt-6">
-		<Button on:click={handleSave} disabled={isSubmitting} class="flex items-center gap-2">
-			<Save class="h-4 w-4" />
-			{isSubmitting ? 'Saving...' : 'Save Changes'}
-		</Button>
-	</div>
 </div>
