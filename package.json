@@ -17,7 +17,7 @@
 		"deploy-qa": "lerna run deploy-qa",
 		"deploy-uat": "lerna run deploy-uat",
 		"deploy-prod": "lerna run deploy-prod",
-		"outdated": "npx check-outdated --prefer-wanted --ignore-packages @vitest,@vitest/ui,@vitest/coverage-istanbul,vitest",
+		"outdated": "npx check-outdated --prefer-wanted --ignore-packages @vitest,@vitest/ui,@vitest/coverage-istanbul,vitest,eslint",
 		"depcheck": "knip -c knip.config.js --no-config-hints",
 		"format": "prettier --write './*.{js,jsx,ts,tsx,json,md,yml,yaml}'",
 		"format-code": "npm run format && lerna run format-code",

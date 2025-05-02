@@ -3,7 +3,7 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 
-	export let user;
+	let { user } = $props();
 </script>
 
 <DropdownMenu.Root>
@@ -14,17 +14,17 @@
 			builders={[builder]}
 			class="overflow-hidden rounded-full "
 		>
-			<Avatar.Root class="h-9 w-9">
-				<Avatar.Image src="/images/placeholder-user.jpg" alt="@shadcn" />
-				<Avatar.Fallback>SC</Avatar.Fallback>
+			<Avatar.Root class="h-6 w-6">
+				<!-- <Avatar.Image src="/images/placeholder-user.jpg" alt="@shadcn" /> -->
+				<p class="flex w-full items-center justify-center">{user?.name[0]}</p>
 			</Avatar.Root>
 		</Button>
 	</DropdownMenu.Trigger>
-	<DropdownMenu.Content class="w-56" align="end">
+	<DropdownMenu.Content class="w-40" align="end">
 		<DropdownMenu.Label class="font-normal">
 			<div class="flex flex-col space-y-1">
-				<p class="text-sm font-medium leading-none">{user.name}</p>
-				<p class="text-xs leading-none text-muted-foreground">{user.email}</p>
+				<p class="text-sm font-medium leading-none">{user?.name}</p>
+				<p class="text-xs leading-none text-muted-foreground">{user?.email}</p>
 			</div>
 		</DropdownMenu.Label>
 		<DropdownMenu.Separator />

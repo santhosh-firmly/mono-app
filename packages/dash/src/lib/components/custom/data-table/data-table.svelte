@@ -1,5 +1,6 @@
 <script>
-	import { get, readable, writable } from 'svelte/store';
+	import { readable } from 'svelte/store';
+	import { goto } from '$app/navigation';
 	import { Render, Subscribe, createRender, createTable } from 'svelte-headless-table';
 	import {
 		addColumnFilters,
@@ -14,14 +15,31 @@
 	import DataTableColumnHeader from './data-table-column-header.svelte';
 	import DataTableToolbar from './data-table-toolbar.svelte';
 	import DataTablePagination from './data-table-pagination.svelte';
-	import DataTableCheckbox from './data-table-checkbox.svelte';
-	import DataTableTitleCell from './data-table-title-cell.svelte';
 	import DataTableRowActions from './data-table-row-actions.svelte';
 	import Merchant from './cells/merchant.svelte';
 	import BadgeCell from './cells/badge-cell.svelte';
 
-	export let data;
-	export let columnFilters;
+	function createColumnFilter() {
+		return {
+			fn: ({ filterValue, value }) => {
+				if (!filterValue || !Array.isArray(filterValue) || filterValue.length === 0) {
+					return true;
+				}
+
+				if (value === undefined || value === null || typeof value !== 'string') {
+					return false;
+				}
+
+				return filterValue.includes(value);
+			},
+			initialFilterValue: [],
+			render: ({ filterValue }) => {
+				return filterValue;
+			}
+		};
+	}
+
+	let { data, columnFilters } = $props();
 
 	const table = createTable(readable(data), {
 		select: addSelectedRows(),
@@ -40,32 +58,9 @@
 	});
 
 	const columns = table.createColumns([
-		table.display({
-			id: 'select',
-			header: (_, { pluginStates }) => {
-				const { allPageRowsSelected } = pluginStates.select;
-				return createRender(DataTableCheckbox, {
-					checked: allPageRowsSelected,
-					'aria-label': 'Select all'
-				});
-			},
-			cell: ({ row }, { pluginStates }) => {
-				const { getRowState } = pluginStates.select;
-				const { isSelected } = getRowState(row);
-				return createRender(DataTableCheckbox, {
-					checked: isSelected,
-					'aria-label': 'Select row',
-					class: 'translate-y-[2px]'
-				});
-			},
-			plugins: {
-				sort: {
-					disable: true
-				}
-			}
-		}),
-		table.display({
+		table.column({
 			id: 'merchant',
+			accessor: 'store_id',
 			header: 'Merchant',
 			cell: ({ row }) => {
 				return createRender(Merchant, {
@@ -73,9 +68,7 @@
 					logoSvg: row.original.logo_svg,
 					name: row.original.display_name,
 					domain: row.original.store_id
-					// class: 'translate-y-[2px]'
 				});
-				// return 'test';
 			},
 			plugins: {
 				sort: {
@@ -84,48 +77,39 @@
 			}
 		}),
 		table.column({
-			accessor: 'store_id',
-			header: 'Domain',
-			id: 'domain'
-		}),
-		table.column({
-			accessor: 'display_name',
-			header: 'Display Name',
-			id: 'display_name',
-			cell: ({ value, row }) => {
-				if (row.isData()) {
-					return createRender(DataTableTitleCell, {
-						value: value || '',
-						labelValue: row.original.label
-					});
-				}
-				return value || '';
-			}
-		}),
-		table.column({
-			accessor: 'is_disabled',
-			header: 'Enabled',
 			id: 'is_disabled',
+			accessor: 'is_disabled',
+			header: 'State',
 			cell: ({ value }) => {
-				const isSelected = writable(!value);
-				return createRender(DataTableCheckbox, {
-					checked: isSelected
+				return createRender(BadgeCell, {
+					value: value ? 'Disabled' : 'Enabled'
 				});
+			},
+			plugins: {
+				filter: {
+					exclude: true
+				}
 			}
 		}),
 		table.column({
-			accessor: 'platform_id',
 			id: 'platform_id',
+			accessor: 'platform_id',
 			header: 'Platform',
 			cell: ({ value }) => {
 				return createRender(BadgeCell, {
 					value
 				});
+			},
+			plugins: {
+				filter: {
+					exclude: true
+				},
+				colFilter: createColumnFilter()
 			}
 		}),
 		table.column({
-			accessor: 'psp',
 			id: 'psp',
+			accessor: 'psp',
 			header: 'PSP',
 			cell: ({ value }) => {
 				return createRender(BadgeCell, {
@@ -133,20 +117,10 @@
 				});
 			},
 			plugins: {
-				colFilter: {
-					fn: ({ filterValue, value }) => {
-						if (filterValue.length === 0) return true;
-						if (!Array.isArray(filterValue) || typeof value !== 'string') return true;
-
-						return filterValue.some((filter) => {
-							return value === filter;
-						});
-					},
-					initialFilterValue: [],
-					render: ({ filterValue }) => {
-						return get(filterValue);
-					}
-				}
+				filter: {
+					exclude: true
+				},
+				colFilter: createColumnFilter()
 			}
 		}),
 		table.display({
@@ -156,8 +130,11 @@
 			},
 			cell: ({ row }) => {
 				if (row.isData() && row.original) {
+					const { store_id } = row.original;
+
 					return createRender(DataTableRowActions, {
-						row: row.original
+						onEdit: () => goto(`/merchants/${store_id}/edit`),
+						onOpenProducts: () => goto(`/merchants/${store_id}/products`)
 					});
 				}
 				return '';
@@ -166,7 +143,6 @@
 	]);
 
 	const tableModel = table.createViewModel(columns);
-
 	const { headerRows, pageRows, tableAttrs, tableBodyAttrs } = tableModel;
 </script>
 

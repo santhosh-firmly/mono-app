@@ -9,15 +9,14 @@
 	export let tableModel;
 
 	const { pageRows, pluginStates, rows } = tableModel;
-
 	const { hasNextPage, hasPreviousPage, pageIndex, pageCount, pageSize } = pluginStates.page;
 
-	const { selectedDataIds } = pluginStates.select;
+	const rowsPerPageOptions = [10, 20, 30, 40, 50];
 </script>
 
 <div class="flex items-center justify-between px-2">
 	<div class="flex-1 text-sm text-muted-foreground">
-		{Object.keys($selectedDataIds).length} of {$rows.length} row(s) selected.
+		{$rows.length} row(s) selected.
 	</div>
 	<div class="flex items-center space-x-6 lg:space-x-8">
 		<div class="flex items-center space-x-2">
@@ -30,11 +29,9 @@
 					<Select.Value placeholder="Select page size" />
 				</Select.Trigger>
 				<Select.Content>
-					<Select.Item value="10">10</Select.Item>
-					<Select.Item value="20">20</Select.Item>
-					<Select.Item value="30">30</Select.Item>
-					<Select.Item value="40">40</Select.Item>
-					<Select.Item value="50">50</Select.Item>
+					{#each rowsPerPageOptions as quantity (quantity)}
+						<Select.Item value={quantity}>{quantity}</Select.Item>
+					{/each}
 				</Select.Content>
 			</Select.Root>
 		</div>

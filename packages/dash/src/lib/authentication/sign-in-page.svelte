@@ -1,5 +1,6 @@
-<script lang="ts">
+<script>
 	import SignInForm from './sign-in-form.svelte';
+	let { azureAdClientId, azureAdRedirectUrl, azureAdTenantId } = $props();
 </script>
 
 <div
@@ -11,7 +12,7 @@
 			style="
 				background-image:
 					url(/background.png);"
-		/>
+		></div>
 		<div class="relative z-20 flex items-center text-lg font-medium"></div>
 		<div class="relative z-20 mt-auto">
 			<blockquote class="space-y-2">
@@ -25,7 +26,7 @@
 				<h1 class="text-2xl font-semibold tracking-tight">Welcome to firmly dashboard</h1>
 				<p class="text-sm text-muted-foreground">Log in to continue</p>
 			</div>
-			<SignInForm />
+			<SignInForm {azureAdClientId} {azureAdRedirectUrl} {azureAdTenantId} />
 			<p class="px-8 text-center text-sm text-muted-foreground">
 				By continuing, you agree to our
 				<a

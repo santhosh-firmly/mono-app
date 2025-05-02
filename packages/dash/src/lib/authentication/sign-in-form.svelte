@@ -1,19 +1,19 @@
 <script>
-	import {
-		PUBLIC_AZURE_AD_CLIENT_ID,
-		PUBLIC_AZURE_AD_TENANT_ID,
-		PUBLIC_AZURE_REDIRECT_URL
-	} from '$env/static/public';
+	let { azureAdClientId, azureAdRedirectUrl, azureAdTenantId } = $props();
 
-	let altSignInWithMS = 'Sign In with Microsoft';
+	let altSignInWithMS = $state('Sign In with Microsoft');
 
-	const MSUrl = new URL(
-		`https://login.microsoftonline.com/${PUBLIC_AZURE_AD_TENANT_ID}/oauth2/v2.0/authorize`
-	);
-	MSUrl.searchParams.set('client_id', PUBLIC_AZURE_AD_CLIENT_ID);
-	MSUrl.searchParams.set('scope', 'openid profile email');
-	MSUrl.searchParams.set('response_type', 'code');
-	MSUrl.searchParams.set('redirect_uri', PUBLIC_AZURE_REDIRECT_URL);
+	let MSUrl = $derived.by(() => {
+		const url = new URL(
+			`https://login.microsoftonline.com/${azureAdTenantId}/oauth2/v2.0/authorize`
+		);
+		url.searchParams.set('client_id', azureAdClientId);
+		url.searchParams.set('scope', 'openid profile email');
+		url.searchParams.set('response_type', 'code');
+		url.searchParams.set('redirect_uri', azureAdRedirectUrl);
+
+		return url;
+	});
 </script>
 
 <div class="grid gap-6">

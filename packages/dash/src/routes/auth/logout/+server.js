@@ -1,8 +1,7 @@
 import { redirect } from '@sveltejs/kit';
-import { FIRMLY_AUTH_COOKIE } from '$env/static/private';
 
-export async function GET({ cookies }) {
-	cookies.set(FIRMLY_AUTH_COOKIE, '', {
+export async function GET({ cookies, platform }) {
+	cookies.set(platform.env.FIRMLY_AUTH_COOKIE, '', {
 		path: '/'
 	});
 

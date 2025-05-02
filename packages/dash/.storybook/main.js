@@ -2,9 +2,16 @@
 const config = {
 	stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|ts|svelte)'],
 	addons: [
-		'@storybook/addon-svelte-csf',
 		'@storybook/addon-essentials',
-		'@storybook/addon-interactions'
+		{
+			name: '@storybook/addon-svelte-csf',
+			options:
+				// TODO: Temporary when using V4 and project is not migrated.
+				{ legacyTemplate: true }
+		},
+		'@chromatic-com/storybook',
+		'@storybook/addon-interactions',
+		'@storybook/addon-postcss'
 	],
 	framework: {
 		name: '@storybook/sveltekit',
