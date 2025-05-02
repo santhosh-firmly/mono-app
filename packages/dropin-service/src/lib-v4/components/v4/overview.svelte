@@ -18,7 +18,7 @@
 	/**
 	 * Total items in cart.
 	 */
-	export let quantity;
+	export let itemQuantity;
 
 	/**
 	 * Total cost of the current cart
@@ -30,7 +30,7 @@
 	 */
 	export let toggleExpanded;
 
-	let showMiniOverview = false;
+	export let showMiniOverview = false;
 
 	let overviewElement;
 
@@ -58,6 +58,7 @@
 			<Header
 				{merchantInfo}
 				{total}
+				itemCount={itemQuantity}
 				skeleton={!images}
 				on:back-click
 				{showMiniOverview}
@@ -73,7 +74,7 @@
 				<div class="bg-fy-on-primary-subtle2 m-1 h-6 w-20 animate-pulse rounded" />
 			{:else}
 				<span class="text-fy-on-primary-subtle pt-1"
-					>Order Total ({quantity} item{quantity > 1 ? 's' : ''})</span
+					>Order Total ({itemQuantity} item{itemQuantity > 1 ? 's' : ''})</span
 				>
 				<span class="text-fy-on-primary text-4xl leading-normal font-semibold"
 					>{formatCurrency(total)}</span

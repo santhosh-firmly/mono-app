@@ -61,10 +61,10 @@
 	}
 </script>
 
-<header class="sticky top-0 z-[120] flex w-full flex-col shadow-sm @md:relative @md:shadow-none">
+<header class="flex w-full flex-col shadow-sm @md:relative @md:shadow-none">
 	<button
 		bind:offsetHeight={headerOffset}
-		class="bg-fy-primary z-[101] flex w-full flex-row items-center justify-between @md:z-[1]"
+		class="bg-fy-primary z-[130] flex w-full flex-row items-center justify-between @md:z-[1]"
 		on:click={toggleExpanded}
 		type="button"
 	>
@@ -173,17 +173,17 @@
 	{#if expanded}
 		<div
 			transition:slide={{ duration: 300, easing: cubicInOut }}
-			class="bg-fy-primary ov-gradient-y-primary absolute top-0 left-0 z-[100] flex max-h-screen w-full flex-col"
+			class="bg-fy-primary ov-gradient-y-primary fixed top-0 left-0 z-[120] flex max-h-screen w-full flex-col"
 			style="padding-top: {headerOffset}px;"
 		>
 			<slot />
 		</div>
 	{/if}
 </header>
-
 {#if expanded}
-	<button
-		class="absolute top-0 right-0 bottom-0 left-0 z-[110] bg-black opacity-30 backdrop-blur-2xl"
+	<div
+		class="fixed top-0 right-0 bottom-0 left-0 z-[110] bg-black opacity-30 backdrop-blur-2xl"
 		on:click={toggleExpanded}
-	/>
+		aria-label="Close expanded view"
+	></div>
 {/if}

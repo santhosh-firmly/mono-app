@@ -100,6 +100,8 @@
 	 */
 	export let isParentIframed = false;
 
+	let showMiniOverview;
+
 	let selectedPaymentMethod;
 	let selectedCardOption;
 	let selectedShippingAddress;
@@ -160,6 +162,11 @@
 				}
 			}
 		}
+	}
+
+	let itemCount = 0;
+	$: {
+		itemCount = $cart?.line_items?.reduce?.((sum, l) => sum + l.quantity, 0) || 0;
 	}
 
 	// Forms and form errors
@@ -910,7 +917,7 @@
 	<div class="@md:bg-fy-primary absolute top-0 left-0 h-full w-1/2"></div>
 	<div class="@md:bg-fy-background absolute top-0 right-0 h-full w-1/2 shadow"></div>
 	<div class="relative flex w-full flex-col items-center justify-center">
-		<div class="w-full @md:hidden">
+		<div class="sticky top-0 z-[120] w-full @md:hidden">
 			<Header
 				merchantInfo={{
 					displayName: $cart?.display_name || $cart?.shop_id,
@@ -918,15 +925,16 @@
 					smallLogo
 				}}
 				total={$cart?.total}
-				itemCount={$cart?.line_items?.reduce?.((sum, l) => sum + l.quantity, 0)}
+				{itemCount}
 				skeleton={!$cart?.line_items?.length}
+				{showMiniOverview}
 				bind:toggleExpanded={toggleHeaderExpanded}
 				on:back-click
 			>
 				<div
 					slot="smallSummary"
 					class="relative mx-2 h-7 w-7 rounded bg-gray-300 bg-cover shadow"
-					style={`background-image: url(${cart?.line_items?.[0]?.image.url});`}
+					style={`background-image: url(${$cart?.line_items?.[0]?.image.url});`}
 				>
 					<span
 						class={classNames(
@@ -946,7 +954,7 @@
 							'font-bold'
 						)}
 					>
-						?
+						{itemCount > 0 ? itemCount : '?'}
 					</span>
 				</div>
 				<div class="h-full overflow-auto px-4">
@@ -992,6 +1000,7 @@
 						largeLogo,
 						smallLogo
 					}}
+					bind:showMiniOverview
 				>
 					<div class="bg-fy-primary w-full">
 						<!--  Hack for showing to kardiel. This should become a configurations of the merchant's theme
