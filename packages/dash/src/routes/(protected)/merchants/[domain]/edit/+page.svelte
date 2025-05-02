@@ -37,7 +37,7 @@
 	}
 
 	function addUrlName() {
-		merchant.url_name = [...merchant.url_name, ''];
+		merchant.url_name = merchant.url ? [...merchant.url_name, ''] : [''];
 	}
 
 	function removeUrlName(index) {
@@ -58,7 +58,6 @@
 		isSubmitting = true;
 		try {
 			console.log('Saving merchant:', merchant);
-			// After successful save, update the original data
 			originalMerchantData = JSON.stringify(merchant);
 			hasChanges = false;
 		} catch (error) {
@@ -72,8 +71,16 @@
 	const currencyOptions = [{ value: 'USD', label: 'USD - US Dollar' }];
 
 	onMount(() => {
-		pspOptions = data.pspOptions || window.dash?.merchants?.columns?.psp;
-		platformOptions = data.platformOptions || window.dash?.merchants?.columns?.platform_id;
+		pspOptions =
+			data.pspOptions ||
+			window.dash?.merchants?.columns?.psp?.map((item) => ({ label: item, value: item }));
+
+		platformOptions =
+			data.platformOptions ||
+			window.dash?.merchants?.columns?.platform_id?.map((item) => ({
+				label: item,
+				value: item
+			}));
 	});
 </script>
 
