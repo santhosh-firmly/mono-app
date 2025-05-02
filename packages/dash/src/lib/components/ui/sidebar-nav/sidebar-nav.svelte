@@ -5,12 +5,7 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 
 	// Using $props rune for component properties
-	let {
-		items = [],
-		activeSection = '',
-		onSectionChange = (section) => {},
-		className = ''
-	} = $props();
+	let { items = [], activeSection = '', onSectionChange = () => {}, className = '' } = $props();
 
 	const [send, receive] = crossfade({
 		duration: 250,
@@ -24,7 +19,10 @@
 
 		<Button
 			variant="ghost"
-			class={cn('relative justify-start', isActive ? 'bg-muted font-medium' : 'hover:bg-muted/50')}
+			class={cn(
+				'relative justify-start',
+				isActive ? 'bg-muted font-medium' : 'hover:bg-muted/50'
+			)}
 			on:click={() => onSectionChange(item.id)}
 		>
 			{#if isActive}

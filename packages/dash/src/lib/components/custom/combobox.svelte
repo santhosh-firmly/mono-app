@@ -10,7 +10,7 @@
 	let isOpen = $state(false);
 
 	let searchCriteria = $state('');
-	let selected = $state(options.find((option) => option.value === value));
+	let selected = $derived(options.find((option) => option.value === value));
 
 	async function handleSelect(selectedValue) {
 		onSelect?.(selectedValue);
@@ -19,7 +19,9 @@
 	}
 
 	let optionsFiltered = $derived(
-		options.filter((option) => option.label?.toLowerCase().includes(searchCriteria?.toLowerCase()))
+		options.filter((option) =>
+			option.label?.toLowerCase().includes(searchCriteria?.toLowerCase())
+		)
 	);
 </script>
 
@@ -48,7 +50,12 @@
 								value={option.value}
 								onSelect={(currentValue) => handleSelect(currentValue)}
 							>
-								<Check class={cn('mr-2 h-4 w-4', option.value !== value && 'text-transparent')} />
+								<Check
+									class={cn(
+										'mr-2 h-4 w-4',
+										option.value !== value && 'text-transparent'
+									)}
+								/>
 								{option.label}
 							</Command.Item>
 						{/each}

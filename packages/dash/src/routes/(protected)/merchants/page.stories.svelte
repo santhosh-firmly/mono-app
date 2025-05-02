@@ -9,10 +9,15 @@
 		component: Merchants,
 		parameters: {
 			layout: 'fullscreen'
+		},
+		args: {
+			data
 		}
 	});
 </script>
 
-<Story name="Default">
-	<Merchants {data} />
-</Story>
+{#snippet template(args)}
+	<Merchants {...args} />
+{/snippet}
+
+<Story name="List" children={template} />

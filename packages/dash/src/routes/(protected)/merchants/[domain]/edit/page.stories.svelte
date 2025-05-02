@@ -9,16 +9,19 @@
 		component: MerchantEdit,
 		parameters: {
 			layout: 'fullscreen'
+		},
+		args: {
+			data: {
+				merchant: data.merchants[Math.floor(Math.random() * data.merchants.length)],
+				platformOptions: data.columns.platform_id.map((value) => ({ label: value, value })),
+				pspOptions: data.columns.psp.map((value) => ({ label: value, value }))
+			}
 		}
 	});
 </script>
 
-<Story name="Default">
-	<MerchantEdit
-		data={{
-			merchant: data.merchants[Math.floor(Math.random() * data.merchants.length)],
-			platformOptions: data.columns.platform_id.map((value) => ({ label: value, value })),
-			pspOptions: data.columns.psp.map((value) => ({ label: value, value }))
-		}}
-	/>
-</Story>
+{#snippet template(args)}
+	<MerchantEdit {...args} />
+{/snippet}
+
+<Story name="Edit" children={template} />

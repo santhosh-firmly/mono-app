@@ -90,12 +90,15 @@
 					<span class="sr-only">firmly Inc</span>
 				</a>
 				{#each navOptions as { icon: Icon, label, href } (label)}
-					{@const isSelected = href === '/' ? currentPath === '/' : currentPath.includes(href)}
+					{@const isSelected =
+						href === '/' ? currentPath === '/' : currentPath.includes(href)}
 					<a
 						{href}
 						class={[
 							'flex items-center gap-4 px-2.5',
-							isSelected ? 'rounded-md bg-muted py-2 text-black' : 'text-gray-500 hover:text-black'
+							isSelected
+								? 'rounded-md bg-muted py-2 text-black'
+								: 'text-gray-500 hover:text-black'
 						]}
 					>
 						<Icon class="h-5 w-5" />

@@ -7,7 +7,6 @@
 	import { Save } from 'lucide-svelte';
 	import Combobox from '$lib/components/custom/combobox.svelte';
 
-	// Using $props rune for component properties
 	let {
 		merchant,
 		updateField,
@@ -20,10 +19,8 @@
 		saveMerchant
 	} = $props();
 
-	// Track if form is being submitted
 	let isSubmitting = $state(false);
 
-	// Handle save with loading state
 	async function handleSave() {
 		isSubmitting = true;
 		try {

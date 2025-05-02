@@ -9,10 +9,15 @@
 		component: Dashboard,
 		parameters: {
 			layout: 'fullscreen'
+		},
+		args: {
+			data
 		}
 	});
 </script>
 
-<Story name="Default">
-	<Dashboard {data} />
-</Story>
+{#snippet template(args)}
+	<Dashboard {...args} />
+{/snippet}
+
+<Story name="Default" children={template} />
