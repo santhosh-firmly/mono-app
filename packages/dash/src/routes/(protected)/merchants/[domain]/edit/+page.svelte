@@ -5,9 +5,11 @@
 
 	import GeneralSection from './general.svelte';
 	import AdvancedSection from './advanced.svelte';
+	import PresentationSection from './presentation.svelte';
 
 	const navItems = [
 		{ id: 'general', title: 'General' },
+		{ id: 'presentation', title: 'Presentation' },
 		{ id: 'advanced', title: 'Advanced' }
 	];
 
@@ -100,6 +102,8 @@
 						{pspOptions}
 						{saveMerchant}
 					/>
+				{:else if activeSection === 'presentation'}
+					<PresentationSection {merchant} {saveMerchant} />
 				{:else if activeSection === 'advanced'}
 					<AdvancedSection {merchant} {saveMerchant} />
 				{/if}

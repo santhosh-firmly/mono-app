@@ -4,7 +4,7 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Switch from '$lib/components/ui/switch/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
-	import { Save } from 'lucide-svelte';
+	import { Save, Store, Globe, Link, Cog, ToggleLeft } from 'lucide-svelte';
 	import Combobox from '$lib/components/custom/combobox.svelte';
 
 	let {
@@ -42,7 +42,10 @@
 	<!-- Main Info -->
 	<Card.Root>
 		<Card.Header>
-			<Card.Title>Merchant Information</Card.Title>
+			<Card.Title class="flex items-center gap-2">
+				<Store class="h-5 w-5" />
+				Merchant Information
+			</Card.Title>
 			<Card.Description>Basic details about your merchant</Card.Description>
 		</Card.Header>
 		<Card.Content class="space-y-4">
@@ -103,7 +106,10 @@
 	<!-- URL Names -->
 	<Card.Root>
 		<Card.Header>
-			<Card.Title>Domain Names</Card.Title>
+			<Card.Title class="flex items-center gap-2">
+				<Globe class="h-5 w-5" />
+				Domain Names
+			</Card.Title>
 			<Card.Description>URLs where the merchant is accessible</Card.Description>
 		</Card.Header>
 		<Card.Content class="space-y-4">
@@ -134,7 +140,10 @@
 	<!-- Platform & Payments -->
 	<Card.Root>
 		<Card.Header>
-			<Card.Title>Integration Settings</Card.Title>
+			<Card.Title class="flex items-center gap-2">
+				<Cog class="h-5 w-5" />
+				Integration Settings
+			</Card.Title>
 			<Card.Description>Platform and payment configuration</Card.Description>
 		</Card.Header>
 		<Card.Content class="space-y-4">
@@ -197,7 +206,10 @@
 	<!-- Status -->
 	<Card.Root>
 		<Card.Header>
-			<Card.Title>Merchant Status</Card.Title>
+			<Card.Title class="flex items-center gap-2">
+				<ToggleLeft class="h-5 w-5" />
+				Merchant Status
+			</Card.Title>
 			<Card.Description>Toggle merchant availability</Card.Description>
 		</Card.Header>
 		<Card.Content>
