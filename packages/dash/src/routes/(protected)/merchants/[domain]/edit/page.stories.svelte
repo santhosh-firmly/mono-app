@@ -12,7 +12,10 @@
 		},
 		args: {
 			data: {
-				merchant: data.merchants[Math.floor(Math.random() * data.merchants.length)],
+				merchant: {
+					...data.merchants[Math.floor(Math.random() * data.merchants.length)],
+					presentation: {}
+				},
 				platformOptions: data.columns.platform_id.map((value) => ({ label: value, value })),
 				pspOptions: data.columns.psp.map((value) => ({ label: value, value }))
 			}

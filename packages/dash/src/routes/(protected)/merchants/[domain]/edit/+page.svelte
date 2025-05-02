@@ -6,6 +6,7 @@
 	import GeneralSection from './general.svelte';
 	import AdvancedSection from './advanced.svelte';
 	import PresentationSection from './presentation.svelte';
+	import { onMount } from 'svelte';
 
 	const navItems = [
 		{ id: 'general', title: 'General' },
@@ -18,8 +19,8 @@
 	let activeSection = $state('general');
 	let merchant = $state(data.merchant);
 
-	const platformOptions = data.platformOptions;
-	const pspOptions = data.pspOptions;
+	let pspOptions = $state();
+	let platformOptions = $state();
 
 	function handleSectionChange(section) {
 		activeSection = section;
@@ -49,6 +50,11 @@
 
 	// Currency options - USD only
 	const currencyOptions = [{ value: 'USD', label: 'USD - US Dollar' }];
+
+	onMount(() => {
+		pspOptions = data.pspOptions || window.dash?.merchants?.columns?.psp;
+		platformOptions = data.platformOptions || window.dash?.merchants?.columns?.platform_id;
+	});
 </script>
 
 <div class="flex flex-col gap-6 bg-background p-4 sm:px-6 sm:py-4 md:gap-8">

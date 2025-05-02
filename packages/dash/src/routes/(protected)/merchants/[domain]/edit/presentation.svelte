@@ -8,38 +8,27 @@
 
 	let { merchant, saveMerchant } = $props();
 
-	// Initialize theme object if it doesn't exist
-	$effect(() => {
-		if (!merchant.theme) {
-			merchant.theme = {
-				colors: {
-					primary: '#e3f8f9',
-					action: '#35cad0'
-				},
-				largeLogo: '',
-				privacyPolicy: ''
-			};
-		}
-	});
-
 	let isSubmitting = $state(false);
 	let previewLogoVisible = $state(false);
 
 	function updateThemeColor(colorType, value) {
-		if (!merchant.theme) merchant.theme = {};
-		if (!merchant.theme.colors) merchant.theme.colors = {};
+		if (!merchant.presentation?.theme) merchant.presentation.theme = {};
+		if (!merchant.presentation?.theme.colors) merchant.presentation.theme.colors = {};
 
-		merchant.theme.colors[colorType] = value;
+		merchant.presentation.theme.colors[colorType] = value;
 	}
 
 	function updateLogo(value) {
-		if (!merchant.theme) merchant.theme = {};
-		merchant.theme.largeLogo = value;
+		if (!merchant.presentation?.theme) merchant.presentation.theme = {};
+		merchant.presentation.theme.largeLogo = value;
 	}
 
 	function updatePrivacyPolicy(value) {
-		if (!merchant.theme) merchant.theme = {};
-		merchant.theme.privacyPolicy = value;
+		merchant.presentation.privacyPolicy = value;
+	}
+
+	function updateTermsOfService(value) {
+		merchant.presentation.termsOfUse = value;
 	}
 
 	async function handleSave() {
@@ -82,16 +71,16 @@
 			<div class="relative w-full">
 				<Input
 					id="primary_color"
-					value={merchant.theme?.colors?.primary || '#e3f8f9'}
+					value={merchant.presentation?.theme?.colors?.primary || '#ffffff'}
 					oninput={(e) => updateThemeColor('primary', e.target.value)}
-					placeholder="#e3f8f9"
+					placeholder="#ffffff"
 				/>
 				<div class="absolute right-2 top-[50%] flex translate-y-[-50%] items-center gap-2">
 					<input
 						type="color"
-						value={merchant.theme?.colors?.primary || '#e3f8f9'}
+						value={merchant.presentation?.theme?.colors?.primary || '#ffffff'}
 						oninput={(e) => updateThemeColor('primary', e.target.value)}
-						class="h-6 w-6 cursor-pointer border-0 bg-transparent p-0"
+						class="w-6 cursor-pointer rounded-lg border bg-transparent p-0"
 					/>
 				</div>
 			</div>
@@ -106,16 +95,16 @@
 			<div class="relative w-full">
 				<Input
 					id="action_color"
-					value={merchant.theme?.colors?.action || '#35cad0'}
+					value={merchant.presentation?.theme?.colors?.action || '#000000'}
 					oninput={(e) => updateThemeColor('action', e.target.value)}
-					placeholder="#35cad0"
+					placeholder="#000000"
 				/>
-				<div class="absolute right-2 top-[50%] flex translate-y-[-50%] items-center gap-2">
+				<div class="absolute right-2 top-[50%] flex translate-y-[-50%] items-center">
 					<input
 						type="color"
-						value={merchant.theme?.colors?.action || '#35cad0'}
+						value={merchant.presentation?.theme?.colors?.action || '#000000'}
 						oninput={(e) => updateThemeColor('action', e.target.value)}
-						class="h-6 w-6 cursor-pointer border-0 bg-transparent p-0"
+						class="w-6 cursor-pointer rounded-lg border bg-transparent"
 					/>
 				</div>
 			</div>
@@ -127,12 +116,14 @@
 			<div class="flex flex-col gap-4">
 				<div
 					class="rounded-md p-4"
-					style="background-color: {merchant.theme?.colors?.primary || '#e3f8f9'}"
+					style="background-color: {merchant.presentation?.theme?.colors?.primary ||
+						'#fffff'}"
 				>
 					<div class="flex justify-center">
 						<button
 							class="rounded-md px-4 py-2 font-medium text-white"
-							style="background-color: {merchant.theme?.colors?.action || '#35cad0'}"
+							style="background-color: {merchant.presentation?.theme?.colors
+								?.action || '#000000'}"
 						>
 							Action Button
 						</button>
@@ -153,7 +144,7 @@
 				<textarea
 					id="logo"
 					class="h-24 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-					value={merchant.theme?.largeLogo || ''}
+					value={merchant.presentation?.theme?.largeLogo || ''}
 					oninput={(e) => updateLogo(e.target.value)}
 					placeholder="data:image/svg+xml,..."
 				></textarea>
@@ -162,10 +153,10 @@
 				<Button variant="outline" size="sm" on:click={toggleLogoPreview} class="w-fit">
 					{previewLogoVisible ? 'Hide Preview' : 'Show Preview'}
 				</Button>
-				{#if previewLogoVisible && merchant.theme?.largeLogo}
+				{#if previewLogoVisible && merchant.presentation?.theme?.largeLogo}
 					<div class="rounded-md border bg-white p-4">
 						<img
-							src={merchant.theme.largeLogo}
+							src={merchant.presentation?.theme.largeLogo}
 							alt="Logo Preview"
 							class="mx-auto max-h-40"
 						/>
@@ -184,7 +175,7 @@
 		>
 			<Input
 				id="privacy_policy"
-				value={merchant.theme?.privacyPolicy || ''}
+				value={merchant.presentation?.privacyPolicy || ''}
 				oninput={(e) => updatePrivacyPolicy(e.target.value)}
 				placeholder="https://example.com/privacy-policy"
 			/>
@@ -197,7 +188,7 @@
 		>
 			<Input
 				id="terms_of_service"
-				value={merchant.theme?.termsOfService || ''}
+				value={merchant.presentation?.termsOfUse || ''}
 				oninput={(e) => updateTermsOfService(e.target.value)}
 				placeholder="https://example.com/terms-of-service"
 			/>

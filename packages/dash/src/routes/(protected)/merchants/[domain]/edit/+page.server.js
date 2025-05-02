@@ -1,31 +1,29 @@
 import { error } from '@sveltejs/kit';
-import { merchants as data } from '$lib/assets/merchants-data.json';
 
 /** @type {import('./$types').PageServerLoad} */
-export async function load({ params }) {
+export async function load({ params, platform }) {
 	const { domain } = params;
 
-	const merchant = data.find((m) => m.store_id === domain);
+	const store = await platform.env.firmlyConfigs
+		.prepare(`SELECT * FROM stores WHERE key = ?`)
+		.bind(domain)
+		.first();
 
-	const platformOptions = Array.from(
-		new Set(
-			data.map(({ platform_id }) =>
-				JSON.stringify({ value: platform_id, label: platform_id })
-			)
-		)
-	).map((item) => JSON.parse(item));
+	const presentation = await platform.env.firmlyConfigs
+		.prepare(`SELECT info FROM merchant_presentation WHERE key = ?`)
+		.bind(domain)
+		.first();
 
-	const pspOptions = Array.from(
-		new Set(data.map(({ psp }) => JSON.stringify({ value: psp, label: psp })))
-	).map((item) => JSON.parse(item));
-
-	if (!merchant) {
+	if (!store) {
 		throw error(404, 'Merchant not found');
 	}
 
+	const merchant = {
+		...JSON.parse(store.info),
+		presentation: presentation?.info ? JSON.parse(presentation.info) : {}
+	};
+
 	return {
-		merchant,
-		platformOptions,
-		pspOptions
+		merchant
 	};
 }
