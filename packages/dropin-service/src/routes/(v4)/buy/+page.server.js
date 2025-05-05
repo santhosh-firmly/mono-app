@@ -16,7 +16,10 @@ export const load = async ({ url, platform }) => {
 	const envVars = {
 		PUBLIC_api_id: platform.env.PUBLIC_api_id,
 		PUBLIC_cf_server: platform.env.PUBLIC_cf_server,
-		PUBLIC_DISABLE_HCAPTCHA: platform.env.PUBLIC_DISABLE_HCAPTCHA
+		PUBLIC_DISABLE_HCAPTCHA: platform.env.PUBLIC_DISABLE_HCAPTCHA,
+		PUBLIC_c2p_sdk_url: platform.env.PUBLIC_c2p_sdk_url,
+		PUBLIC_c2p_dpa_id: platform.env.PUBLIC_c2p_dpa_id,
+		PUBLIC_c2p_initiator_id: platform.env.PUBLIC_c2p_initiator_id
 	};
 
 	const isValidRequest = firmlyDomain.includes('firmly') && merchantDomain;
