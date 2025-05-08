@@ -37,6 +37,16 @@
 			"account_id": "edefa8570f305f587d4a564abd8bdc80",
 			"name": "dash",
 			"main": ".svelte-kit/cloudflare/_worker.js",
+			"routes": [
+				{
+					"pattern": "dash.firmly.dev/*",
+					"zone_name": "firmly.dev"
+				},
+				{
+					"pattern": "firmly.dev/*",
+					"zone_name": "firmly.dev"
+				}
+			],
 			"d1_databases": [
 				{
 					"binding": "firmlyConfigs",
@@ -60,7 +70,36 @@
 		"uat": {
 			"account_id": "e7638306f2807c7feef461c785b712c1",
 			"main": ".svelte-kit/cloudflare/_worker.js",
-			"name": "dash"
+			"name": "dash",
+			"d1_databases": [
+				{
+					"binding": "firmlyConfigs",
+					"database_name": "firmly-configs",
+					"database_id": "253a1370-b5ce-4474-8664-ae243f30802a"
+				},
+				{
+					"binding": "reporting",
+					"database_name": "reporting",
+					"database_id": "d269cace-932c-41e0-bf7c-b852db8e83f1" // Need to be updated
+				}
+			],
+			"routes": [
+				{
+					"pattern": "dash.firmlyuat.com/*", // Need validation
+					"zone_name": "firmlyuat.com" // Need validation
+				},
+				{
+					"pattern": "firmlyuat.com/*", // Need validation
+					"zone_name": "firmlyuat.com" // Need validation
+				}
+			],
+			"vars": {
+				"PUBLIC_AZURE_AD_CLIENT_ID": "194f24d1-f48d-401e-acaa-b0e2900bce67", // Need to be updated
+				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45", // Need to be updated
+				"PUBLIC_AZURE_REDIRECT_URL": "http://localhost:5173/auth/callback", // Need to be updated
+				"FIRMLY_AUTH_COOKIE": "fuser",
+				"HONEYCOMB_DATASET": "requests-dev" // Need to be updated
+			}
 		},
 		"prod": {
 			"account_id": "71f2b81ee4789578e28a5fbf03a935e8",
@@ -77,7 +116,24 @@
 					"database_name": "reporting",
 					"database_id": "bf2df3ce-3973-4dd4-9fcd-57c11297d57c"
 				}
-			]
+			],
+			"routes": [
+				{
+					"pattern": "dash.firmly.live/*", // Need validation
+					"zone_name": "firmly.live" // Need validation
+				},
+				{
+					"pattern": "firmly.live/*", // Need validation
+					"zone_name": "firmly.live" // Need validation
+				}
+			],
+			"vars": {
+				"PUBLIC_AZURE_AD_CLIENT_ID": "194f24d1-f48d-401e-acaa-b0e2900bce67", // Need to be updated
+				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45", // Need to be updated
+				"PUBLIC_AZURE_REDIRECT_URL": "http://localhost:5173/auth/callback", // Need to be updated
+				"FIRMLY_AUTH_COOKIE": "fuser",
+				"HONEYCOMB_DATASET": "requests-dev" // Need to be updated
+			}
 		}
 	}
 }
