@@ -5,8 +5,8 @@ export function postCheckoutClosed() {
 	window.parent.postMessage(jData, '*');
 }
 
-export function postOrderPlaced(url, session) {
-	const jData = JSON.stringify({ action: 'firmlyOrderPlaced', url, session });
+export function postOrderPlaced(url, session, order) {
+	const jData = JSON.stringify({ action: 'firmlyOrderPlaced', url, session, order });
 	window.parent.postMessage(jData, '*');
 }
 

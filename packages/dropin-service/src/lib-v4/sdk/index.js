@@ -391,6 +391,9 @@ export function bootstrap() {
 			if (checkoutConfig.onClose) {
 				window.firmly.callbacks.onClose = checkoutConfig.onClose;
 			}
+			if (checkoutConfig.onOrderPlaced) {
+				window.firmly.callbacks.onOrderPlaced = checkoutConfig.onOrderPlaced;
+			}
 		};
 
 		bindEvent(window, 'message', async (event) => {
@@ -447,6 +450,9 @@ export function bootstrap() {
 
 						// Now it will be called by the onClose callback
 						// window.creative.adapter.collapse();
+					} else if (data.action === 'firmlyOrderPlaced') {
+						console.log('firmly - order placed successfully');
+						window.firmly?.callbacks?.onOrderPlaced?.(data.order);
 					} else if (data.action === 'firmly::addToCart') {
 						console.log('firmly - add to cart clicked', event);
 						window.firmly.dropinIframe.style.display = 'block';
