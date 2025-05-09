@@ -37,6 +37,12 @@
 			"account_id": "edefa8570f305f587d4a564abd8bdc80",
 			"name": "dash",
 			"main": ".svelte-kit/cloudflare/_worker.js",
+			"routes": [
+				{
+					"pattern": "dash.firmly.dev/*",
+					"zone_name": "firmly.dev"
+				}
+			],
 			"d1_databases": [
 				{
 					"binding": "firmlyConfigs",
@@ -52,15 +58,100 @@
 			"vars": {
 				"PUBLIC_AZURE_AD_CLIENT_ID": "194f24d1-f48d-401e-acaa-b0e2900bce67",
 				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
-				"PUBLIC_AZURE_REDIRECT_URL": "http://localhost:5173/auth/callback",
+				"PUBLIC_AZURE_REDIRECT_URL": "https://dash.firmly.dev/auth/callback",
 				"FIRMLY_AUTH_COOKIE": "fuser",
 				"HONEYCOMB_DATASET": "requests-dev"
+			}
+		},
+		"ci": {
+			"account_id": "4e6de22bab2c64884e178b0be7559230",
+			"name": "dash",
+			"main": ".svelte-kit/cloudflare/_worker.js",
+			"routes": [
+				{
+					"pattern": "dash.firmlyci.com/*",
+					"zone_name": "firmlyci.com"
+				}
+			],
+			"d1_databases": [
+				{
+					"binding": "firmlyConfigs",
+					"database_name": "firmly-configs",
+					"database_id": "c4b58390-6682-46ab-8c3c-17c3efc8ef88"
+				},
+				{
+					"binding": "reporting",
+					"database_name": "reporting",
+					"database_id": "c873f38b-03af-48b5-90dd-5ea7bba33ef1"
+				}
+			],
+			"vars": {
+				"PUBLIC_AZURE_AD_CLIENT_ID": "b75259e2-e211-4481-a8a8-67ca518838c5",
+				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
+				"PUBLIC_AZURE_REDIRECT_URL": "https://dash.firmlyci.com/auth/callback",
+				"FIRMLY_AUTH_COOKIE": "fuser",
+				"HONEYCOMB_DATASET": "requests-ci"
+			}
+		},
+		"qa": {
+			"account_id": "c90aa8c275f60c00fc3844f2ecbb84a1",
+			"name": "dash",
+			"main": ".svelte-kit/cloudflare/_worker.js",
+			"routes": [
+				{
+					"pattern": "dash.amarood.art/*",
+					"zone_name": "amarood.art"
+				}
+			],
+			"d1_databases": [
+				{
+					"binding": "firmlyConfigs",
+					"database_name": "firmly-configs",
+					"database_id": "d185f8b4-1755-4640-a4a1-98b63369c033"
+				},
+				{
+					"binding": "reporting",
+					"database_name": "reporting",
+					"database_id": "9fe0e79a-dd06-4e65-894c-cf2e15e715e6"
+				}
+			],
+			"vars": {
+				"PUBLIC_AZURE_AD_CLIENT_ID": "adc4dd13-b11f-4c32-b853-806b174c9574",
+				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
+				"PUBLIC_AZURE_REDIRECT_URL": "https://dash.amarood.art/auth/callback",
+				"FIRMLY_AUTH_COOKIE": "fuser",
+				"HONEYCOMB_DATASET": "requests-qa"
 			}
 		},
 		"uat": {
 			"account_id": "e7638306f2807c7feef461c785b712c1",
 			"main": ".svelte-kit/cloudflare/_worker.js",
-			"name": "dash"
+			"name": "dash",
+			"d1_databases": [
+				{
+					"binding": "firmlyConfigs",
+					"database_name": "firmly-configs",
+					"database_id": "253a1370-b5ce-4474-8664-ae243f30802a"
+				},
+				{
+					"binding": "reporting",
+					"database_name": "reporting",
+					"database_id": "9ffc4df7-f27a-44a2-b526-44de76eed733"
+				}
+			],
+			"routes": [
+				{
+					"pattern": "dash.firmlyuat.com/*",
+					"zone_name": "firmlyuat.com"
+				},
+			],
+			"vars": {
+				"PUBLIC_AZURE_AD_CLIENT_ID": "d6e4c0e6-03d6-4681-ae55-6886f9fae696",
+				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
+				"PUBLIC_AZURE_REDIRECT_URL": "https://dash.firmlyuat.com/auth/callback",
+				"FIRMLY_AUTH_COOKIE": "fuser",
+				"HONEYCOMB_DATASET": "requests-uat"
+			}
 		},
 		"prod": {
 			"account_id": "71f2b81ee4789578e28a5fbf03a935e8",
@@ -77,7 +168,20 @@
 					"database_name": "reporting",
 					"database_id": "bf2df3ce-3973-4dd4-9fcd-57c11297d57c"
 				}
-			]
+			],
+			"routes": [
+				{
+					"pattern": "dash.firmly.live/*",
+					"zone_name": "firmly.live"
+				}
+			],
+			"vars": {
+				"PUBLIC_AZURE_AD_CLIENT_ID": "c5002bb2-89f9-48eb-b719-a318e021ae6c",
+				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
+				"PUBLIC_AZURE_REDIRECT_URL": "https://dash.firmly.live/auth/callback",
+				"FIRMLY_AUTH_COOKIE": "fuser",
+				"HONEYCOMB_DATASET": "requests-prod"
+			}
 		}
 	}
 }
