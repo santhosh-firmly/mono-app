@@ -86,7 +86,7 @@
 				}
 			],
 			"vars": {
-				"PUBLIC_AZURE_AD_CLIENT_ID": "194f24d1-f48d-401e-acaa-b0e2900bce67",
+				"PUBLIC_AZURE_AD_CLIENT_ID": "b75259e2-e211-4481-a8a8-67ca518838c5",
 				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
 				"PUBLIC_AZURE_REDIRECT_URL": "https://dash.firmlyci.com/auth/callback",
 				"FIRMLY_AUTH_COOKIE": "fuser",
@@ -116,7 +116,7 @@
 				}
 			],
 			"vars": {
-				"PUBLIC_AZURE_AD_CLIENT_ID": "194f24d1-f48d-401e-acaa-b0e2900bce67",
+				"PUBLIC_AZURE_AD_CLIENT_ID": "adc4dd13-b11f-4c32-b853-806b174c9574",
 				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
 				"PUBLIC_AZURE_REDIRECT_URL": "https://dash.amarood.art/auth/callback",
 				"FIRMLY_AUTH_COOKIE": "fuser",
@@ -146,7 +146,7 @@
 				},
 			],
 			"vars": {
-				"PUBLIC_AZURE_AD_CLIENT_ID": "194f24d1-f48d-401e-acaa-b0e2900bce67",
+				"PUBLIC_AZURE_AD_CLIENT_ID": "d6e4c0e6-03d6-4681-ae55-6886f9fae696",
 				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
 				"PUBLIC_AZURE_REDIRECT_URL": "https://dash.firmlyuat.com/auth/callback",
 				"FIRMLY_AUTH_COOKIE": "fuser",
@@ -176,7 +176,7 @@
 				}
 			],
 			"vars": {
-				"PUBLIC_AZURE_AD_CLIENT_ID": "194f24d1-f48d-401e-acaa-b0e2900bce67",
+				"PUBLIC_AZURE_AD_CLIENT_ID": "c5002bb2-89f9-48eb-b719-a318e021ae6c",
 				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
 				"PUBLIC_AZURE_REDIRECT_URL": "https://dash.firmly.live/auth/callback",
 				"FIRMLY_AUTH_COOKIE": "fuser",
