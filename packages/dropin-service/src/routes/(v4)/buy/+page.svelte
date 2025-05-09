@@ -7,7 +7,7 @@
 		initializeDomain
 	} from '$lib-v4/browser/api-firmly.js';
 	import Visa from '$lib-v4/clients/visa.svelte';
-	import { postCheckoutClosed } from '$lib-v4/browser/cross.js';
+	import { postCheckoutClosed, postOrderPlaced } from '$lib-v4/browser/cross.js';
 	import { onMount } from 'svelte';
 	import FlowSinglePage from '$lib-v4/components/v4/flow-single-page.svelte';
 	import { writable } from 'svelte/store';
@@ -342,6 +342,7 @@
 	}
 
 	function onOrderPlacedEvent(event) {
+		postOrderPlaced(null, null, event.detail.order);
 		order = event.detail.order;
 	}
 </script>
