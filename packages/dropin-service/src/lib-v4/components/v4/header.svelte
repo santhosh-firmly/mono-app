@@ -65,7 +65,7 @@
 	<button
 		bind:offsetHeight={headerOffset}
 		class="bg-fy-primary z-[130] flex w-full flex-row items-center justify-between @md:z-[1]"
-		on:click={toggleExpanded}
+		onclick={toggleExpanded}
 		type="button"
 	>
 		<div class="flex w-1/2 items-center @md:w-full">
