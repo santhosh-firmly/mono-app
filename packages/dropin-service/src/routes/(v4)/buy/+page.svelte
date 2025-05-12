@@ -21,6 +21,7 @@
 	import FullscreenLayout from './fullscreen-layout.svelte';
 	import PopupLayout from './popup-layout.svelte';
 	import BottomsheetLayout from './bottom-sheet-layout.svelte';
+	import PdpSkeleton from './pdp-skeleton.svelte';
 
 	let error = $state();
 	let skipPdp = $state(false);
@@ -41,7 +42,8 @@
 		'www.meetlalo.com': 'meetlalo.firmly.in',
 		'meetlalo.com': 'meetlalo.firmly.in',
 		'test.victoriassecret.com': 'test-victoriassecret.firmly.in',
-		'www.dermstore.com': 'dermstore.firmly.in'
+		'www.dermstore.com': 'dermstore.firmly.in',
+		'www.luma.gift': 'luma.firmly.in'
 	};
 
 	const bypassCatalogApiMerchants = ['test.victoriassecret.com', 'dermstore.com'];
@@ -75,13 +77,13 @@
 			const primaryColor = theme.colors?.primary;
 			if (primaryColor) {
 				isPrimaryDark.set(colord(primaryColor).isDark());
-				document.documentElement.style.setProperty('--fy-primary', primaryColor);
+				document.documentElement.style.setProperty('--color-fy-primary', primaryColor);
 				document.documentElement.style.setProperty(
-					'--fy-on-primary',
+					'--color-fy-on-primary',
 					theme.colors?.onPrimary || ($isPrimaryDark ? 'white' : 'black')
 				);
 				document.documentElement.style.setProperty(
-					'--fy-on-primary-subtle',
+					'--color-fy-on-primary-subtle',
 					theme.colors?.onPrimarySubtle || ($isPrimaryDark ? '#a2a2a2' : '#a2a2a2')
 				);
 			}
@@ -89,9 +91,9 @@
 			const actionColor = theme.colors?.action || primaryColor;
 			if (actionColor) {
 				isActionDark.set(colord(actionColor).isDark());
-				document.documentElement.style.setProperty('--fy-action', actionColor);
+				document.documentElement.style.setProperty('--color-fy-action', actionColor);
 				document.documentElement.style.setProperty(
-					'--fy-on-action',
+					'--color-fy-on-action',
 					theme.colors?.onAction || ($isActionDark ? 'white' : 'black')
 				);
 			}
@@ -376,7 +378,7 @@
 
 				{#if multipleVariants && !skipPdp}
 					<div class="flex h-full w-full flex-col">
-						<div class="border-fy-border border-b">
+						<div class="z-10 shadow-(--fy-surface-box-shadow)">
 							<Header
 								merchantInfo={partnerInfo}
 								doNotExpand={true}
@@ -384,12 +386,12 @@
 							/>
 						</div>
 						{#if iframeDisplay === 'none'}
-							<FlowSinglePage cart={writable(null)} />
+							<PdpSkeleton />
 						{/if}
 						<iframe
 							title="Product Details"
 							id="firmly-pdp-frame"
-							class="mt-4 grow"
+							class="grow"
 							style={`height: ${iframeHeight}px; display: ${iframeDisplay}`}
 							src={ecsUrl}
 						/>

@@ -553,7 +553,7 @@
 
 	async function placeOrderPayPal() {
 		const isEmailvalid = await validateEmail(true);
-		const isShippingValid = await validateAndSubmitShipping(true, false);
+		const isShippingValid = await isShippingAddressValid();
 
 		const attributes = {
 			paypal_token: $cart.payment_method?.attributes?.paypal_token,
@@ -1584,8 +1584,8 @@
 
 <style>
 	input.error {
-		color: var(--fy-alert);
-		box-shadow: var(--fy-form-element-input-error);
+		color: var(--color-fy-alert);
+		box-shadow: var(--color-fy-form-element-input-error);
 		z-index: 2;
 	}
 
@@ -1595,7 +1595,7 @@
 		outline: 0 !important;
 		z-index: 10;
 
-		box-shadow: var(--fy-form-element-input-focus);
+		box-shadow: var(--color-fy-form-element-input-focus);
 		transition-property: box-shadow, color, filter;
 	}
 </style>

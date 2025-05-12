@@ -15,7 +15,7 @@
 
 <style>
 	div > :global(*:not(.group-item-custom-bg)) {
-		background-color: var(--fy-surface);
+		background-color: var(--color-fy-surface);
 		box-shadow: var(--fy-surface-box-shadow);
 	}
 </style>

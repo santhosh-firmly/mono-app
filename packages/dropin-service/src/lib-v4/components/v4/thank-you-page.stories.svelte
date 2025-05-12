@@ -4,6 +4,7 @@
 	import { Meta, Story } from '@storybook/addon-svelte-csf';
 	import './theme.css';
 	import order from './data/order.json';
+	import paypalOrder from './data/paypal-order.json';
 	import { isPrimaryDark } from './theme-context';
 
 	const merchantName = 'Merchant Name';
@@ -60,5 +61,17 @@
 <Story name="Thank You Page Red">
 	<div class="theme-provider red" use:setDarkTheme>
 		<ThankYouPage {order} {merchantInfo} {merchantName} />
+	</div>
+</Story>
+
+<Story name="Thank You Page White">
+	<div class="theme-provider">
+		<ThankYouPage {order} {merchantInfo} {merchantName} />
+	</div>
+</Story>
+
+<Story name="Thank You Page PayPal">
+	<div class="theme-provider adoreme-dark" use:setDarkTheme>
+		<ThankYouPage order={paypalOrder} {merchantInfo} {merchantName} />
 	</div>
 </Story>

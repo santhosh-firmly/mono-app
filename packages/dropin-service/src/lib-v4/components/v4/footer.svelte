@@ -38,7 +38,7 @@
 		</svg>
 		Payments are secure and encrypted
 	</span>
-	<span class="text-fy-on-primary-subtle text-md mt-6 @md:hidden">
+	<span class="text-fy-on-primary-subtle text-xs mt-6 @md:hidden">
 		<FooterLinks />
 	</span>
 </div>

@@ -383,18 +383,18 @@
 			largeLogo = message.data.largeLogo;
 			smallLogo = message.data.smallLogo;
 			cart.set(currentCart);
-			document.documentElement.style.setProperty('--fy-primary', message.data.primaryColor);
+			document.documentElement.style.setProperty('--color-fy-primary', message.data.primaryColor);
 			document.documentElement.style.setProperty(
-				'--fy-on-primary',
+				'--color-fy-on-primary',
 				$isPrimaryDark ? 'white' : 'black'
 			);
 			document.documentElement.style.setProperty(
-				'--fy-on-primary-subtle',
+				'--color-fy-on-primary-subtle',
 				$isPrimaryDark ? '#a2a2a2' : '#a2a2a2'
 			);
-			document.documentElement.style.setProperty('--fy-action', message.data.actionColor);
+			document.documentElement.style.setProperty('--color-fy-action', message.data.actionColor);
 			document.documentElement.style.setProperty(
-				'--fy-on-action',
+				'--color-fy-on-action',
 				$isActionDark ? 'white' : 'black'
 			);
 		}
