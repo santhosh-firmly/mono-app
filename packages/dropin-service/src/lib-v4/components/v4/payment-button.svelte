@@ -84,9 +84,9 @@
 	}
 
 	.button-disabled {
-		background-color: var(--fy-background-disabled);
+		background-color: var(--color-fy-background-disabled);
 		pointer-events: none;
-		color: var(--fy-color-disabled);
+		color: var(--color-fy-color-disabled);
 		cursor: not-allowed;
 	}
 </style>

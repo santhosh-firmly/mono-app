@@ -1,0 +1,177 @@
+{
+    "display_name": "Luma",
+    "cart_status": "submitted",
+    "platform_id": "magento",
+    "shop_id": "luma.gift",
+    "shop_properties": {
+        "paypal": {
+            "express_enabled": true,
+            "sandbox": true,
+            "merchantId": "AE337YFQ8FRZ6",
+            "clientId": "ATDZ9_ECFh-fudesZo4kz3fGTSO1pzuWCS4IjZMq4JKdRK7hQR3Rxyafx39H2fP363WtmlQNYXjUiAae"
+        }
+    },
+    "cart_id": "8dd97b4b-b60b-4fce-8476-67c6e0afc256",
+    "submitted_at": "2025-05-11T03:55:50.109Z",
+    "urls": {
+        "thank_you_page": "https://luma.gift/checkout/onepage/success"
+    },
+    "payment_method_options": [
+        {
+            "type": "PayPal",
+            "wallet": "paypal"
+        },
+        {
+            "type": "CreditCard",
+            "wallet": "user"
+        }
+    ],
+    "payment_method": {
+        "payment_type": "PayPal",
+        "attributes": {
+            "paypal_token": "EC-99D89462NL6164920",
+            "url": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-99D89462NL6164920",
+            "sandbox": true,
+            "requires_review": false,
+            "payer_id": "VJDK69M8ETVS6"
+        }
+    },
+    "line_items": [
+        {
+            "line_item_id": "457374d5-7b40-44a5-bf48-4f863aaae7cc",
+            "sku": "Men's White Hoodie-Medium",
+            "base_sku": "Men's White Hoodie-Medium",
+            "quantity": 1,
+            "requires_shipping": true,
+            "image": {
+                "url": "https://www.luma.gift/media/catalog/product/1/_/1.png",
+                "type": "default"
+            },
+            "msrp": {
+                "currency": "USD",
+                "value": 1,
+                "number": 100,
+                "symbol": "$"
+            },
+            "price": {
+                "currency": "USD",
+                "value": 1,
+                "number": 100,
+                "symbol": "$"
+            },
+            "line_price": {
+                "currency": "USD",
+                "value": 1,
+                "number": 100,
+                "symbol": "$"
+            },
+            "platform_line_item_id": "0",
+            "description": "Men's White Hoodie"
+        }
+    ],
+    "shipping_info": {
+        "address1": "1 Microsoft Way",
+        "first_name": "John",
+        "last_name": "Doe",
+        "email": "testguest@firmly.ai",
+        "phone": "0000000000",
+        "city": "Newcastle",
+        "postal_code": "98056-1303",
+        "state_or_province": "WA",
+        "state_name": "Washington",
+        "country": "United States"
+    },
+    "shipping_method": {
+        "sku": "freeshipping_freeshipping",
+        "description": "Standard",
+        "price": {
+            "currency": "USD",
+            "value": 0,
+            "number": 0,
+            "symbol": "$"
+        }
+    },
+    "shipping_method_options": [
+        {
+            "sku": "freeshipping_freeshipping",
+            "description": "Standard",
+            "price": {
+                "currency": "USD",
+                "value": 0,
+                "number": 0,
+                "symbol": "$"
+            }
+        },
+        {
+            "sku": "flatrate_flatrate",
+            "description": "Expedited",
+            "price": {
+                "currency": "USD",
+                "value": 8,
+                "number": 800,
+                "symbol": "$"
+            }
+        }
+    ],
+    "session": {
+        "requires_login": false,
+        "is_email_registered": false,
+        "is_logged_in": false,
+        "cookies": [
+            "PHPSESSID=knuh61tn0quan3r4bqefllrini; expires=Sun, 11-May-2025 04:55:46 GMT; Max-Age=3600; path=/; domain=www.luma.gift; secure; HttpOnly; SameSite=Lax"
+        ]
+    },
+    "total": {
+        "currency": "USD",
+        "value": 1,
+        "number": 100,
+        "symbol": "$"
+    },
+    "sub_total": {
+        "currency": "USD",
+        "value": 1,
+        "number": 100,
+        "symbol": "$"
+    },
+    "shipping_total": {
+        "currency": "USD",
+        "value": 0,
+        "number": 0,
+        "symbol": "$"
+    },
+    "tax": {
+        "currency": "USD",
+        "value": 0,
+        "number": 0,
+        "symbol": "$"
+    },
+    "cart_discount": {
+        "currency": "USD",
+        "value": 0,
+        "number": 0,
+        "symbol": "$"
+    },
+    "platform_order_number": "528",
+    "payment_summary": {
+        "payment_type": "PayPal",
+        "attributes": {
+            "paypal_token": "EC-99D89462NL6164920",
+            "url": "https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-99D89462NL6164920",
+            "sandbox": true,
+            "requires_review": false,
+            "payer_id": "VJDK69M8ETVS6"
+        }
+    },
+    "billing_info": {
+        "address1": "1 Microsoft Way",
+        "first_name": "John",
+        "last_name": "Doe",
+        "email": "testguest@firmly.ai",
+        "phone": "0000000000",
+        "city": "Newcastle",
+        "postal_code": "98056-1303",
+        "state_or_province": "WA",
+        "state_name": "Washington",
+        "country": "United States"
+    }
+}

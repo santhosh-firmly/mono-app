@@ -4,27 +4,38 @@
 @plugin 'flowbite/plugin';
 
 @theme {
-	--color-fy-primary: var(--fy-primary);
-	--color-fy-on-primary: var(--fy-on-primary);
-	--color-fy-on-primary-subtle: var(--fy-on-primary-subtle);
-	--color-fy-action: var(--fy-action);
-	--color-fy-on-action: var(--fy-on-action);
-	--color-fy-background: var(--fy-background);
-	--color-fy-on-background: var(--fy-on-background);
-	--color-fy-surface: var(--fy-surface);
-	--color-fy-surface-subtle: var(--fy-surface-subtle);
-	--color-fy-on-surface: var(--fy-on-surface);
-	--color-fy-on-surface-subtle: var(--fy-on-surface-subtle);
-	--color-fy-alert: var(--fy-alert);
-	--color-fy-on-alert: var(--fy-on-alert);
-	--color-fy-form-element-input-focus: var(--fy-form-element-input-focus);
-	--color-fy-form-element-input-error: var(--fy-form-element-input-error);
-	--color-fy-on-primary-subtle2: var(--fy-on-primary-subtle2);
-	--color-fy-on-primary-accent: var(--fy-on-primary-accent);
+	--color-fy-primary: white;
+	--color-fy-on-primary: black;
+	--color-fy-on-primary-subtle: #a2a2a2;
+	--color-fy-on-primary-subtle2: #e0e0e0;
+	--color-fy-on-primary-accent: #ff79e3;
+
+	--color-fy-action: #4c7cec;
+	--color-fy-on-action: white;
+
+	--color-fy-background: white;
+	--color-fy-on-background: black;
+
+	--color-fy-surface: white;
+	--color-fy-surface-subtle: #f7f7f7;
+	--color-fy-on-surface: black;
+	--color-fy-on-surface-subtle: #1a1a1ab3;
+
+	--color-fy-form-element-input-focus:
+		rgba(50, 151, 211, 0.3) 0px 0px 0px 1px, rgba(0, 0, 0, 0.07) 0px 1px 1px 0px,
+		rgba(50, 151, 211, 0.3) 0px 0px 0px 4px;
+	--color-fy-form-element-input-error:
+		0 0 0 1px #ef9896, 0 2px 4px 0 rgba(0, 0, 0, 0.07), 0 1px 1.5px 0 rgba(0, 0, 0, 0.05);
+
+	--color-fy-alert: red;
+	--color-fy-on-alert: white;
+
+	--color-fy-background-disabled: #a3a3a3;
+	--color-fy-color-disabled: #e0e0e0;
 }
 
 hr {
-	color: var(--fy-on-primary-subtle2);
+	color: var(--color-fy-on-primary-subtle2);
 }
 
 html {
@@ -47,36 +58,36 @@ body {
 }
 
 :root {
-	--fy-primary: white;
-	--fy-on-primary: black;
-	--fy-on-primary-subtle: #a2a2a2;
-	--fy-on-primary-subtle2: #e0e0e0;
-	--fy-on-primary-accent: #ff79e3;
+	--color-fy-primary: white;
+	--color-fy-on-primary: black;
+	--color-fy-on-primary-subtle: #a2a2a2;
+	--color-fy-on-primary-subtle2: #e0e0e0;
+	--color-fy-on-primary-accent: #ff79e3;
 
-	--fy-action: #4c7cec;
-	--fy-on-action: white;
+	--color-fy-action: #4c7cec;
+	--color-fy-on-action: white;
 
-	--fy-background: white;
-	--fy-on-background: black;
+	--color-fy-background: white;
+	--color-fy-on-background: black;
 
-	--fy-surface: white;
-	--fy-surface-subtle: #f7f7f7;
-	--fy-on-surface: black;
-	--fy-on-surface-subtle: #1a1a1ab3;
+	--color-fy-surface: white;
+	--color-fy-surface-subtle: #f7f7f7;
+	--color-fy-on-surface: black;
+	--color-fy-on-surface-subtle: #1a1a1ab3;
 
 	--fy-surface-box-shadow:
 		0 0 0 1px #e0e0e0, 0 2px 4px 0 rgba(0, 0, 0, 0.07), 0 1px 1.5px 0 rgba(0, 0, 0, 0.05);
-	--fy-form-element-input-focus:
+	--color-fy-form-element-input-focus:
 		rgba(50, 151, 211, 0.3) 0px 0px 0px 1px, rgba(0, 0, 0, 0.07) 0px 1px 1px 0px,
 		rgba(50, 151, 211, 0.3) 0px 0px 0px 4px;
-	--fy-form-element-input-error:
+	--color-fy-form-element-input-error:
 		0 0 0 1px #ef9896, 0 2px 4px 0 rgba(0, 0, 0, 0.07), 0 1px 1.5px 0 rgba(0, 0, 0, 0.05);
 
-	--fy-alert: red;
-	--fy-on-alert: white;
+	--color-fy-alert: red;
+	--color-fy-on-alert: white;
 
-	--fy-background-disabled: #a3a3a3;
-	--fy-color-disabled: #e0e0e0;
+	--color-fy-background-disabled: #a3a3a3;
+	--color-fy-color-disabled: #e0e0e0;
 
 	font-family: Inter;
 	-webkit-font-smoothing: antialiased;
@@ -84,32 +95,32 @@ body {
 }
 
 :root .light {
-	--fy-primary: white;
-	--fy-primary-pay-button: var(--fy-primary);
-	--fy-primary-pay-button-text: var(--fy-on-primary);
-	--fy-on-primary: black;
-	--fy-on-primary-subtle: #a2a2a2;
-	--fy-on-primary-subtle2: #e0e0e0;
+	--color-fy-primary: white;
+	--color-fy-primary-pay-button: var(--color-fy-primary);
+	--color-fy-primary-pay-button-text: var(--color-fy-on-primary);
+	--color-fy-on-primary: black;
+	--color-fy-on-primary-subtle: #a2a2a2;
+	--color-fy-on-primary-subtle2: #e0e0e0;
 
-	--fy-background: white;
-	--fy-on-background: black;
+	--color-fy-background: white;
+	--color-fy-on-background: black;
 
-	--fy-surface: white;
-	--fy-on-surface: black;
-	--fy-on-surface-subtle: #1a1a1ab3;
+	--color-fy-surface: white;
+	--color-fy-on-surface: black;
+	--color-fy-on-surface-subtle: #1a1a1ab3;
 
 	--fy-surface-box-shadow:
 		0 0 0 1px #e0e0e0, 0 2px 4px 0 rgba(0, 0, 0, 0.07), 0 1px 1.5px 0 rgba(0, 0, 0, 0.05);
-	--fy-form-element-input-focus:
+	--color-fy-form-element-input-focus:
 		rgba(50, 151, 211, 0.3) 0px 0px 0px 1px, rgba(0, 0, 0, 0.07) 0px 1px 1px 0px,
 		rgba(50, 151, 211, 0.3) 0px 0px 0px 4px;
-	--fy-form-element-input-error:
+	--color-fy-form-element-input-error:
 		0 0 0 1px #ef9896, 0 2px 4px 0 rgba(0, 0, 0, 0.07), 0 1px 1.5px 0 rgba(0, 0, 0, 0.05);
 
-	--fy-alert: red;
-	--fy-on-alert: white;
+	--color-fy-alert: red;
+	--color-fy-on-alert: white;
 
-	--fy-on-action-subtle: #e2e8ef;
+	--color-fy-on-action-subtle: #e2e8ef;
 
 	font-family: Inter;
 	-webkit-font-smoothing: antialiased;
@@ -117,21 +128,21 @@ body {
 }
 
 :root .adoreme-dark {
-	--fy-primary: #550c46;
-	--fy-primary-pay-button: var(--fy-primary);
-	--fy-primary-pay-button-text: var(--fy-on-primary);
-	--fy-on-primary: white;
-	--fy-on-primary-subtle: hsl(0, 0%, 64%);
+	--color-fy-primary: #550c46;
+	--color-fy-primary-pay-button: var(--color-fy-primary);
+	--color-fy-primary-pay-button-text: var(--color-fy-on-primary);
+	--color-fy-on-primary: white;
+	--color-fy-on-primary-subtle: hsl(0, 0%, 64%);
 
-	--fy-action: #550c46;
+	--color-fy-action: #550c46;
 
-	--fy-background: white;
-	--fy-on-background: black;
-	--fy-surface: white;
-	--fy-on-surface: black;
+	--color-fy-background: white;
+	--color-fy-on-background: black;
+	--color-fy-surface: white;
+	--color-fy-on-surface: black;
 
-	--fy-alert: red;
-	--fy-on-alert: white;
+	--color-fy-alert: red;
+	--color-fy-on-alert: white;
 }
 
 .font-josefin {
@@ -139,33 +150,33 @@ body {
 }
 
 :root .adoreme-light {
-	--fy-primary: #faeeeb;
-	--fy-primary-pay-button: var(--fy-primary);
-	--fy-primary-pay-button-text: var(--fy-on-primary);
-	--fy-on-primary: black;
-	--fy-on-primary-subtle: #a2a2a2;
+	--color-fy-primary: #faeeeb;
+	--color-fy-primary-pay-button: var(--color-fy-primary);
+	--color-fy-primary-pay-button-text: var(--color-fy-on-primary);
+	--color-fy-on-primary: black;
+	--color-fy-on-primary-subtle: #a2a2a2;
 
-	--fy-background: white;
-	--fy-on-background: black;
-	--fy-surface: white;
-	--fy-on-surface: black;
+	--color-fy-background: white;
+	--color-fy-on-background: black;
+	--color-fy-surface: white;
+	--color-fy-on-surface: black;
 
-	--fy-alert: red;
-	--fy-on-alert: white;
+	--color-fy-alert: red;
+	--color-fy-on-alert: white;
 }
 
 :root .red {
-	--fy-primary: #a60000;
-	--fy-primary-pay-button: var(--fy-primary);
-	--fy-primary-pay-button-text: var(--fy-on-primary);
-	--fy-on-primary: white;
-	--fy-on-primary-subtle: #a2a2a2;
+	--color-fy-primary: #a60000;
+	--color-fy-primary-pay-button: var(--color-fy-primary);
+	--color-fy-primary-pay-button-text: var(--color-fy-on-primary);
+	--color-fy-on-primary: white;
+	--color-fy-on-primary-subtle: #a2a2a2;
 
-	--fy-background: white;
-	--fy-on-background: black;
-	--fy-surface: white;
-	--fy-on-surface: black;
+	--color-fy-background: white;
+	--color-fy-on-background: black;
+	--color-fy-surface: white;
+	--color-fy-on-surface: black;
 
-	--fy-alert: red;
-	--fy-on-alert: white;
+	--color-fy-alert: red;
+	--color-fy-on-alert: white;
 }

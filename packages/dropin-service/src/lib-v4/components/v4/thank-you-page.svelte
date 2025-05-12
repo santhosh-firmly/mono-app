@@ -8,6 +8,8 @@
 	import { isPrimaryDark } from './theme-context';
 	import { colord } from 'colord';
 	import { onMount } from 'svelte';
+	import Group from './group.svelte';
+	import PaypalLogo from '../common/svg/paypal-logo.svelte';
 
 	/**
 	 * Order
@@ -70,7 +72,8 @@
 
 	onMount(() => {
 		if ($isPrimaryDark) {
-			const primaryColor = getComputedStyle(animationContainer).getPropertyValue('--fy-primary');
+			const primaryColor =
+				getComputedStyle(animationContainer).getPropertyValue('--color-fy-primary');
 			const primaryColorRgb = colord(primaryColor).toRgb();
 			animationBackground1Color = '1,1,1,1'; // White
 			animationBackground2Color = `${primaryColorRgb.r / 255},${primaryColorRgb.g / 255},${primaryColorRgb.b / 255},1`;
@@ -96,10 +99,16 @@
 			shippingMethod = order.shipping_method.description;
 
 			if (order.payment_summary) {
-				wallet = {
-					lastFour: order.payment_summary.last_four,
-					cardType: order.payment_summary.card_type
-				};
+				if (order.payment_summary.payment_type?.toLowerCase() === 'paypal') {
+					wallet = {
+						type: 'paypal'
+					};
+				} else {
+					wallet = {
+						lastFour: order.payment_summary.last_four,
+						cardType: order.payment_summary.card_type
+					};
+				}
 			}
 
 			merchantName = order.display_name || order.shop_id;
@@ -108,10 +117,16 @@
 </script>
 
 <div>
-	<Header {merchantInfo} {merchantName} {total} itemCount={order.line_items.length} on:back-click />
+	<Header
+		{merchantInfo}
+		{merchantName}
+		{total}
+		itemCount={order.line_items.length}
+		on:back-click
+	/>
 </div>
 
-<div class="bg-fy-primary flex w-full flex-col items-center justify-center gap-6 px-3 pt-16 pb-5">
+<div class="bg-fy-primary flex w-full flex-col items-center justify-center gap-6 px-3 pb-5 pt-16">
 	<div class="max-w-md">
 		<div bind:this={animationContainer} class="flex flex-col items-center justify-center p-4">
 			<LottiePlayer
@@ -131,65 +146,87 @@
 			</span>
 		</div>
 	</div>
-	<div
-		class="bg-fy-surface flex w-full max-w-sm flex-col gap-4 divide-y rounded-lg border px-8 py-6 shadow-sm"
-	>
-		<div class="flex flex-col items-center justify-center gap-3">
-			{#if merchantInfo?.largeLogo}
-				<img
-					class="inline h-4 align-middle"
-					src={merchantInfo.largeLogo}
-					alt="{merchantName} logo"
-				/>
-			{:else}
-				<span class="text-lg">
-					{merchantName}
-				</span>
-			{/if}
-			<div class="text-fy-on-primary-subtle flex flex-row gap-2">
-				<button class="text-xs font-semibold"> Contact </button>
-				·
-				<button class="text-xs font-semibold"> Returns </button>
-				·
-				<button class="text-xs font-semibold"> Terms </button>
+	<div>
+		<Group>
+			<div
+				class="bg-fy-surface divide-fy-on-primary-subtle col-span-2 flex w-full max-w-sm flex-col gap-4 divide-y rounded-lg px-8 py-6"
+			>
+				<div class="flex flex-col items-center justify-center gap-3">
+					{#if merchantInfo?.largeLogo}
+						<img
+							class="inline h-4 align-middle"
+							src={merchantInfo.largeLogo}
+							alt="{merchantName} logo"
+						/>
+					{:else}
+						<span class="text-lg">
+							{merchantName}
+						</span>
+					{/if}
+					<div class="text-fy-on-primary-subtle flex flex-row gap-2">
+						<button class="text-xs font-semibold"> Contact </button>
+						·
+						<button class="text-xs font-semibold"> Returns </button>
+						·
+						<button class="text-xs font-semibold"> Terms </button>
+					</div>
+				</div>
+				<div class="grid grid-cols-2 gap-4 pt-4">
+					<span class="text-fy-on-primary-subtle text-start text-sm font-normal">
+						Merchant
+					</span>
+					<span class="text-end text-sm font-medium">
+						{merchantName}
+					</span>
+					<span class="text-fy-on-primary-subtle text-start text-sm font-normal">
+						Order Number
+					</span>
+					<span class="break-words text-end text-sm font-medium">
+						{orderNumber}
+					</span>
+					<span class="text-fy-on-primary-subtle text-start text-sm font-normal">
+						Order Total
+					</span>
+					<span class=" text-end text-sm font-medium">
+						{formatCurrency(total)}
+					</span>
+					<span class="text-fy-on-primary-subtle text-start text-sm font-normal">
+						Payment
+					</span>
+					<div class="flex flex-row justify-end text-sm">
+						{#if wallet.type === 'paypal'}
+							<PaypalLogo />
+						{:else}
+							<CreditCardDisplay
+								showOnlyLastFour={true}
+								lastFour={wallet.lastFour}
+								cardType={wallet.cardType}
+							/>
+						{/if}
+					</div>
+					<span class="text-fy-on-primary-subtle text-start text-sm font-normal">
+						Email
+					</span>
+					<span class="break-words text-end text-sm font-medium">
+						{shippingInfo.email}
+					</span>
+					<span class="text-fy-on-primary-subtle text-start text-sm font-normal">
+						Shipping to
+					</span>
+					<span class="-primary text-end text-sm font-medium">
+						{shippingInfo.name} · {shippingInfo.address} · {shippingInfo.phone}
+					</span>
+					<span class="text-fy-on-primary-subtle text-start text-sm font-normal">
+						Method
+					</span>
+					<span class="text-end text-sm font-medium">
+						{shippingMethod}
+					</span>
+				</div>
 			</div>
-		</div>
-		<div class="grid grid-cols-2 gap-4 pt-4">
-			<span class="text-fy-on-primary-subtle text-start text-sm font-normal"> Merchant </span>
-			<span class="text-end text-sm font-medium">
-				{merchantName}
-			</span>
-			<span class="text-fy-on-primary-subtle text-start text-sm font-normal"> Order Number </span>
-			<span class="text-end text-sm font-medium break-words">
-				{orderNumber}
-			</span>
-			<span class="text-fy-on-primary-subtle text-start text-sm font-normal"> Order Total </span>
-			<span class=" text-end text-sm font-medium">
-				{formatCurrency(total)}
-			</span>
-			<span class="text-fy-on-primary-subtle text-start text-sm font-normal"> Payment </span>
-			<div class="flex flex-row justify-end text-sm">
-				<CreditCardDisplay
-					showOnlyLastFour={true}
-					lastFour={wallet.lastFour}
-					cardType={wallet.cardType}
-				/>
-			</div>
-			<span class="text-fy-on-primary-subtle text-start text-sm font-normal"> Email </span>
-			<span class="text-end text-sm font-medium break-words">
-				{shippingInfo.email}
-			</span>
-			<span class="text-fy-on-primary-subtle text-start text-sm font-normal"> Shipping to </span>
-			<span class="-primary text-end text-sm font-medium">
-				{shippingInfo.name} · {shippingInfo.address} · {shippingInfo.phone}
-			</span>
-			<span class="text-fy-on-primary-subtle text-start text-sm font-normal"> Method </span>
-			<span class="text-end text-sm font-medium">
-				{shippingMethod}
-			</span>
-		</div>
+		</Group>
 	</div>
-	<div class="text-fy-on-primary-subtle text-md pt-10 text-center">
+	<div class="text-fy-on-primary-subtle pt-10 text-center text-xs">
 		<FooterLinks />
 	</div>
 </div>

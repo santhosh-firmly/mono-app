@@ -102,13 +102,13 @@
 			const primaryColor = theme.colors?.primary;
 			if (primaryColor) {
 				isPrimaryDark.set(colord(primaryColor).isDark());
-				document.documentElement.style.setProperty('--fy-primary', primaryColor);
+				document.documentElement.style.setProperty('--color-fy-primary', primaryColor);
 				document.documentElement.style.setProperty(
-					'--fy-on-primary',
+					'--color-fy-on-primary',
 					theme.colors?.onPrimary || ($isPrimaryDark ? 'white' : 'black')
 				);
 				document.documentElement.style.setProperty(
-					'--fy-on-primary-subtle',
+					'--color-fy-on-primary-subtle',
 					theme.colors?.onPrimarySubtle || ($isPrimaryDark ? '#a2a2a2' : '#a2a2a2')
 				);
 			}
@@ -116,9 +116,9 @@
 			const actionColor = theme.colors?.action || primaryColor;
 			if (actionColor) {
 				isActionDark.set(colord(actionColor).isDark());
-				document.documentElement.style.setProperty('--fy-action', actionColor);
+				document.documentElement.style.setProperty('--color-fy-action', actionColor);
 				document.documentElement.style.setProperty(
-					'--fy-on-action',
+					'--color-fy-on-action',
 					theme.colors?.onAction || ($isActionDark ? 'white' : 'black')
 				);
 			}
