@@ -156,7 +156,9 @@
 			} else {
 				if (!selectedShippingAddress) {
 					let shippingOption = savedAddresses?.find((shipping) =>
-						Object.keys(shipping).every((key) => $cart?.shipping_info[key] === shipping[key])
+						Object.keys(shipping).every(
+							(key) => $cart?.shipping_info[key] === shipping[key]
+						)
 					);
 					selectedShippingAddress = shippingOption || NEW_SHIPPING_ADDRESS;
 				}
@@ -237,7 +239,8 @@
 			// Collapse the shipping info if there is already one set to the cart.
 			collapsedStateShipping = !!$cart.shipping_info || !!$cart.shipping_info_options?.[0];
 			// Collapse the shipping method if there is already one set to the cart.
-			collapsedStateShippingMethod = !!$cart.shipping_method || !!$cart.shipping_info_options?.[0];
+			collapsedStateShippingMethod =
+				!!$cart.shipping_method || !!$cart.shipping_info_options?.[0];
 			// Collapse the shipping method if there is already one set to the cart.
 			collapsedStatePayment = selectedCardOption && selectedCardOption !== NEW_CARD_OPTION;
 			if (collapsedStatePayment && !selectedPaymentMethod) {
@@ -295,7 +298,8 @@
 	}
 
 	function setEmail() {
-		email = email || $cart?.shipping_info?.email || $cart?.shipping_info_options?.[0]?.email || '';
+		email =
+			email || $cart?.shipping_info?.email || $cart?.shipping_info_options?.[0]?.email || '';
 	}
 
 	function areModalsClosed() {
@@ -325,7 +329,8 @@
 		let totalQuantity = 0;
 		try {
 			shippingMethodInProgress = true;
-			const productIdentifier = $cart.platform_id === 'bigcommerce' ? item.base_sku : item.sku;
+			const productIdentifier =
+				$cart.platform_id === 'bigcommerce' ? item.base_sku : item.sku;
 			const result = await window.firmly.cartUpdateSku(
 				productIdentifier,
 				quantity,
@@ -417,7 +422,8 @@
 				} else {
 					// Restore the original cart state if there's an error
 					cart.set(originalCart);
-					shipping_info_error = result.data?.description || 'Please, verify your shipping address';
+					shipping_info_error =
+						result.data?.description || 'Please, verify your shipping address';
 					selectedShippingAddress = NEW_SHIPPING_ADDRESS;
 					collapsedStateShipping = false;
 					collapsedStateShippingMethod = false;
@@ -467,10 +473,19 @@
 		return false;
 	}
 
+	let previouslyValidatedEmail = '';
+
 	async function validateAndSubmitContactInfo() {
-		const isEmailValid = await validateEmail();
+		const isEmailValid = (await validateEmail()) && email !== previouslyValidatedEmail;
+
+		previouslyValidatedEmail = email;
+
 		if (isEmailValid) {
-			if ($cart.session?.requires_login && !$cart.session?.is_logged_in && areModalsClosed()) {
+			if (
+				$cart.session?.requires_login &&
+				!$cart.session?.is_logged_in &&
+				areModalsClosed()
+			) {
 				await merchantLoginCreateOtp(email);
 			}
 
@@ -590,7 +605,8 @@
 		);
 
 		if (completeOrderResponse.status !== 200) {
-			place_order_error = completeOrderResponse.data.description || completeOrderResponse.data;
+			place_order_error =
+				completeOrderResponse.data.description || completeOrderResponse.data;
 			return;
 		}
 
@@ -645,7 +661,9 @@
 			return;
 		}
 
-		const placeOrderResponse = await window.firmly.cartCompleteOrder(tokenizeResponse.data.token);
+		const placeOrderResponse = await window.firmly.cartCompleteOrder(
+			tokenizeResponse.data.token
+		);
 		if (placeOrderResponse.status !== 200) {
 			place_order_error = placeOrderResponse.data.description || placeOrderResponse.data;
 			return;
@@ -655,7 +673,11 @@
 	}
 
 	async function placeOrderC2P(selectedCard, additionalData = {}) {
-		const tokenizeResponse = await tokenizeC2P(selectedCard, additionalData, cvvConfirmationValue);
+		const tokenizeResponse = await tokenizeC2P(
+			selectedCard,
+			additionalData,
+			cvvConfirmationValue
+		);
 
 		if (tokenizeResponse.cvv_required) {
 			isCvvRequired = true;
@@ -666,7 +688,9 @@
 			isCvvRequired = false;
 			cvvConfirmationValue = '';
 
-			const placeOrderResponse = await window.firmly.cartCompleteOrder(tokenizeResponse.token);
+			const placeOrderResponse = await window.firmly.cartCompleteOrder(
+				tokenizeResponse.token
+			);
 			if (placeOrderResponse.status !== 200) {
 				place_order_error = placeOrderResponse.data.description || placeOrderResponse.data;
 				return;
@@ -786,8 +810,15 @@
 
 			if (orderPlaceResponse) {
 				isOrderPlaced = true;
-				if (redirectOnPlaceOrder && orderPlaceResponse.urls?.thank_you_page && !isParentIframed) {
-					postOrderPlaced(orderPlaceResponse.urls.thank_you_page, orderPlaceResponse.session);
+				if (
+					redirectOnPlaceOrder &&
+					orderPlaceResponse.urls?.thank_you_page &&
+					!isParentIframed
+				) {
+					postOrderPlaced(
+						orderPlaceResponse.urls.thank_you_page,
+						orderPlaceResponse.session
+					);
 				} else {
 					dispatch('orderPlacedEvent', {
 						order: orderPlaceResponse
@@ -975,7 +1006,9 @@
 							tax={$cart?.tax}
 							total={$cart?.total}
 							{updateQuantity}
-							disabled={shippingInfoInProgress || shippingMethodInProgress || placeOrderInProgress}
+							disabled={shippingInfoInProgress ||
+								shippingMethodInProgress ||
+								placeOrderInProgress}
 							{addPromoCodeCallback}
 							{clearPromoCodesCallback}
 							showImageBorder={$cart?.shop_id !== 'kardiel.com'}
@@ -988,7 +1021,9 @@
 			class="w-full @md:flex @md:max-w-[1024px] @md:flex-row @md:justify-around"
 			on:submit={onPlaceOrder}
 		>
-			<section class="flex flex-col items-center @md:h-full @md:w-1/2 @md:max-w-[412px] @md:py-16">
+			<section
+				class="flex flex-col items-center @md:h-full @md:w-1/2 @md:max-w-[412px] @md:py-16"
+			>
 				<Overview
 					on:back-click
 					total={$cart?.total}
@@ -1019,7 +1054,9 @@
 							tax={$cart?.tax}
 							total={$cart?.total}
 							{updateQuantity}
-							disabled={shippingInfoInProgress || shippingMethodInProgress || placeOrderInProgress}
+							disabled={shippingInfoInProgress ||
+								shippingMethodInProgress ||
+								placeOrderInProgress}
 							{addPromoCodeCallback}
 							{clearPromoCodesCallback}
 							showImageBorder={$cart?.shop_id !== 'kardiel.com'}
@@ -1049,7 +1086,9 @@
 								></div>
 							</div>
 						</div>
-						<div class="text-fy-on-primary-subtle relative flex w-full flex-row justify-center">
+						<div
+							class="text-fy-on-primary-subtle relative flex w-full flex-row justify-center"
+						>
 							<div
 								class="absolute left-0 flex h-full w-full flex-col justify-center"
 								style="z-index: -1;"
@@ -1058,10 +1097,14 @@
 							</div>
 						</div>
 						<div>
-							<div class="bg-fy-on-primary-subtle2 my-1 h-4 w-40 animate-pulse rounded px-4"></div>
+							<div
+								class="bg-fy-on-primary-subtle2 my-1 h-4 w-40 animate-pulse rounded px-4"
+							></div>
 						</div>
 						<div>
-							<div class="bg-fy-on-primary-subtle2 my-1 h-3 w-12 animate-pulse rounded px-4"></div>
+							<div
+								class="bg-fy-on-primary-subtle2 my-1 h-3 w-12 animate-pulse rounded px-4"
+							></div>
 							<div
 								class="bg-fy-on-primary-subtle2 my-1 h-10 w-full animate-pulse rounded-lg px-4"
 							></div>
@@ -1080,8 +1123,12 @@
 							<div
 								class="bg-fy-on-primary-subtle2 col-span-2 h-10 w-full animate-pulse rounded-lg px-4"
 							></div>
-							<div class="bg-fy-on-primary-subtle2 h-10 w-full animate-pulse rounded-lg px-4"></div>
-							<div class="bg-fy-on-primary-subtle2 h-10 w-full animate-pulse rounded-lg px-4"></div>
+							<div
+								class="bg-fy-on-primary-subtle2 h-10 w-full animate-pulse rounded-lg px-4"
+							></div>
+							<div
+								class="bg-fy-on-primary-subtle2 h-10 w-full animate-pulse rounded-lg px-4"
+							></div>
 							<div
 								class="bg-fy-on-primary-subtle2 col-span-2 h-10 w-full animate-pulse rounded-lg px-4"
 							></div>
@@ -1120,7 +1167,11 @@
 											data-testid="shoppay-button"
 											on:click={() => (isShopPayOpen = true)}
 										>
-											<ShopPayIcon class="fill-white px-2" width={84} height={32} />
+											<ShopPayIcon
+												class="fill-white px-2"
+												width={84}
+												height={32}
+											/>
 										</button>
 									</div>
 								{/if}
@@ -1134,7 +1185,8 @@
 											{onPaypalHandler}
 											merchantId={$cart.shop_properties.paypal.merchantId}
 											clientId={$cart.shop_properties.paypal.clientId}
-											integrationVersion={$cart.shop_properties.paypal?.integration_version}
+											integrationVersion={$cart.shop_properties.paypal
+												?.integration_version}
 											intent={$cart.shop_properties.paypal?.intent}
 											bind:paypalPayerId
 										/>
@@ -1144,14 +1196,22 @@
 							<div
 								class="text-fy-on-primary-subtle relative my-2 flex w-full flex-row justify-center"
 							>
-								<div class="absolute left-0 flex h-full w-full flex-col justify-center">
+								<div
+									class="absolute left-0 flex h-full w-full flex-col justify-center"
+								>
 									<hr class="h-[1px] w-full" />
 								</div>
-								<span class="bg-fy-background z-10 px-4 text-sm"> Or pay another way </span>
+								<span class="bg-fy-background z-10 px-4 text-sm">
+									Or pay another way
+								</span>
 							</div>
 						{/if}
 						{#if collapsedStateShipping}
-							<div transition:fadeSlide class="pt-2" class:pb-2={!collapsedStateShippingMethod}>
+							<div
+								transition:fadeSlide
+								class="pt-2"
+								class:pb-2={!collapsedStateShippingMethod}
+							>
 								<Group>
 									<div
 										class="col-span-2 flex flex-row items-center justify-between rounded-t-lg p-5"
@@ -1163,13 +1223,16 @@
 												<hr />
 												<span class="text-sm">
 													{$cart.shipping_info?.first_name}
-													{$cart.shipping_info?.last_name} · {$cart.shipping_info?.address1}{$cart
+													{$cart.shipping_info?.last_name} · {$cart
+														.shipping_info?.address1}{$cart
 														.shipping_info?.address2
 														? `, ${$cart.shipping_info?.address2}`
-														: ''}, {$cart.shipping_info?.city}, {$cart.shipping_info
-														?.state_or_province}
+														: ''}, {$cart.shipping_info?.city}, {$cart
+														.shipping_info?.state_or_province}
 													{$cart.shipping_info?.postal_code}
-													{$cart.shipping_info?.phone ? `· ${$cart.shipping_info?.phone}` : ''}
+													{$cart.shipping_info?.phone
+														? `· ${$cart.shipping_info?.phone}`
+														: ''}
 												</span>
 											</div>
 											<button
@@ -1179,7 +1242,8 @@
 												on:click={() => {
 													collapsedStateShipping = false;
 													if (savedAddresses.length === 1) {
-														selectedShippingAddress = NEW_SHIPPING_ADDRESS;
+														selectedShippingAddress =
+															NEW_SHIPPING_ADDRESS;
 													}
 												}}
 											>
@@ -1230,10 +1294,13 @@
 									<div>
 										<h3 class="py-1 text-sm">Email</h3>
 										<Group>
-											<div class="col-span-2 flex w-full flex-col justify-center rounded-lg">
+											<div
+												class="col-span-2 flex w-full flex-col justify-center rounded-lg"
+											>
 												<input
 													class="placeholder:text-fy-on-primary-subtle w-full rounded-lg border-0 focus:z-[2] disabled:bg-gray-100"
-													disabled={placeOrderInProgress || $cart?.session?.is_logged_in}
+													disabled={placeOrderInProgress ||
+														$cart?.session?.is_logged_in}
 													class:error={email_error}
 													bind:this={emailField}
 													bind:value={email}
@@ -1242,7 +1309,9 @@
 													}}
 													placeholder=""
 													data-testid="email-input"
-													autocomplete={shippingAutoCompleteEnabled ? 'shipping email' : ''}
+													autocomplete={shippingAutoCompleteEnabled
+														? 'shipping email'
+														: ''}
 													type="email"
 												/>
 											</div>
@@ -1254,11 +1323,13 @@
 										{/if}
 										{#if isC2PAvailable()}
 											<div class="my-2 rounded-lg bg-[#F7F7F7] p-2">
-												<span class="text-fy-on-surface-subtle inline-block text-sm leading-normal">
-													By entering your email, you consent and direct firmly to send your
-													information to
-													<span class="font-bold">Click to Pay</span> to check if you have any saved
-													cards
+												<span
+													class="text-fy-on-surface-subtle inline-block text-sm leading-normal"
+												>
+													By entering your email, you consent and direct
+													firmly to send your information to
+													<span class="font-bold">Click to Pay</span> to check
+													if you have any saved cards
 												</span>
 											</div>
 										{/if}
@@ -1279,7 +1350,8 @@
 														{#if part.type === 'terms'}
 															<button
 																type="button"
-																on:click={() => (isTermsPopupOpen = true)}
+																on:click={() =>
+																	(isTermsPopupOpen = true)}
 																class="underline"
 															>
 																{part.content}
@@ -1323,13 +1395,19 @@
 										{#if $cart.shipping_method}
 											<div class="w-full">
 												<div class="flex flex-row justify-between text-sm">
-													<span class="font-bold">{$cart.shipping_method.description}</span>
+													<span class="font-bold"
+														>{$cart.shipping_method.description}</span
+													>
 													<span class="font-bold">
-														{formatCurrency($cart.shipping_method.price)}
+														{formatCurrency(
+															$cart.shipping_method.price
+														)}
 													</span>
 												</div>
 												{#if $cart.shipping_method.estimate}
-													<span class="text-xs">$cart.shipping_method.estimate</span>
+													<span class="text-xs"
+														>$cart.shipping_method.estimate</span
+													>
 												{/if}
 											</div>
 											<button
@@ -1381,7 +1459,11 @@
 							{@const selectedCard = savedCreditCards.find(
 								(c) => selectedCardOption && (c.id || c.pan) === selectedCardOption
 							)}
-							<div class="pb-6" class:pt-2={!collapsedStateShippingMethod} transition:fadeSlide>
+							<div
+								class="pb-6"
+								class:pt-2={!collapsedStateShippingMethod}
+								transition:fadeSlide
+							>
 								<Group>
 									<div
 										class="col-span-2 flex flex-row items-center rounded-b-lg p-5"
@@ -1409,7 +1491,9 @@
 								<h2 class="font-semibold">Payment Method</h2>
 								<!-- TODO: how to get the email from PayPal? -->
 								<PaymentTabs
-									allowedPaymentMethods={$cart?.payment_method_options?.map?.((p) => p.type) || []}
+									allowedPaymentMethods={$cart?.payment_method_options?.map?.(
+										(p) => p.type
+									) || []}
 									disabled={placeOrderInProgress}
 									merchantId={$cart?.shop_properties?.paypal?.merchantId}
 									intent={$cart?.shop_properties?.paypal?.intent}
@@ -1448,8 +1532,14 @@
 							</div>
 						{/if}
 						{#if marketingConsent && marketingConsent.ui_slot === 'ABOVE_PLACE_ORDER_BUTTON'}
-							<Checkbox disabled={placeOrderInProgress} bind:isChecked={isMarketingConsentSigned}>
-								<span slot="title" class="text-fy-on-surface-subtle pt-0.5 text-xs font-normal">
+							<Checkbox
+								disabled={placeOrderInProgress}
+								bind:isChecked={isMarketingConsentSigned}
+							>
+								<span
+									slot="title"
+									class="text-fy-on-surface-subtle pt-0.5 text-xs font-normal"
+								>
 									{#each marketingConsent.parts as part}
 										{#if part.type === 'text'}
 											{part.content}
@@ -1487,7 +1577,9 @@
 							>
 								<h2 class="font-semibold">Order Summary</h2>
 								<div class="flex items-center">
-									<span class="mr-2">{toggleLineItemsExpanded ? 'Hide' : 'Show'}</span>
+									<span class="mr-2"
+										>{toggleLineItemsExpanded ? 'Hide' : 'Show'}</span
+									>
 									<svg
 										class="fill-fy-on-primary-subtle transition duration-300"
 										class:rotate-180={!toggleLineItemsExpanded}
@@ -1508,7 +1600,8 @@
 									<Summary
 										displayMode="collapsible"
 										{toggleLineItemsExpanded}
-										calculating={shippingInfoInProgress || shippingMethodInProgress}
+										calculating={shippingInfoInProgress ||
+											shippingMethodInProgress}
 										lineItems={$cart?.line_items}
 										discount={$cart?.cart_discount}
 										discountsBreakdown={$cart?.cart_discount_breakdown}
