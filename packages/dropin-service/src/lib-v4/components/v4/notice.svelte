@@ -25,7 +25,7 @@
 {#if showNotice}
 	<div
 		transition:fade
-		class="outline-fy-on-primary-subtle2 border-fy-primary col-span-2 flex items-center rounded-lg border-solid bg-white p-4 text-gray-500 shadow-lg outline outline-1 dark:bg-gray-800 dark:text-gray-400"
+		class="border-fy-on-primary-subtle col-span-2 flex items-center rounded-lg border border-solid bg-white p-4 text-gray-500 shadow-lg"
 	>
 		<slot name="icon" />
 
@@ -34,7 +34,7 @@
 			{#if undoCallback}
 				<button
 					disabled={undoInProgress}
-					class="rounded-lg p-2 text-sm font-medium text-blue-600 hover:bg-blue-100 disabled:bg-gray-200 disabled:text-gray-400 dark:text-blue-500 dark:hover:bg-gray-700"
+					class="rounded-lg p-2 text-sm font-medium text-blue-600 hover:bg-blue-100 disabled:bg-gray-200 disabled:text-gray-400"
 					on:click={undo}>Undo</button
 				>
 			{/if}
@@ -60,7 +60,7 @@
 				<button
 					type="button"
 					on:click={() => closeNotice()}
-					class="inline-flex items-center justify-center rounded-lg bg-white p-3 text-gray-400 hover:bg-gray-100 hover:text-gray-900 focus:ring-2 focus:ring-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-white"
+					class="inline-flex items-center justify-center rounded-lg bg-white p-3 text-gray-400 hover:bg-gray-100 hover:text-gray-900 focus:ring-2 focus:ring-gray-300"
 					aria-label="Close"
 				>
 					<span class="sr-only">Close</span>
