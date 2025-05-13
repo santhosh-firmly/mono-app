@@ -53,7 +53,9 @@
 </script>
 
 <div class="relative w-full">
-	<div class="bg-fy-primary flex w-full flex-col items-center px-3 pb-3 @md:px-0 @md:pt-0 @md:pb-0">
+	<div
+		class="bg-fy-primary flex w-full flex-col items-center px-3 pb-3 @md:px-0 @md:pt-0 @md:pb-0"
+	>
 		<div class="hidden w-full @md:block">
 			<Header
 				{merchantInfo}
@@ -65,7 +67,10 @@
 				doNotExpand={true}
 			></Header>
 		</div>
-		<div bind:this={overviewElement} class="flex w-full flex-col items-center p-4 @md:items-start">
+		<div
+			bind:this={overviewElement}
+			class="flex w-full flex-col items-center p-4 @md:items-start"
+		>
 			<div class="py-7 @md:hidden">
 				<CardStack {images} />
 			</div>
@@ -73,9 +78,9 @@
 				<div class="bg-fy-on-primary-subtle2 m-1 h-4 w-20 animate-pulse rounded" />
 				<div class="bg-fy-on-primary-subtle2 m-1 h-6 w-20 animate-pulse rounded" />
 			{:else}
-				<span class="text-fy-on-primary-subtle pt-1"
-					>Order Total ({itemQuantity} item{itemQuantity > 1 ? 's' : ''})</span
-				>
+				<span class="text-fy-on-primary-subtle pt-1">
+					Order Total ({itemQuantity} item{itemQuantity > 1 ? 's' : ''})
+				</span>
 				<span class="text-fy-on-primary text-4xl leading-normal font-semibold"
 					>{formatCurrency(total)}</span
 				>
