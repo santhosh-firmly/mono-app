@@ -473,8 +473,13 @@
 		return false;
 	}
 
+	let previouslyValidatedEmail = '';
+
 	async function validateAndSubmitContactInfo() {
-		const isEmailValid = await validateEmail();
+		const isEmailValid = (await validateEmail()) && email !== previouslyValidatedEmail;
+
+		previouslyValidatedEmail = email;
+
 		if (isEmailValid) {
 			if (
 				$cart.session?.requires_login &&

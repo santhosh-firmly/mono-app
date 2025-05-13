@@ -354,13 +354,15 @@
 	PUBLIC_c2p_initiator_id={data.PUBLIC_c2p_initiator_id}
 	PUBLIC_c2p_sdk_url={data.PUBLIC_c2p_sdk_url}
 />
+
 <!-- The following div helps detecting if the iframe is visible or not and correctly showing the contents. -->
-<div class="bottom-0 left-0 h-[1px] w-[1px]" />
+<div class="bottom-0 left-0 h-[1px] w-[1px]"></div>
 {#if error}
 	{error}
 {:else}
+	{@const Layout = layout}
 	<div class="theme-provider">
-		<svelte:component this={layout}>
+		<Layout>
 			<div class="h-full w-full transition-all duration-300">
 				<!-- {#if !multipleVariants && !order}
 					<div
@@ -394,7 +396,7 @@
 							class="grow"
 							style={`height: ${iframeHeight}px; display: ${iframeDisplay}`}
 							src={ecsUrl}
-						/>
+						></iframe>
 					</div>
 				{/if}
 
@@ -428,6 +430,6 @@
 					</div>
 				{/if}
 			</div>
-		</svelte:component>
+		</Layout>
 	</div>
 {/if}

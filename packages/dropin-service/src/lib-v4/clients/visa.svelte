@@ -78,12 +78,22 @@
 		}
 	}
 
-	export async function isRecognized(vSrc) {
+	export async function isRecognized(vSrc, email) {
+		if (!email) return null;
+
 		const { recognized } = await performanceObserver(() => vSrc.isRecognized(), 'isRecognized');
-		// TODO: How to know that the recognized one matches the input email?
 		if (recognized) {
-			const { profiles } = await performanceObserver(() => vSrc.getSrcProfile(), 'getSrcProfile');
+			const { profiles } = await performanceObserver(
+				() => vSrc.getSrcProfile(),
+				'getSrcProfile'
+			);
 			const { maskedConsumer, maskedCards } = profiles[0];
+
+			// Verify if the recognized email matches the input email
+			if (maskedConsumer.emailAddress.toLowerCase() !== email.toLowerCase()) {
+				return null;
+			}
+
 			return {
 				status: 200,
 				data: {
@@ -118,16 +128,24 @@
 				}
 			};
 		}
+		return null;
 	}
 
 	export async function unlockStart(email, vSrc) {
+		if (!email || !vSrc) {
+			throw new Error('Email and vSrc are required parameters');
+		}
+
 		try {
-			const isRecognizedResponse = await isRecognized(vSrc);
+			const isRecognizedResponse = await isRecognized(vSrc, email);
 			if (isRecognizedResponse) {
 				return isRecognizedResponse;
 			}
 
-			const res = await performanceObserver(() => visaUnlockStart(email, vSrc), 'visaUnlockStart');
+			const res = await performanceObserver(
+				() => visaUnlockStart(email, vSrc),
+				'visaUnlockStart'
+			);
 			if (res) {
 				return {
 					status: 200,
@@ -158,7 +176,10 @@
 				}),
 			'completeIdentityValidation'
 		);
-		const { profiles } = await performanceObserver(() => vSrc.getSrcProfile(resp), 'getSrcProfile');
+		const { profiles } = await performanceObserver(
+			() => vSrc.getSrcProfile(resp),
+			'getSrcProfile'
+		);
 		const { maskedConsumer, maskedCards } = profiles[0];
 
 		return {
@@ -464,6 +485,10 @@
 
 	// Script load handler that initializes the SDK
 	async function onSDKLoaded() {
+		if (isScriptLoaded) {
+			return;
+		}
+
 		try {
 			await waitScriptLoaded();
 
@@ -478,10 +503,11 @@
 			window.firmly.visa = {
 				unlockStart: (email) => unlockStart(email, vSrc),
 				unlockComplete: (otpValue) => unlockComplete(otpValue, vSrc),
-				isRecognized: () => isRecognized(vSrc),
+				isRecognized: (email) => isRecognized(vSrc, email),
 				getVisaCardToken: (cardId, cvv, rememberMe, additionalData) =>
 					getVisaCardToken(cardId, cvv, rememberMe, additionalData, vSrc, initOptions),
-				visaAuthenticate: (authenticationMethod) => visaAuthenticate(authenticationMethod, vSrc)
+				visaAuthenticate: (authenticationMethod) =>
+					visaAuthenticate(authenticationMethod, vSrc)
 			};
 		} catch (error) {
 			console.error('Failed to initialize Visa SDK:', error);
