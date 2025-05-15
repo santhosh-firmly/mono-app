@@ -256,6 +256,10 @@
 				validateEmail(true);
 			}
 
+			if (selectedPaymentMethod !== 'PayPal' && email && isC2PAvailable()) {
+				validateAndSubmitContactInfo();
+			}
+
 			// Automatically set the shipping info if there is none yet set.
 			if (!$cart.shipping_info && $cart.shipping_info_options?.[0]) {
 				// Update fields so the user understands what is happening.
@@ -942,6 +946,7 @@
 		}
 	}
 	// end of Promo code section
+	//
 </script>
 
 <div class="@container relative min-h-full">

@@ -159,34 +159,48 @@
 	}
 	onMount(async () => {
 		try {
-			let attempts = 0;
-			const maxAttempts = 50; // 5 seconds
-
-			const checkVisaApi = async () => {
-				if (window.firmly?.visa?.isRecognized) {
-					const res = await window.firmly.visa.isRecognized();
-					if (res?.status === 200 && res?.data.recognized) {
-						sendVisaEventToTelemetry('login-c2p-successful');
-						dispatch('login-c2p-successful', Object.assign(res.data));
+			// Helper function to wait for Visa API to be available
+			const waitForVisaApi = () => {
+				return new Promise((resolve) => {
+					// If API is already available, resolve immediately
+					if (window.firmly?.visa?.isRecognized) {
+						resolve();
+						return;
 					}
-					return true;
-				}
-				return false;
+
+					// Otherwise, set up a single observer to detect when it becomes available
+					const observer = new MutationObserver(() => {
+						if (window.firmly?.visa?.isRecognized) {
+							observer.disconnect();
+							resolve();
+						}
+					});
+
+					// Watch for changes to the document body
+					observer.observe(document.body, {
+						childList: true,
+						subtree: true
+					});
+
+					// Set a timeout to avoid waiting indefinitely
+					setTimeout(() => {
+						observer.disconnect();
+						resolve();
+					}, 5000); // 5 second timeout
+				});
 			};
 
-			const isAvailable = await checkVisaApi();
-			if (isAvailable) return;
+			// Wait for API to be ready
+			await waitForVisaApi();
 
-			const interval = setInterval(async () => {
-				attempts++;
-				const isAvailable = await checkVisaApi();
-
-				if (isAvailable || attempts >= maxAttempts) {
-					clearInterval(interval);
+			// Only call isRecognized once when API is fully initialized
+			if (window.firmly?.visa?.isRecognized) {
+				const res = await window.firmly.visa.isRecognized();
+				if (res?.status === 200 && res?.data.recognized) {
+					sendVisaEventToTelemetry('login-c2p-successful');
+					dispatch('login-c2p-successful', Object.assign(res.data));
 				}
-			}, 100);
-
-			return () => clearInterval(interval);
+			}
 		} catch (ex) {
 			console.error('Error checking Visa recognition:', ex);
 		}

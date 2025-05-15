@@ -79,8 +79,6 @@
 	}
 
 	export async function isRecognized(vSrc, email) {
-		if (!email) return null;
-
 		const { recognized } = await performanceObserver(() => vSrc.isRecognized(), 'isRecognized');
 		if (recognized) {
 			const { profiles } = await performanceObserver(
