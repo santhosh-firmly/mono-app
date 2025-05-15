@@ -57,6 +57,10 @@ body {
 	min-width: 320px;
 }
 
+button {
+	cursor: pointer;
+}
+
 :root {
 	--color-fy-primary: white;
 	--color-fy-on-primary: black;
