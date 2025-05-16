@@ -86,12 +86,6 @@
 				'getSrcProfile'
 			);
 			const { maskedConsumer, maskedCards } = profiles[0];
-
-			// Verify if the recognized email matches the input email
-			if (maskedConsumer.emailAddress.toLowerCase() !== email.toLowerCase()) {
-				return null;
-			}
-
 			return {
 				status: 200,
 				data: {

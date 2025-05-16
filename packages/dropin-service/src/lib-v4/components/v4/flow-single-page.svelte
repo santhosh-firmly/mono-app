@@ -737,7 +737,7 @@
 			} else if (selectedCard.wallet === 'c2p' && isEmailvalid && isShippingValid) {
 				return placeOrderC2P(selectedCard, additionalData);
 			} else if (
-				(selectedCard.wallet === 'merchant' || selectedCard.wallet === 'test') &&
+				['merchant', 'test'].includes(selectedCard.wallet) &&
 				isEmailvalid &&
 				isShippingValid
 			) {
