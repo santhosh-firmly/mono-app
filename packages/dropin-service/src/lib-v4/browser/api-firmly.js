@@ -1594,6 +1594,31 @@ async function searchProducts(query) {
 	return res;
 }
 
+/**
+ * Sets custom properties for a specific domain
+ * @param {string} domain - The domain to set properties for
+ * @param {Object} customProperties - The custom properties object to send
+ * @returns {Promise<Object>} Response object
+ */
+async function setCustomProperties(domain, customProperties) {
+	if (!customProperties || typeof customProperties !== 'object') {
+		throw new Error('Custom properties must be a valid object');
+	}
+	
+	const headers = await getHeaders();
+	const res = await browserFetch(`${window.firmly.apiServer}/api/v1/domains/${domain}/properties`, {
+		...headers,
+		method: 'PUT',
+		body: JSON.stringify(customProperties)
+	});
+	
+	if (res.status !== 200) {
+		console.error('Failed to set properties:', res.data);
+	}
+	
+	return res;
+}
+
 //#endregion
 
 //#region Initialize
@@ -1675,6 +1700,9 @@ if (typeof window !== 'undefined') {
 
 	// Search functions
 	firmly.searchProducts = searchProducts;
+	
+	// Custom properties functions
+	firmly.setCustomProperties = setCustomProperties;
 
 	// Telemetry click events
 	firmly.telemetryButtonClick = telemetryButtonClick;

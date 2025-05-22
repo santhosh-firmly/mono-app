@@ -125,7 +125,11 @@ function monitorElements(inputSelectors, action) {
 }
 
 function initWindowFirmly() {
-	window.firmly = window.firmly || { sdk: null, dropin: { iframe: null } };
+	window.firmly = window.firmly || {
+		sdk: null,
+		dropin: { iframe: null },
+		customProperties: null
+	};
 }
 
 function getWindowDropin() {
@@ -366,6 +370,8 @@ export function bootstrap() {
 					'custom_properties',
 					checkoutConfig.custom_properties
 				);
+				// Store custom_properties for later use with session transfer
+				window.firmly.customProperties = checkoutConfig.custom_properties;
 				window.firmly.dropinIframe = createIframe(
 					dropinBuyNowUrl.toString(),
 					checkoutConfig
@@ -406,10 +412,24 @@ export function bootstrap() {
 					// And add it to the cartHive
 					const cartHive = await CartHive.get([storeId]);
 					const currentShippingInfo = cartHive.shipping_info;
+					const customProperties = window.firmly.customProperties || null;
 
 					try {
 						window.parent.postMessage({ action: 'firmly:sessionTransfer:start' }, '*');
 						await cartHive.sessionTransfer(storeId, event.data.transferPayload);
+
+						if (customProperties) {
+							try {
+								const propsData =
+									typeof customProperties === 'string'
+										? JSON.parse(customProperties)
+										: customProperties;
+
+								await window.firmly.setCustomProperties(storeId, propsData);
+							} catch (error) {
+								console.error('Failed to set custom properties:', error);
+							}
+						}
 					} catch (e) {
 						console.error('Session transfer error', e);
 					} finally {
