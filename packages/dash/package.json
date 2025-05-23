@@ -1,7 +1,7 @@
 {
 	"name": "dash",
 	"private": true,
-	"version": "0.8.1",
+	"version": "0.8.2",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
@@ -27,7 +27,7 @@
 	},
 	"devDependencies": {
 		"@chromatic-com/storybook": "^3.2.6",
-		"@firmly/eslint-config": "^0.8.1",
+		"@firmly/eslint-config": "^0.8.2",
 		"@storybook/addon-essentials": "^8.4.5",
 		"@storybook/addon-interactions": "^8.4.5",
 		"@storybook/addon-postcss": "^2.0.0",
