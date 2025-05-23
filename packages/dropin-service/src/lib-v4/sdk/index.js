@@ -125,7 +125,11 @@ function monitorElements(inputSelectors, action) {
 }
 
 function initWindowFirmly() {
-	window.firmly = window.firmly || { sdk: null, dropin: { iframe: null } };
+	window.firmly = window.firmly || {
+		sdk: null,
+		dropin: { iframe: null },
+		customProperties: null
+	};
 }
 
 function getWindowDropin() {
@@ -357,15 +361,25 @@ export function bootstrap() {
 			const dropinBuyNowUrl = new URL(dropInUrl);
 			dropinBuyNowUrl.pathname = '/buy';
 
-			if (checkoutConfig.mode === 'minimal-pdp') {
-				console.log('firmly - minimal pdp mode');
+			if (checkoutConfig.pdp_url) {
 				dropinBuyNowUrl.searchParams.set('url', checkoutConfig.pdp_url);
+			}
+			if (checkoutConfig.ui_mode) {
 				dropinBuyNowUrl.searchParams.set('ui_mode', checkoutConfig.ui_mode);
+			}
+			if (checkoutConfig.skip_pdp) {
 				dropinBuyNowUrl.searchParams.set('skip_pdp', checkoutConfig.skip_pdp);
+			}
+			if (checkoutConfig.custom_properties) {
 				dropinBuyNowUrl.searchParams.set(
 					'custom_properties',
-					checkoutConfig.custom_properties
+					JSON.stringify(checkoutConfig.custom_properties)
 				);
+				window.firmly.customProperties = checkoutConfig.custom_properties;
+			}
+
+			if (checkoutConfig.mode === 'minimal-pdp') {
+				console.log('firmly - minimal pdp mode');
 				window.firmly.dropinIframe = createIframe(
 					dropinBuyNowUrl.toString(),
 					checkoutConfig
@@ -406,10 +420,15 @@ export function bootstrap() {
 					// And add it to the cartHive
 					const cartHive = await CartHive.get([storeId]);
 					const currentShippingInfo = cartHive.shipping_info;
+					const customProperties = window.firmly.customProperties || null;
 
 					try {
 						window.parent.postMessage({ action: 'firmly:sessionTransfer:start' }, '*');
 						await cartHive.sessionTransfer(storeId, event.data.transferPayload);
+
+						if (customProperties) {
+							await window.firmly.setCustomProperties(storeId, customProperties);
+						}
 					} catch (e) {
 						console.error('Session transfer error', e);
 					} finally {
