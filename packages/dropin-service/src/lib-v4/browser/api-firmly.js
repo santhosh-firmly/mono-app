@@ -1604,19 +1604,26 @@ async function setCustomProperties(domain, customProperties) {
 	if (!customProperties || typeof customProperties !== 'object') {
 		throw new Error('Custom properties must be a valid object');
 	}
-	
-	const headers = await getHeaders();
-	const res = await browserFetch(`${window.firmly.apiServer}/api/v1/domains/${domain}/properties`, {
-		...headers,
-		method: 'PUT',
-		body: JSON.stringify(customProperties)
-	});
-	
-	if (res.status !== 200) {
-		console.error('Failed to set properties:', res.data);
+
+	try {
+		const headers = await getHeaders();
+		const url = `${window.firmly.apiServer}/api/v1/domains/${domain}/properties`;
+
+		const res = await browserFetch(url, {
+			...headers,
+			method: 'PUT',
+			body: JSON.stringify(customProperties)
+		});
+
+		if (res.status !== 200) {
+			console.error('Failed to set properties:', res.data);
+		}
+
+		return res;
+	} catch (error) {
+		console.error('Error in setCustomProperties:', error);
+		throw error;
 	}
-	
-	return res;
 }
 
 //#endregion
@@ -1700,7 +1707,7 @@ if (typeof window !== 'undefined') {
 
 	// Search functions
 	firmly.searchProducts = searchProducts;
-	
+
 	// Custom properties functions
 	firmly.setCustomProperties = setCustomProperties;
 

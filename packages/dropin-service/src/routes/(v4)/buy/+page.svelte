@@ -171,6 +171,17 @@
 		const res = await window.firmly.cartSessionTransfer(transferPayload);
 		if (res.status == 200) {
 			cart.set(res.data);
+
+			// Handle custom properties if available
+			const customProperties = window.firmly.customProperties;
+			if (customProperties && res.data?.shop_id) {
+				try {
+					console.log('Attempting to set custom properties after session transfer');
+					await window.firmly.setCustomProperties(res.data.shop_id, customProperties);
+				} catch (error) {
+					console.error('Failed to set custom properties:', error);
+				}
+			}
 		} else {
 			// Show some error dialog to the customer
 		}
@@ -209,6 +220,16 @@
 						// This will redirect the user to Firmly's thank you page
 						isParentIframed = data.isIframed;
 						initializeDomainInfo(data.store_id);
+
+						// Store custom properties if present in the message
+						if (data.custom_properties) {
+							window.firmly.customProperties = data.custom_properties;
+							console.log(
+								'Stored custom properties from message:',
+								window.firmly.customProperties
+							);
+						}
+
 						onAddToCart(data.transfer);
 					} else if (data.action == 'firmly::adjustSize') {
 						if (iframeHeight === 0) {
@@ -316,6 +337,20 @@
 		// Initialize the session in the background.
 		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server);
 		initializeAppVersion(version);
+
+		// Get custom_properties from URL if present
+		const customPropsParam = $page.url.searchParams.get('custom_properties');
+		if (customPropsParam) {
+			try {
+				window.firmly.customProperties = JSON.parse(customPropsParam);
+				console.log(
+					'Stored custom properties from URL params:',
+					window.firmly.customProperties
+				);
+			} catch (e) {
+				console.error('Failed to parse custom_properties URL parameter:', e);
+			}
+		}
 
 		setupLayout();
 		initiateFlow();

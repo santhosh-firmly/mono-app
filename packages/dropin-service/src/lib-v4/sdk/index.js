@@ -361,17 +361,25 @@ export function bootstrap() {
 			const dropinBuyNowUrl = new URL(dropInUrl);
 			dropinBuyNowUrl.pathname = '/buy';
 
-			if (checkoutConfig.mode === 'minimal-pdp') {
-				console.log('firmly - minimal pdp mode');
+			if (checkoutConfig.pdp_url) {
 				dropinBuyNowUrl.searchParams.set('url', checkoutConfig.pdp_url);
+			}
+			if (checkoutConfig.ui_mode) {
 				dropinBuyNowUrl.searchParams.set('ui_mode', checkoutConfig.ui_mode);
+			}
+			if (checkoutConfig.skip_pdp) {
 				dropinBuyNowUrl.searchParams.set('skip_pdp', checkoutConfig.skip_pdp);
+			}
+			if (checkoutConfig.custom_properties) {
 				dropinBuyNowUrl.searchParams.set(
 					'custom_properties',
-					checkoutConfig.custom_properties
+					JSON.stringify(checkoutConfig.custom_properties)
 				);
-				// Store custom_properties for later use with session transfer
 				window.firmly.customProperties = checkoutConfig.custom_properties;
+			}
+
+			if (checkoutConfig.mode === 'minimal-pdp') {
+				console.log('firmly - minimal pdp mode');
 				window.firmly.dropinIframe = createIframe(
 					dropinBuyNowUrl.toString(),
 					checkoutConfig
@@ -419,16 +427,7 @@ export function bootstrap() {
 						await cartHive.sessionTransfer(storeId, event.data.transferPayload);
 
 						if (customProperties) {
-							try {
-								const propsData =
-									typeof customProperties === 'string'
-										? JSON.parse(customProperties)
-										: customProperties;
-
-								await window.firmly.setCustomProperties(storeId, propsData);
-							} catch (error) {
-								console.error('Failed to set custom properties:', error);
-							}
+							await window.firmly.setCustomProperties(storeId, customProperties);
 						}
 					} catch (e) {
 						console.error('Session transfer error', e);
