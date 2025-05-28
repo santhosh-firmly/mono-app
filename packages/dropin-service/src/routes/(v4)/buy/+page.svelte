@@ -34,16 +34,9 @@
 
 	let { data } = $props();
 
-	const ecsUrlMap = {
-		'avenlur.com': 'avenlur.firmly.in',
-		'www.avenlur.com': 'avenlur.firmly.in',
-		'lovevery.com': 'lovevery.firmly.in',
-		'www.lovevery.com': 'lovevery.firmly.in',
-		'www.meetlalo.com': 'meetlalo.firmly.in',
-		'meetlalo.com': 'meetlalo.firmly.in',
-		'test.victoriassecret.com': 'test-victoriassecret.firmly.in',
-		'www.dermstore.com': 'dermstore.firmly.in',
-		'www.luma.gift': 'luma.firmly.in'
+	// Special cases that don't follow the standard domain conversion pattern
+	const specialEcsUrlMap = {
+		'test.victoriassecret.com': 'test-victoriassecret.firmly.in'
 	};
 
 	const bypassCatalogApiMerchants = ['test.victoriassecret.com', 'dermstore.com'];
@@ -149,17 +142,37 @@
 		return addToCart(variantId, quantity, domain, flushCart);
 	}
 
+	function convertToFirmlyDomain(hostname) {
+		// Remove 'www.' prefix if present
+		let domain = hostname.replace(/^www\./, '');
+
+		// Check special cases first
+		if (specialEcsUrlMap[hostname]) {
+			return specialEcsUrlMap[hostname];
+		}
+
+		// Handle myshopify.com domains
+		if (domain.endsWith('myshopify.com')) {
+			return domain.replace('myshopify.com', 'firmly.in');
+		}
+
+		// For regular domains, extract the main domain name without TLD
+		// and append .firmly.in
+		const domainParts = domain.split('.');
+		if (domainParts.length >= 2) {
+			// Take the domain name without TLD (e.g., 'example' from 'example.com')
+			return `${domainParts[0]}.firmly.in`;
+		}
+
+		// Fallback if the domain doesn't match expected patterns
+		return `${domain}.firmly.in`;
+	}
+
 	function getEcsUrl(url) {
 		const urlObj = new URL(url);
 		console.log('firmly - original hostname', urlObj.hostname);
 
-		if (urlObj.hostname.endsWith('myshopify.com')) {
-			urlObj.hostname = urlObj.hostname.replace('myshopify.com', 'firmly.in');
-		}
-
-		if (ecsUrlMap[urlObj.hostname]) {
-			urlObj.hostname = ecsUrlMap[urlObj.hostname];
-		}
+		urlObj.hostname = convertToFirmlyDomain(urlObj.hostname);
 
 		console.log('firmly - getEcsUrl - urlObj', urlObj.href);
 
