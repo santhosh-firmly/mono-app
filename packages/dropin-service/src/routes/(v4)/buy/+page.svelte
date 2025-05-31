@@ -111,11 +111,11 @@
 	let isParentIframed = $state(false);
 	let order = $state(null);
 
-	async function addToCart(variantId, quantity, domain) {
+	async function addToCart(variantId, quantity, domain, flushCart = false) {
 		// Remove any existing cart so the skeleton and the collapsed states take action.
 		showCheckout = true;
 		cart.set(null);
-		const res = await window.firmly.cartAddLineItem(variantId, quantity, [], domain, false);
+		const res = await window.firmly.cartAddLineItem(variantId, quantity, [], domain, flushCart);
 		if (res.status == 200) {
 			console.log('firmly - addToCart - res.data', res.data);
 			cart.set(res.data);
@@ -144,9 +144,9 @@
 		return getCart(domain);
 	}
 
-	async function initiateCheckoutByVariantId(domain, variantId, quantity) {
+	async function initiateCheckoutByVariantId(domain, variantId, quantity, flushCart = false) {
 		initializeDomainInfo(domain);
-		return addToCart(variantId, quantity, domain);
+		return addToCart(variantId, quantity, domain, flushCart);
 	}
 
 	function getEcsUrl(url) {
@@ -187,7 +187,7 @@
 		}
 	}
 
-	async function initiateCheckoutByUrl(url) {
+	async function initiateCheckoutByUrl(url, flushCart = false) {
 		const skipCatalogApi = bypassCatalogApiMerchants.some((merchant) => url.includes(merchant));
 
 		let productDetails = [];
@@ -261,7 +261,7 @@
 				1
 			);
 
-			return initiateCheckoutByVariantId(merchantDomain, variant.sku, 1);
+			return initiateCheckoutByVariantId(merchantDomain, variant.sku, 1, flushCart);
 		}
 	}
 
@@ -288,9 +288,10 @@
 	async function initiateFlow() {
 		// Using the PDP URL, get variant ID.
 		const url = $page.url.searchParams.get('url');
+		const flushCart = $page.url.searchParams.get('flush_cart') !== 'false';
 		console.log('firmly - initiateFlow - url', url);
 		if (url) {
-			return initiateCheckoutByUrl(url);
+			return initiateCheckoutByUrl(url, flushCart);
 		}
 
 		const variantId = $page.url.searchParams.get('variant_id');
@@ -299,7 +300,7 @@
 		const quantity = $page.url.searchParams.get('quantity') || 1;
 		if (domain) {
 			if (variantId) {
-				return initiateCheckoutByVariantId(domain, variantId, quantity);
+				return initiateCheckoutByVariantId(domain, variantId, quantity, flushCart);
 			}
 
 			return initiateCheckoutByDomain(domain);
