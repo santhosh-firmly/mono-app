@@ -298,6 +298,61 @@
 		const domain = $page.url.searchParams.get('domain')?.replace(/^www\./, '');
 		initializeDomainInfo(domain);
 		const quantity = $page.url.searchParams.get('quantity') || 1;
+
+		// Check for multiple variants
+		const variants = $page.url.searchParams.get('variants');
+		if (domain && variants) {
+			// Parse variant:quantity format (comma-separated)
+			const items = variants.split(',').map((item) => {
+				const [variantId, quantity] = item.trim().split(':');
+				return {
+					variantId: variantId,
+					quantity: parseInt(quantity) || 1
+				};
+			});
+
+			// Show loading skeleton first
+			showCheckout = true;
+			cart.set(null);
+
+			// Add each product sequentially
+			let currentCart = null;
+			let error = false;
+
+			for (let i = 0; i < items.length; i++) {
+				const isFirstItem = i === 0;
+				try {
+					const response = await window.firmly.cartAddLineItem(
+						items[i].variantId,
+						items[i].quantity,
+						[],
+						domain,
+						isFirstItem && flushCart
+					);
+
+					if (response.status == 200) {
+						currentCart = response.data;
+						// Don't update the UI yet, just keep the skeleton visible
+					} else {
+						console.error('Failed to add item to cart:', response);
+						error = true;
+						break;
+					}
+				} catch (e) {
+					console.error('Error adding item to cart:', e);
+					error = true;
+					break;
+				}
+			}
+
+			// After all items are processed, update the cart to show the final state
+			if (!error && currentCart) {
+				cart.set(currentCart);
+			}
+
+			return;
+		}
+
 		if (domain) {
 			if (variantId) {
 				return initiateCheckoutByVariantId(domain, variantId, quantity, flushCart);
