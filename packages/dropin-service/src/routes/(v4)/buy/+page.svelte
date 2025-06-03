@@ -34,24 +34,26 @@
 
 	let { data } = $props();
 
-	const ecsUrlMap = {
-		'avenlur.com': 'avenlur.firmly.in',
-		'www.avenlur.com': 'avenlur.firmly.in',
-		'lovevery.com': 'lovevery.firmly.in',
-		'www.lovevery.com': 'lovevery.firmly.in',
-		'www.meetlalo.com': 'meetlalo.firmly.in',
-		'meetlalo.com': 'meetlalo.firmly.in',
-		'test.victoriassecret.com': 'test-victoriassecret.firmly.in',
-		'www.dermstore.com': 'dermstore.firmly.in',
-		'www.luma.gift': 'luma.firmly.in'
+	// Special cases that don't follow the standard domain conversion pattern
+	const specialEcsUrlMap = {
+		'test.victoriassecret.com': 'test-victoriassecret.firmly.in'
 	};
 
 	const bypassCatalogApiMerchants = ['test.victoriassecret.com', 'dermstore.com'];
 
-	let partnerInfo = {
+	let partnerInfo = $state({
 		largeLogo:
 			"data:image/svg+xml,%3Csvg class='forbes-logo_svg__fs-icon forbes-logo_svg__fs-icon--forbes-logo' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 54'%3E%3Cpath d='M113.3 18.2c0-5.8.1-11.2.4-16.2L98.4 4.9v1.4l1.5.2c1.1.1 1.8.5 2.2 1.1.4.7.7 1.7.9 3.2.2 2.9.4 9.5.3 19.9 0 10.3-.1 16.8-.3 19.3 5.5 1.2 9.8 1.7 13 1.7 6 0 10.7-1.7 14.1-5.2 3.4-3.4 5.2-8.2 5.2-14.1 0-4.7-1.3-8.6-3.9-11.7-2.6-3.1-5.9-4.6-9.8-4.6-2.6 0-5.3.7-8.3 2.1zm.3 30.8c-.2-3.2-.4-12.8-.4-28.5.9-.3 2.1-.5 3.6-.5 2.4 0 4.3 1.2 5.7 3.7 1.4 2.5 2.1 5.5 2.1 9.3 0 4.7-.8 8.5-2.4 11.7-1.6 3.1-3.6 4.7-6.1 4.7-.8-.2-1.6-.3-2.5-.4zM41 3H1v2l2.1.2c1.6.3 2.7.9 3.4 1.8.7 1 1.1 2.6 1.2 4.8.8 10.8.8 20.9 0 30.2-.2 2.2-.6 3.8-1.2 4.8-.7 1-1.8 1.6-3.4 1.8l-2.1.3v2h25.8v-2l-2.7-.2c-1.6-.2-2.7-.9-3.4-1.8-.7-1-1.1-2.6-1.2-4.8-.3-4-.5-8.6-.5-13.7l5.4.1c2.9.1 4.9 2.3 5.9 6.7h2V18.9h-2c-1 4.3-2.9 6.5-5.9 6.6l-5.4.1c0-9 .2-15.4.5-19.3h7.9c5.6 0 9.4 3.6 11.6 10.8l2.4-.7L41 3zm-4.7 30.8c0 5.2 1.5 9.5 4.4 12.9 2.9 3.4 7.2 5 12.6 5s9.8-1.7 13-5.2c3.2-3.4 4.7-7.7 4.7-12.9s-1.5-9.5-4.4-12.9c-2.9-3.4-7.2-5-12.6-5s-9.8 1.7-13 5.2c-3.2 3.4-4.7 7.7-4.7 12.9zm22.3-11.4c1.2 2.9 1.7 6.7 1.7 11.3 0 10.6-2.2 15.8-6.5 15.8-2.2 0-3.9-1.5-5.1-4.5-1.2-3-1.7-6.8-1.7-11.3C47 23.2 49.2 18 53.5 18c2.2-.1 3.9 1.4 5.1 4.4zm84.5 24.3c3.3 3.3 7.5 5 12.5 5 3.1 0 5.8-.6 8.2-1.9 2.4-1.2 4.3-2.7 5.6-4.5l-1-1.2c-2.2 1.7-4.7 2.5-7.6 2.5-4 0-7.1-1.3-9.2-4-2.2-2.7-3.2-6.1-3-10.5H170c0-4.8-1.2-8.7-3.7-11.8-2.5-3-6-4.5-10.5-4.5-5.6 0-9.9 1.8-13 5.3-3.1 3.5-4.6 7.8-4.6 12.9 0 5.2 1.6 9.4 4.9 12.7zm7.4-25.1c1.1-2.4 2.5-3.6 4.4-3.6 3 0 4.5 3.8 4.5 11.5l-10.6.2c.1-3 .6-5.7 1.7-8.1zm46.4-4c-2.7-1.2-6.1-1.9-10.2-1.9-4.2 0-7.5 1.1-10 3.2s-3.8 4.7-3.8 7.8c0 2.7.8 4.8 2.3 6.3 1.5 1.5 3.9 2.8 7 3.9 2.8 1 4.8 2 5.8 2.9 1 1 1.6 2.1 1.6 3.6 0 1.4-.5 2.7-1.6 3.7-1 1.1-2.4 1.6-4.2 1.6-4.4 0-7.7-3.2-10-9.6l-1.7.5.4 10c3.6 1.4 7.6 2.1 12 2.1 4.6 0 8.1-1 10.7-3.1 2.6-2 3.9-4.9 3.9-8.5 0-2.4-.6-4.4-1.9-5.9-1.3-1.5-3.4-2.8-6.4-4-3.3-1.2-5.6-2.3-6.8-3.3-1.2-1-1.8-2.2-1.8-3.7s.4-2.7 1.3-3.7 2-1.4 3.4-1.4c4 0 6.9 2.9 8.7 8.6l1.7-.5-.4-8.6zm-96.2-.9c-1.4-.7-2.9-1-4.6-1-1.7 0-3.4.7-5.3 2.1-1.9 1.4-3.3 3.3-4.4 5.9l.1-8-15.2 3v1.4l1.5.1c1.9.2 3 1.7 3.2 4.4.6 6.2.6 12.8 0 19.8-.2 2.7-1.3 4.1-3.2 4.4l-1.5.2v1.9h21.2V49l-2.7-.2c-1.9-.2-3-1.7-3.2-4.4-.6-5.8-.7-12-.2-18.4.6-1 1.9-1.6 3.9-1.8 2-.2 4.3.4 6.7 1.8l3.7-9.3z'%3E%3C/path%3E%3C/svg%3E"
-	};
+	});
+
+	$effect(() => {
+		if (data.partner === 'gannett') {
+			partnerInfo = {
+				largeLogo:
+					'https://www.gannett.com/wp-content/uploads/2023/03/OurBrands_USATODAY_Logo_142x51.png'
+			};
+		}
+	});
 
 	let layout = $state(FullscreenLayout);
 
@@ -149,17 +151,37 @@
 		return addToCart(variantId, quantity, domain, flushCart);
 	}
 
+	function convertToFirmlyDomain(hostname) {
+		// Remove 'www.' prefix if present
+		let domain = hostname.replace(/^www\./, '');
+
+		// Check special cases first
+		if (specialEcsUrlMap[hostname]) {
+			return specialEcsUrlMap[hostname];
+		}
+
+		// Handle myshopify.com domains
+		if (domain.endsWith('myshopify.com')) {
+			return domain.replace('myshopify.com', 'firmly.in');
+		}
+
+		// For regular domains, extract the main domain name without TLD
+		// and append .firmly.in
+		const domainParts = domain.split('.');
+		if (domainParts.length >= 2) {
+			// Take the domain name without TLD (e.g., 'example' from 'example.com')
+			return `${domainParts[0]}.firmly.in`;
+		}
+
+		// Fallback if the domain doesn't match expected patterns
+		return `${domain}.firmly.in`;
+	}
+
 	function getEcsUrl(url) {
 		const urlObj = new URL(url);
 		console.log('firmly - original hostname', urlObj.hostname);
 
-		if (urlObj.hostname.endsWith('myshopify.com')) {
-			urlObj.hostname = urlObj.hostname.replace('myshopify.com', 'firmly.in');
-		}
-
-		if (ecsUrlMap[urlObj.hostname]) {
-			urlObj.hostname = ecsUrlMap[urlObj.hostname];
-		}
+		urlObj.hostname = convertToFirmlyDomain(urlObj.hostname);
 
 		console.log('firmly - getEcsUrl - urlObj', urlObj.href);
 

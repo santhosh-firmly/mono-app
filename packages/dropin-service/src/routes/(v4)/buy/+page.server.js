@@ -13,6 +13,22 @@ export const load = async ({ url, platform }) => {
 	const merchantUrl = url.searchParams.get('domain') || url.searchParams.get('url');
 	const merchantDomain = getDomain(merchantUrl);
 
+	const partnerSubdomains = {
+		gannett: 'gannett',
+		forbes: 'forbes'
+	};
+
+	let partner = null;
+
+	const domainParts = firmlyDomain.split('.');
+	const firmlyIndex = domainParts.findIndex((part) => part === 'firmly');
+
+	// Check if we're on a firmly domain (firmly.dev, firmly.in, etc.)
+	if (firmlyIndex !== -1 && firmlyIndex > 0) {
+		const subdomain = domainParts[firmlyIndex - 1];
+		partner = partnerSubdomains[subdomain] || null;
+	}
+
 	const envVars = {
 		PUBLIC_api_id: platform.env.PUBLIC_api_id,
 		PUBLIC_cf_server: platform.env.PUBLIC_cf_server,
@@ -35,6 +51,7 @@ export const load = async ({ url, platform }) => {
 
 	return {
 		...envVars,
-		merchantPresentation
+		merchantPresentation,
+		partner
 	};
 };

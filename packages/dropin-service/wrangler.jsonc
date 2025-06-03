@@ -48,6 +48,10 @@
 				{
 					"pattern": "firmly.dev/*",
 					"zone_name": "firmly.dev"
+				},
+				{
+					"pattern": "gannett.firmly.dev/*",
+					"zone_name": "firmly.dev"
 				}
 			],
 			"vars": {
