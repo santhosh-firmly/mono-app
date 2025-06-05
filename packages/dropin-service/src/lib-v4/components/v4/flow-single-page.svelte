@@ -1073,7 +1073,15 @@
 					<FooterLinks />
 				</div>
 
-				<Notices bind:notices />
+				<div
+					class="pointer-events-none fixed bottom-24 z-[121] hidden w-full justify-around @md:flex"
+				>
+					<div
+						class="flex w-full flex-col justify-center px-3 @md:w-1/2 @md:max-w-[412px]"
+					>
+						<Notices bind:notices />
+					</div>
+				</div>
 			</section>
 			<section class="bg-fy-background @md:w-1/2 @md:max-w-[412px] @md:py-16">
 				<!-- Skeleton -->
@@ -1647,6 +1655,12 @@
 					</div>
 				{/if}
 			</section>
+
+			<div class="pointer-events-none fixed bottom-10 z-[121] flex w-full @md:hidden">
+				<div class="flex w-full max-w-[422px] flex-col justify-center px-3">
+					<Notices bind:notices />
+				</div>
+			</div>
 		</form>
 		<Shoppay
 			bind:isModalOpen={isShopPayOpen}

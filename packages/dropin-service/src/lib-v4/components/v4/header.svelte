@@ -71,16 +71,16 @@
 		<div class="flex w-1/2 items-center @md:w-full">
 			<BackButton {...merchantInfo} showBackButton={!expanded} {skeleton} on:back-click />
 			<div
-				class="relative flex h-full flex-row items-center gap-2 transition duration-300"
+				class="relative flex h-full w-full flex-row items-center gap-2 transition duration-300"
 				class:-translate-x-6={expanded}
 			>
 				{#if skeleton}
 					<div
 						class="bg-fy-on-primary-subtle2 inline h-8 w-8 shrink-0 animate-pulse rounded-full duration-300 group-hover:-translate-x-1 group-hover:animate-none"
-					/>
+					></div>
 					<div
 						class="bg-fy-on-primary-subtle2 inline h-8 w-32 shrink animate-pulse rounded-lg leading-[normal] transition duration-300 group-hover:-translate-x-1 group-hover:animate-none"
-					/>
+					></div>
 				{:else if merchantInfo.largeLogo}
 					<img
 						class="inline h-4 transition duration-300 group-hover:-translate-x-1 {$isPrimaryDark
