@@ -228,7 +228,11 @@
 			productDetails = await resp.json();
 		}
 
-		if (productDetails?.variants?.length > 1 || skipCatalogApi) {
+		if (
+			$page.url.searchParams.get('force_pdp') ||
+			productDetails?.variants?.length > 1 ||
+			skipCatalogApi
+		) {
 			// Multiple variants, show PDP.
 			console.log('firmly - Multiple variants, show PDP.');
 			multipleVariants = true;
