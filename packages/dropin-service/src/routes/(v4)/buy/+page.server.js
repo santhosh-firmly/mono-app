@@ -9,7 +9,7 @@ import { getMerchantPresentation } from '$lib-v4/server/db-acessor.js';
  * @returns {Object} - Data object with platform environment variables and merchant presentation
  */
 export const load = async ({ url, platform }) => {
-	const firmlyDomain = getDomain(url);
+	const domain = getDomain(url);
 	const merchantUrl = url.searchParams.get('domain') || url.searchParams.get('url');
 	const merchantDomain = getDomain(merchantUrl);
 
@@ -20,13 +20,10 @@ export const load = async ({ url, platform }) => {
 
 	let partner = null;
 
-	const domainParts = firmlyDomain.split('.');
-	const firmlyIndex = domainParts.findIndex((part) => part === 'firmly');
-
-	// Check if we're on a firmly domain (firmly.dev, firmly.in, etc.)
-	if (firmlyIndex !== -1 && firmlyIndex > 0) {
-		const subdomain = domainParts[firmlyIndex - 1];
-		partner = partnerSubdomains[subdomain] || null;
+	const domainParts = domain.split('.');
+	const firstSubdomain = domainParts.length > 2 ? domainParts[0] : null;
+	if (firstSubdomain && partnerSubdomains[firstSubdomain]) {
+		partner = partnerSubdomains[firstSubdomain];
 	}
 
 	const envVars = {
@@ -38,9 +35,9 @@ export const load = async ({ url, platform }) => {
 		PUBLIC_c2p_initiator_id: platform.env.PUBLIC_c2p_initiator_id
 	};
 
-	const isValidRequest = firmlyDomain.includes('firmly') && merchantDomain;
+	const isValidRequest = domain && merchantDomain;
 	if (!isValidRequest) {
-		console.error('Invalid domain', { merchantDomain, firmlyDomain });
+		console.error('Invalid domain', { merchantDomain, domain });
 		return {
 			...envVars,
 			merchantPresentation: null
