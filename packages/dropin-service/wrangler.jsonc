@@ -160,6 +160,10 @@
 				{
 					"pattern": "firmlyuat.com/*",
 					"zone_name": "firmlyuat.com"
+				},
+				{
+					"pattern": "gannett.firmlyuat.com/*",
+					"zone_name": "firmlyuat.com"
 				}
 			],
 			"vars": {
@@ -195,6 +199,10 @@
 				},
 				{
 					"pattern": "firmly.live/*",
+					"zone_name": "firmly.live"
+				},
+				{
+					"pattern": "gannett.firmly.live/*",
 					"zone_name": "firmly.live"
 				}
 			],
