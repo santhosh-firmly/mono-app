@@ -84,7 +84,7 @@
 		let res;
 		if (!otpReference) {
 			popupStep = BASE_LOGIN_STEPS.PROCESSING_OTP;
-			res = await window.firmly.visa.unlockComplete(event.detail.otpValue);
+			res = await unified.unlockComplete(event.detail.otpValue);
 		} else {
 			const cloneAuthenticationMethod = structuredClone(selectedAuthenticationMethod);
 			cloneAuthenticationMethod.methodAttributes.otpValue = event.detail.otpValue;
@@ -106,7 +106,6 @@
 			popupStep = BASE_LOGIN_STEPS.WAITING_OTP;
 		}
 	}
-
 	async function handleContinueWithC2P(event) {
 		showC2pCheckbox = false;
 		if (event?.detail?.selectedAuthenticationMethod) {
