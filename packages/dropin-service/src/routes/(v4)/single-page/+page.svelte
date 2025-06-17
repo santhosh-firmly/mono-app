@@ -18,6 +18,7 @@
 	import { colord } from 'colord';
 	import { sCartStoreInfo } from '$lib-v4/browser/api-manager';
 	import ThankYouPage from '$lib-v4/components/v4/thank-you-page.svelte';
+	import { startMasterCardUnifiedSolution } from '$lib-v4/clients/mastercard.js';
 
 	let { data } = $props();
 
@@ -177,6 +178,10 @@
 		// Initialize the session in the background.
 		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server);
 		initializeAppVersion(version);
+		startMasterCardUnifiedSolution({
+			srcDpaId: data.PUBLIC_unified_c2p_dpa_id,
+			presentationName: data.PUBLIC_unified_c2p_presentation_name
+		});
 	});
 
 	function onBackClick() {

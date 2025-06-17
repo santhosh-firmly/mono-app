@@ -22,6 +22,7 @@
 	import PopupLayout from './popup-layout.svelte';
 	import BottomsheetLayout from './bottom-sheet-layout.svelte';
 	import PdpSkeleton from './pdp-skeleton.svelte';
+	import { startMasterCardUnifiedSolution } from '$lib-v4/clients/mastercard';
 
 	let error = $state();
 	let skipPdp = $state(false);
@@ -434,6 +435,10 @@
 		// Initialize the session in the background.
 		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server);
 		initializeAppVersion(version);
+		startMasterCardUnifiedSolution({
+			srcDpaId: data.PUBLIC_unified_c2p_dpa_id,
+			presentationName: data.PUBLIC_unified_c2p_presentation_name
+		});
 
 		// Get custom_properties from URL if present
 		const customPropsParam = $page.url.searchParams.get('custom_properties');
