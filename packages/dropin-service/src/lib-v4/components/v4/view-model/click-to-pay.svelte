@@ -127,12 +127,11 @@
 		}
 	}
 	export async function tokenizeC2P(selectedCard, additionalData = {}) {
-		const tokenizeResponse = await window.firmly.visa.getVisaCardToken(
-			selectedCard.id,
-			null,
-			isChecked,
-			additionalData
-		);
+		const tokenizeResponse = await unified.checkoutWithCard({
+			cardId: selectedCard.id,
+			rememberMe: isChecked
+		});
+
 		if (tokenizeResponse.status !== 200) {
 			const place_order_error = tokenizeResponse.data.description || tokenizeResponse.data;
 			return { place_order_error };
@@ -142,6 +141,7 @@
 			popupStep = BASE_LOGIN_STEPS.SELECTING_C2P_STEPUP;
 			isModalOpen = true;
 		}
+
 		return tokenizeResponse.data;
 	}
 	async function resendCode() {

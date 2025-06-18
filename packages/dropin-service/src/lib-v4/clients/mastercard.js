@@ -97,7 +97,9 @@ export async function unlockStart(email) {
 		return;
 	}
 
-	const validation = await window.mcCheckoutService.initiateValidation();
+	const validation = await window.mcCheckoutService.initiateValidation({
+		requestedValidationChannelId: 'EMAIL'
+	});
 
 	let emails = [];
 	let phones = [];
@@ -138,4 +140,32 @@ export async function unlockComplete(otpCode) {
 	});
 
 	return fromMaskedCards(maskedCards);
+}
+
+export async function checkoutWithCard({ cardId, windowRef = window, rememberMe = false } = {}) {
+	const iframe = document.createElement('iframe');
+	iframe.style.position = 'fixed';
+	iframe.style.top = '0';
+	iframe.style.left = '0';
+	iframe.style.width = '100vw';
+	iframe.style.height = '100vh';
+	iframe.style.border = 'none';
+	iframe.style.zIndex = '2147483647';
+	iframe.allow = 'payment *; clipboard-write;';
+
+	document.body.appendChild(iframe);
+
+	const response = await window.mcCheckoutService.checkoutWithCard({
+		srcDigitalCardId: cardId,
+		windowRef: iframe.contentWindow,
+		rememberMe
+	});
+
+	// Optionally, remove the iframe after checkout completes
+	document.body.removeChild(iframe);
+
+	return {
+		status: 200,
+		data: response.checkoutResponseData.maskedCard
+	};
 }
