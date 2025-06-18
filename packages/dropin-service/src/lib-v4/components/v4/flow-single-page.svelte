@@ -695,6 +695,7 @@
 			const placeOrderResponse = await window.firmly.cartCompleteOrder(
 				tokenizeResponse.token
 			);
+
 			if (placeOrderResponse.status !== 200) {
 				place_order_error = placeOrderResponse.data.description || placeOrderResponse.data;
 				return;
