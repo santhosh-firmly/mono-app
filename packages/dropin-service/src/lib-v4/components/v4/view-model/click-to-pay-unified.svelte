@@ -38,7 +38,6 @@
 	 * Set the default value of the "Remember me" checkbox as checked
 	 */
 	let isChecked = true;
-	export let cart;
 	export let checkboxTitle = 'Skip verification next time';
 	export let isUserLoggedInC2p = false;
 	export let isC2PInProgress = false;
@@ -127,14 +126,10 @@
 			popupStep = BASE_LOGIN_STEPS.SELECTING_C2P_STEPUP;
 		}
 	}
-	export async function tokenizeC2P(selectedCard) {
+	export async function tokenizeC2P(selectedCard, additionalData = {}) {
 		const tokenizeResponse = await unified.checkoutWithCard({
 			cardId: selectedCard.id,
-			rememberMe: isChecked,
-			additionalData: {
-				value: cart.total.value,
-				currency: cart.total.currency
-			}
+			rememberMe: isChecked
 		});
 
 		if (tokenizeResponse.status !== 200) {
