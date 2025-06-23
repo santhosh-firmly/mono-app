@@ -7,6 +7,8 @@
 	import C2pLogo from '$lib-v4/components/common/c2p-logo.svelte';
 	import Checkbox from '../checkbox.svelte';
 	import { InfoC2PRememberMeLong } from '$lib-v4/browser/localization';
+	import * as unified from '$lib-v4/clients/mastercard';
+
 	const dispatch = createEventDispatcher();
 	/**
 	 * Whether or not the Visa pop up is open
@@ -57,7 +59,7 @@
 	export async function c2pUnlockStart(email) {
 		isC2PInProgress = true;
 		EmailC2P = email;
-		const res = await window.firmly.visa.unlockStart(email);
+		const res = await unified.unlockStart(email);
 		if (res.status === 200 && res.data.otp_destination) {
 			c2pOTPDestination = res.data.otp_destination;
 			otpEmailInfo = otpPhoneInfo = null;
@@ -82,7 +84,7 @@
 		let res;
 		if (!otpReference) {
 			popupStep = BASE_LOGIN_STEPS.PROCESSING_OTP;
-			res = await window.firmly.visa.unlockComplete(event.detail.otpValue);
+			res = await unified.unlockComplete(event.detail.otpValue);
 		} else {
 			const cloneAuthenticationMethod = structuredClone(selectedAuthenticationMethod);
 			cloneAuthenticationMethod.methodAttributes.otpValue = event.detail.otpValue;
@@ -125,12 +127,11 @@
 		}
 	}
 	export async function tokenizeC2P(selectedCard, additionalData = {}) {
-		const tokenizeResponse = await window.firmly.visa.getVisaCardToken(
-			selectedCard.id,
-			null,
-			isChecked,
-			additionalData
-		);
+		const tokenizeResponse = await unified.checkoutWithCard({
+			cardId: selectedCard.id,
+			rememberMe: isChecked
+		});
+
 		if (tokenizeResponse.status !== 200) {
 			const place_order_error = tokenizeResponse.data.description || tokenizeResponse.data;
 			return { place_order_error };
@@ -140,6 +141,7 @@
 			popupStep = BASE_LOGIN_STEPS.SELECTING_C2P_STEPUP;
 			isModalOpen = true;
 		}
+
 		return tokenizeResponse.data;
 	}
 	async function resendCode() {
@@ -159,47 +161,10 @@
 	}
 	onMount(async () => {
 		try {
-			// Helper function to wait for Visa API to be available
-			const waitForVisaApi = () => {
-				return new Promise((resolve) => {
-					// If API is already available, resolve immediately
-					if (window.firmly?.visa?.isRecognized) {
-						resolve();
-						return;
-					}
-
-					// Otherwise, set up a single observer to detect when it becomes available
-					const observer = new MutationObserver(() => {
-						if (window.firmly?.visa?.isRecognized) {
-							observer.disconnect();
-							resolve();
-						}
-					});
-
-					// Watch for changes to the document body
-					observer.observe(document.body, {
-						childList: true,
-						subtree: true
-					});
-
-					// Set a timeout to avoid waiting indefinitely
-					setTimeout(() => {
-						observer.disconnect();
-						resolve();
-					}, 5000); // 5 second timeout
-				});
-			};
-
-			// Wait for API to be ready
-			await waitForVisaApi();
-
-			// Only call isRecognized once when API is fully initialized
-			if (window.firmly?.visa?.isRecognized) {
-				const res = await window.firmly.visa.isRecognized();
-				if (res?.status === 200 && res?.data.recognized) {
-					sendVisaEventToTelemetry('login-c2p-successful');
-					dispatch('login-c2p-successful', Object.assign(res.data));
-				}
+			const res = await unified.isRecognized();
+			if (res?.status === 200 && res?.data.recognized) {
+				sendVisaEventToTelemetry('login-c2p-successful');
+				dispatch('login-c2p-successful', Object.assign(res.data));
 			}
 		} catch (ex) {
 			console.error('Error checking Visa recognition:', ex);

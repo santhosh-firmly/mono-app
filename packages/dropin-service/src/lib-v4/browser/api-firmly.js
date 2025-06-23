@@ -1455,7 +1455,11 @@ function setC2PAccessToken(value) {
 	sessionStorage.setItem(WALLET_C2P_ACCESS_TOKEN, value);
 }
 
-const CLICK_2_PAY = 'visa';
+let CLICK_2_PAY = 'visa';
+
+function changeC2PProvider(provider = 'mastercard-unified') {
+	CLICK_2_PAY = provider;
+}
 
 async function c2pWalletUnlockStart(emailAddress) {
 	const ret = await walletUnlockStart(CLICK_2_PAY, emailAddress);
@@ -1690,6 +1694,7 @@ if (typeof window !== 'undefined') {
 	firmly.c2pWalletUnlockStart = c2pWalletUnlockStart;
 	firmly.c2pWalletUnlockComplete = c2pWalletUnlockComplete;
 	firmly.paymentC2PTokenize = paymentC2PTokenize;
+	firmly.changeC2PProvider = changeC2PProvider;
 
 	// Wallet ShopPay functions
 	firmly.shopPayWalletUnlockStart = shopPayWalletUnlockStart;

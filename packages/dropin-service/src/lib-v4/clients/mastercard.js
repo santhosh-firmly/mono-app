@@ -62,6 +62,7 @@ export async function startMasterCardUnifiedSolution({
 	});
 
 	window.mcCheckoutService = new MastercardCheckoutServices();
+	window.firmly.changeC2PProvider();
 
 	await window.mcCheckoutService.init({
 		srcDpaId,
@@ -142,7 +143,12 @@ export async function unlockComplete(otpCode) {
 	return fromMaskedCards(maskedCards);
 }
 
-export async function checkoutWithCard({ cardId, windowRef = window, rememberMe = false } = {}) {
+export async function checkoutWithCard({
+	cardId,
+	windowRef = window,
+	rememberMe = false,
+	cvv
+} = {}) {
 	const iframe = document.createElement('iframe');
 	iframe.style.position = 'fixed';
 	iframe.style.top = '0';
@@ -163,6 +169,13 @@ export async function checkoutWithCard({ cardId, windowRef = window, rememberMe 
 
 	// Optionally, remove the iframe after checkout completes
 	document.body.removeChild(iframe);
+
+	await window.firmly.paymentC2PTokenize(
+		cardId,
+		null,
+		response.headers['x-src-cx-flow-id'],
+		response.checkoutResponse
+	);
 
 	return {
 		status: 200,
