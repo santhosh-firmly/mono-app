@@ -147,7 +147,8 @@ export async function checkoutWithCard({
 	cardId,
 	windowRef = window,
 	rememberMe = false,
-	cvv
+	cvv,
+	additionalData = {}
 } = {}) {
 	const iframe = document.createElement('iframe');
 	iframe.style.position = 'fixed';
@@ -174,7 +175,8 @@ export async function checkoutWithCard({
 		cardId,
 		null,
 		response.headers['x-src-cx-flow-id'],
-		response.checkoutResponse
+		response.checkoutResponse,
+		additionalData
 	);
 
 	return {
