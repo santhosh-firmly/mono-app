@@ -1388,9 +1388,17 @@ async function paymentCompleteOrderV3(ccInfo, paymentHandle) {
 
 //#region Wallet functions
 
-async function paymentTokenizeWallet(wallet, walletAccessToken, cardId, cvv = null, jws = null) {
+async function paymentTokenizeWallet(
+	wallet,
+	walletAccessToken,
+	cardId,
+	cvv = null,
+	jws = null,
+	additionalData = {}
+) {
 	const body = { credit_card_id: cardId + '' };
 	const cart = getSessionCart();
+
 	if (cart) {
 		body.handle = cart.payment_handle;
 	}
@@ -1402,6 +1410,9 @@ async function paymentTokenizeWallet(wallet, walletAccessToken, cardId, cvv = nu
 	}
 	if (jws) {
 		body.jws = jws;
+	}
+	if (Object.keys(additionalData).length > 0) {
+		body.additional_data = additionalData;
 	}
 
 	const headers = await getHeaders();
@@ -1482,12 +1493,18 @@ async function c2pWalletUnlockComplete(otp, accessToken = null) {
 	return ret;
 }
 
-async function paymentC2PTokenize(cardId, cvv = null, accessToken = null, jws = null) {
+async function paymentC2PTokenize(
+	cardId,
+	cvv = null,
+	accessToken = null,
+	jws = null,
+	additionalData = {}
+) {
 	if (!accessToken) {
 		accessToken = getC2PAccessToken();
 	}
 
-	return paymentTokenizeWallet(CLICK_2_PAY, accessToken, cardId, cvv, jws);
+	return paymentTokenizeWallet(CLICK_2_PAY, accessToken, cardId, cvv, jws, additionalData);
 }
 
 //#endregion
