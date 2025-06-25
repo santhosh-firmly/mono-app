@@ -467,7 +467,6 @@
 	function onBackClick() {
 		if (pageState === 'checkout') {
 			if (multipleVariants) {
-				// Go back to PDP
 				pageState = 'pdp';
 				showCheckout = false;
 			} else {
@@ -476,7 +475,7 @@
 				postCheckoutClosed();
 			}
 		} else {
-			// Already on PDP or no PDP at all, just close
+			console.log('firmly - onBackClick - postCheckoutClosed');
 			postCheckoutClosed();
 		}
 	}
