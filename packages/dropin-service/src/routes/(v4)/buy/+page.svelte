@@ -31,6 +31,7 @@
 	let iframeDisplay = $state('none');
 	let ecsUrl = $state('');
 	let uiMode = $state('fullscreen');
+	let pageState = $state('pdp');
 
 	let { data } = $props();
 
@@ -116,11 +117,22 @@
 	async function addToCart(variantId, quantity, domain, flushCart = false) {
 		// Remove any existing cart so the skeleton and the collapsed states take action.
 		showCheckout = true;
+		pageState = 'checkout';
 		cart.set(null);
 		const res = await window.firmly.cartAddLineItem(variantId, quantity, [], domain, flushCart);
 		if (res.status == 200) {
 			console.log('firmly - addToCart - res.data', res.data);
 			cart.set(res.data);
+
+			// Set custom properties if available (for direct-to-checkout)
+			const customProperties = window.firmly.customProperties;
+			if (customProperties && res.data?.shop_id) {
+				try {
+					await window.firmly.setCustomProperties(res.data.shop_id, customProperties);
+				} catch (error) {
+					console.error('Failed to set custom properties:', error);
+				}
+			}
 		} else {
 			console.log('firmly - addToCart - error', res.data);
 			// Show some error dialog to the customer
@@ -204,6 +216,7 @@
 					console.error('Failed to set custom properties:', error);
 				}
 			}
+			pageState = 'checkout';
 		} else {
 			// Show some error dialog to the customer
 		}
@@ -236,6 +249,7 @@
 			// Multiple variants, show PDP.
 			console.log('firmly - Multiple variants, show PDP.');
 			multipleVariants = true;
+			pageState = 'pdp';
 
 			// Listen for the message from the ECS Service
 			bindEvent(window, 'message', (e) => {
@@ -451,11 +465,18 @@
 	});
 
 	function onBackClick() {
-		if (showCheckout) {
-			console.log('firmly - onBackClick - showCheckout = false');
-			showCheckout = false;
+		if (pageState === 'checkout') {
+			if (multipleVariants) {
+				// Go back to PDP
+				pageState = 'pdp';
+				showCheckout = false;
+			} else {
+				// No PDP to go back to, close
+				showCheckout = false;
+				postCheckoutClosed();
+			}
 		} else {
-			console.log('firmly - onBackClick - postCheckoutClosed');
+			// Already on PDP or no PDP at all, just close
 			postCheckoutClosed();
 		}
 	}
