@@ -171,12 +171,19 @@ export async function checkoutWithCard({
 	// Optionally, remove the iframe after checkout completes
 	document.body.removeChild(iframe);
 
+	const mastercardPayload = {
+		...additionalData,
+		flowId: response.headers['x-src-cx-flow-id'],
+		merchantTransactionId: response.headers['merchant-transaction-id'],
+		correlationId: response.checkoutResponseData.srcCorrelationId
+	};
+
 	await window.firmly.paymentC2PTokenize(
 		cardId,
 		null,
-		response.headers['x-src-cx-flow-id'],
+		null,
 		response.checkoutResponse,
-		additionalData
+		mastercardPayload
 	);
 
 	return {
