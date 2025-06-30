@@ -378,6 +378,8 @@ export function bootstrap() {
 				window.firmly.customProperties = checkoutConfig.custom_properties;
 			}
 
+			window.firmly.removeOnClose = checkoutConfig.remove_on_close || false;
+
 			if (checkoutConfig.mode === 'minimal-pdp') {
 				console.log('firmly - minimal pdp mode');
 				window.firmly.dropinIframe = createIframe(
@@ -460,15 +462,9 @@ export function bootstrap() {
 					const data = JSON.parse(event.data);
 					if (data.action === 'firmlyCheckoutClosed') {
 						console.log('firmly - closing the checkout');
-						let persistRendered = false;
+						window.firmly?.callbacks?.onClose?.();
 
-						window.firmly?.callbacks?.onClose?.({
-							persistIframeRendered: (value) => {
-								persistRendered = value || true;
-							}
-						});
-
-						if (window.firmly.dropinIframe && !persistRendered) {
+						if (window.firmly.dropinIframe && window.firmly.removeOnClose) {
 							window.firmly.dropinIframe.style.display = 'none';
 						}
 					} else if (data.action === 'firmlyOrderPlaced') {
