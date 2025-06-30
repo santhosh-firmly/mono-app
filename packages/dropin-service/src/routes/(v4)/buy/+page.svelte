@@ -202,6 +202,8 @@
 
 	async function onAddToCart(transferPayload) {
 		showCheckout = true;
+		pageState = 'checkout';
+
 		const res = await window.firmly.cartSessionTransfer(transferPayload);
 		if (res.status == 200) {
 			cart.set(res.data);
@@ -216,7 +218,6 @@
 					console.error('Failed to set custom properties:', error);
 				}
 			}
-			pageState = 'checkout';
 		} else {
 			// Show some error dialog to the customer
 		}
@@ -465,19 +466,19 @@
 	});
 
 	function onBackClick() {
-		if (pageState === 'checkout') {
-			if (multipleVariants) {
-				pageState = 'pdp';
-				showCheckout = false;
-			} else {
-				// No PDP to go back to, close
-				showCheckout = false;
-				postCheckoutClosed();
-			}
-		} else {
+		if (pageState === 'pdp') {
 			console.log('firmly - onBackClick - postCheckoutClosed');
 			postCheckoutClosed();
+			return;
 		}
+
+		if (multipleVariants) {
+			pageState = 'pdp';
+			showCheckout = false;
+			return;
+		}
+
+		postCheckoutClosed();
 	}
 
 	function onOrderPlacedEvent(event) {

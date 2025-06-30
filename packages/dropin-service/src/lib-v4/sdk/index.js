@@ -378,6 +378,8 @@ export function bootstrap() {
 				window.firmly.customProperties = checkoutConfig.custom_properties;
 			}
 
+			window.firmly.removeOnClose = checkoutConfig.remove_on_close || false;
+
 			if (checkoutConfig.mode === 'minimal-pdp') {
 				console.log('firmly - minimal pdp mode');
 				window.firmly.dropinIframe = createIframe(
@@ -460,15 +462,11 @@ export function bootstrap() {
 					const data = JSON.parse(event.data);
 					if (data.action === 'firmlyCheckoutClosed') {
 						console.log('firmly - closing the checkout');
-						// @ts-ignore - creative exists inside of Celtra ecosystem
 						window.firmly?.callbacks?.onClose?.();
 
-						if (window.firmly.dropinIframe) {
+						if (window.firmly.dropinIframe && window.firmly.removeOnClose) {
 							window.firmly.dropinIframe.style.display = 'none';
 						}
-
-						// Now it will be called by the onClose callback
-						// window.creative.adapter.collapse();
 					} else if (data.action === 'firmlyOrderPlaced') {
 						console.log('firmly - order placed successfully');
 						window.firmly?.callbacks?.onOrderPlaced?.(data.order);
