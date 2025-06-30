@@ -460,15 +460,17 @@ export function bootstrap() {
 					const data = JSON.parse(event.data);
 					if (data.action === 'firmlyCheckoutClosed') {
 						console.log('firmly - closing the checkout');
-						// @ts-ignore - creative exists inside of Celtra ecosystem
-						window.firmly?.callbacks?.onClose?.();
+						let persistRendered = false;
 
-						if (window.firmly.dropinIframe) {
+						window.firmly?.callbacks?.onClose?.({
+							persistIframeRendered: (value) => {
+								persistRendered = value || true;
+							}
+						});
+
+						if (window.firmly.dropinIframe && !persistRendered) {
 							window.firmly.dropinIframe.style.display = 'none';
 						}
-
-						// Now it will be called by the onClose callback
-						// window.creative.adapter.collapse();
 					} else if (data.action === 'firmlyOrderPlaced') {
 						console.log('firmly - order placed successfully');
 						window.firmly?.callbacks?.onOrderPlaced?.(data.order);
