@@ -68,6 +68,7 @@ export async function startMasterCardUnifiedSolution({
 		srcDpaId,
 		dpaTransactionOptions: {
 			dpaLocale,
+			dpaLocale: 'en_US',
 			dpaBillingPreference: 'FULL',
 			consumerNameRequested: true,
 			consumerEmailAddressRequested: true,
@@ -143,6 +144,8 @@ export async function unlockComplete(otpCode) {
 	return fromMaskedCards(maskedCards);
 }
 
+let previuslyWithCardResponse = null;
+
 export async function checkoutWithCard({
 	cardId,
 	windowRef = window,
@@ -150,44 +153,57 @@ export async function checkoutWithCard({
 	cvv,
 	additionalData = {}
 } = {}) {
-	const iframe = document.createElement('iframe');
-	iframe.style.position = 'fixed';
-	iframe.style.top = '0';
-	iframe.style.left = '0';
-	iframe.style.width = '100vw';
-	iframe.style.height = '100vh';
-	iframe.style.border = 'none';
-	iframe.style.zIndex = '2147483647';
-	iframe.allow = 'payment *; clipboard-write;';
+	let withCardResponse = previuslyWithCardResponse;
 
-	document.body.appendChild(iframe);
+	if (!cvv || !withCardResponse) {
+		const iframe = document.createElement('iframe');
+		iframe.style.position = 'fixed';
+		iframe.style.top = '0';
+		iframe.style.left = '0';
+		iframe.style.width = '100vw';
+		iframe.style.height = '100vh';
+		iframe.style.border = 'none';
+		iframe.style.zIndex = '2147483647';
+		iframe.allow = 'payment *; clipboard-write;';
 
-	const response = await window.mcCheckoutService.checkoutWithCard({
-		srcDigitalCardId: cardId,
-		windowRef: iframe.contentWindow,
-		rememberMe
-	});
+		document.body.appendChild(iframe);
 
-	// Optionally, remove the iframe after checkout completes
-	document.body.removeChild(iframe);
+		withCardResponse = await window.mcCheckoutService.checkoutWithCard({
+			srcDigitalCardId: cardId,
+			windowRef: iframe.contentWindow,
+			rememberMe
+		});
+
+		// Optionally, remove the iframe after checkout completes
+		document.body.removeChild(iframe);
+	}
 
 	const mastercardPayload = {
 		...additionalData,
-		flowId: response.headers['x-src-cx-flow-id'],
-		merchantTransactionId: response.headers['merchant-transaction-id'],
-		correlationId: response.checkoutResponseData.srcCorrelationId
+		flowId: withCardResponse.headers['x-src-cx-flow-id'],
+		merchantTransactionId: withCardResponse.headers['merchant-transaction-id'],
+		correlationId: withCardResponse.checkoutResponseData.srcCorrelationId
 	};
 
-	await window.firmly.paymentC2PTokenize(
+	const walletResponse = await window.firmly.paymentC2PTokenize(
 		cardId,
+		cvv,
 		null,
-		null,
-		response.checkoutResponse,
+		withCardResponse.checkoutResponse,
 		mastercardPayload
 	);
 
+	if (walletResponse.data?.cvv_required) {
+		previuslyWithCardResponse = withCardResponse;
+
+		return {
+			status: 200,
+			data: walletResponse.data
+		};
+	}
+
 	return {
 		status: 200,
-		data: response.checkoutResponseData.maskedCard
+		data: walletResponse.data
 	};
 }

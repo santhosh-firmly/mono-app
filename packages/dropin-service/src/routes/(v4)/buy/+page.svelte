@@ -492,11 +492,11 @@
 	}
 </script>
 
-<Visa
+<!-- <Visa
 	PUBLIC_c2p_dpa_id={data.PUBLIC_c2p_dpa_id}
 	PUBLIC_c2p_initiator_id={data.PUBLIC_c2p_initiator_id}
 	PUBLIC_c2p_sdk_url={data.PUBLIC_c2p_sdk_url}
-/>
+/> -->
 
 <!-- The following div helps detecting if the iframe is visible or not and correctly showing the contents. -->
 <div class="bottom-0 left-0 h-[1px] w-[1px]"></div>

@@ -54,9 +54,7 @@
 	let otpAlternativeTextDisabled = false;
 	let alternativeMethodText = 'Resend code';
 	let EmailC2P;
-	function sendVisaEventToTelemetry(name) {
-		window.firmly?.telemetryVisaEvent?.(name);
-	}
+
 	export async function c2pUnlockStart(email) {
 		isC2PInProgress = true;
 		EmailC2P = email;
@@ -71,12 +69,10 @@
 				otpPhoneInfo = c2pOTPDestination.phones[0];
 			}
 			otpDevice = 'Phone or Email';
-			sendVisaEventToTelemetry('openC2pOTPModal');
 			popupStep = BASE_LOGIN_STEPS.WAITING_OTP;
 			showC2pCheckbox = true;
 			isModalOpen = true;
 		} else if (res.status === 200 && res.data.recognized) {
-			sendVisaEventToTelemetry('login-c2p-successful');
 			dispatch('login-c2p-successful', Object.assign(res.data));
 		}
 		isC2PInProgress = false;
@@ -92,13 +88,11 @@
 			res = await window.firmly.visa.visaAuthenticate(cloneAuthenticationMethod);
 		}
 		if (res.status === 200 && res.data.payment_method_options) {
-			sendVisaEventToTelemetry('C2pOTPSucceeded');
 			otpError = '';
 			isUserLoggedInC2p = true;
 			isModalOpen = false;
 			dispatch('login-c2p-successful', Object.assign(res.data));
 		} else if (res.status === 200 && res.data.assuranceData) {
-			sendVisaEventToTelemetry('C2pStepupOTPSucceeded');
 			otpError = '';
 			isModalOpen = false;
 			dispatch('authenticate-c2p-successful', Object.assign(res.data));
@@ -127,10 +121,11 @@
 			popupStep = BASE_LOGIN_STEPS.SELECTING_C2P_STEPUP;
 		}
 	}
-	export async function tokenizeC2P(selectedCard) {
+	export async function tokenizeC2P(selectedCard, additionalData, cvv) {
 		const tokenizeResponse = await unified.checkoutWithCard({
 			cardId: selectedCard.id,
 			rememberMe: isChecked,
+			cvv,
 			additionalData: {
 				value: cart.total.value,
 				currency: cart.total.currency
@@ -141,7 +136,6 @@
 			const place_order_error = tokenizeResponse.data.description || tokenizeResponse.data;
 			return { place_order_error };
 		} else if (tokenizeResponse.data?.digitalCardData?.status === 'PENDING') {
-			sendVisaEventToTelemetry('openC2pStepUpModal');
 			c2pMaskedCard = tokenizeResponse.data;
 			popupStep = BASE_LOGIN_STEPS.SELECTING_C2P_STEPUP;
 			isModalOpen = true;
@@ -153,10 +147,8 @@
 		alternativeMethodText = 'Code sent';
 		otpAlternativeTextDisabled = true;
 		if (popupStep === BASE_LOGIN_STEPS.WAITING_OTP) {
-			sendVisaEventToTelemetry('resendCodeC2pOTP');
 			await c2pUnlockStart(EmailC2P);
 		} else if (popupStep === BASE_LOGIN_STEPS.WAITING_C2P_OTP_STEPUP) {
-			sendVisaEventToTelemetry('resendCodeC2pStepupOTP');
 			await handleContinueWithC2P(selectedAuthenticationMethod);
 		}
 		setTimeout(function () {
@@ -168,7 +160,6 @@
 		try {
 			const res = await unified.isRecognized();
 			if (res?.status === 200 && res?.data.recognized) {
-				sendVisaEventToTelemetry('login-c2p-successful');
 				dispatch('login-c2p-successful', Object.assign(res.data));
 			}
 		} catch (ex) {
