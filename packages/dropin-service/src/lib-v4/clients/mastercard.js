@@ -90,6 +90,13 @@ export async function isRecognized() {
 }
 
 export async function unlockStart(email) {
+	const recognizedData = await isRecognized();
+
+	if (recognizedData) {
+		console.warn('[Mastercard Unified]: Recognized cards found, no need to unlock.');
+		return recognizedData;
+	}
+
 	const { consumerPresent } = await window.mcCheckoutService.idLookup({ email });
 
 	if (!consumerPresent) {
