@@ -68,13 +68,14 @@ export async function startMasterCardUnifiedSolution({
 		srcDpaId,
 		dpaTransactionOptions: {
 			dpaLocale,
-			dpaLocale: 'en_US',
 			dpaBillingPreference: 'FULL',
 			consumerNameRequested: true,
 			consumerEmailAddressRequested: true,
-			consumerPhoneNumberRequested: true
+			consumerPhoneNumberRequested: true,
+			confirmPayment: false,
+			paymentOptions: [{ dynamicDataType: 'NONE' }]
 		},
-		dpaData: { dpaName: presentationName },
+		dpaData: { dpaName: presentationName, applicationType: 'WEB_BROWSER' },
 		cardBrands: ['mastercard', 'maestro', 'visa', 'amex', 'discover']
 	});
 }
