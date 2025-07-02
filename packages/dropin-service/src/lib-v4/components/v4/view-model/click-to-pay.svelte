@@ -182,11 +182,13 @@
 						subtree: true
 					});
 
+					const FIVE_SECONDS = 5000;
+
 					// Set a timeout to avoid waiting indefinitely
 					setTimeout(() => {
 						observer.disconnect();
 						resolve();
-					}, 5000); // 5 second timeout
+					}, FIVE_SECONDS);
 				});
 			};
 
