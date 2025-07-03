@@ -7,7 +7,12 @@
 	import C2pLogo from '$lib-v4/components/common/c2p-logo.svelte';
 	import Checkbox from '../checkbox.svelte';
 	import { InfoC2PRememberMeLong } from '$lib-v4/browser/localization';
-	import * as unified from '$lib-v4/clients/mastercard';
+	import {
+		isRecognized,
+		unlockComplete,
+		unlockStart,
+		checkoutWithCard
+	} from '$lib-v4/clients/mastercard';
 
 	const dispatch = createEventDispatcher();
 	/**
@@ -58,7 +63,7 @@
 	export async function c2pUnlockStart(email) {
 		isC2PInProgress = true;
 		EmailC2P = email;
-		const res = await unified.unlockStart(email);
+		const res = await unlockStart(email);
 		if (res.status === 200 && res.data.otp_destination) {
 			c2pOTPDestination = res.data.otp_destination;
 			otpEmailInfo = otpPhoneInfo = null;
@@ -81,7 +86,7 @@
 		let res;
 		if (!otpReference) {
 			popupStep = BASE_LOGIN_STEPS.PROCESSING_OTP;
-			res = await unified.unlockComplete(event.detail.otpValue);
+			res = await unlockComplete(event.detail.otpValue);
 		} else {
 			const cloneAuthenticationMethod = structuredClone(selectedAuthenticationMethod);
 			cloneAuthenticationMethod.methodAttributes.otpValue = event.detail.otpValue;
@@ -122,7 +127,7 @@
 		}
 	}
 	export async function tokenizeC2P(selectedCard, additionalData, cvv) {
-		const tokenizeResponse = await unified.checkoutWithCard({
+		const tokenizeResponse = await checkoutWithCard({
 			cardId: selectedCard.id,
 			rememberMe: isChecked,
 			cvv,
@@ -158,7 +163,7 @@
 	}
 	onMount(async () => {
 		try {
-			const res = await unified.isRecognized();
+			const res = await isRecognized();
 			if (res?.status === 200 && res?.data.recognized) {
 				dispatch('login-c2p-successful', Object.assign(res.data));
 			}
