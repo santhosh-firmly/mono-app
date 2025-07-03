@@ -75,6 +75,7 @@ export async function startMasterCardUnifiedSolution({
 			confirmPayment: false,
 			paymentOptions: [{ dynamicDataType: 'NONE' }]
 		},
+		checkoutExperience: 'PAYMENT_SETTINGS',
 		dpaData: { dpaName: presentationName, applicationType: 'WEB_BROWSER' },
 		cardBrands: ['mastercard', 'maestro', 'visa', 'amex', 'discover']
 	});
