@@ -268,7 +268,7 @@
 						{disabled}
 						bind:value={number}
 						bind:this={numberElement}
-						data-testid="number"
+						data-testid="card-number"
 						placeholder="1234 1234 1234 1234"
 						autocomplete="cc-number"
 						inputmode="numeric"
@@ -361,7 +361,7 @@
 {/if}
 
 {#if !isBillingSameShipping}
-	<div class="pt-4" transition:slide={{ duration: 150 }}>
+	<div class="pt-4" data-testid="billing-address-form" transition:slide={{ duration: 150 }} >
 		<span class="text-sm">Billing Address</span>
 		<Address
 			{disabled}

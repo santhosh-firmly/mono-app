@@ -1234,7 +1234,7 @@
 											<div class="w-full">
 												<span class="text-sm font-bold">{email}</span>
 												<hr />
-												<span class="text-sm">
+												<span class="text-sm" data-testid="collapsed-shipping-address">
 													{$cart.shipping_info?.first_name}
 													{$cart.shipping_info?.last_name} · {$cart
 														.shipping_info?.address1}{$cart
@@ -1375,7 +1375,7 @@
 											</Checkbox>
 										{/if}
 									</div>
-									<div>
+									<div data-testid="shipping-address-form">
 										<h3 class="py-1 text-sm">Shipping Address</h3>
 										<Address
 											on:focusremoved={() => onSetShippingInfo()}
@@ -1407,7 +1407,7 @@
 									>
 										{#if $cart.shipping_method}
 											<div class="w-full">
-												<div class="flex flex-row justify-between text-sm">
+												<div class="flex flex-row justify-between text-sm" data-testid="collapsed-shipping-method">
 													<span class="font-bold"
 														>{$cart.shipping_method.description}</span
 													>
@@ -1426,6 +1426,7 @@
 											<button
 												type="button"
 												class="ml-5 rounded-full px-1 text-sm text-blue-500"
+												data-testid="change-shipping-method-button"
 												on:click={() => {
 													collapsedStateShippingMethod = false;
 												}}
