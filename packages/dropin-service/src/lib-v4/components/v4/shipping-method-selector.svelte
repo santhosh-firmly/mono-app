@@ -77,6 +77,7 @@
 				class:group-item-custom-bg={disabled && selectedShippingMethod !== shippingMethod.sku}
 				class:rounded-t-lg={isFirst(shippingMethods, index)}
 				class:rounded-b-lg={isLast(shippingMethods, index)}
+				data-testid={`shipping-methods-${shippingMethod.sku}`}
 			>
 				<input
 					name="shipping-method"
