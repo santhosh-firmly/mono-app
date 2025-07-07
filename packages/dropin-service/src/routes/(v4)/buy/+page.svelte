@@ -6,7 +6,6 @@
 		initializeAppVersion,
 		initializeDomain
 	} from '$lib-v4/browser/api-firmly.js';
-	import Visa from '$lib-v4/clients/visa.svelte';
 	import { postCheckoutClosed, postOrderPlaced } from '$lib-v4/browser/cross.js';
 	import { onMount } from 'svelte';
 	import FlowSinglePage from '$lib-v4/components/v4/flow-single-page.svelte';
@@ -22,6 +21,7 @@
 	import PopupLayout from './popup-layout.svelte';
 	import BottomsheetLayout from './bottom-sheet-layout.svelte';
 	import PdpSkeleton from './pdp-skeleton.svelte';
+	import { startMasterCardUnifiedSolution } from '$lib-v4/clients/mastercard';
 
 	let error = $state();
 	let skipPdp = $state(false);
@@ -434,6 +434,11 @@
 		// Initialize the session in the background.
 		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server);
 		initializeAppVersion(version);
+		startMasterCardUnifiedSolution({
+			srcDpaId: data.PUBLIC_unified_c2p_dpa_id,
+			presentationName: data.PUBLIC_unified_c2p_presentation_name,
+			sandbox: data.PUBLIC_unified_c2p_sandbox
+		});
 
 		// Get custom_properties from URL if present
 		const customPropsParam = $page.url.searchParams.get('custom_properties');
@@ -487,11 +492,11 @@
 	}
 </script>
 
-<Visa
+<!-- <Visa
 	PUBLIC_c2p_dpa_id={data.PUBLIC_c2p_dpa_id}
 	PUBLIC_c2p_initiator_id={data.PUBLIC_c2p_initiator_id}
 	PUBLIC_c2p_sdk_url={data.PUBLIC_c2p_sdk_url}
-/>
+/> -->
 
 <!-- The following div helps detecting if the iframe is visible or not and correctly showing the contents. -->
 <div class="bottom-0 left-0 h-[1px] w-[1px]"></div>

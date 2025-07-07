@@ -1388,9 +1388,17 @@ async function paymentCompleteOrderV3(ccInfo, paymentHandle) {
 
 //#region Wallet functions
 
-async function paymentTokenizeWallet(wallet, walletAccessToken, cardId, cvv = null, jws = null) {
+async function paymentTokenizeWallet(
+	wallet,
+	walletAccessToken,
+	cardId,
+	cvv = null,
+	jws = null,
+	additionalData = {}
+) {
 	const body = { credit_card_id: cardId + '' };
 	const cart = getSessionCart();
+
 	if (cart) {
 		body.handle = cart.payment_handle;
 	}
@@ -1402,6 +1410,9 @@ async function paymentTokenizeWallet(wallet, walletAccessToken, cardId, cvv = nu
 	}
 	if (jws) {
 		body.jws = jws;
+	}
+	if (Object.keys(additionalData).length > 0) {
+		body.additional_data = additionalData;
 	}
 
 	const headers = await getHeaders();
@@ -1455,7 +1466,11 @@ function setC2PAccessToken(value) {
 	sessionStorage.setItem(WALLET_C2P_ACCESS_TOKEN, value);
 }
 
-const CLICK_2_PAY = 'visa';
+let CLICK_2_PAY = 'visa';
+
+function changeC2PProvider(provider = 'mastercard-unified') {
+	CLICK_2_PAY = provider;
+}
 
 async function c2pWalletUnlockStart(emailAddress) {
 	const ret = await walletUnlockStart(CLICK_2_PAY, emailAddress);
@@ -1478,12 +1493,18 @@ async function c2pWalletUnlockComplete(otp, accessToken = null) {
 	return ret;
 }
 
-async function paymentC2PTokenize(cardId, cvv = null, accessToken = null, jws = null) {
+async function paymentC2PTokenize(
+	cardId,
+	cvv = null,
+	accessToken = null,
+	jws = null,
+	additionalData = {}
+) {
 	if (!accessToken) {
 		accessToken = getC2PAccessToken();
 	}
 
-	return paymentTokenizeWallet(CLICK_2_PAY, accessToken, cardId, cvv, jws);
+	return paymentTokenizeWallet(CLICK_2_PAY, accessToken, cardId, cvv, jws, additionalData);
 }
 
 //#endregion
@@ -1690,6 +1711,7 @@ if (typeof window !== 'undefined') {
 	firmly.c2pWalletUnlockStart = c2pWalletUnlockStart;
 	firmly.c2pWalletUnlockComplete = c2pWalletUnlockComplete;
 	firmly.paymentC2PTokenize = paymentC2PTokenize;
+	firmly.changeC2PProvider = changeC2PProvider;
 
 	// Wallet ShopPay functions
 	firmly.shopPayWalletUnlockStart = shopPayWalletUnlockStart;

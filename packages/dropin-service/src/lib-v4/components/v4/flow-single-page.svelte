@@ -17,7 +17,7 @@
 	import { postOrderPlaced, postQuantityUpdated, postSignIn } from '$lib-v4/browser/cross.js';
 	import LoginButton from './login-button.svelte';
 	import Shoppay from './view-model/shoppay.svelte';
-	import ClickToPay from './view-model/click-to-pay.svelte';
+	import ClickToPay from './view-model/click-to-pay-unified.svelte';
 	import { BASE_LOGIN_STEPS, NEW_CARD_OPTION, NEW_SHIPPING_ADDRESS } from '$lib-v4/constants.js';
 	import MerchantLogin from './view-model/merchant-login.svelte';
 	import Checkbox from './checkbox.svelte';
@@ -676,7 +676,7 @@
 		return placeOrderResponse.data;
 	}
 
-	async function placeOrderC2P(selectedCard, additionalData = {}) {
+	async function placeOrderC2P(selectedCard, additionalData = $cart) {
 		const tokenizeResponse = await tokenizeC2P(
 			selectedCard,
 			additionalData,
@@ -695,6 +695,7 @@
 			const placeOrderResponse = await window.firmly.cartCompleteOrder(
 				tokenizeResponse.token
 			);
+
 			if (placeOrderResponse.status !== 200) {
 				place_order_error = placeOrderResponse.data.description || placeOrderResponse.data;
 				return;
@@ -1681,6 +1682,7 @@
 			on:login-successful={onMerchantLoginSuccess}
 		/>
 		<ClickToPay
+			cart={$cart}
 			on:login-c2p-successful={onC2PLoginSuccess}
 			on:authenticate-c2p-successful={handleC2PAuthenticate}
 			{c2pOTPDestination}
