@@ -6,7 +6,6 @@
 		initializeAppVersion,
 		initializeDomain
 	} from '$lib-v4/browser/api-firmly.js';
-	import Visa from '$lib-v4/clients/visa.svelte';
 	import { postCheckoutClosed, postOrderPlaced } from '$lib-v4/browser/cross.js';
 	import { onMount } from 'svelte';
 	import FlowSinglePage from '$lib-v4/components/v4/flow-single-page.svelte';
@@ -437,7 +436,8 @@
 		initializeAppVersion(version);
 		startMasterCardUnifiedSolution({
 			srcDpaId: data.PUBLIC_unified_c2p_dpa_id,
-			presentationName: data.PUBLIC_unified_c2p_presentation_name
+			presentationName: data.PUBLIC_unified_c2p_presentation_name,
+			sandbox: data.PUBLIC_unified_c2p_sandbox
 		});
 
 		// Get custom_properties from URL if present

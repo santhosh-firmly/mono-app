@@ -180,7 +180,8 @@
 		initializeAppVersion(version);
 		startMasterCardUnifiedSolution({
 			srcDpaId: data.PUBLIC_unified_c2p_dpa_id,
-			presentationName: data.PUBLIC_unified_c2p_presentation_name
+			presentationName: data.PUBLIC_unified_c2p_presentation_name,
+			sandbox: data.PUBLIC_unified_c2p_sandbox
 		});
 	});
 

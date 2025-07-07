@@ -35,7 +35,7 @@ function fromMaskedCards(maskedCards) {
 }
 
 export async function startMasterCardUnifiedSolution({
-	sandbox = true,
+	sandbox = false,
 	dpaLocale = 'en_US',
 	srcDpaId,
 	presentationName = 'Firmly, Inc.'

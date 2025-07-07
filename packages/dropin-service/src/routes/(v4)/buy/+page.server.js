@@ -35,7 +35,8 @@ export const load = async ({ url, platform }) => {
 		PUBLIC_c2p_initiator_id: platform.env.PUBLIC_c2p_initiator_id,
 		PUBLIC_unified_c2p_dpa_id: platform.env.PUBLIC_unified_c2p_dpa_id,
 		PUBLIC_unified_c2p_dpa_presentation_name:
-			platform.env.PUBLIC_unified_c2p_dpa_presentation_name
+			platform.env.PUBLIC_unified_c2p_dpa_presentation_name,
+		PUBLIC_unified_c2p_sandbox: Boolean(platform.env.PUBLIC_unified_c2p_sandbox)
 	};
 
 	const isValidRequest = domain && merchantDomain;
