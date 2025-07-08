@@ -25,7 +25,7 @@
 
 	let error = $state();
 	let skipPdp = $state(false);
-	let showCheckout = $state(false);
+	let showCheckout = $state(true);
 	let multipleVariants = $state(false);
 	let iframeHeight = $state(0);
 	let iframeDisplay = $state('none');
@@ -250,6 +250,7 @@
 			// Multiple variants, show PDP.
 			console.log('firmly - Multiple variants, show PDP.');
 			multipleVariants = true;
+			showCheckout = false;
 			pageState = 'pdp';
 
 			// Listen for the message from the ECS Service
