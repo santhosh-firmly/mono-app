@@ -950,7 +950,7 @@
 	//
 </script>
 
-<div class="@container relative min-h-full">
+<div class="@container relative h-dvh bg-white">
 	<div class="@md:bg-fy-primary absolute top-0 left-0 h-full w-1/2"></div>
 	<div class="@md:bg-fy-background absolute top-0 right-0 h-full w-1/2 shadow"></div>
 	<div class="relative flex w-full flex-col items-center justify-center">
@@ -1235,7 +1235,10 @@
 											<div class="w-full">
 												<span class="text-sm font-bold">{email}</span>
 												<hr />
-												<span class="text-sm" data-testid="collapsed-shipping-address">
+												<span
+													class="text-sm"
+													data-testid="collapsed-shipping-address"
+												>
 													{$cart.shipping_info?.first_name}
 													{$cart.shipping_info?.last_name} · {$cart
 														.shipping_info?.address1}{$cart
@@ -1408,7 +1411,10 @@
 									>
 										{#if $cart.shipping_method}
 											<div class="w-full">
-												<div class="flex flex-row justify-between text-sm" data-testid="collapsed-shipping-method">
+												<div
+													class="flex flex-row justify-between text-sm"
+													data-testid="collapsed-shipping-method"
+												>
 													<span class="font-bold"
 														>{$cart.shipping_method.description}</span
 													>
