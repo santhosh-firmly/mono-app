@@ -950,9 +950,9 @@
 	//
 </script>
 
-<div class="@container relative h-dvh bg-white">
+<div class="@container relative min-h-dvh bg-white">
 	<div class="@md:bg-fy-primary absolute top-0 left-0 h-full w-1/2"></div>
-	<div class="@md:bg-fy-background absolute top-0 right-0 h-full w-1/2 shadow"></div>
+	<div class="@md:bg-fy-background absolute top-0 right-0 h-full w-1/2 @md:shadow"></div>
 	<div class="relative flex w-full flex-col items-center justify-center">
 		<div class="sticky top-0 z-[120] w-full @md:hidden">
 			<Header
