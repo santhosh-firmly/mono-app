@@ -106,6 +106,17 @@
 	let selectedCardOption;
 	let selectedShippingAddress;
 
+	// Array to track cards that require CVV
+	let cardsRequiringCvv = [];
+	let cvvConfirmationValue = '';
+
+	// Clear CVV input when switching to a card that doesn't require CVV
+	$: {
+		if (!cardsRequiringCvv.includes(selectedCardOption)) {
+			cvvConfirmationValue = '';
+		}
+	}
+
 	/**
 	 * Boolean variable to control if Click To Pay modal is open or not
 	 */
@@ -117,7 +128,6 @@
 	let c2pCards;
 	let isUserLoggedInC2p;
 	let cardRequiringCvv = null;
-	let cvvConfirmationValue = '';
 
 	/**
 	 * Boolean variable to set the first card from C2P if needed
@@ -684,12 +694,14 @@
 		);
 
 		if (tokenizeResponse.cvv_required) {
-			cardRequiringCvv = selectedCardOption;
+			if (!cardsRequiringCvv.includes(selectedCardOption)) {
+				cardsRequiringCvv = [...cardsRequiringCvv, selectedCardOption];
+			}
 			return;
 		}
 
 		if (tokenizeResponse?.token) {
-			cardRequiringCvv = null;
+			cardsRequiringCvv = cardsRequiringCvv.filter((card) => card !== selectedCardOption);
 			cvvConfirmationValue = '';
 
 			const placeOrderResponse = await window.firmly.cartCompleteOrder(
@@ -1527,7 +1539,7 @@
 									{onPaypalHandler}
 									{savedCreditCards}
 									{shouldTryFocusOnPaymentTab}
-									{cardRequiringCvv}
+									{cardsRequiringCvv}
 									bind:paypalPayerId
 									bind:cvvConfirmationValue
 									bind:validateCreditCard
@@ -1653,7 +1665,9 @@
 							on:click={onPlaceOrder}
 							disabled={shippingInfoInProgress ||
 								shippingMethodInProgress ||
-								(selectedPaymentMethod === 'PayPal' && !paypalConnected)}
+								(selectedPaymentMethod === 'PayPal' && !paypalConnected) ||
+								(cardsRequiringCvv.includes(selectedCardOption) &&
+									!cvvConfirmationValue)}
 							inProgress={placeOrderInProgress}
 							total={$cart?.total}
 							{isOrderPlaced}

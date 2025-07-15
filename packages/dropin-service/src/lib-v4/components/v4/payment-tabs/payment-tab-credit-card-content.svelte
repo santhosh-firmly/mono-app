@@ -15,7 +15,7 @@
 	import Address from '../address.svelte';
 	import Checkbox from '../checkbox.svelte';
 
-	export let cardRequiringCvv = null;
+	export let cardsRequiringCvv = [];
 	export let cvvConfirmationValue = '';
 
 	export let number;
@@ -196,7 +196,7 @@
 						number={savedCard.last_four}
 						customArtUrl={savedCard.art}
 					/>
-					{#if cardRequiringCvv === (savedCard.id || savedCard.pan)}
+					{#if cardsRequiringCvv && cardsRequiringCvv.includes(savedCard.id || savedCard.pan)}
 						<div class="mb-2 flex items-center gap-2">
 							<span class="text-fy-alert text-sm">Please confirm your CVV</span>
 						</div>
