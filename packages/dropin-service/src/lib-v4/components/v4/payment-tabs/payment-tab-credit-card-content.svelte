@@ -15,7 +15,7 @@
 	import Address from '../address.svelte';
 	import Checkbox from '../checkbox.svelte';
 
-	export let isCvvRequired = false;
+	export let cardsRequiringCvv = [];
 	export let cvvConfirmationValue = '';
 
 	export let number;
@@ -95,12 +95,17 @@
 					month,
 					year: '20' + year,
 					verification_value:
-						selectedCardOption !== NEW_CARD_OPTION ? cvvConfirmationValue : verification_value
+						selectedCardOption !== NEW_CARD_OPTION
+							? cvvConfirmationValue
+							: verification_value
 				};
 
 				let isBillingCorrect = true;
 				if (!isBillingSameShipping) {
-					isBillingCorrect = await validateAndSubmitBillingAddress(BillingInfoSchema, false);
+					isBillingCorrect = await validateAndSubmitBillingAddress(
+						BillingInfoSchema,
+						false
+					);
 				}
 
 				const result = await CreditCardApiSchema.validate(creditCard, {
@@ -154,7 +159,8 @@
 					expiryDate = expiry[0];
 				}
 			} else if (expiry.length > 2) {
-				const [, month = null, year = null] = expiry.join('').match(/^(\d{2}).*(\d{2})$/) || [];
+				const [, month = null, year = null] =
+					expiry.join('').match(/^(\d{2}).*(\d{2})$/) || [];
 				expiryDate = [month, year].join('/');
 			} else {
 				expiryDate = expiry.join('/');
@@ -190,11 +196,9 @@
 						number={savedCard.last_four}
 						customArtUrl={savedCard.art}
 					/>
-					{#if isCvvRequired && (selectedCardOption === savedCard.id || selectedCardOption === savedCard.pan)}
-						<div class="mb-2 flex items-center gap-2">
-							<span class="text-fy-alert text-sm">Please confirm your CVV</span>
-						</div>
-						<div class="px-3 py-2">
+					{#if cardsRequiringCvv && cardsRequiringCvv.includes(savedCard.id || savedCard.pan)}
+						<div class="flex flex-col gap-2">
+							<span class="text-fy-alert text-xs"> Please confirm your CVV </span>
 							<input
 								class="border-fy-on-primary-subtle placeholder:text-fy-on-primary-subtle w-full rounded border p-2 disabled:bg-gray-100"
 								class:error
@@ -317,7 +321,12 @@
 					/>
 				</div>
 				<div class="absolute top-0 right-0 z-10 mr-3 flex h-full flex-col justify-center">
-					<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 44 44">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="28"
+						height="28"
+						viewBox="0 0 44 44"
+					>
 						<g fill="none" fill-rule="evenodd">
 							<path d="M0 0h44v44H0z" />
 							<path
@@ -329,7 +338,10 @@
 							<circle cx="27.5" cy="27.5" r="1" class="stroke-fy-on-surface-subtle" />
 							<circle cx="31.5" cy="27.5" r="1" class="stroke-fy-on-surface-subtle" />
 							<circle cx="35.5" cy="27.5" r="1" class="stroke-fy-on-surface-subtle" />
-							<path class="fill-fy-on-surface-subtle" d="M1 11h42v1H1zM1 15h42v1H1z" />
+							<path
+								class="fill-fy-on-surface-subtle"
+								d="M1 11h42v1H1zM1 15h42v1H1z"
+							/>
 							<path
 								stroke="#904EBA"
 								stroke-linecap="round"
@@ -361,7 +373,7 @@
 {/if}
 
 {#if !isBillingSameShipping}
-	<div class="pt-4" data-testid="billing-address-form" transition:slide={{ duration: 150 }} >
+	<div class="pt-4" data-testid="billing-address-form" transition:slide={{ duration: 150 }}>
 		<span class="text-sm">Billing Address</span>
 		<Address
 			{disabled}
