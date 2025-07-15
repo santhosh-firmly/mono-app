@@ -197,10 +197,8 @@
 						customArtUrl={savedCard.art}
 					/>
 					{#if cardsRequiringCvv && cardsRequiringCvv.includes(savedCard.id || savedCard.pan)}
-						<div class="mb-2 flex items-center gap-2">
-							<span class="text-fy-alert text-sm">Please confirm your CVV</span>
-						</div>
-						<div class="px-3 py-2">
+						<div class="flex flex-col gap-2">
+							<span class="text-fy-alert text-xs"> Please confirm your CVV </span>
 							<input
 								class="border-fy-on-primary-subtle placeholder:text-fy-on-primary-subtle w-full rounded border p-2 disabled:bg-gray-100"
 								class:error
