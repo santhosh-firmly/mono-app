@@ -116,7 +116,7 @@
 	let isC2PInProgress;
 	let c2pCards;
 	let isUserLoggedInC2p;
-	let isCvvRequired = false;
+	let cardRequiringCvv = null;
 	let cvvConfirmationValue = '';
 
 	/**
@@ -684,12 +684,12 @@
 		);
 
 		if (tokenizeResponse.cvv_required) {
-			isCvvRequired = true;
+			cardRequiringCvv = selectedCardOption;
 			return;
 		}
 
 		if (tokenizeResponse?.token) {
-			isCvvRequired = false;
+			cardRequiringCvv = null;
 			cvvConfirmationValue = '';
 
 			const placeOrderResponse = await window.firmly.cartCompleteOrder(
@@ -1527,7 +1527,7 @@
 									{onPaypalHandler}
 									{savedCreditCards}
 									{shouldTryFocusOnPaymentTab}
-									{isCvvRequired}
+									{cardRequiringCvv}
 									bind:paypalPayerId
 									bind:cvvConfirmationValue
 									bind:validateCreditCard

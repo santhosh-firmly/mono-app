@@ -26,7 +26,7 @@
 	let paymentMethods = [];
 
 	export let cvvConfirmationValue;
-	export let isCvvRequired;
+	export let cardRequiringCvv;
 	export let selectedPaymentMethod;
 	export let selectedCardOption;
 	export let validateCreditCard;
@@ -72,7 +72,7 @@
 				this={supportedPaymentMethods[selectedPaymentMethod]?.content}
 				{disabled}
 				{shouldTryFocusOnPaymentTab}
-				{isCvvRequired}
+				{cardRequiringCvv}
 				bind:cvvConfirmationValue
 				bind:selectedCardOption
 				bind:validateCreditCard
