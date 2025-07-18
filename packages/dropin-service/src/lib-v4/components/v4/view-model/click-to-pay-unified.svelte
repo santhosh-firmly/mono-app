@@ -161,16 +161,6 @@
 			otpAlternativeTextDisabled = false;
 		}, 60000);
 	}
-	onMount(async () => {
-		try {
-			const res = await isRecognized();
-			if (res?.status === 200 && res?.data.recognized) {
-				dispatch('login-c2p-successful', Object.assign(res.data));
-			}
-		} catch (ex) {
-			console.error('Error checking Visa recognition:', ex);
-		}
-	});
 </script>
 
 <Modal bind:isModalOpen on:modalClosed>

@@ -255,35 +255,37 @@
 
 			// Listen for the message from the ECS Service
 			bindEvent(window, 'message', (e) => {
-				try {
-					let data = JSON.parse(e.data);
-					console.log('firmly - message data.action', data.action);
-					if (data.action == 'firmly::addToCart') {
-						// This will redirect the user to Firmly's thank you page
-						isParentIframed = data.isIframed;
-						initializeDomainInfo(data.store_id);
+				let data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
 
-						// Store custom properties if present in the message
-						if (data.custom_properties) {
-							window.firmly.customProperties = data.custom_properties;
-							console.log(
-								'Stored custom properties from message:',
-								window.firmly.customProperties
-							);
-						}
+				if (data?.action) {
+					try {
+						console.log('firmly - message data.action', data.action);
+						if (data.action == 'firmly::addToCart') {
+							// This will redirect the user to Firmly's thank you page
+							isParentIframed = data.isIframed;
+							initializeDomainInfo(data.store_id);
 
-						onAddToCart(data.transfer);
-					} else if (data.action == 'firmly::adjustSize') {
-						if (iframeHeight === 0) {
-							iframeHeight = data.data.height;
+							// Store custom properties if present in the message
+							if (data.custom_properties) {
+								window.firmly.customProperties = data.custom_properties;
+								console.log(
+									'Stored custom properties from message:',
+									window.firmly.customProperties
+								);
+							}
+
+							onAddToCart(data.transfer);
+						} else if (data.action == 'firmly::adjustSize') {
+							if (iframeHeight === 0) {
+								iframeHeight = data.data.height;
+							}
+						} else if (data.action == 'firmly::onDOMContentLoaded') {
+							iframeDisplay = 'block';
+							console.log('firmly - iframeDisplay', iframeDisplay);
 						}
-					} else if (data.action == 'firmly::onDOMContentLoaded') {
-						iframeDisplay = 'block';
-						console.log('firmly - iframeDisplay', iframeDisplay);
+					} catch (ex) {
+						console.log('Firmly message bind error', ex);
 					}
-				} catch (ex) {
-					// Ignored
-					console.log('error', ex);
 				}
 			});
 
@@ -457,18 +459,6 @@
 
 		setupLayout();
 		initiateFlow();
-
-		bindEvent(window, 'message', (e) => {
-			try {
-				let data = JSON.parse(e.data);
-				if (data.action == 'firmly::setTheme') {
-					initializeTheme(data.data);
-				}
-			} catch (ex) {
-				// Ignored
-				console.log('error', ex);
-			}
-		});
 	});
 
 	function onBackClick() {
