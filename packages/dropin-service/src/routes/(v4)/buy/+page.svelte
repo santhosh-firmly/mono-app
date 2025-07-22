@@ -429,9 +429,6 @@
 	}
 
 	onMount(async () => {
-		uiMode = $page.url.searchParams.get('ui_mode') || 'fullscreen';
-		skipPdp = $page.url.searchParams.get('skip_pdp') === 'true';
-
 		// Initialize the session in the background.
 		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server);
 		initializeAppVersion(version);
@@ -440,6 +437,9 @@
 			presentationName: data.PUBLIC_unified_c2p_presentation_name,
 			sandbox: data.PUBLIC_unified_c2p_sandbox
 		});
+
+		uiMode = $page.url.searchParams.get('ui_mode') || 'fullscreen';
+		skipPdp = $page.url.searchParams.get('skip_pdp') === 'true';
 
 		// Get custom_properties from URL if present
 		const customPropsParam = $page.url.searchParams.get('custom_properties');

@@ -308,6 +308,31 @@ export function telemetryEcsEvent(data) {
 	_telemetryTimeout = setTimeout(telemetryPush, TELEMETRY_THROTTLE_TIME);
 }
 
+export function telemetryDropinError(error) {
+	const firmly = window.firmly;
+	const headerProp = getHeaderProp();
+
+	_telemetryQueue.push(
+		Object.assign(
+			{
+				timestamp: Date.now(),
+				name: 'dropin error',
+				event_type: EVENT_TYPE_ERROR,
+				order: ++_telemetryOrder,
+				span_id: firmly.traceId,
+				event_id: getNextEventId(),
+				error: {
+					message: error.message,
+					stack: error.stack
+				}
+			},
+			headerProp
+		)
+	);
+	clearTimeout(_telemetryTimeout);
+	_telemetryTimeout = setTimeout(telemetryPush, TELEMETRY_THROTTLE_TIME);
+}
+
 function telemetryVisaApiPerformance(
 	durationMs,
 	apiName,
