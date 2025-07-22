@@ -4,7 +4,8 @@
 	import {
 		initialize,
 		initializeAppVersion,
-		initializeDomain
+		initializeDomain,
+		telemetryEcsEvent
 	} from '$lib-v4/browser/api-firmly.js';
 	import { postCheckoutClosed, postOrderPlaced } from '$lib-v4/browser/cross.js';
 	import { onMount } from 'svelte';
@@ -191,12 +192,7 @@
 
 	function getEcsUrl(url) {
 		const urlObj = new URL(url);
-		console.log('firmly - original hostname', urlObj.hostname);
-
 		urlObj.hostname = convertToFirmlyDomain(urlObj.hostname);
-
-		console.log('firmly - getEcsUrl - urlObj', urlObj.href);
-
 		return urlObj;
 	}
 
@@ -282,6 +278,8 @@
 						} else if (data.action == 'firmly::onDOMContentLoaded') {
 							iframeDisplay = 'block';
 							console.log('firmly - iframeDisplay', iframeDisplay);
+						} else if (data.action == 'firmly::telemetry') {
+							telemetryEcsEvent(data.data);
 						}
 					} catch (ex) {
 						console.log('Firmly message bind error', ex);

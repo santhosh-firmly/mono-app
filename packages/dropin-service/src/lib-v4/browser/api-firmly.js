@@ -286,6 +286,28 @@ function telemetryVisaEvent(name) {
 	_telemetryTimeout = setTimeout(telemetryPush, TELEMETRY_THROTTLE_TIME);
 }
 
+export function telemetryEcsEvent(data) {
+	const firmly = window.firmly;
+	const headerProp = getHeaderProp();
+
+	_telemetryQueue.push(
+		Object.assign(
+			{
+				timestamp: Date.now(),
+				name: 'ecs event',
+				event_type: EVENT_TYPE_UX,
+				order: ++_telemetryOrder,
+				span_id: firmly.traceId,
+				event_id: getNextEventId(),
+				data
+			},
+			headerProp
+		)
+	);
+	clearTimeout(_telemetryTimeout);
+	_telemetryTimeout = setTimeout(telemetryPush, TELEMETRY_THROTTLE_TIME);
+}
+
 function telemetryVisaApiPerformance(
 	durationMs,
 	apiName,
