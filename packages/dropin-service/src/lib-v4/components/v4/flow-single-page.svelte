@@ -1321,12 +1321,15 @@
 							{#if !savedAddresses || savedAddresses.length === 0 || selectedShippingAddress === NEW_SHIPPING_ADDRESS}
 								<div class="py-2" transition:slide={{ duration: 150 }}>
 									<div>
-										<h3 class="py-1 text-sm">Email</h3>
+										<label for="email-input-field" class="py-1 text-sm">
+											Email
+										</label>
 										<Group>
 											<div
 												class="col-span-2 flex w-full flex-col justify-center rounded-lg"
 											>
 												<input
+													id="email-input-field"
 													class="placeholder:text-fy-on-primary-subtle w-full rounded-lg border-0 focus:z-[2] disabled:bg-gray-100"
 													disabled={placeOrderInProgress ||
 														$cart?.session?.is_logged_in}
@@ -1336,17 +1339,24 @@
 													on:blur={() => {
 														validateAndSubmitContactInfo();
 													}}
-													placeholder=""
 													data-testid="email-input"
 													autocomplete={shippingAutoCompleteEnabled
 														? 'shipping email'
 														: ''}
 													type="email"
+													aria-required="true"
+													aria-describedby={email_error
+														? 'email-error'
+														: null}
 												/>
 											</div>
 										</Group>
 										{#if email_error}
-											<span class="text-fy-alert text-xs">
+											<span
+												id="email-error"
+												class="text-fy-alert text-xs"
+												role="alert"
+											>
 												{email_error}
 											</span>
 										{/if}
@@ -1628,7 +1638,7 @@
 									</svg>
 								</div>
 							</button>
-							<div class="flex flex-col">
+							<div class="flex flex-col" id="order-summary-content">
 								<div class="w-full">
 									<Summary
 										displayMode="collapsible"

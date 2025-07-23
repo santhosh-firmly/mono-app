@@ -37,13 +37,14 @@
 		class:hidden={!loaded}
 		on:error={onError}
 		on:load={onLoad}
+		decoding="async"
 	/>
 	{#if errored || !loaded}
 		<div
 			data-testid="card-image-placeholder"
-			class="image outline-fy-on-primary-subtle2 aspect-square rounded-lg outline outline-1"
+			class="image outline-fy-on-primary-subtle2 aspect-square rounded-lg outline-1"
 			class:animate-pulse={!errored}
-		/>
+		></div>
 	{/if}
 </div>
 

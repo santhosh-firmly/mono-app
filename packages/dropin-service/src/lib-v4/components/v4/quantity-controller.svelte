@@ -35,6 +35,7 @@
 			<button
 				class="h-full w-8 p-1 px-2 text-xs font-bold hover:bg-gray-100 disabled:bg-gray-100"
 				type="button"
+				aria-label="Decrease Quantity"
 				{disabled}
 				on:click={() => updateItemQuantity(--quantity)}
 				data-testid="decrease-quantity"
@@ -61,6 +62,7 @@
 				{disabled}
 				bind:value={inputFieldValue}
 				data-testid="quantity-input"
+				aria-label="Quantity Input"
 				on:change={(ev) => {
 					updateItemQuantityImmediately(Math.min(ev.target.value, MAX_QUANTITY_ALLOWED));
 				}}
@@ -69,6 +71,7 @@
 				class="text w-8 p-1 px-2 text-xs font-bold hover:bg-gray-100 disabled:bg-gray-100"
 				type="button"
 				{disabled}
+				aria-label="Increase Quantity"
 				data-testid="increase-quantity"
 				on:click={() => updateItemQuantity(++quantity)}
 			>

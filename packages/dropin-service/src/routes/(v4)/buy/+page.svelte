@@ -481,6 +481,33 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Firmly - Buy Now</title>
+	<meta
+		name="description"
+		content="Complete your purchase securely with Firmly's trusted checkout platform. Fast, safe, and easy payments for your online shopping."
+	/>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta name="robots" content="index, follow" />
+	<meta property="og:title" content="Secure Checkout - Firmly" />
+	<meta
+		property="og:description"
+		content="Complete your purchase securely with Firmly's trusted checkout platform. Fast, safe, and easy payments for your online shopping."
+	/>
+	<meta property="og:type" content="website" />
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:title" content="Secure Checkout - Firmly" />
+	<meta
+		name="twitter:description"
+		content="Complete your purchase securely with Firmly's trusted checkout platform. Fast, safe, and easy payments for your online shopping."
+	/>
+
+	<!-- Preconnect to external domains for better performance -->
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+	<link rel="preconnect" href="https://js.hcaptcha.com" />
+</svelte:head>
+
 <!-- <Visa
 	PUBLIC_c2p_dpa_id={data.PUBLIC_c2p_dpa_id}
 	PUBLIC_c2p_initiator_id={data.PUBLIC_c2p_initiator_id}
