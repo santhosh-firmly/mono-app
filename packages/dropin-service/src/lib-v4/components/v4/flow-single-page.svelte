@@ -3,6 +3,7 @@
 	import * as Yup from 'yup';
 	import { Required } from '$lib-v4/browser/localization.js';
 	import ShopPayIcon from '../common/svg/shop-pay-icon.svelte';
+	import SpinnerIcon from '../common/svg/spinner-icon.svelte';
 	import Paypal from '../payment/paypal.svelte';
 	import Address from './address.svelte';
 	import FooterLinks from './footer-links.svelte';
@@ -128,6 +129,7 @@
 	let c2pCards;
 	let isUserLoggedInC2p;
 	let cardRequiringCvv = null;
+	let isEmailValidating = false;
 
 	/**
 	 * Boolean variable to set the first card from C2P if needed
@@ -494,21 +496,31 @@
 	}
 
 	async function validateAndSubmitContactInfo() {
-		const isEmailValid = await validateEmail();
-		if (isEmailValid) {
-			if (
-				$cart.session?.requires_login &&
-				!$cart.session?.is_logged_in &&
-				areModalsClosed()
-			) {
-				await merchantLoginCreateOtp(email);
-			}
+		isEmailValidating = true;
+		try {
+			const isEmailValid = await validateEmail();
+			if (isEmailValid) {
+				if (
+					$cart.session?.requires_login &&
+					!$cart.session?.is_logged_in &&
+					areModalsClosed()
+				) {
+					await merchantLoginCreateOtp(email);
+				}
 
-			if (isC2PAvailable() && areModalsClosed() && !isUserLoggedInC2p && !isC2PInProgress) {
-				await c2pUnlockStart(email);
-			}
+				if (
+					isC2PAvailable() &&
+					areModalsClosed() &&
+					!isUserLoggedInC2p &&
+					!isC2PInProgress
+				) {
+					await c2pUnlockStart(email);
+				}
 
-			await validateAndSubmitShipping();
+				await validateAndSubmitShipping();
+			}
+		} finally {
+			isEmailValidating = false;
 		}
 	}
 
@@ -1327,18 +1339,21 @@
 										</label>
 										<Group>
 											<div
-												class="col-span-2 flex w-full flex-col justify-center rounded-lg"
+												class="relative col-span-2 flex w-full flex-col justify-center rounded-lg"
 											>
 												<input
 													id="email-input-field"
-													class="placeholder:text-fy-on-primary-subtle w-full rounded-lg border-0 focus:z-[2] disabled:bg-gray-100"
+													class="placeholder:text-fy-on-primary-subtle w-full rounded-lg border-0 pr-10 focus:z-[2] disabled:bg-gray-100"
 													disabled={placeOrderInProgress ||
-														$cart?.session?.is_logged_in}
+														$cart?.session?.is_logged_in ||
+														isEmailValidating}
 													class:error={email_error}
 													bind:this={emailField}
 													bind:value={email}
 													on:blur={() => {
-														validateAndSubmitContactInfo();
+														if (!isEmailValidating) {
+															validateAndSubmitContactInfo();
+														}
 													}}
 													data-testid="email-input"
 													autocomplete={shippingAutoCompleteEnabled
@@ -1350,6 +1365,15 @@
 														? 'email-error'
 														: null}
 												/>
+												{#if isEmailValidating}
+													<div
+														class="absolute top-1/2 right-3 -translate-y-1/2 transform"
+													>
+														<SpinnerIcon
+															class="text-fy-on-primary-subtle h-4 w-4"
+														/>
+													</div>
+												{/if}
 											</div>
 										</Group>
 										{#if email_error}
