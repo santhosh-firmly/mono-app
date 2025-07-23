@@ -4,7 +4,8 @@
 	import {
 		initialize,
 		initializeAppVersion,
-		initializeDomain
+		initializeDomain,
+		telemetryEcsEvent
 	} from '$lib-v4/browser/api-firmly.js';
 	import { postCheckoutClosed, postOrderPlaced } from '$lib-v4/browser/cross.js';
 	import { onMount } from 'svelte';
@@ -191,12 +192,7 @@
 
 	function getEcsUrl(url) {
 		const urlObj = new URL(url);
-		console.log('firmly - original hostname', urlObj.hostname);
-
 		urlObj.hostname = convertToFirmlyDomain(urlObj.hostname);
-
-		console.log('firmly - getEcsUrl - urlObj', urlObj.href);
-
 		return urlObj;
 	}
 
@@ -282,6 +278,8 @@
 						} else if (data.action == 'firmly::onDOMContentLoaded') {
 							iframeDisplay = 'block';
 							console.log('firmly - iframeDisplay', iframeDisplay);
+						} else if (data.action == 'firmly::telemetry') {
+							telemetryEcsEvent(data.data);
 						}
 					} catch (ex) {
 						console.log('Firmly message bind error', ex);
@@ -431,9 +429,6 @@
 	}
 
 	onMount(async () => {
-		uiMode = $page.url.searchParams.get('ui_mode') || 'fullscreen';
-		skipPdp = $page.url.searchParams.get('skip_pdp') === 'true';
-
 		// Initialize the session in the background.
 		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server);
 		initializeAppVersion(version);
@@ -442,6 +437,9 @@
 			presentationName: data.PUBLIC_unified_c2p_presentation_name,
 			sandbox: data.PUBLIC_unified_c2p_sandbox
 		});
+
+		uiMode = $page.url.searchParams.get('ui_mode') || 'fullscreen';
+		skipPdp = $page.url.searchParams.get('skip_pdp') === 'true';
 
 		// Get custom_properties from URL if present
 		const customPropsParam = $page.url.searchParams.get('custom_properties');
