@@ -320,6 +320,12 @@
 		return !isC2POpen && !isShopPayOpen && !isMerchantLoginOpen;
 	}
 
+	// Reset C2P state when email changes to allow validation of new email
+	$: if (email) {
+		isUserLoggedInC2p = false;
+		isC2PInProgress = false;
+	}
+
 	async function addLineItem(sku, quantity, variantHandles) {
 		let totalQuantity = 0;
 		try {
@@ -487,13 +493,8 @@
 		return false;
 	}
 
-	let previouslyValidatedEmail = '';
-
 	async function validateAndSubmitContactInfo() {
-		const isEmailValid = (await validateEmail()) && email !== previouslyValidatedEmail;
-
-		previouslyValidatedEmail = email;
-
+		const isEmailValid = await validateEmail();
 		if (isEmailValid) {
 			if (
 				$cart.session?.requires_login &&
@@ -963,7 +964,7 @@
 </script>
 
 <div class="@container relative min-h-dvh bg-white">
-	<div class="@md:bg-fy-primary absolute top-0 left-0 h-full w-1/2"></div>
+	<div class="@md:bg-fy-primary absolute top-0 left-0 h-full w-1/2 transition-colors"></div>
 	<div class="@md:bg-fy-background absolute top-0 right-0 h-full w-1/2 @md:shadow"></div>
 	<div class="relative flex w-full flex-col items-center justify-center">
 		<div class="sticky top-0 z-[120] w-full @md:hidden">
@@ -1056,7 +1057,7 @@
 					bind:showMiniOverview
 				>
 					<div class="bg-fy-primary w-full">
-						<!--  Hack for showing to kardiel. This should become a configurations of the merchant's theme
+						<!--  Hack for showing to kardiel. This should become a` configurations of the merchant's theme
 						  It should be passed to the UI along with the colors, etc. -->
 						<Summary
 							displayMode="header"
