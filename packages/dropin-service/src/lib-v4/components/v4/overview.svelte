@@ -75,8 +75,8 @@
 				<CardStack {images} />
 			</div>
 			{#if !images}
-				<div class="bg-fy-on-primary-subtle2 m-1 h-4 w-20 animate-pulse rounded" />
-				<div class="bg-fy-on-primary-subtle2 m-1 h-6 w-20 animate-pulse rounded" />
+				<div class="bg-fy-on-primary-subtle2 m-1 h-4 w-20 animate-pulse rounded"></div>
+				<div class="bg-fy-on-primary-subtle2 m-1 h-6 w-20 animate-pulse rounded"></div>
 			{:else}
 				<span class="text-fy-on-primary-subtle pt-1">
 					Order Total ({itemQuantity} item{itemQuantity > 1 ? 's' : ''})
@@ -94,5 +94,6 @@
 		class="absolute top-0 left-0 h-full w-full border-0 bg-transparent @md:hidden"
 		type="button"
 		on:click={toggleExpanded}
+		aria-label="View order details"
 	></button>
 </div>

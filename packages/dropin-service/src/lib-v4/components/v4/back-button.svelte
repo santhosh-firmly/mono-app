@@ -23,6 +23,7 @@
 	class="text-fy-on-primary flex items-center px-2.5 py-5"
 	class:group={showBackButton}
 	class:cursor-default={!showBackButton}
+	aria-label="Go back to previous page"
 >
 	<svg
 		data-testid="back-arrow"

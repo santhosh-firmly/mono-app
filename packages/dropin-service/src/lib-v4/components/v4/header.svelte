@@ -67,6 +67,7 @@
 		class="bg-fy-primary z-[130] flex w-full flex-row items-center justify-between @md:z-[1]"
 		onclick={toggleExpanded}
 		type="button"
+		aria-label={expanded ? 'Close order summary' : 'Show order summary'}
 	>
 		<div class="flex w-1/2 items-center @md:w-full">
 			<BackButton {...merchantInfo} showBackButton={!expanded} {skeleton} on:back-click />
@@ -181,9 +182,10 @@
 	{/if}
 </header>
 {#if expanded}
-	<div
+	<button
 		class="fixed top-0 right-0 bottom-0 left-0 z-[110] bg-black opacity-30 backdrop-blur-2xl"
 		onclick={toggleExpanded}
 		aria-label="Close expanded view"
-	></div>
+	>
+	</button>
 {/if}
