@@ -34,6 +34,33 @@ function isStorageAvailable(type) {
 	}
 }
 
+/**
+ * Tracks a form-related UX telemetry event.
+ * @param {string} name - The event name (e.g., 'form_email_filled').
+ * @param {object} [details={}] - Additional event details (e.g., field values, context).
+ */
+export function telemetryFormEvent(name, details = {}) {
+	const firmly = window.firmly;
+	const headerProp = getHeaderProp();
+
+	_telemetryQueue.push(
+		Object.assign(
+			{
+				timestamp: Date.now(),
+				name,
+				event_type: EVENT_TYPE_UX,
+				order: ++_telemetryOrder,
+				span_id: firmly?.traceId,
+				event_id: getNextEventId(),
+				...details
+			},
+			headerProp
+		)
+	);
+	clearTimeout(_telemetryTimeout);
+	_telemetryTimeout = setTimeout(telemetryPush, TELEMETRY_THROTTLE_TIME);
+}
+
 class InMemory {
 	constructor() {
 		this.local = {};

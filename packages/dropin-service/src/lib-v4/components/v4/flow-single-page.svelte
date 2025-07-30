@@ -33,6 +33,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import Header from './header.svelte';
 	import classNames from 'classnames';
+	import { telemetryFormEvent } from '../../browser/api-firmly.js';
 
 	const dispatch = createEventDispatcher();
 	/**
@@ -44,6 +45,19 @@
 	let optionalFields = {};
 	$: {
 		optionalFields = $cart?.shop_properties?.optional_fields || {};
+	}
+
+	// --- Telemetry masking helpers ---
+	function maskEmail(email) {
+		if (!email) return '';
+		const [user, domain] = email.split('@');
+		if (!user || !domain) return '';
+		return user[0] + '***' + user.slice(-1) + '@' + domain;
+	}
+
+	function maskPostalCode(postal) {
+		if (!postal) return '';
+		return postal.slice(0, 3) + '***';
 	}
 
 	export let PUBLIC_DISABLE_HCAPTCHA = false;
@@ -105,6 +119,53 @@
 
 	let selectedPaymentMethod;
 	let selectedCardOption;
+
+	// --- Telemetry: Card and Payment Method Selection ---
+	let lastTrackedCardOption = null;
+	let lastTrackedPaymentMethod = null;
+	let cardSelectionInitialized = false;
+	let paymentTabSelectionInitialized = false;
+
+	$: {
+		// Only track after initial mount/first assignment
+		if (
+			cardSelectionInitialized &&
+			selectedCardOption !== lastTrackedCardOption &&
+			savedCreditCards &&
+			savedCreditCards.length > 0
+		) {
+			const card = savedCreditCards.find(
+				(c) => c.id === selectedCardOption || c.pan === selectedCardOption
+			);
+			const cardType =
+				card?.card_type ||
+				(selectedCardOption === NEW_CARD_OPTION ? 'new_card' : undefined);
+
+			if (cardType) {
+				telemetryFormEvent('card_selected', { cardType });
+			}
+			lastTrackedCardOption = selectedCardOption;
+		}
+		if (!cardSelectionInitialized && selectedCardOption) {
+			cardSelectionInitialized = true;
+			lastTrackedCardOption = selectedCardOption;
+		}
+	}
+
+	$: {
+		if (
+			paymentTabSelectionInitialized &&
+			selectedPaymentMethod !== lastTrackedPaymentMethod &&
+			selectedPaymentMethod
+		) {
+			telemetryFormEvent('payment_method_selected', { paymentMethod: selectedPaymentMethod });
+			lastTrackedPaymentMethod = selectedPaymentMethod;
+		}
+		if (!paymentTabSelectionInitialized && selectedPaymentMethod) {
+			paymentTabSelectionInitialized = true;
+			lastTrackedPaymentMethod = selectedPaymentMethod;
+		}
+	}
 	let selectedShippingAddress;
 
 	// Array to track cards that require CVV
@@ -316,6 +377,9 @@
 	function setEmail() {
 		email =
 			email || $cart?.shipping_info?.email || $cart?.shipping_info_options?.[0]?.email || '';
+		if (email) {
+			telemetryFormEvent('form_email_filled', { email: maskEmail(email) });
+		}
 	}
 
 	function areModalsClosed() {
@@ -441,6 +505,11 @@
 					// Real update from the server
 					cart.set(result.data);
 					shipping_info_error = '';
+					telemetryFormEvent('form_shipping_address_filled', {
+						country: shippingInfo.country,
+						postal: maskPostalCode(shippingInfo.postal),
+						shippingMethod: shippingInfo.shipping_method_sku
+					});
 				} else {
 					// Restore the original cart state if there's an error
 					cart.set(originalCart);
@@ -530,6 +599,9 @@
 			const result = await window.firmly.cartUpdateDelivery(shippingMethodSku);
 			if (result.status === 200) {
 				cart.set(result.data);
+				telemetryFormEvent('shipping_method_selected', {
+					shippingMethodSku
+				});
 			}
 		} catch (e) {
 			// TODO: Show error to the user
@@ -625,6 +697,12 @@
 			},
 			billing_info: billingInfo
 		};
+
+		// Only send non-sensitive, masked data
+		telemetryFormEvent('form_billing_address_filled', {
+			country: billingInfo.country,
+			postal: maskPostalCode(billingInfo.postal)
+		});
 
 		completeOrderResponse = await window.firmly.paymentCompleteOrderV3(
 			ccInfo,
@@ -788,6 +866,10 @@
 	}
 
 	async function onPlaceOrder(additionalData = {}) {
+		// Telemetry: user submitted the order form
+		telemetryFormEvent('form_submitted', {
+			paymentMethod: selectedPaymentMethod
+		});
 		try {
 			placeOrderInProgress = true;
 
