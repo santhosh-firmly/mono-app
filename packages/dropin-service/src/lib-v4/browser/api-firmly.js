@@ -40,25 +40,30 @@ function isStorageAvailable(type) {
  * @param {object} [details={}] - Additional event details (e.g., interaction type, context).
  */
 export function telemetryEvent(name, details = {}) {
-	const firmly = window.firmly;
-	const headerProp = getHeaderProp();
+	try {
+		const firmly = window.firmly;
+		const headerProp = getHeaderProp();
 
-	_telemetryQueue.push(
-		Object.assign(
-			{
-				timestamp: Date.now(),
-				name,
-				event_type: EVENT_TYPE_UX,
-				order: ++_telemetryOrder,
-				span_id: firmly?.traceId,
-				event_id: getNextEventId(),
-				...details
-			},
-			headerProp
-		)
-	);
-	clearTimeout(_telemetryTimeout);
-	_telemetryTimeout = setTimeout(telemetryPush, TELEMETRY_THROTTLE_TIME);
+		_telemetryQueue.push(
+			Object.assign(
+				{
+					timestamp: Date.now(),
+					name,
+					event_type: EVENT_TYPE_UX,
+					order: ++_telemetryOrder,
+					span_id: firmly?.traceId,
+					event_id: getNextEventId(),
+					...details
+				},
+				headerProp
+			)
+		);
+		clearTimeout(_telemetryTimeout);
+		_telemetryTimeout = setTimeout(telemetryPush, TELEMETRY_THROTTLE_TIME);
+	} catch (error) {
+		// Telemetry errors should never break the application
+		console.warn('Telemetry event failed:', error);
+	}
 }
 
 class InMemory {
