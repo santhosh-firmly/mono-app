@@ -35,11 +35,11 @@ function isStorageAvailable(type) {
 }
 
 /**
- * Tracks a form-related UX telemetry event.
- * @param {string} name - The event name (e.g., 'form_email_filled').
- * @param {object} [details={}] - Additional event details (e.g., field values, context).
+ * Enqueues a telemetry event for user interactions and behaviors.
+ * @param {string} name - The event name (e.g., 'card_selected', 'express_payment_clicked').
+ * @param {object} [details={}] - Additional event details (e.g., interaction type, context).
  */
-export function telemetryFormEvent(name, details = {}) {
+export function telemetryEvent(name, details = {}) {
 	const firmly = window.firmly;
 	const headerProp = getHeaderProp();
 

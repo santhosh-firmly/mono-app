@@ -33,7 +33,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import Header from './header.svelte';
 	import classNames from 'classnames';
-	import { telemetryFormEvent } from '../../browser/api-firmly.js';
+	import { telemetryEvent } from '../../browser/api-firmly.js';
 
 	const dispatch = createEventDispatcher();
 	/**
@@ -142,7 +142,7 @@
 				(selectedCardOption === NEW_CARD_OPTION ? 'new_card' : undefined);
 
 			if (cardType) {
-				telemetryFormEvent('card_selected', { cardType });
+				telemetryEvent('card_selected', { cardType });
 			}
 			lastTrackedCardOption = selectedCardOption;
 		}
@@ -158,7 +158,7 @@
 			selectedPaymentMethod !== lastTrackedPaymentMethod &&
 			selectedPaymentMethod
 		) {
-			telemetryFormEvent('payment_method_selected', { paymentMethod: selectedPaymentMethod });
+			telemetryEvent('payment_method_selected', { paymentMethod: selectedPaymentMethod });
 			lastTrackedPaymentMethod = selectedPaymentMethod;
 		}
 		if (!paymentTabSelectionInitialized && selectedPaymentMethod) {
@@ -378,7 +378,7 @@
 		email =
 			email || $cart?.shipping_info?.email || $cart?.shipping_info_options?.[0]?.email || '';
 		if (email) {
-			telemetryFormEvent('form_email_filled', { email: maskEmail(email) });
+			telemetryEvent('form_email_filled', { email: maskEmail(email) });
 		}
 	}
 
@@ -505,7 +505,7 @@
 					// Real update from the server
 					cart.set(result.data);
 					shipping_info_error = '';
-					telemetryFormEvent('form_shipping_address_filled', {
+					telemetryEvent('form_shipping_address_filled', {
 						country: shippingInfo.country,
 						postal: maskPostalCode(shippingInfo.postal),
 						shippingMethod: shippingInfo.shipping_method_sku
@@ -599,7 +599,7 @@
 			const result = await window.firmly.cartUpdateDelivery(shippingMethodSku);
 			if (result.status === 200) {
 				cart.set(result.data);
-				telemetryFormEvent('shipping_method_selected', {
+				telemetryEvent('shipping_method_selected', {
 					shippingMethodSku
 				});
 			}
@@ -659,6 +659,7 @@
 	}
 
 	function onPaypalHandler(cartData) {
+		telemetryEvent('express_payment_clicked', { paymentMethod: 'paypal' });
 		selectedPaymentMethod = 'PayPal';
 		paypalConnected = true;
 		email = cartData?.shipping_info?.email;
@@ -698,8 +699,7 @@
 			billing_info: billingInfo
 		};
 
-		// Only send non-sensitive, masked data
-		telemetryFormEvent('form_billing_address_filled', {
+		telemetryEvent('form_billing_address_filled', {
 			country: billingInfo.country,
 			postal: maskPostalCode(billingInfo.postal)
 		});
@@ -866,8 +866,7 @@
 	}
 
 	async function onPlaceOrder(additionalData = {}) {
-		// Telemetry: user submitted the order form
-		telemetryFormEvent('form_submitted', {
+		telemetryEvent('form_submitted', {
 			paymentMethod: selectedPaymentMethod
 		});
 		try {
@@ -1007,6 +1006,7 @@
 
 	async function loginButtonClicked(event) {
 		event.preventDefault();
+		telemetryEvent('express_payment_clicked', { paymentMethod: 'merchant_login' });
 		isMerchantLoginOpen = true;
 	}
 
@@ -1024,6 +1024,10 @@
 	async function handleSetShippingInfo(event) {
 		const shippingInfo = event.detail?.selectedShippingAddress;
 
+		telemetryEvent('shipping_address_selected', {
+			addressType: shippingInfo === NEW_SHIPPING_ADDRESS ? 'new_address' : 'saved_address'
+		});
+
 		if (shippingInfo !== NEW_SHIPPING_ADDRESS) {
 			await onSetShippingInfo(shippingInfo);
 		}
@@ -1040,7 +1044,9 @@
 		const result = await window.firmly.addPromoCode(promoCode);
 		if (result.status === 200) {
 			cart.set(result.data);
+			telemetryEvent('promo_code_added', { success: true });
 		} else {
+			telemetryEvent('promo_code_added', { success: false });
 			throw result.data;
 		}
 	}
@@ -1049,6 +1055,7 @@
 		const result = await window.firmly.clearPromoCodes();
 		if (result.status === 200) {
 			cart.set(result.data);
+			telemetryEvent('promo_code_removed');
 		} else {
 			// TODO: How to show such error to the user?
 		}
@@ -1286,7 +1293,12 @@
 											class="flex w-full flex-row items-center justify-center rounded bg-[#5a31f4] px-4 py-2 text-white shadow hover:bg-[#390ced]"
 											disabled={isC2PInProgress || placeOrderInProgress}
 											data-testid="shoppay-button"
-											on:click={() => (isShopPayOpen = true)}
+											on:click={() => {
+												telemetryEvent('express_payment_clicked', {
+													paymentMethod: 'shoppay'
+												});
+												isShopPayOpen = true;
+											}}
 										>
 											<ShopPayIcon
 												class="fill-white px-2"
@@ -1364,6 +1376,9 @@
 												class="ml-5 rounded-full px-1 text-sm text-blue-500"
 												data-testid="change-shipping-button"
 												on:click={() => {
+													telemetryEvent(
+														'shipping_address_change_clicked'
+													);
 													collapsedStateShipping = false;
 													if (savedAddresses.length === 1) {
 														selectedShippingAddress =
@@ -1564,6 +1579,9 @@
 												class="ml-5 rounded-full px-1 text-sm text-blue-500"
 												data-testid="change-shipping-method-button"
 												on:click={() => {
+													telemetryEvent(
+														'shipping_method_change_clicked'
+													);
 													collapsedStateShippingMethod = false;
 												}}
 											>
@@ -1628,6 +1646,7 @@
 											type="button"
 											class="ml-5 rounded-full px-1 text-sm text-blue-500"
 											on:click={() => {
+												telemetryEvent('payment_method_change_clicked');
 												collapsedStatePayment = false;
 											}}
 										>
