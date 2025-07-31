@@ -83,6 +83,7 @@
 
 	// Stitching header expanded state
 	let toggleHeaderExpanded;
+	let headerExpanded = false;
 
 	/**
 	 * Boolean variable to control if the line items are expanded or not in the Order Summary above the place order button
@@ -152,6 +153,7 @@
 		}
 	}
 
+	// --- Telemetry: Payment method interactions
 	$: {
 		if (
 			paymentTabSelectionInitialized &&
@@ -166,6 +168,17 @@
 			lastTrackedPaymentMethod = selectedPaymentMethod;
 		}
 	}
+
+	// --- Telemetry: Header interactions ---
+	let headerExpandedInitialized = false;
+	$: if (typeof headerExpanded === 'boolean') {
+		if (headerExpandedInitialized) {
+			telemetryEvent('header_order_summary_toggled', { expanded: headerExpanded });
+		} else {
+			headerExpandedInitialized = true;
+		}
+	}
+
 	let selectedShippingAddress;
 
 	// Array to track cards that require CVV
@@ -377,9 +390,6 @@
 	function setEmail() {
 		email =
 			email || $cart?.shipping_info?.email || $cart?.shipping_info_options?.[0]?.email || '';
-		if (email) {
-			telemetryEvent('form_email_filled', { email: maskEmail(email) });
-		}
 	}
 
 	function areModalsClosed() {
@@ -402,8 +412,9 @@
 					totalQuantity += item.quantity;
 				});
 				cart.set(result.data);
+				telemetryEvent('cart_item_added', { sku, quantity });
 			} else {
-				// TODO: Show error to the user
+				telemetryEvent('cart_item_add_failed', { sku, quantity });
 			}
 		} finally {
 			shippingMethodInProgress = false;
@@ -413,6 +424,7 @@
 
 	async function updateQuantity(item, quantity) {
 		let totalQuantity = 0;
+		const oldQuantity = item.quantity;
 		try {
 			shippingMethodInProgress = true;
 			const productIdentifier =
@@ -437,17 +449,26 @@
 						notices = notices.concat({
 							text: `Product ${item.description} has been removed.`,
 							timeout: 15000,
-							undoCallback: () =>
-								addLineItem(productIdentifier, item.quantity, item.variant_handles),
+							undoCallback: () => {
+								telemetryEvent('cart_item_undo', { sku: productIdentifier });
+								addLineItem(productIdentifier, item.quantity, item.variant_handles);
+							},
 							closeable: true,
 							image: item.image?.url
+						});
+						telemetryEvent('cart_item_removed', { sku: productIdentifier });
+					} else {
+						telemetryEvent('cart_item_quantity_updated', {
+							sku: productIdentifier,
+							oldQuantity,
+							newQuantity: quantity
 						});
 					}
 				}
 
 				cart.set(result.data);
 			} else {
-				// TODO: Show error to the user
+				telemetryEvent('cart_item_update_failed', { sku: productIdentifier, quantity });
 			}
 		} finally {
 			shippingMethodInProgress = false;
@@ -534,6 +555,7 @@
 		try {
 			email_error = '';
 			await Yup.string().email().required(Required).validate(email);
+			telemetryEvent('form_email_filled', { email: maskEmail(email) });
 			return true;
 		} catch (e) {
 			if (showSchemaErrors || e.type !== 'required') {
@@ -1080,6 +1102,7 @@
 				skeleton={!$cart?.line_items?.length}
 				{showMiniOverview}
 				bind:toggleExpanded={toggleHeaderExpanded}
+				bind:expanded={headerExpanded}
 				on:back-click
 			>
 				<div
@@ -1736,11 +1759,17 @@
 								on:click={(ev) => {
 									ev.stopPropagation();
 									toggleLineItemsExpanded = !toggleLineItemsExpanded;
+									telemetryEvent('order_summary_toggled', {
+										expanded: toggleLineItemsExpanded
+									});
 								}}
 								on:keydown={(ev) => {
 									if (ev.key === 'Enter' || ev.key === ' ') {
 										ev.preventDefault();
 										toggleLineItemsExpanded = !toggleLineItemsExpanded;
+										telemetryEvent('order_summary_toggled', {
+											expanded: toggleLineItemsExpanded
+										});
 									}
 								}}
 							>
