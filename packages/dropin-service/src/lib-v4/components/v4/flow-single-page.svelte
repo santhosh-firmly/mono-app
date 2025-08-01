@@ -33,6 +33,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import Header from './header.svelte';
 	import classNames from 'classnames';
+	import { telemetryEvent } from '../../browser/api-firmly.js';
 
 	const dispatch = createEventDispatcher();
 	/**
@@ -44,6 +45,19 @@
 	let optionalFields = {};
 	$: {
 		optionalFields = $cart?.shop_properties?.optional_fields || {};
+	}
+
+	// --- Telemetry masking helpers ---
+	function maskEmail(email) {
+		if (!email) return '';
+		const [user, domain] = email.split('@');
+		if (!user || !domain) return '';
+		return user[0] + '***' + user.slice(-1) + '@' + domain;
+	}
+
+	function maskPostalCode(postal) {
+		if (!postal) return '';
+		return postal.slice(0, 3) + '***';
 	}
 
 	export let PUBLIC_DISABLE_HCAPTCHA = false;
@@ -69,6 +83,7 @@
 
 	// Stitching header expanded state
 	let toggleHeaderExpanded;
+	let headerExpanded = false;
 
 	/**
 	 * Boolean variable to control if the line items are expanded or not in the Order Summary above the place order button
@@ -105,6 +120,65 @@
 
 	let selectedPaymentMethod;
 	let selectedCardOption;
+
+	// --- Telemetry: Card and Payment Method Selection ---
+	let lastTrackedCardOption = null;
+	let lastTrackedPaymentMethod = null;
+	let cardSelectionInitialized = false;
+	let paymentTabSelectionInitialized = false;
+
+	$: {
+		// Only track after initial mount/first assignment
+		if (
+			cardSelectionInitialized &&
+			selectedCardOption !== lastTrackedCardOption &&
+			savedCreditCards &&
+			savedCreditCards.length > 0
+		) {
+			const card = savedCreditCards.find(
+				(c) => c.id === selectedCardOption || c.pan === selectedCardOption
+			);
+			const cardType =
+				card?.card_type ||
+				(selectedCardOption === NEW_CARD_OPTION ? 'new_card' : undefined);
+
+			if (cardType) {
+				telemetryEvent('card_selected', { cardType });
+			}
+			lastTrackedCardOption = selectedCardOption;
+		}
+		if (!cardSelectionInitialized && selectedCardOption) {
+			cardSelectionInitialized = true;
+			lastTrackedCardOption = selectedCardOption;
+		}
+	}
+
+	// --- Telemetry: Payment method interactions
+	$: {
+		if (
+			paymentTabSelectionInitialized &&
+			selectedPaymentMethod !== lastTrackedPaymentMethod &&
+			selectedPaymentMethod
+		) {
+			telemetryEvent('payment_method_selected', { paymentMethod: selectedPaymentMethod });
+			lastTrackedPaymentMethod = selectedPaymentMethod;
+		}
+		if (!paymentTabSelectionInitialized && selectedPaymentMethod) {
+			paymentTabSelectionInitialized = true;
+			lastTrackedPaymentMethod = selectedPaymentMethod;
+		}
+	}
+
+	// --- Telemetry: Header interactions ---
+	let headerExpandedInitialized = false;
+	$: if (typeof headerExpanded === 'boolean') {
+		if (headerExpandedInitialized) {
+			telemetryEvent('header_order_summary_toggled', { expanded: headerExpanded });
+		} else {
+			headerExpandedInitialized = true;
+		}
+	}
+
 	let selectedShippingAddress;
 
 	// Array to track cards that require CVV
@@ -338,8 +412,9 @@
 					totalQuantity += item.quantity;
 				});
 				cart.set(result.data);
+				telemetryEvent('cart_item_added', { sku, quantity });
 			} else {
-				// TODO: Show error to the user
+				telemetryEvent('cart_item_add_failed', { sku, quantity });
 			}
 		} finally {
 			shippingMethodInProgress = false;
@@ -349,6 +424,7 @@
 
 	async function updateQuantity(item, quantity) {
 		let totalQuantity = 0;
+		const oldQuantity = item.quantity;
 		try {
 			shippingMethodInProgress = true;
 			const productIdentifier =
@@ -373,17 +449,26 @@
 						notices = notices.concat({
 							text: `Product ${item.description} has been removed.`,
 							timeout: 15000,
-							undoCallback: () =>
-								addLineItem(productIdentifier, item.quantity, item.variant_handles),
+							undoCallback: () => {
+								telemetryEvent('cart_item_undo', { sku: productIdentifier });
+								addLineItem(productIdentifier, item.quantity, item.variant_handles);
+							},
 							closeable: true,
 							image: item.image?.url
+						});
+						telemetryEvent('cart_item_removed', { sku: productIdentifier });
+					} else {
+						telemetryEvent('cart_item_quantity_updated', {
+							sku: productIdentifier,
+							oldQuantity,
+							newQuantity: quantity
 						});
 					}
 				}
 
 				cart.set(result.data);
 			} else {
-				// TODO: Show error to the user
+				telemetryEvent('cart_item_update_failed', { sku: productIdentifier, quantity });
 			}
 		} finally {
 			shippingMethodInProgress = false;
@@ -441,6 +526,11 @@
 					// Real update from the server
 					cart.set(result.data);
 					shipping_info_error = '';
+					telemetryEvent('form_shipping_address_filled', {
+						country: shippingInfo.country,
+						postal: maskPostalCode(shippingInfo.postal),
+						shippingMethod: shippingInfo.shipping_method_sku
+					});
 				} else {
 					// Restore the original cart state if there's an error
 					cart.set(originalCart);
@@ -465,6 +555,7 @@
 		try {
 			email_error = '';
 			await Yup.string().email().required(Required).validate(email);
+			telemetryEvent('form_email_filled', { email: maskEmail(email) });
 			return true;
 		} catch (e) {
 			if (showSchemaErrors || e.type !== 'required') {
@@ -530,6 +621,9 @@
 			const result = await window.firmly.cartUpdateDelivery(shippingMethodSku);
 			if (result.status === 200) {
 				cart.set(result.data);
+				telemetryEvent('shipping_method_selected', {
+					shippingMethodSku
+				});
 			}
 		} catch (e) {
 			// TODO: Show error to the user
@@ -587,6 +681,7 @@
 	}
 
 	function onPaypalHandler(cartData) {
+		telemetryEvent('express_payment_clicked', { paymentMethod: 'paypal' });
 		selectedPaymentMethod = 'PayPal';
 		paypalConnected = true;
 		email = cartData?.shipping_info?.email;
@@ -625,6 +720,11 @@
 			},
 			billing_info: billingInfo
 		};
+
+		telemetryEvent('form_billing_address_filled', {
+			country: billingInfo.country,
+			postal: maskPostalCode(billingInfo.postal)
+		});
 
 		completeOrderResponse = await window.firmly.paymentCompleteOrderV3(
 			ccInfo,
@@ -788,6 +888,9 @@
 	}
 
 	async function onPlaceOrder(additionalData = {}) {
+		telemetryEvent('form_submitted', {
+			paymentMethod: selectedPaymentMethod
+		});
 		try {
 			placeOrderInProgress = true;
 
@@ -925,6 +1028,7 @@
 
 	async function loginButtonClicked(event) {
 		event.preventDefault();
+		telemetryEvent('express_payment_clicked', { paymentMethod: 'merchant_login' });
 		isMerchantLoginOpen = true;
 	}
 
@@ -942,6 +1046,10 @@
 	async function handleSetShippingInfo(event) {
 		const shippingInfo = event.detail?.selectedShippingAddress;
 
+		telemetryEvent('shipping_address_selected', {
+			addressType: shippingInfo === NEW_SHIPPING_ADDRESS ? 'new_address' : 'saved_address'
+		});
+
 		if (shippingInfo !== NEW_SHIPPING_ADDRESS) {
 			await onSetShippingInfo(shippingInfo);
 		}
@@ -958,7 +1066,9 @@
 		const result = await window.firmly.addPromoCode(promoCode);
 		if (result.status === 200) {
 			cart.set(result.data);
+			telemetryEvent('promo_code_added', { success: true });
 		} else {
+			telemetryEvent('promo_code_added', { success: false });
 			throw result.data;
 		}
 	}
@@ -967,6 +1077,7 @@
 		const result = await window.firmly.clearPromoCodes();
 		if (result.status === 200) {
 			cart.set(result.data);
+			telemetryEvent('promo_code_removed');
 		} else {
 			// TODO: How to show such error to the user?
 		}
@@ -991,6 +1102,7 @@
 				skeleton={!$cart?.line_items?.length}
 				{showMiniOverview}
 				bind:toggleExpanded={toggleHeaderExpanded}
+				bind:expanded={headerExpanded}
 				on:back-click
 			>
 				<div
@@ -1204,7 +1316,12 @@
 											class="flex w-full flex-row items-center justify-center rounded bg-[#5a31f4] px-4 py-2 text-white shadow hover:bg-[#390ced]"
 											disabled={isC2PInProgress || placeOrderInProgress}
 											data-testid="shoppay-button"
-											on:click={() => (isShopPayOpen = true)}
+											on:click={() => {
+												telemetryEvent('express_payment_clicked', {
+													paymentMethod: 'shoppay'
+												});
+												isShopPayOpen = true;
+											}}
 										>
 											<ShopPayIcon
 												class="fill-white px-2"
@@ -1282,6 +1399,9 @@
 												class="ml-5 rounded-full px-1 text-sm text-blue-500"
 												data-testid="change-shipping-button"
 												on:click={() => {
+													telemetryEvent(
+														'shipping_address_change_clicked'
+													);
 													collapsedStateShipping = false;
 													if (savedAddresses.length === 1) {
 														selectedShippingAddress =
@@ -1482,6 +1602,9 @@
 												class="ml-5 rounded-full px-1 text-sm text-blue-500"
 												data-testid="change-shipping-method-button"
 												on:click={() => {
+													telemetryEvent(
+														'shipping_method_change_clicked'
+													);
 													collapsedStateShippingMethod = false;
 												}}
 											>
@@ -1546,6 +1669,7 @@
 											type="button"
 											class="ml-5 rounded-full px-1 text-sm text-blue-500"
 											on:click={() => {
+												telemetryEvent('payment_method_change_clicked');
 												collapsedStatePayment = false;
 											}}
 										>
@@ -1635,11 +1759,17 @@
 								on:click={(ev) => {
 									ev.stopPropagation();
 									toggleLineItemsExpanded = !toggleLineItemsExpanded;
+									telemetryEvent('order_summary_toggled', {
+										expanded: toggleLineItemsExpanded
+									});
 								}}
 								on:keydown={(ev) => {
 									if (ev.key === 'Enter' || ev.key === ' ') {
 										ev.preventDefault();
 										toggleLineItemsExpanded = !toggleLineItemsExpanded;
+										telemetryEvent('order_summary_toggled', {
+											expanded: toggleLineItemsExpanded
+										});
 									}
 								}}
 							>

@@ -5,7 +5,8 @@
 		initialize,
 		initializeAppVersion,
 		initializeDomain,
-		telemetryEcsEvent
+		telemetryEcsEvent,
+		telemetryEvent
 	} from '$lib-v4/browser/api-firmly.js';
 	import { postCheckoutClosed, postOrderPlaced } from '$lib-v4/browser/cross.js';
 	import { onMount } from 'svelte';
@@ -460,6 +461,8 @@
 	});
 
 	function onBackClick() {
+		telemetryEvent('back_button_clicked');
+
 		if (pageState === 'pdp') {
 			console.log('firmly - onBackClick - postCheckoutClosed');
 			postCheckoutClosed();
