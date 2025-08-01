@@ -56,6 +56,11 @@
 	 */
 	export let showImageBorder = true;
 
+	/**
+	 * Error message to display for the line item
+	 */
+	export let errorMessage = '';
+
 	function getRecurringPeriodDisplay(period) {
 		switch (period) {
 			case 'monthly':
@@ -83,12 +88,25 @@
 				class="text-fy-on-primary-subtle bg-fy-on-primary-subtle2 m-1 h-4 w-28 animate-pulse rounded text-xs"
 			/>
 		{:else}
-			<span class="text-fy-on-primary text-sm font-semibold" data-testid="line-item-description"
-				>{description}</span
+			<span
+				class="text-fy-on-primary text-sm font-semibold"
+				data-testid="line-item-description">{description}</span
 			>
 			<span class="text-fy-on-primary-subtle text-xs">{variantDescription || ''}</span>
 			{#if allowChangeQuantity}
-				<QuantityController {quantity} {disabled} updateItemQuantityImmediately={updateQuantity} />
+				<QuantityController
+					{quantity}
+					{disabled}
+					updateItemQuantityImmediately={updateQuantity}
+				/>
+			{/if}
+			{#if errorMessage}
+				<div
+					class="text-fy-alert mt-2 w-full rounded px-2 py-1 text-xs"
+					data-testid="line-item-error"
+				>
+					{errorMessage}
+				</div>
 			{/if}
 		{/if}
 	</div>

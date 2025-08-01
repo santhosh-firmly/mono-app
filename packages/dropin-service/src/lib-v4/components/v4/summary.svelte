@@ -18,6 +18,11 @@
 	export let updateQuantity = () => {};
 	export let disabled = false;
 
+	/**
+	 * Object mapping line_item_id to error message
+	 */
+	export let lineItemErrors = {};
+
 	export let coupons = null;
 	export let subtotal = null;
 	export let discount = null;
@@ -74,6 +79,7 @@
 					allowChangeQuantity={!item.fixed_quantity}
 					{disabled}
 					{showImageBorder}
+					errorMessage={lineItemErrors?.[item.line_item_id] || ''}
 				/>
 			{:else}
 				<LineItem />
@@ -87,13 +93,17 @@
 				<PromoCodes {coupons} {addPromoCodeCallback} {clearPromoCodesCallback} />
 			{/if}
 			{#if discountsBreakdown}
-				<div class="text-fy-on-primary-accent flex flex-col justify-between gap-5 font-semibold">
+				<div
+					class="text-fy-on-primary-accent flex flex-col justify-between gap-5 font-semibold"
+				>
 					{#each discountsBreakdown as db (db.label)}
 						<div class="flex flex-row justify-between" data-testid="discount">
 							<span> {db.label} </span>
 							<span
 								class="text-right font-semibold"
-								data-testid="discount-breakdown-{db.label.toLowerCase().replace(/\s+/g, '-')}"
+								data-testid="discount-breakdown-{db.label
+									.toLowerCase()
+									.replace(/\s+/g, '-')}"
 							>
 								(-{formatCurrency(db.discount)})
 							</span>
@@ -116,10 +126,14 @@
 			<div class="flex flex-row justify-between font-semibold">
 				{#if skeleton}
 					<div class="bg-fy-on-primary-subtle2 m-1 h-4 w-24 animate-pulse rounded" />
-					<div class="bg-fy-on-primary-subtle2 m-1 h-4 w-12 animate-pulse rounded text-right" />
+					<div
+						class="bg-fy-on-primary-subtle2 m-1 h-4 w-12 animate-pulse rounded text-right"
+					/>
 				{:else}
 					<span>Subtotal</span>
-					<span class="text-right" data-testid="subtotal-value">{formatCurrency(subtotal)}</span>
+					<span class="text-right" data-testid="subtotal-value"
+						>{formatCurrency(subtotal)}</span
+					>
 				{/if}
 			</div>
 			<div class="text-fy-on-primary-subtle flex flex-row items-start justify-between gap-2">
@@ -128,7 +142,9 @@
 						<div class="bg-fy-on-primary-subtle2 m-1 h-4 w-24 animate-pulse rounded" />
 						<div class="bg-fy-on-primary-subtle2 m-1 h-4 w-32 animate-pulse rounded" />
 					</div>
-					<div class="bg-fy-on-primary-subtle2 m-1 h-4 w-12 animate-pulse rounded text-right" />
+					<div
+						class="bg-fy-on-primary-subtle2 m-1 h-4 w-12 animate-pulse rounded text-right"
+					/>
 				{:else}
 					<div class="flex flex-col text-left">
 						<span> Shipping </span>
@@ -142,7 +158,9 @@
 						{#if calculating}
 							Calculating...
 						{:else if shippingMethod}
-							{shippingMethod.price.value === 0 ? 'Free' : formatCurrency(shippingMethod.price)}
+							{shippingMethod.price.value === 0
+								? 'Free'
+								: formatCurrency(shippingMethod.price)}
 						{:else}
 							Enter shipping address
 						{/if}
@@ -152,7 +170,9 @@
 			<div class="text-fy-on-primary-subtle flex flex-row justify-between gap-2">
 				{#if skeleton}
 					<div class="bg-fy-on-primary-subtle2 m-1 h-4 w-24 animate-pulse rounded" />
-					<div class="bg-fy-on-primary-subtle2 m-1 h-4 w-12 animate-pulse rounded text-right" />
+					<div
+						class="bg-fy-on-primary-subtle2 m-1 h-4 w-12 animate-pulse rounded text-right"
+					/>
 				{:else}
 					<span>Tax</span>
 					<span class="text-right" data-testid="tax-value">
@@ -167,7 +187,9 @@
 				{/if}
 			</div>
 			{#if storeCredit?.value > 0}
-				<div class="text-fy-on-primary-subtle flex flex-row items-start justify-between gap-2">
+				<div
+					class="text-fy-on-primary-subtle flex flex-row items-start justify-between gap-2"
+				>
 					<div class="flex flex-col text-left">
 						<span> Store Credit </span>
 					</div>
@@ -177,7 +199,9 @@
 				</div>
 			{/if}
 			{#if rewardPoints?.value > 0}
-				<div class="text-fy-on-primary-subtle flex flex-row items-start justify-between gap-2">
+				<div
+					class="text-fy-on-primary-subtle flex flex-row items-start justify-between gap-2"
+				>
 					<div class="flex flex-col text-left">
 						<span> Reward Points </span>
 					</div>
@@ -192,17 +216,22 @@
 			<div class="flex flex-row justify-between font-semibold">
 				{#if skeleton}
 					<div class="bg-fy-on-primary-subtle2 m-1 h-4 w-24 animate-pulse rounded" />
-					<div class="bg-fy-on-primary-subtle2 m-1 h-4 w-12 animate-pulse rounded text-right" />
+					<div
+						class="bg-fy-on-primary-subtle2 m-1 h-4 w-12 animate-pulse rounded text-right"
+					/>
 				{:else}
 					<span>Total due today</span>
-					<span class="text-right" data-testid="total-due-today">{formatCurrency(total)}</span>
+					<span class="text-right" data-testid="total-due-today"
+						>{formatCurrency(total)}</span
+					>
 				{/if}
 			</div>
 			{#if monthlyRecurring}
 				<div class="text-fy-on-primary-subtle flex flex-row justify-between">
 					<span>Due monthly</span>
 					<span class="text-right" data-testid="due-monthly"
-						>{formatCurrency({ currency: 'USD', value: monthlyRecurring })}/mo<br />after 1 month</span
+						>{formatCurrency({ currency: 'USD', value: monthlyRecurring })}/mo<br
+						/>after 1 month</span
 					>
 				</div>
 			{/if}
