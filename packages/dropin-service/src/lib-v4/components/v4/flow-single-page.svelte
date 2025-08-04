@@ -41,6 +41,9 @@
 	 */
 	export let cart = writable();
 
+	// Error state for line items
+	let lineItemErrors = {};
+
 	// Check if there are optional fields
 	let optionalFields = {};
 	$: {
@@ -425,6 +428,7 @@
 	async function updateQuantity(item, quantity) {
 		let totalQuantity = 0;
 		const oldQuantity = item.quantity;
+		let errorMsg = '';
 		try {
 			shippingMethodInProgress = true;
 			const productIdentifier =
@@ -467,9 +471,19 @@
 				}
 
 				cart.set(result.data);
+				// Clear error for this line item if previously set
+				if (lineItemErrors[item.line_item_id]) {
+					lineItemErrors = { ...lineItemErrors, [item.line_item_id]: '' };
+				}
 			} else {
 				telemetryEvent('cart_item_update_failed', { sku: productIdentifier, quantity });
+				errorMsg =
+					result?.data?.description || 'Unable to update quantity. Please try again.';
+				lineItemErrors = { ...lineItemErrors, [item.line_item_id]: errorMsg };
 			}
+		} catch (err) {
+			errorMsg = err?.message || 'Unable to update quantity. Please try again.';
+			lineItemErrors = { ...lineItemErrors, [item.line_item_id]: errorMsg };
 		} finally {
 			shippingMethodInProgress = false;
 			postQuantityUpdated(totalQuantity);
@@ -1155,6 +1169,7 @@
 							{addPromoCodeCallback}
 							{clearPromoCodesCallback}
 							showImageBorder={$cart?.shop_id !== 'kardiel.com'}
+							{lineItemErrors}
 						/>
 					</div>
 				</div>
@@ -1203,6 +1218,7 @@
 							{addPromoCodeCallback}
 							{clearPromoCodesCallback}
 							showImageBorder={$cart?.shop_id !== 'kardiel.com'}
+							{lineItemErrors}
 						/>
 					</div>
 				</Overview>
@@ -1817,6 +1833,7 @@
 										{addPromoCodeCallback}
 										{clearPromoCodesCallback}
 										showImageBorder={$cart?.shop_id !== 'kardiel.com'}
+										{lineItemErrors}
 									/>
 								</div>
 							</div>
