@@ -626,33 +626,6 @@ async function browserFetch(url, options = defaultOptions) {
 //#region Crypto Encryption
 let CRYPTO;
 
-function cryptoConcat(arrays) {
-	// Get the total length of all arrays.
-	const length = arrays.reduce((sum, item) => sum + item.byteLength, 0);
-	const typedArrays = arrays.map((e) => new Uint8Array(e));
-
-	// Create a new array with total length and merge all source arrays.
-	const result = new Uint8Array(length);
-	let offset = 0;
-	typedArrays.forEach((item) => {
-		result.set(item, offset);
-		offset += item.byteLength;
-	});
-
-	return result;
-}
-
-async function gcmDataEncrypt(plain, key, iv) {
-	const data = await CRYPTO.subtle.encrypt({ name: 'AES-GCM', iv }, key, plain);
-
-	const authTagOffset = data.byteLength - 16;
-
-	return {
-		data: data.slice(0, authTagOffset),
-		authTag: data.slice(authTagOffset)
-	};
-}
-
 async function getRSAKey(jwkKey) {
 	const version = jwkKey['kid'];
 	const publicKey = await CRYPTO.subtle.importKey(
@@ -699,46 +672,6 @@ async function encryptJWEPayloadWithKey(payload, publicKey, options = {}) {
 	} catch (error) {
 		console.error('Error encrypting JWE payload:', error);
 		throw new Error(`Failed to encrypt JWE payload: ${error.message}`);
-	}
-}
-
-async function gcmEncrypt(inputData) {
-	try {
-		const firmly = window.firmly;
-		const encoder = new TextEncoder();
-		const encodedData = encoder.encode(
-			typeof inputData === 'string' ? inputData : JSON.stringify(inputData)
-		);
-		const { publicKey, version } = firmly.paymentRSAKey;
-
-		// Generate a new AESGCM Key for encrypting the payload.
-		const aesgcmKey = await CRYPTO.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, [
-			'encrypt',
-			'decrypt'
-		]);
-		const rawAesgcmKey = await CRYPTO.subtle.exportKey('raw', aesgcmKey);
-
-		const iv = CRYPTO.getRandomValues(new Uint8Array(16));
-
-		// Encrypt the data.
-		const { data, authTag } = await gcmDataEncrypt(encodedData, aesgcmKey, iv);
-
-		// Encrypt the meta data using the incoming public key.
-		const b64Encoded = await CRYPTO.subtle.encrypt(
-			{ name: 'RSA-OAEP', hash: 'SHA-1' },
-			publicKey,
-			cryptoConcat([rawAesgcmKey, iv, authTag])
-		);
-
-		const b64Encrypted = btoa(String.fromCharCode.apply(null, new Uint8Array(b64Encoded)));
-
-		return {
-			data: btoa(String.fromCharCode.apply(null, new Uint8Array(data))),
-			metadata: `${version}|${b64Encrypted}`
-		};
-	} catch (e) {
-		console.error('');
-		return null;
 	}
 }
 
@@ -798,25 +731,7 @@ function clearPaymentSession() {
 }
 
 function getCCUrl(suffix) {
-	return `${window.firmly.ccServer}/api/v1/payment/${suffix}`;
-}
-
-function getCCUrlV2(suffix) {
-	return `${window.firmly.ccServer}/api/v2/payment/${suffix}`;
-}
-
-function getCCUrlV3(suffix) {
-	return `${window.firmly.ccServer}/api/v3/payment/${suffix}`;
-}
-
-function getPaymentHeaders() {
-	const ret = {
-		headers: {
-			'Content-Type': 'application/json'
-		}
-	};
-
-	return ret;
+	return `${window.firmly.ccServer}/api/v1/payment/domains/${window.firmly.domain}/${suffix}`;
 }
 
 async function paymentInitialize(ccServer) {
@@ -846,32 +761,6 @@ async function paymentInitialize(ccServer) {
 	}
 }
 
-async function paymentCreditCardTokenize(paymentInfo, paymentHandle) {
-	const body = await gcmEncrypt(paymentInfo);
-	body.handle = paymentHandle;
-
-	const headers = getPaymentHeaders();
-	const res = await browserFetch(getCCUrl('tokenize'), {
-		...headers,
-		method: 'POST',
-		body: JSON.stringify(body)
-	});
-	return res;
-}
-
-// eslint-disable-next-line no-unused-vars
-async function paymentCreditCardTokenizeV2(paymentInfo, paymentHandle) {
-	const body = await gcmEncrypt(paymentInfo);
-	body.handle = paymentHandle;
-
-	const headers = getPaymentHeaders();
-	const res = await browserFetch(getCCUrlV2('tokenize'), {
-		...headers,
-		method: 'POST',
-		body: JSON.stringify(body)
-	});
-	return res;
-}
 //#endregion
 
 //#region Browser Session API functions
@@ -1396,12 +1285,14 @@ async function clearPromoCodes() {
 
 //#region  Cart Payment functions
 
-async function paymentCompleteOrder(ccInfo, paymentHandle) {
-	const body = await gcmEncrypt(ccInfo);
-	body.handle = paymentHandle;
+// Main function for completing credit card orders with JWE encryption
+async function completeCreditCardOrder(domain, ccInfo) {
+	// The complete-order endpoint gets payment_handle from cart automatically
+	// No need to pass it in the body
+	const body = await encryptCCInfoAsJWE(ccInfo);
 
 	const headers = await getHeaders();
-	const res = await browserFetch(getCCUrl('complete-order'), {
+	const res = await browserFetch(getCCUrl(`complete-order`), {
 		...headers,
 		method: 'POST',
 		body: JSON.stringify(body)
@@ -1409,15 +1300,17 @@ async function paymentCompleteOrder(ccInfo, paymentHandle) {
 	return res;
 }
 
-async function encryptCCInfo(ccInfo) {
-	ccInfo.credit_card.month = await rsaEncrypt(ccInfo.credit_card.month);
-	ccInfo.credit_card.name = await rsaEncrypt(ccInfo.credit_card.name);
-	ccInfo.credit_card.number = await rsaEncrypt(ccInfo.credit_card.number);
-	ccInfo.credit_card.verification_value = await rsaEncrypt(ccInfo.credit_card.verification_value);
-	ccInfo.credit_card.year = await rsaEncrypt(ccInfo.credit_card.year);
-
-	return ccInfo;
+// New function for wallet complete orders
+async function completeWalletOrder(domain, walletData) {
+	const headers = await getHeaders();
+	const res = await browserFetch(getCCUrl(`wallet-complete-order`), {
+		...headers,
+		method: 'POST',
+		body: JSON.stringify(walletData)
+	});
+	return res;
 }
+
 
 async function encryptCCInfoAsJWE(ccInfo) {
 	const firmly = window.firmly;
@@ -1437,71 +1330,11 @@ async function encryptCCInfoAsJWE(ccInfo) {
 	return placeOrderV3Payload;
 }
 
-async function paymentCompleteOrderV2(ccInfo, paymentHandle) {
-	const body = await encryptCCInfo(ccInfo);
-	body.handle = paymentHandle;
-
-	const headers = await getHeaders();
-	const res = await browserFetch(getCCUrlV2('complete-order'), {
-		...headers,
-		method: 'POST',
-		body: JSON.stringify(body)
-	});
-	return res;
-}
-
-async function paymentCompleteOrderV3(ccInfo, paymentHandle) {
-	const body = await encryptCCInfoAsJWE(ccInfo);
-	body.handle = paymentHandle;
-
-	const headers = await getHeaders();
-	const res = await browserFetch(getCCUrlV3('complete-order'), {
-		...headers,
-		method: 'POST',
-		body: JSON.stringify(body)
-	});
-	return res;
-}
 
 //#endregion
 
 //#region Wallet functions
 
-async function paymentTokenizeWallet(
-	wallet,
-	walletAccessToken,
-	cardId,
-	cvv = null,
-	jws = null,
-	additionalData = {}
-) {
-	const body = { credit_card_id: cardId + '' };
-	const cart = getSessionCart();
-
-	if (cart) {
-		body.handle = cart.payment_handle;
-	}
-	if (walletAccessToken) {
-		body.access_token = walletAccessToken;
-	}
-	if (cvv) {
-		body.verification_value = await rsaEncrypt(cvv);
-	}
-	if (jws) {
-		body.jws = jws;
-	}
-	if (Object.keys(additionalData).length > 0) {
-		body.additional_data = additionalData;
-	}
-
-	const headers = await getHeaders();
-	const res = await browserFetch(getCCUrl(`tokenize/${wallet}`), {
-		...headers,
-		method: 'POST',
-		body: JSON.stringify(body)
-	});
-	return res;
-}
 
 async function walletUnlockStart(walletType, emailAddress, captcha = null) {
 	const body = { email: emailAddress };
@@ -1572,67 +1405,8 @@ async function c2pWalletUnlockComplete(otp, accessToken = null) {
 	return ret;
 }
 
-async function paymentC2PTokenize(
-	cardId,
-	cvv = null,
-	accessToken = null,
-	jws = null,
-	additionalData = {}
-) {
-	if (!accessToken) {
-		accessToken = getC2PAccessToken();
-	}
 
-	return paymentTokenizeWallet(CLICK_2_PAY, accessToken, cardId, cvv, jws, additionalData);
-}
-
-//#endregion
-
-//#region ShopPay Wallet
-
-const WALLET_SHOPPAY_ACCESS_TOKEN = 'FWSP';
-function getShopPayAccessToken() {
-	const value = sessionStorage.getItem(WALLET_SHOPPAY_ACCESS_TOKEN);
-	if (value) {
-		return value;
-	}
-	return null;
-}
-
-function setShopPayAccessToken(value) {
-	sessionStorage.setItem(WALLET_SHOPPAY_ACCESS_TOKEN, value);
-}
-
-const SHOP_PAY = 'shoppay';
-
-async function shopPayWalletUnlockStart(emailAddress, captcha) {
-	const ret = await walletUnlockStart(SHOP_PAY, emailAddress, captcha);
-	if (ret.status == 200) {
-		setShopPayAccessToken(ret.data.access_token);
-	}
-	return ret;
-}
-
-async function shopPayWalletUnlockComplete(otp, accessToken = null) {
-	if (!accessToken) {
-		accessToken = getShopPayAccessToken();
-	}
-
-	const ret = await walletUnlockComplete(SHOP_PAY, accessToken, otp);
-	if (ret.status == 200) {
-		setShopPayAccessToken(ret.data.access_token);
-	}
-
-	return ret;
-}
-
-async function paymentShopPayTokenize(cardId, accessToken = null) {
-	if (!accessToken) {
-		accessToken = getShopPayAccessToken();
-	}
-
-	return paymentTokenizeWallet(SHOP_PAY, accessToken, cardId);
-}
+// ShopPay support has been removed
 
 //#endregion
 
@@ -1754,7 +1528,6 @@ if (typeof window !== 'undefined') {
 
 	// Payment functions
 	firmly.paymentInitialize = paymentInitialize;
-	firmly.paymentCreditCardTokenize = paymentCreditCardTokenize;
 	firmly.paymentRsaEncrypt = rsaEncrypt;
 
 	// Session functions
@@ -1782,20 +1555,15 @@ if (typeof window !== 'undefined') {
 	firmly.clearPromoCodes = clearPromoCodes;
 
 	// Cart Payment functions
-	firmly.paymentCompleteOrder = paymentCompleteOrder;
-	firmly.paymentCompleteOrderV2 = paymentCompleteOrderV2;
-	firmly.paymentCompleteOrderV3 = paymentCompleteOrderV3;
+	firmly.completeCreditCardOrder = completeCreditCardOrder;
+	firmly.completeWalletOrder = completeWalletOrder;
 
 	// Wallet Click to Pay functions
 	firmly.c2pWalletUnlockStart = c2pWalletUnlockStart;
 	firmly.c2pWalletUnlockComplete = c2pWalletUnlockComplete;
-	firmly.paymentC2PTokenize = paymentC2PTokenize;
 	firmly.changeC2PProvider = changeC2PProvider;
 
-	// Wallet ShopPay functions
-	firmly.shopPayWalletUnlockStart = shopPayWalletUnlockStart;
-	firmly.shopPayWalletUnlockComplete = shopPayWalletUnlockComplete;
-	firmly.paymentShopPayTokenize = paymentShopPayTokenize;
+	// ShopPay functions removed - no longer supported
 
 	// Wallet paypal functions
 	firmly.paypalStart = paypalStart;

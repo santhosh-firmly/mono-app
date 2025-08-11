@@ -207,11 +207,6 @@ export const ProgressC2PUnlockStart = {
 	info: 'We are checking with Click to Pay to see if you have any saved cards…'
 };
 
-export const ProgressShoppayUnlockStart = {
-	header: 'Please wait...',
-	info: 'We are checking with Shoppay.'
-};
-
 export const ProgressUnlockComplete = {
 	header: 'Please wait...',
 	info: 'We are validating the OTP.'
@@ -220,11 +215,6 @@ export const ProgressUnlockComplete = {
 export const ProgressC2PTokenize = {
 	header: 'Please wait...',
 	info: 'We are checking with Click to Pay.'
-};
-
-export const ProgressShoppayTokenize = {
-	header: 'Please wait...',
-	info: 'We are checking the Shoppay Payment.'
 };
 
 const ProgressPaypalStart = {

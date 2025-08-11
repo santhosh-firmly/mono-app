@@ -13,7 +13,7 @@
 		args: {
 			isLoading: false,
 			onclick: fn(),
-			use: ['shoppay', 'paypal']
+			use: ['paypal']
 		}
 	});
 </script>
@@ -31,14 +31,6 @@
 	children={template}
 	args={{
 		isLoading: true
-	}}
-/>
-
-<Story
-	name="Shop Pay Only"
-	children={template}
-	args={{
-		use: ['shoppay']
 	}}
 />
 

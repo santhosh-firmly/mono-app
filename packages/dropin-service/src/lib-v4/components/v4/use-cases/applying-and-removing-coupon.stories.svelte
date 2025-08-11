@@ -182,7 +182,7 @@
 				type: 'CreditCard',
 				art: '',
 				id: '213879546',
-				wallet: 'shoppay',
+				wallet: 'c2p',
 				last_four: '5726',
 				month: 4,
 				year: 2025,

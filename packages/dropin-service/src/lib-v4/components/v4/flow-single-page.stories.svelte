@@ -90,10 +90,6 @@
 				wallet: 'paypal'
 			},
 			{
-				type: 'ShopPay',
-				wallet: 'shoppay'
-			},
-			{
 				type: 'DemoCreditCard',
 				wallet: 'test',
 				art: '',
@@ -215,7 +211,7 @@
 				type: 'CreditCard',
 				art: '',
 				id: '249351882',
-				wallet: 'shoppay',
+				wallet: 'c2p',
 				last_four: '8798',
 				month: 3,
 				year: 2030,
@@ -237,7 +233,7 @@
 				type: 'CreditCard',
 				art: '',
 				id: '249351883',
-				wallet: 'shoppay',
+				wallet: 'c2p',
 				last_four: '8798',
 				month: 3,
 				year: 2030,
@@ -784,10 +780,6 @@
 			{
 				type: 'PayPal',
 				wallet: 'paypal'
-			},
-			{
-				type: 'ShopPay',
-				wallet: 'shoppay'
 			},
 			{
 				expired: false,

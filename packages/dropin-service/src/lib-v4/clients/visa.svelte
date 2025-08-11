@@ -351,9 +351,25 @@
 				}
 			}
 
+			// Prepare wallet data for complete-order
+			const walletData = {
+				wallet: 'visa',
+				credit_card_id: String(cardId),
+				access_token: sessionStorage.getItem('FWC2P')
+			};
+			
+			if (cvv) {
+				walletData.verification_value = await window.firmly.paymentRsaEncrypt(cvv);
+			}
+			
+			if (jws) {
+				walletData.jws = jws;
+			}
+			
+			const domain = window.firmly.domain;
 			const res = await performanceObserver(
-				() => window.firmly.paymentC2PTokenize(cardId, cvv, null, jws),
-				'paymentC2PTokenize'
+				() => window.firmly.completeWalletOrder(domain, walletData),
+				'completeWalletOrder'
 			);
 			if (res.status == 200) {
 				if (res.data.cvv_required) {

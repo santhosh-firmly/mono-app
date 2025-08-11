@@ -8,11 +8,9 @@ import {
 	ProgressPaymentToken,
 	ProgressPaypalComplete,
 	ProgressShippingInfo,
-	ProgressShoppayTokenize,
 	ProgressTransferCart,
 	ProgressUnlockComplete,
 	ProgressC2PUnlockStart,
-	ProgressShoppayUnlockStart,
 	ProgressSessionJoin,
 	ProgressSessionCreateOtp
 } from './localization.js';
@@ -145,18 +143,24 @@ function mockSetup(data, c2pData) {
 
 //#region Payment
 
-async function cartUpdatePayment(paymentInfo) {
+// Complete credit card payment directly (no tokenization)
+async function completeCreditCardPayment(paymentInfo) {
 	if (isMock) {
-		await mockDelay(ProgressPaymentToken);
+		await mockDelay(ProgressOrderPlacement);
 		return cartData;
 	}
 
 	resetApiError();
-	sApiProgressInfo.set(ProgressPaymentToken);
+	sApiProgressInfo.set(ProgressOrderPlacement);
 
 	const ccInfo = getCCInfo(paymentInfo);
-
-	const res = await window.firmly.paymentCreditCardTokenize(ccInfo, cartData.payment_handle);
+	const domain = storeId; // Get domain from store context
+	// Direct complete-order with JWE encryption
+	const res = await window.firmly.completeCreditCardOrder(
+		domain,
+		ccInfo
+	);
+	
 	if (res.status == 200) {
 		sCartPayment.set(res.data);
 	} else {
@@ -165,6 +169,25 @@ async function cartUpdatePayment(paymentInfo) {
 
 	sApiProgressInfo.set(ProgressEmpty);
 	return res.status == 200 ? res.data : null;
+}
+
+function getBillingInfoFromCart() {
+	// Get billing info from cart's shipping info or separate billing form
+	if (cartData && cartData.shipping_info) {
+		return {
+			first_name: cartData.shipping_info.first_name,
+			last_name: cartData.shipping_info.last_name,
+			email: cartData.shipping_info.email,
+			phone: cartData.shipping_info.phone || DEFAULT_PHONE,
+			address1: cartData.shipping_info.address1,
+			address2: cartData.shipping_info.address2,
+			city: cartData.shipping_info.city,
+			state_or_province: cartData.shipping_info.state_or_province,
+			country: cartData.shipping_info.country,
+			postal_code: cartData.shipping_info.postal_code
+		};
+	}
+	return {};
 }
 
 function getCCInfo(paymentInfo) {
@@ -196,94 +219,14 @@ function getCCInfo(paymentInfo) {
 	return ccInfo;
 }
 
-async function getCCInfoV2(paymentInfo) {
-	const eDate = paymentInfo.expiryDate.split('/');
-	const year = '20' + eDate[1].trim();
-	const month = eDate[0].trim();
 
-	const ccInfo = {
-		credit_card: {
-			name: await window.firmly.paymentRsaEncrypt(paymentInfo.cardName.trim()),
-			number: await window.firmly.paymentRsaEncrypt(
-				paymentInfo.cardNumber.replaceAll(' ', '')
-			),
-			month: await window.firmly.paymentRsaEncrypt(month),
-			year: await window.firmly.paymentRsaEncrypt(year),
-			verification_value: await window.firmly.paymentRsaEncrypt(paymentInfo.cvc)
-		},
-		billing_info: {
-			first_name: cartData.shipping_info.first_name,
-			last_name: cartData.shipping_info.last_name,
-			email: cartData.shipping_info.email,
-			phone: cartData.shipping_info.phone || DEFAULT_PHONE,
-			address1: paymentInfo.address1,
-			address2: paymentInfo.address2 || ' ',
-			city: paymentInfo.city,
-			state_or_province: paymentInfo.state_or_province,
-			country: paymentInfo.country,
-			postal_code: paymentInfo.postal_code
-		}
-	};
-	return ccInfo;
-}
 
-async function paymentCompleteOrder(paymentInfo) {
-	if (isMock) {
-		await mockDelay(ProgressOrderPlacement);
-		return cartData;
-	}
-
-	resetApiError();
-	sApiProgressInfo.set(ProgressOrderPlacement);
-
-	const ccInfo = getCCInfo(paymentInfo);
-
-	const res = await window.firmly.paymentCompleteOrder(ccInfo, cartData.payment_handle);
-	if (res.status == 200) {
-		// Difference between tokenize and complete-order is we get back the cart in case of completeOrder.
-		sCart.set(res.data);
-		if (res.data.notice) {
-			sApiError.set(res.data);
-		}
-	} else {
-		sApiError.set(res.data);
-	}
-
-	sApiProgressInfo.set(ProgressEmpty);
-	return res.status == 200 ? res.data : null;
-}
-
-async function paymentCompleteOrderV2(paymentInfo) {
-	if (isMock) {
-		await mockDelay(ProgressOrderPlacement);
-		return cartData;
-	}
-
-	resetApiError();
-	sApiProgressInfo.set(ProgressOrderPlacement);
-
-	const ccInfo = getCCInfoV2(paymentInfo);
-
-	const res = await window.firmly.paymentCompleteOrderV2(ccInfo, cartData.payment_handle);
-	if (res.status == 200) {
-		// Difference between tokenize and complete-order is we get back the cart in case of completeOrder.
-		sCart.set(res.data);
-		if (res.data.notice) {
-			sApiError.set(res.data);
-		}
-	} else {
-		sApiError.set(res.data);
-	}
-
-	sApiProgressInfo.set(ProgressEmpty);
-	return res.status == 200 ? res.data : null;
-}
 //#endregion
 
 //#region Wallet
 
 // Click to Pay
-async function c2pWalletUnlockStart(emailAddress) {
+async function startC2PAuthentication(emailAddress) {
 	const progress = ProgressC2PUnlockStart;
 	if (isMock) {
 		await mockDelay(progress);
@@ -308,7 +251,7 @@ async function c2pWalletUnlockStart(emailAddress) {
 	return res.status == 200 ? res.data : null;
 }
 
-async function c2pWalletUnlockComplete(otp) {
+async function completeC2PAuthentication(otp) {
 	if (isMock) {
 		await mockDelay(ProgressUnlockComplete);
 		sWallet.set(mockData.mockUnlockComplete);
@@ -332,7 +275,8 @@ async function c2pWalletUnlockComplete(otp) {
 	return res.status == 200 ? res.data : null;
 }
 
-async function cartC2PWallet(cardId, rememberMe = false, cvv = null, additionalData = {}) {
+// Complete C2P payment using wallet-complete-order endpoint
+async function completeC2PPayment(cardId, rememberMe = false, cvv = null, additionalData = {}) {
 	if (isMock) {
 		await mockDelay(ProgressC2PTokenize);
 		if (cvv) {
@@ -351,10 +295,29 @@ async function cartC2PWallet(cardId, rememberMe = false, cvv = null, additionalD
 
 	resetApiError();
 	sApiProgressInfo.set(ProgressC2PTokenize);
-	const res =
-		PUBLIC_use_c2p_api !== 'false'
-			? await window.firmly.paymentC2PTokenize(cardId, cvv)
-			: await getVisaCardToken(cardId, cvv, rememberMe, additionalData);
+	
+	const domain = storeId; // Get domain from store context
+	const billingInfo = getBillingInfoFromCart(); // Get billing info from cart or form
+	
+	// Prepare wallet data for complete-order
+	const walletData = {
+		wallet: 'visa', // or 'paze' depending on provider
+		credit_card_id: String(cardId),
+		access_token: sessionStorage.getItem('FWC2P'),
+		billing_info: billingInfo
+	};
+	
+	if (cvv) {
+		walletData.verification_value = await window.firmly.paymentRsaEncrypt(cvv);
+	}
+	
+	if (additionalData.jws) {
+		walletData.jws = additionalData.jws;
+	}
+	
+	// Use new wallet-complete-order endpoint
+	const res = await window.firmly.completeWalletOrder(domain, walletData);
+	
 	if (!res) {
 		// Consumer closed Visa popup without completing the flow.
 		sApiProgressInfo.set(ProgressEmpty);
@@ -369,6 +332,7 @@ async function cartC2PWallet(cardId, rememberMe = false, cvv = null, additionalD
 	sApiProgressInfo.set(ProgressEmpty);
 	return res.status == 200 ? res.data : null;
 }
+
 
 async function c2pVisaAuthenticate(authenticationMethod) {
 	if (isMock) {
@@ -402,68 +366,9 @@ async function c2pVisaAuthenticate(authenticationMethod) {
 
 //#endregion
 
-// Shop Pay
-async function shopPayWalletUnlockStart(emailAddress, captcha) {
-	const progress = ProgressShoppayUnlockStart;
-	if (isMock) {
-		await mockDelay(progress);
-		sWallet.set(mockData.mockUnlockStart);
-		return mockData.mockUnlockStart;
-	}
+// ShopPay functions removed - no longer supported
 
-	resetApiError();
-	sApiProgressInfo.set(progress);
-
-	const res = await window.firmly.shopPayWalletUnlockStart(emailAddress, captcha);
-	if (res.status == 200) {
-		sWallet.set(res.data);
-	} else {
-		sApiError.set(res.data);
-	}
-
-	sApiProgressInfo.set(ProgressEmpty);
-	return res.status == 200 ? res.data : null;
-}
-
-async function shopPayWalletUnlockComplete(otp) {
-	if (isMock) {
-		await mockDelay(ProgressUnlockComplete);
-		sWallet.set(mockData.mockUnlockComplete);
-		return mockData.mockUnlockComplete;
-	}
-
-	resetApiError();
-	sApiProgressInfo.set(ProgressUnlockComplete);
-
-	const res = await window.firmly.shopPayWalletUnlockComplete(otp);
-	if (res.status == 200) {
-		sWallet.set(res.data);
-	} else {
-		sApiError.set(res.data);
-	}
-
-	sApiProgressInfo.set(ProgressEmpty);
-	return res.status == 200 ? res.data : null;
-}
-
-async function cartShoppayWallet(cardId) {
-	if (isMock) {
-		await mockDelay(ProgressShoppayTokenize);
-		return mockData.mockC2PCVV;
-	}
-
-	resetApiError();
-	sApiProgressInfo.set(ProgressShoppayTokenize);
-	const res = await window.firmly.paymentShopPayTokenize(cardId);
-	if (res.status == 200) {
-		sCartPayment.set(res.data);
-	} else {
-		sApiError.set(res.data);
-	}
-
-	sApiProgressInfo.set(ProgressEmpty);
-	return res.status == 200 ? res.data : null;
-}
+// ShopPay support has been removed
 
 //#endregion
 
