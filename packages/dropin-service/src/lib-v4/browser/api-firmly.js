@@ -3,7 +3,7 @@
 import { platformsToMakeCartHealthCheck } from './api-config';
 import { postUpdateCart } from './cross';
 import { importJWK, CompactEncrypt } from 'foundation/auth/ext-jose.js';
-import { trackUXEvent, trackAPIEvent, trackError } from './telemetry.js';
+import { trackUXEvent, trackAPIEvent, trackError, getSessionTraceId } from './telemetry.js';
 
 //#region Session Storage
 
@@ -283,11 +283,26 @@ async function semaphore(func) {
 	}
 }
 
-async function browserFetch(url, options = defaultOptions) {
+async function browserFetch(url, options = defaultOptions, parentContext = null) {
+	const startTime = Date.now();
+
+	let traceContext = null;
+	if (parentContext) {
+		traceContext = {
+			'trace.trace_id': parentContext.traceId,
+			'trace.span_id': generateRandomId(8),
+			'trace.parent_id': parentContext.spanId,
+			'trace.sampled': true
+		};
+	}
+
 	const mergedOptions = Object.assign(options, {
 		credentials: 'include'
 	});
+
 	const res = await semaphore(() => fetch(url, mergedOptions).catch(handleFetchError));
+	const duration = Date.now() - startTime;
+
 	let ret = { status: res.status };
 	try {
 		ret.data = await res.json();
@@ -295,24 +310,27 @@ async function browserFetch(url, options = defaultOptions) {
 		/* empty */
 	}
 
+	const apiEventData = {
+		url: url,
+		method: options.method || 'GET',
+		status: res.status,
+		duration_ms: duration,
+		success: res.status >= 200 && res.status < 300
+	};
+
 	if (res.status != 200) {
 		try {
 			const tempData = ret.data;
-			const error = new Error('error-fetch');
-			trackError(error, {
-				url: url,
-				method: options.method,
-				status: ret.status,
-				code: tempData?.code,
-				description: tempData?.description,
-				error: tempData?.error,
-				error_string: tempData.errorString,
-				res_headers: Object.fromEntries(res.headers)
-			});
+			apiEventData.error_code = tempData?.code;
+			apiEventData.error_description = tempData?.description;
+			apiEventData.error = tempData?.error;
+			apiEventData.error_string = tempData?.errorString;
 		} catch (ex) {
 			/* empty */
 		}
 	}
+
+	trackAPIEvent('api_request', apiEventData, traceContext);
 
 	return ret;
 }
@@ -320,6 +338,15 @@ async function browserFetch(url, options = defaultOptions) {
 //#endregion
 
 //#region Crypto Encryption
+function generateRandomId(byteLength) {
+	const crypto = window.crypto || window.msCrypto;
+	const bytes = crypto?.getRandomValues
+		? crypto.getRandomValues(new Uint8Array(byteLength))
+		: Uint8Array.from({ length: byteLength }, () => Math.floor(Math.random() * 256));
+
+	return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
 let CRYPTO;
 
 async function getRSAKey(jwkKey) {
@@ -593,7 +620,7 @@ export async function initialize(appId, apiServer, domain = null) {
 	firmly.domain = domain;
 
 	// Observers
-	performanceInit();
+	// performanceInit(); // Removed to stop api-PerformanceResourceTiming events
 	mutationInit();
 
 	// initialize payment keys
@@ -713,13 +740,17 @@ async function getHeaders() {
 	return ret;
 }
 
-async function cartSessionTransfer(body, domain) {
+async function cartSessionTransfer(body, domain, parentContext = null) {
 	const headers = await getHeaders();
-	const res = await browserFetch(getDomainUrl('session/transfer', domain), {
-		...headers,
-		method: 'POST',
-		body: JSON.stringify(body)
-	});
+	const res = await browserFetch(
+		getDomainUrl('session/transfer', domain),
+		{
+			...headers,
+			method: 'POST',
+			body: JSON.stringify(body)
+		},
+		parentContext
+	);
 	if (res.status == 200) {
 		setSessionCart(res.data);
 	}
@@ -728,12 +759,16 @@ async function cartSessionTransfer(body, domain) {
 	return res;
 }
 
-async function cartGetCart(domain, healthCheckCall = false) {
+async function cartGetCart(domain, healthCheckCall = false, parentContext = null) {
 	const headers = await getHeaders();
-	const res = await browserFetch(getDomainUrl('cart', domain), {
-		...headers,
-		method: 'GET'
-	});
+	const res = await browserFetch(
+		getDomainUrl('cart', domain),
+		{
+			...headers,
+			method: 'GET'
+		},
+		parentContext
+	);
 
 	// If this is already a health check call, we do not need to create a new one
 	if (!healthCheckCall) {
@@ -747,7 +782,8 @@ async function cartAddLineItem(
 	quantity,
 	variantHandles = [],
 	domain = undefined,
-	flushCart = false
+	flushCart = false,
+	parentContext = null
 ) {
 	const headers = await getHeaders();
 	const body = {
@@ -759,7 +795,8 @@ async function cartAddLineItem(
 			...headers,
 			method: 'POST',
 			body: JSON.stringify(body)
-		}
+		},
+		parentContext
 	);
 	if (res.status == 200) {
 		setSessionCart(res.data);
@@ -770,17 +807,27 @@ async function cartAddLineItem(
 	return res;
 }
 
-async function cartUpdateSku(sku, quantity, variantHandles = [], domain = undefined) {
+async function cartUpdateSku(
+	sku,
+	quantity,
+	variantHandles = [],
+	domain = undefined,
+	parentContext = null
+) {
 	const headers = await getHeaders();
 	const body = {
 		quantity: quantity,
 		variant_handles: variantHandles
 	};
-	const res = await browserFetch(getDomainUrl(`cart/line-items/${sku}`, domain), {
-		...headers,
-		method: 'PUT',
-		body: JSON.stringify(body)
-	});
+	const res = await browserFetch(
+		getDomainUrl(`cart/line-items/${sku}`, domain),
+		{
+			...headers,
+			method: 'PUT',
+			body: JSON.stringify(body)
+		},
+		parentContext
+	);
 	if (res.status == 200) {
 		setSessionCart(res.data);
 	}
@@ -789,12 +836,16 @@ async function cartUpdateSku(sku, quantity, variantHandles = [], domain = undefi
 	return res;
 }
 
-async function cartClear(domain = undefined) {
+async function cartClear(domain = undefined, parentContext = null) {
 	const headers = await getHeaders();
-	const res = await browserFetch(getDomainUrl(`cart/line-items`, domain), {
-		...headers,
-		method: 'DELETE'
-	});
+	const res = await browserFetch(
+		getDomainUrl(`cart/line-items`, domain),
+		{
+			...headers,
+			method: 'DELETE'
+		},
+		parentContext
+	);
 	if (res.status == 200) {
 		setSessionCart(res.data);
 	}
@@ -804,13 +855,17 @@ async function cartClear(domain = undefined) {
 	return res;
 }
 
-async function cartUpdateShippingInfo(body, domain) {
+async function cartUpdateShippingInfo(body, domain, parentContext = null) {
 	const headers = await getHeaders();
-	const res = await browserFetch(getDomainUrl('cart/shipping-info', domain), {
-		...headers,
-		method: 'POST',
-		body: JSON.stringify(body)
-	});
+	const res = await browserFetch(
+		getDomainUrl('cart/shipping-info', domain),
+		{
+			...headers,
+			method: 'POST',
+			body: JSON.stringify(body)
+		},
+		parentContext
+	);
 	if (res.status == 200) {
 		setSessionCart(res.data);
 	}
@@ -819,16 +874,20 @@ async function cartUpdateShippingInfo(body, domain) {
 	return res;
 }
 
-async function cartUpdateDelivery(sku, domain) {
+async function cartUpdateDelivery(sku, domain, parentContext = null) {
 	const headers = await getHeaders();
 	const body = {
 		shipping_method: sku
 	};
-	const res = await browserFetch(getDomainUrl('cart/shipping-method', domain), {
-		...headers,
-		method: 'POST',
-		body: JSON.stringify(body)
-	});
+	const res = await browserFetch(
+		getDomainUrl('cart/shipping-method', domain),
+		{
+			...headers,
+			method: 'POST',
+			body: JSON.stringify(body)
+		},
+		parentContext
+	);
 	if (res.status == 200) {
 		setSessionCart(res.data);
 	}
@@ -837,17 +896,21 @@ async function cartUpdateDelivery(sku, domain) {
 	return res;
 }
 
-async function cartCompleteOrder(paymentToken, domain) {
+async function cartCompleteOrder(paymentToken, domain, parentContext = null) {
 	const headers = await getHeaders();
 	const body = {
 		payment_token: { id: paymentToken },
 		vault_token: true
 	};
-	const res = await browserFetch(getDomainUrl('cart/complete-order', domain), {
-		...headers,
-		method: 'POST',
-		body: JSON.stringify(body)
-	});
+	const res = await browserFetch(
+		getDomainUrl('cart/complete-order', domain),
+		{
+			...headers,
+			method: 'POST',
+			body: JSON.stringify(body)
+		},
+		parentContext
+	);
 	if (res.status == 200) {
 		setSessionCart(res.data);
 	}
@@ -856,39 +919,51 @@ async function cartCompleteOrder(paymentToken, domain) {
 	return res;
 }
 
-async function getConsents() {
+async function getConsents(parentContext = null) {
 	const headers = await getHeaders();
 
-	const res = await browserFetch(getDomainUrl('cart/consents'), {
-		...headers,
-		method: 'GET'
-	});
+	const res = await browserFetch(
+		getDomainUrl('cart/consents'),
+		{
+			...headers,
+			method: 'GET'
+		},
+		parentContext
+	);
 
 	return res;
 }
 
-async function setConsents(consents) {
+async function setConsents(consents, parentContext = null) {
 	const headers = await getHeaders();
 
-	const res = await browserFetch(getDomainUrl('cart/consents'), {
-		...headers,
-		method: 'POST',
-		body: JSON.stringify(consents)
-	});
+	const res = await browserFetch(
+		getDomainUrl('cart/consents'),
+		{
+			...headers,
+			method: 'POST',
+			body: JSON.stringify(consents)
+		},
+		parentContext
+	);
 
 	return res;
 }
 
-async function sessionJoin(password) {
+async function sessionJoin(password, parentContext = null) {
 	const headers = await getHeaders();
 	const body = {
 		password
 	};
-	const res = await browserFetch(getDomainUrl('session/join'), {
-		...headers,
-		method: 'POST',
-		body: JSON.stringify(body)
-	});
+	const res = await browserFetch(
+		getDomainUrl('session/join'),
+		{
+			...headers,
+			method: 'POST',
+			body: JSON.stringify(body)
+		},
+		parentContext
+	);
 	if (res.status == 200) {
 		setSessionCart(res.data);
 	}
@@ -897,30 +972,38 @@ async function sessionJoin(password) {
 	return res;
 }
 
-async function sessionCreateOtp(email) {
+async function sessionCreateOtp(email, parentContext = null) {
 	const headers = await getHeaders();
 	const body = {
 		email
 	};
-	const res = await browserFetch(getDomainUrl('session/create-otp'), {
-		...headers,
-		method: 'POST',
-		body: JSON.stringify(body)
-	});
+	const res = await browserFetch(
+		getDomainUrl('session/create-otp'),
+		{
+			...headers,
+			method: 'POST',
+			body: JSON.stringify(body)
+		},
+		parentContext
+	);
 	return res;
 }
 
-async function sessionValidateOtp(email, otp) {
+async function sessionValidateOtp(email, otp, parentContext = null) {
 	const headers = await getHeaders();
 	const body = {
 		email,
 		otp
 	};
-	const res = await browserFetch(getDomainUrl('session/validate-otp'), {
-		...headers,
-		method: 'POST',
-		body: JSON.stringify(body)
-	});
+	const res = await browserFetch(
+		getDomainUrl('session/validate-otp'),
+		{
+			...headers,
+			method: 'POST',
+			body: JSON.stringify(body)
+		},
+		parentContext
+	);
 	if (res.status == 200) {
 		setSessionCart(res.data);
 	}
@@ -929,16 +1012,20 @@ async function sessionValidateOtp(email, otp) {
 	return res;
 }
 
-async function cartSavedPaymentCompleteOrder(paymentId) {
+async function cartSavedPaymentCompleteOrder(paymentId, parentContext = null) {
 	const headers = await getHeaders();
 	const body = {
 		payment_id: paymentId
 	};
-	const res = await browserFetch(getDomainUrl('cart/complete-order-with-saved-payment'), {
-		...headers,
-		method: 'POST',
-		body: JSON.stringify(body)
-	});
+	const res = await browserFetch(
+		getDomainUrl('cart/complete-order-with-saved-payment'),
+		{
+			...headers,
+			method: 'POST',
+			body: JSON.stringify(body)
+		},
+		parentContext
+	);
 	if (res.status == 200) {
 		setSessionCart(res.data);
 	}
@@ -949,28 +1036,36 @@ async function cartSavedPaymentCompleteOrder(paymentId) {
 
 //#region  Promo code functions
 
-async function addPromoCode(promoCode) {
+async function addPromoCode(promoCode, parentContext = null) {
 	const headers = await getHeaders();
 	const body = {
 		promo_codes: [promoCode]
 	};
-	const res = await browserFetch(getDomainUrl('cart/promo-codes'), {
-		...headers,
-		method: 'POST',
-		body: JSON.stringify(body)
-	});
+	const res = await browserFetch(
+		getDomainUrl('cart/promo-codes'),
+		{
+			...headers,
+			method: 'POST',
+			body: JSON.stringify(body)
+		},
+		parentContext
+	);
 	if (res.status == 200) {
 		setSessionCart(res.data);
 	}
 	return res;
 }
 
-async function clearPromoCodes() {
+async function clearPromoCodes(parentContext = null) {
 	const headers = await getHeaders();
-	const res = await browserFetch(getDomainUrl('cart/promo-codes'), {
-		...headers,
-		method: 'DELETE'
-	});
+	const res = await browserFetch(
+		getDomainUrl('cart/promo-codes'),
+		{
+			...headers,
+			method: 'DELETE'
+		},
+		parentContext
+	);
 	if (res.status == 200) {
 		setSessionCart(res.data);
 	}
@@ -1107,60 +1202,84 @@ async function c2pWalletUnlockComplete(otp, accessToken = null) {
 //#endregion
 
 //#region Paypal
-async function paypalStart() {
+async function paypalStart(parentContext = null) {
 	const headers = await getHeaders();
-	const res = await browserFetch(getDomainUrl('express/paypal/start'), {
-		...headers,
-		method: 'POST'
-	});
+	const res = await browserFetch(
+		getDomainUrl('express/paypal/start'),
+		{
+			...headers,
+			method: 'POST'
+		},
+		parentContext
+	);
 	return res;
 }
 
-async function paypalAuthorize(attributes) {
+async function paypalAuthorize(attributes, parentContext = null) {
 	const headers = await getHeaders();
-	const res = await browserFetch(getDomainUrl('express/paypal/authorize'), {
-		...headers,
-		method: 'POST',
-		body: JSON.stringify({ attributes })
-	});
+	const res = await browserFetch(
+		getDomainUrl('express/paypal/authorize'),
+		{
+			...headers,
+			method: 'POST',
+			body: JSON.stringify({ attributes })
+		},
+		parentContext
+	);
 	return res;
 }
 
-async function paypalCompleteOrder(attributes) {
+async function paypalCompleteOrder(attributes, parentContext = null) {
 	const headers = await getHeaders();
-	const res = await browserFetch(getDomainUrl('express/paypal/complete-order'), {
-		...headers,
-		method: 'POST',
-		body: JSON.stringify({ attributes })
-	});
+	const res = await browserFetch(
+		getDomainUrl('express/paypal/complete-order'),
+		{
+			...headers,
+			method: 'POST',
+			body: JSON.stringify({ attributes })
+		},
+		parentContext
+	);
 	return res;
 }
 //#endregion
 
 //#region Address search
 
-async function searchAddress(prefix, domain) {
+async function searchAddress(prefix, domain, parentContext = null) {
 	const headers = await getHeaders();
 	const encoded = encodeURIComponent(prefix);
-	const res = await browserFetch(getDomainUrl(`addresses?q=${encoded}`, domain), {
-		...headers
-	});
+	const res = await browserFetch(
+		getDomainUrl(`addresses?q=${encoded}`, domain),
+		{
+			...headers
+		},
+		parentContext
+	);
 	return res;
 }
 
-async function getAddress(id, domain) {
+async function getAddress(id, domain, parentContext = null) {
 	const headers = await getHeaders();
-	const res = await browserFetch(getDomainUrl(`addresses/${id}`, domain), {
-		...headers
-	});
+	const res = await browserFetch(
+		getDomainUrl(`addresses/${id}`, domain),
+		{
+			...headers
+		},
+		parentContext
+	);
 	return res;
 }
 
-async function searchProducts(query) {
+async function searchProducts(query, parentContext = null) {
 	const headers = await getHeaders();
-	const res = await browserFetch(getDynamoUrl(`search?q=${query}`), {
-		...headers
-	});
+	const res = await browserFetch(
+		getDynamoUrl(`search?q=${query}`),
+		{
+			...headers
+		},
+		parentContext
+	);
 	return res;
 }
 
@@ -1170,7 +1289,7 @@ async function searchProducts(query) {
  * @param {Object} customProperties - The custom properties object to send
  * @returns {Promise<Object>} Response object
  */
-async function setCustomProperties(domain, customProperties) {
+async function setCustomProperties(domain, customProperties, parentContext = null) {
 	if (!customProperties || typeof customProperties !== 'object') {
 		throw new Error('Custom properties must be a valid object');
 	}
@@ -1179,11 +1298,15 @@ async function setCustomProperties(domain, customProperties) {
 		const headers = await getHeaders();
 		const url = `${window.firmly.apiServer}/api/v1/domains/${domain}/properties`;
 
-		const res = await browserFetch(url, {
-			...headers,
-			method: 'PUT',
-			body: JSON.stringify(customProperties)
-		});
+		const res = await browserFetch(
+			url,
+			{
+				...headers,
+				method: 'PUT',
+				body: JSON.stringify(customProperties)
+			},
+			parentContext
+		);
 
 		if (res.status !== 200) {
 			console.error('Failed to set properties:', res.data);

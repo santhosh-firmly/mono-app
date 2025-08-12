@@ -1,27 +1,10 @@
 /**
- * Modern telemetry system with proper distributed tracing support
- *
- * Trace relationships:
- * - Each event gets a unique span_id
- * - Events without explicit parent have parent_id = null (root spans)
- * - Child spans can be created with createChildSpan() for explicit parent-child relationships
- * - All events in a session share the same trace_id
- *
- * Example usage:
- * - trackUXEvent('button_click') // Creates independent span with parent_id = null
- * - trackAPIEvent('api_call') // Creates independent span with parent_id = null
- *
- * For parent-child relationships:
- * - const parentContext = trackUXEvent('operation_start')
- * - trackAPIEvent('sub_operation', {}, createChildSpan(parentContext))
- *
- * Example output structure:
- * Event 1: { trace_id: "abc123", span_id: "span001", parent_id: null }        // Root span
- * Event 2: { trace_id: "abc123", span_id: "span002", parent_id: null }        // Independent span
- * Event 3: { trace_id: "abc123", span_id: "span003", parent_id: "span001" }   // Child of Event 1
+ * Telemetry system with distributed tracing support
+ * - All events share the same trace_id per session
+ * - Events without explicit parent become children of session root span
+ * - Session trace_id available via getSessionTraceId() for external systems
  */
 
-// Constants
 const EVENT_TYPES = {
 	API: 'api',
 	UX: 'ux',
@@ -31,11 +14,15 @@ const EVENT_TYPES = {
 const CONFIG = {
 	THROTTLE_TIME: 200,
 	TRACE_ID_BYTES: 16,
-	SPAN_ID_BYTES: 8,
-	SESSION_TRACE_ID: generateRandomId(CONFIG.TRACE_ID_BYTES)
+	SPAN_ID_BYTES: 8
 };
 
-// Utility functions
+let sessionTracing = {
+	traceId: null,
+	rootSpanId: null,
+	initialized: false
+};
+
 function generateRandomId(byteLength) {
 	const crypto = window.crypto || window.msCrypto;
 	const bytes = crypto?.getRandomValues
@@ -45,14 +32,41 @@ function generateRandomId(byteLength) {
 	return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
-function createTraceContext(traceId = null, parentId = null) {
+function initializeSessionTracing() {
+	if (!sessionTracing.initialized) {
+		sessionTracing.traceId = generateRandomId(CONFIG.TRACE_ID_BYTES);
+		sessionTracing.rootSpanId = generateRandomId(CONFIG.SPAN_ID_BYTES);
+		sessionTracing.initialized = true;
+
+		// Send session_start event as the root span
+		const rootTraceContext = {
+			'trace.trace_id': sessionTracing.traceId,
+			'trace.span_id': sessionTracing.rootSpanId,
+			'trace.parent_id': null,
+			'trace.sampled': true
+		};
+
+		createEvent('session_start', EVENT_TYPES.UX, {}, rootTraceContext);
+	}
+}
+
+function createTraceContext(traceId = null, parentId = undefined) {
+	initializeSessionTracing();
+
 	const spanId = generateRandomId(CONFIG.SPAN_ID_BYTES);
-	const currentTraceId = traceId || CONFIG.SESSION_TRACE_ID;
+	const currentTraceId = traceId || sessionTracing.traceId;
+
+	let currentParentId;
+	if (parentId === undefined) {
+		currentParentId = sessionTracing.rootSpanId;
+	} else {
+		currentParentId = parentId;
+	}
 
 	return {
 		'trace.trace_id': currentTraceId,
 		'trace.span_id': spanId,
-		'trace.parent_id': parentId,
+		'trace.parent_id': currentParentId,
 		'trace.sampled': true
 	};
 }
@@ -80,7 +94,6 @@ function getBaseProperties() {
 	return properties;
 }
 
-// State management
 const telemetryState = {
 	order: 0,
 	queue: [],
@@ -88,7 +101,6 @@ const telemetryState = {
 	ongoingRequest: null
 };
 
-// Request semaphore
 async function executeWithSemaphore(operation) {
 	while (telemetryState.ongoingRequest) {
 		await telemetryState.ongoingRequest;
@@ -107,7 +119,6 @@ async function executeWithSemaphore(operation) {
 	}
 }
 
-// Event sending
 async function sendEvents(events) {
 	const firmly = window.firmly || {};
 
@@ -157,7 +168,6 @@ function enqueueEvent(event) {
 	telemetryState.timeout = setTimeout(flushQueue, CONFIG.THROTTLE_TIME);
 }
 
-// Core event creation
 function createEvent(name, eventType, data = {}, traceContext = null) {
 	try {
 		const baseProperties = getBaseProperties();
@@ -185,7 +195,14 @@ function createEvent(name, eventType, data = {}, traceContext = null) {
 	}
 }
 
-// Public API
+/**
+ * Get the current session trace ID for use in external systems
+ * @returns {string} The session trace ID
+ */
+export function getSessionTraceId() {
+	initializeSessionTracing();
+	return sessionTracing.traceId;
+}
 
 /**
  * Track a user experience event (clicks, page views, form submissions)
@@ -202,8 +219,8 @@ export function trackUXEvent(name, data = {}, traceContext = null) {
  * Track an API/performance event
  * @param {string} name - Event name
  * @param {object} data - Additional event data (duration_ms, status, etc.)
- * @param {object} traceContext - Optional trace context for child spans
- * @returns {object} Trace context with traceId, spanId, parentId
+ * @param {object|null} traceContext - Optional trace context for child spans
+ * @returns {object|null} Trace context with traceId, spanId, parentId
  */
 export function trackAPIEvent(name, data = {}, traceContext = null) {
 	return createEvent(name, EVENT_TYPES.API, data, traceContext);
@@ -213,8 +230,8 @@ export function trackAPIEvent(name, data = {}, traceContext = null) {
  * Track an error event
  * @param {Error} error - Error object
  * @param {object} context - Additional error context
- * @param {object} traceContext - Optional trace context for child spans
- * @returns {object} Trace context with traceId, spanId, parentId
+ * @param {object|null} traceContext - Optional trace context for child spans
+ * @returns {object|null} Trace context with traceId, spanId, parentId
  */
 export function trackError(error, context = {}, traceContext = null) {
 	const errorData = {
@@ -234,7 +251,6 @@ export function flush() {
 	flushQueue();
 }
 
-// Cleanup on page unload
 if (typeof window !== 'undefined') {
 	window.addEventListener('beforeunload', flush);
 	window.addEventListener('pagehide', flush);
