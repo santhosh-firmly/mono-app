@@ -1,3 +1,26 @@
+/**
+ * Modern telemetry system with proper distributed tracing support
+ *
+ * Trace relationships:
+ * - Each event gets a unique span_id
+ * - Events without explicit parent have parent_id = null (root spans)
+ * - Child spans can be created with createChildSpan() for explicit parent-child relationships
+ * - All events in a session share the same trace_id
+ *
+ * Example usage:
+ * - trackUXEvent('button_click') // Creates independent span with parent_id = null
+ * - trackAPIEvent('api_call') // Creates independent span with parent_id = null
+ *
+ * For parent-child relationships:
+ * - const parentContext = trackUXEvent('operation_start')
+ * - trackAPIEvent('sub_operation', {}, createChildSpan(parentContext))
+ *
+ * Example output structure:
+ * Event 1: { trace_id: "abc123", span_id: "span001", parent_id: null }        // Root span
+ * Event 2: { trace_id: "abc123", span_id: "span002", parent_id: null }        // Independent span
+ * Event 3: { trace_id: "abc123", span_id: "span003", parent_id: "span001" }   // Child of Event 1
+ */
+
 // Constants
 const EVENT_TYPES = {
 	API: 'api',
@@ -8,7 +31,8 @@ const EVENT_TYPES = {
 const CONFIG = {
 	THROTTLE_TIME: 200,
 	TRACE_ID_BYTES: 16,
-	SPAN_ID_BYTES: 8
+	SPAN_ID_BYTES: 8,
+	SESSION_TRACE_ID: generateRandomId(CONFIG.TRACE_ID_BYTES)
 };
 
 // Utility functions
@@ -23,11 +47,12 @@ function generateRandomId(byteLength) {
 
 function createTraceContext(traceId = null, parentId = null) {
 	const spanId = generateRandomId(CONFIG.SPAN_ID_BYTES);
+	const currentTraceId = traceId || CONFIG.SESSION_TRACE_ID;
 
 	return {
-		'trace.trace_id': traceId || generateRandomId(CONFIG.TRACE_ID_BYTES),
+		'trace.trace_id': currentTraceId,
 		'trace.span_id': spanId,
-		'trace.parent_id': parentId || spanId,
+		'trace.parent_id': parentId,
 		'trace.sampled': true
 	};
 }
@@ -161,14 +186,36 @@ function createEvent(name, eventType, data = {}, traceContext = null) {
 }
 
 // Public API
+
+/**
+ * Track a user experience event (clicks, page views, form submissions)
+ * @param {string} name - Event name
+ * @param {object} data - Additional event data
+ * @param {object} traceContext - Optional trace context for child spans
+ * @returns {object} Trace context with traceId, spanId, parentId
+ */
 export function trackUXEvent(name, data = {}, traceContext = null) {
 	return createEvent(name, EVENT_TYPES.UX, data, traceContext);
 }
 
+/**
+ * Track an API/performance event
+ * @param {string} name - Event name
+ * @param {object} data - Additional event data (duration_ms, status, etc.)
+ * @param {object} traceContext - Optional trace context for child spans
+ * @returns {object} Trace context with traceId, spanId, parentId
+ */
 export function trackAPIEvent(name, data = {}, traceContext = null) {
 	return createEvent(name, EVENT_TYPES.API, data, traceContext);
 }
 
+/**
+ * Track an error event
+ * @param {Error} error - Error object
+ * @param {object} context - Additional error context
+ * @param {object} traceContext - Optional trace context for child spans
+ * @returns {object} Trace context with traceId, spanId, parentId
+ */
 export function trackError(error, context = {}, traceContext = null) {
 	const errorData = {
 		error: {

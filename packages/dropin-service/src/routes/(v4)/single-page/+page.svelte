@@ -19,7 +19,7 @@
 	import { sCartStoreInfo } from '$lib-v4/browser/api-manager';
 	import ThankYouPage from '$lib-v4/components/v4/thank-you-page.svelte';
 	import { startMasterCardUnifiedSolution } from '$lib-v4/clients/mastercard.js';
-	import { telemetryEvent } from '$lib-v4/browser/api-firmly.js';
+	import { trackUXEvent } from '$lib-v4/browser/telemetry.js';
 
 	let { data } = $props();
 
@@ -187,7 +187,7 @@
 	});
 
 	function onBackClick() {
-		telemetryEvent('back_button_clicked');
+		trackUXEvent('back_button_clicked');
 		history.back();
 	}
 

@@ -1,5 +1,6 @@
 <script module>
 	// @ts-nocheck
+	import { trackAPIEvent, trackError } from '$lib-v4/browser/telemetry.js';
 
 	/**
 	 * Helper function to wait for another promise resolution
@@ -39,18 +40,22 @@
 		} finally {
 			const endTime = Date.now();
 			const durationMs = endTime - startTime;
-			window.firmly.telemetryVisaApiPerformance?.(
-				durationMs,
-				apiName,
-				response,
-				window.visaUniqueTransactionId,
-				additionalData
-			);
+			trackAPIEvent(apiName || 'visa sdk', {
+				duration_ms: durationMs,
+				status: response?.status,
+				transaction_id: window.visaUniqueTransactionId,
+				...(additionalData ? { additionalData } : {})
+			});
 		}
 	}
 
 	function sendVisaErrorToTelemetry(response) {
-		window.firmly?.telemetryVisaErrors?.(response);
+		trackError(new Error('error-c2p'), {
+			status: response?.status,
+			code: response?.code,
+			description: response?.description,
+			error: response?.error
+		});
 	}
 
 	export async function visaUnlockStart(email, vSrc) {

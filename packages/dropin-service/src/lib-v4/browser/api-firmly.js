@@ -3,6 +3,7 @@
 import { platformsToMakeCartHealthCheck } from './api-config';
 import { postUpdateCart } from './cross';
 import { importJWK, CompactEncrypt } from 'foundation/auth/ext-jose.js';
+import { trackUXEvent, trackAPIEvent, trackError } from './telemetry.js';
 
 //#region Session Storage
 
@@ -31,38 +32,6 @@ function isStorageAvailable(type) {
 			storage &&
 			storage.length !== 0
 		);
-	}
-}
-
-/**
- * Enqueues a telemetry event for user interactions and behaviors.
- * @param {string} name - The event name (e.g., 'card_selected', 'express_payment_clicked').
- * @param {object} [details={}] - Additional event details (e.g., interaction type, context).
- */
-export function telemetryEvent(name, details = {}) {
-	try {
-		const firmly = window.firmly;
-		const headerProp = getHeaderProp();
-
-		_telemetryQueue.push(
-			Object.assign(
-				{
-					timestamp: Date.now(),
-					name,
-					event_type: EVENT_TYPE_UX,
-					order: ++_telemetryOrder,
-					span_id: firmly?.traceId,
-					event_id: getNextEventId(),
-					...details
-				},
-				headerProp
-			)
-		);
-		clearTimeout(_telemetryTimeout);
-		_telemetryTimeout = setTimeout(telemetryPush, TELEMETRY_THROTTLE_TIME);
-	} catch (error) {
-		// Telemetry errors should never break the application
-		console.warn('Telemetry event failed:', error);
 	}
 }
 
@@ -139,278 +108,6 @@ function initBrowserId() {
 	return id;
 }
 
-async function telemetry(message) {
-	const firmly = window.firmly;
-	if (!message) {
-		return;
-	}
-	try {
-		const body = JSON.stringify(message);
-		if (navigator?.sendBeacon) {
-			//TODO: check the return value of the nsb.
-			navigator.sendBeacon(firmly.telemetryServer, body);
-		} else {
-			const options = {
-				method: 'post',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: body
-			};
-			fetch(firmly.telemetryServer, options);
-		}
-	} catch (ex) {
-		console.error('telemetry error:', ex);
-		// Last resort is just to post via console.
-	}
-}
-
-const TELEMETRY_THROTTLE_TIME = 200;
-let _telemetryTimeout = null;
-let _telemetryQueue = [];
-let _telemetryOrder = 0;
-
-function telemetryPush() {
-	if (_telemetryQueue.length > 0) {
-		telemetry(_telemetryQueue);
-	}
-	_telemetryQueue = [];
-}
-
-function getHeaderProp() {
-	const firmly = window.firmly;
-	let headerProp = {
-		browser_id: firmly.browserId,
-		device_id: firmly.deviceId,
-		session_id: firmly.sessionId,
-		trace_id: firmly.traceId,
-		parent_id: firmly.traceId,
-		app_name: firmly.appName,
-		app_version: firmly.appVersion
-	};
-	if (firmly.parentInfo) {
-		headerProp.edge_version = firmly.parentInfo.version;
-		headerProp.edge_hostname = firmly.parentInfo.hostname;
-		headerProp.edge_pathname = firmly.parentInfo.pathname;
-		headerProp.edge_href = firmly.parentInfo.href;
-		headerProp.edge_referrer = firmly.parentInfo.referrer;
-	}
-
-	const sessionParentUtm = getSessionParentUTM();
-	if (sessionParentUtm) {
-		headerProp.sess = sessionParentUtm;
-	}
-	return headerProp;
-}
-
-function getNextEventId() {
-	return `${window.firmly.traceId}_${_telemetryOrder.toString()}_${Date.now()}`;
-}
-function telemetryEnqueue(message) {
-	const headerProp = getHeaderProp();
-
-	if (Array.isArray(message)) {
-		for (const iterator of message) {
-			const order = ++_telemetryOrder;
-			const event_id = getNextEventId();
-			_telemetryQueue.push(
-				Object.assign(
-					iterator,
-					{ order: order, span_id: event_id, event_id: event_id },
-					headerProp
-				)
-			);
-		}
-	} else {
-		const order = ++_telemetryOrder;
-		const event_id = getNextEventId();
-		_telemetryQueue.push(
-			Object.assign(
-				message,
-				{ order: order, span_id: event_id, event_id: event_id },
-				headerProp
-			)
-		);
-	}
-	clearTimeout(_telemetryTimeout);
-	_telemetryTimeout = setTimeout(telemetryPush, TELEMETRY_THROTTLE_TIME);
-}
-
-function telemetrySessionStart() {
-	telemetryEnqueue({
-		timestamp: Date.now(),
-		name: 'sessionStart',
-		event_type: EVENT_TYPE_SESSION
-	});
-}
-
-function telemetryDeviceCreated() {
-	telemetryEnqueue({
-		timestamp: Date.now(),
-		name: 'deviceCreated',
-		event_type: EVENT_TYPE_DEVICE
-	});
-}
-
-const EVENT_VIEW_PAGE = 'viewPage';
-
-function telemetryPageVisit() {
-	const firmly = window.firmly;
-	const headerProp = getHeaderProp();
-	delete headerProp['parent_id'];
-
-	_telemetryQueue.push(
-		Object.assign(
-			{
-				timestamp: Date.now(),
-				name: EVENT_VIEW_PAGE,
-				event_type: EVENT_TYPE_UX,
-				order: ++_telemetryOrder,
-				span_id: firmly.traceId,
-				event_id: getNextEventId()
-			},
-			headerProp
-		)
-	);
-	clearTimeout(_telemetryTimeout);
-	_telemetryTimeout = setTimeout(telemetryPush, TELEMETRY_THROTTLE_TIME);
-}
-
-function telemetryButtonClick(name) {
-	const firmly = window.firmly;
-	const headerProp = getHeaderProp();
-
-	_telemetryQueue.push(
-		Object.assign(
-			{
-				timestamp: Date.now(),
-				name: name || 'click',
-				event_type: EVENT_TYPE_UX,
-				order: ++_telemetryOrder,
-				span_id: firmly.traceId,
-				event_id: getNextEventId()
-			},
-			headerProp
-		)
-	);
-	clearTimeout(_telemetryTimeout);
-	_telemetryTimeout = setTimeout(telemetryPush, TELEMETRY_THROTTLE_TIME);
-}
-
-function telemetryVisaEvent(name) {
-	const firmly = window.firmly;
-	const headerProp = getHeaderProp();
-
-	_telemetryQueue.push(
-		Object.assign(
-			{
-				timestamp: Date.now(),
-				name: name || 'c2p event',
-				event_type: EVENT_TYPE_UX,
-				order: ++_telemetryOrder,
-				span_id: firmly.traceId,
-				event_id: getNextEventId()
-			},
-			headerProp
-		)
-	);
-	clearTimeout(_telemetryTimeout);
-	_telemetryTimeout = setTimeout(telemetryPush, TELEMETRY_THROTTLE_TIME);
-}
-
-export function telemetryEcsEvent(data) {
-	const firmly = window.firmly;
-	const headerProp = getHeaderProp();
-
-	_telemetryQueue.push(
-		Object.assign(
-			{
-				timestamp: Date.now(),
-				name: 'ecs event',
-				event_type: EVENT_TYPE_UX,
-				order: ++_telemetryOrder,
-				span_id: firmly.traceId,
-				event_id: getNextEventId(),
-				data
-			},
-			headerProp
-		)
-	);
-	clearTimeout(_telemetryTimeout);
-	_telemetryTimeout = setTimeout(telemetryPush, TELEMETRY_THROTTLE_TIME);
-}
-
-export function telemetryDropinError(error) {
-	const firmly = window.firmly;
-	const headerProp = getHeaderProp();
-
-	_telemetryQueue.push(
-		Object.assign(
-			{
-				timestamp: Date.now(),
-				name: 'dropin error',
-				event_type: EVENT_TYPE_ERROR,
-				order: ++_telemetryOrder,
-				span_id: firmly.traceId,
-				event_id: getNextEventId(),
-				error: {
-					message: error.message,
-					stack: error.stack
-				}
-			},
-			headerProp
-		)
-	);
-	clearTimeout(_telemetryTimeout);
-	_telemetryTimeout = setTimeout(telemetryPush, TELEMETRY_THROTTLE_TIME);
-}
-
-function telemetryVisaApiPerformance(
-	durationMs,
-	apiName,
-	apiResponse,
-	transactionId,
-	additionalData
-) {
-	const firmly = window.firmly;
-	const headerProp = getHeaderProp();
-	const messageObject = Object.assign(
-		{
-			event_type: EVENT_TYPE_API,
-			timestamp: Date.now(),
-			name: apiName || 'visa sdk',
-			duration_ms: durationMs,
-			status: apiResponse?.status,
-			order: ++_telemetryOrder,
-			span_id: firmly.traceId,
-			event_id: getNextEventId(),
-			transaction_id: transactionId,
-			correlation_id: apiResponse?.srcCorrelationId,
-			...(additionalData ? { additionalData } : {})
-		},
-		headerProp
-	);
-
-	telemetryEnqueue(messageObject);
-}
-
-function telemetryVisaErrors(response) {
-	telemetryEnqueue({
-		event_type: EVENT_TYPE_ERROR,
-		timestamp: Date.now(),
-		name: 'error-c2p',
-		status: response?.status,
-		code: response?.code,
-		description: response?.description,
-		error: response?.error
-	});
-}
-
-const EVENT_TYPE_API = 'api';
-const EVENT_TYPE_UX = 'ux';
-const EVENT_TYPE_DEVICE = 'device';
-const EVENT_TYPE_SESSION = 'session';
-const EVENT_TYPE_ERROR = 'error';
 //#endregion
 
 //#region PerformanceObserver.
@@ -427,10 +124,8 @@ async function performanceInit() {
 					(entry.name.includes(firmly.apiServer) || entry.name.includes(firmly.ccServer))
 				) {
 					// console.log(entry);
-					const message = {
-						event_type: EVENT_TYPE_API,
+					const messageData = {
 						timestamp: performance.timeOrigin + entry.startTime,
-						name: `api-${entry.initiatorType}`,
 						url: entry.name,
 						duration_ms: entry.duration,
 						redirect: entry.redirectEnd - entry.redirectStart,
@@ -453,13 +148,15 @@ async function performanceInit() {
 						entry_keys: Object.keys(entry.toJSON())
 					};
 					if (entry.responseStatus > 399) {
-						message.error = 'apiError';
+						messageData.error = 'apiError';
 					}
-					exceededList.push(message);
+					exceededList.push(messageData);
 				}
 			}
 			if (exceededList.length > 0) {
-				telemetryEnqueue(exceededList);
+				exceededList.forEach((data) => {
+					trackAPIEvent(`api-${data.entry_type}`, data);
+				});
 			}
 		});
 
@@ -478,26 +175,27 @@ function enqueueFobNodes(nodes, eventName) {
 	const messages = [];
 	for (const iterator of nodes) {
 		if (iterator.attributes && iterator.attributes[FOBS] && iterator.id) {
-			let msg = {
-				event_type: EVENT_TYPE_UX,
+			let msgData = {
 				timestamp: Date.now(),
 				event_name: eventName,
-				name: iterator.id
+				element_id: iterator.id
 			};
 			if (eventName == EVENT_VIEW_SHOWN) {
 				iterator.attributes[FOBS].value = Date.now();
 			} else if (eventName == EVENT_VIEW_REMOVED) {
 				const ts = parseInt(iterator.attributes[FOBS].value);
 				if (ts) {
-					msg.event_start_timestamp = msg.ts;
-					msg.duration_ms = Date.now() - ts;
+					msgData.event_start_timestamp = msgData.timestamp;
+					msgData.duration_ms = Date.now() - ts;
 				}
 			}
-			messages.push(msg);
+			messages.push(msgData);
 		}
 	}
 	if (messages.length > 0) {
-		telemetryEnqueue(messages);
+		messages.forEach((data) => {
+			trackUXEvent(data.element_id, data);
+		});
 	}
 	return messages;
 }
@@ -600,10 +298,8 @@ async function browserFetch(url, options = defaultOptions) {
 	if (res.status != 200) {
 		try {
 			const tempData = ret.data;
-			telemetryEnqueue({
-				event_type: EVENT_TYPE_ERROR,
-				timestamp: Date.now(),
-				name: 'error-fetch',
+			const error = new Error('error-fetch');
+			trackError(error, {
 				url: url,
 				method: options.method,
 				status: ret.status,
@@ -843,7 +539,7 @@ async function fetchBrowserSession() {
 		setBrowserSession(ret.data);
 		firmly.deviceId = ret.data.device_id;
 		if (ret.data.device_created) {
-			telemetryDeviceCreated();
+			trackUXEvent('deviceCreated');
 		}
 		return ret.data;
 	}
@@ -906,7 +602,7 @@ export async function initialize(appId, apiServer, domain = null) {
 	// initialize browser session
 	await getApiAccessToken();
 	if (firmly.isNewSessionId) {
-		telemetrySessionStart();
+		trackUXEvent('sessionStart');
 	}
 }
 
@@ -973,7 +669,7 @@ export async function initializeParentInfo(parentInfo) {
 	const firmly = window.firmly;
 	firmly.parentInfo = parentInfo;
 	initParentUTM(parentInfo);
-	telemetryPageVisit();
+	trackUXEvent('viewPage');
 }
 
 //#endregion
@@ -1521,7 +1217,6 @@ if (typeof window !== 'undefined') {
 		localStorage = window.localStorage;
 	}
 
-	firmly.traceId = 'T' + getRandomId();
 	firmly.browserId = initBrowserId();
 	firmly.deviceId = getDeviceId() || getRandomId();
 	firmly.sessionId = initSessionId();
@@ -1579,14 +1274,6 @@ if (typeof window !== 'undefined') {
 
 	// Custom properties functions
 	firmly.setCustomProperties = setCustomProperties;
-
-	// Telemetry click events
-	firmly.telemetryButtonClick = telemetryButtonClick;
-
-	// Telemetry visa
-	firmly.telemetryVisaEvent = telemetryVisaEvent;
-	firmly.telemetryVisaErrors = telemetryVisaErrors;
-	firmly.telemetryVisaApiPerformance = telemetryVisaApiPerformance;
 }
 
 //#endregion

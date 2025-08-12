@@ -42,6 +42,7 @@
 <script>
 	// @ts-nocheck
 	import { paypalApprove, paypalStart, sIsApiMock } from '$lib-v4/browser/api-manager.js';
+	import { trackUXEvent } from '$lib-v4/browser/telemetry.js';
 	import { onMount } from 'svelte';
 
 	export let merchantId = null;
@@ -59,7 +60,7 @@
 	let buttonInstance = null;
 
 	async function internalStart() {
-		window.firmly?.telemetryButtonClick?.('ClickPaypal');
+		trackUXEvent('ClickPaypal');
 		if ($sIsApiMock) {
 			paypalApprove();
 			if (onPaypalHandler) {
