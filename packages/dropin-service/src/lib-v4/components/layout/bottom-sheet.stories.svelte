@@ -87,10 +87,6 @@
 			{
 				type: 'PayPal',
 				wallet: 'paypal'
-			},
-			{
-				type: 'ShopPay',
-				wallet: 'shoppay'
 			}
 		]
 	};

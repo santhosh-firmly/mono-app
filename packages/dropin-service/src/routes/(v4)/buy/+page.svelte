@@ -1,5 +1,6 @@
 <script>
 	// @ts-nocheck
+	import { SvelteURL } from 'svelte/reactivity';
 	import { version } from '$app/environment';
 	import {
 		initialize,
@@ -192,7 +193,7 @@
 	}
 
 	function getEcsUrl(url) {
-		const urlObj = new URL(url);
+		const urlObj = new SvelteURL(url);
 		urlObj.hostname = convertToFirmlyDomain(urlObj.hostname);
 		return urlObj;
 	}

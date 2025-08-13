@@ -2,7 +2,6 @@
 	// @ts-nocheck
 	import * as Yup from 'yup';
 	import { Required } from '$lib-v4/browser/localization.js';
-	import ShopPayIcon from '../common/svg/shop-pay-icon.svelte';
 	import SpinnerIcon from '../common/svg/spinner-icon.svelte';
 	import Paypal from '../payment/paypal.svelte';
 	import Address from './address.svelte';
@@ -17,7 +16,6 @@
 	import { writable } from 'svelte/store';
 	import { postOrderPlaced, postQuantityUpdated, postSignIn } from '$lib-v4/browser/cross.js';
 	import LoginButton from './login-button.svelte';
-	import Shoppay from './view-model/shoppay.svelte';
 	import ClickToPay from './view-model/click-to-pay-unified.svelte';
 	import { BASE_LOGIN_STEPS, NEW_CARD_OPTION, NEW_SHIPPING_ADDRESS } from '$lib-v4/constants.js';
 	import MerchantLogin from './view-model/merchant-login.svelte';
@@ -92,12 +90,6 @@
 	 * Boolean variable to control if the line items are expanded or not in the Order Summary above the place order button
 	 */
 	let toggleLineItemsExpanded;
-
-	/**
-	 * Boolean variable to control if ShopPay modal is open or not
-	 */
-	let isShopPayOpen = false;
-	// let shopPayAccessToken;
 
 	/**
 	 * Boolean variable to control if merchant login modal is open or not
@@ -396,7 +388,7 @@
 	}
 
 	function areModalsClosed() {
-		return !isC2POpen && !isShopPayOpen && !isMerchantLoginOpen;
+		return !isC2POpen && !isMerchantLoginOpen;
 	}
 
 	// Reset C2P state when email changes to allow validation of new email
@@ -740,9 +732,10 @@
 			postal: maskPostalCode(billingInfo.postal)
 		});
 
-		completeOrderResponse = await window.firmly.paymentCompleteOrderV3(
-			ccInfo,
-			$cart.payment_handle
+		
+		completeOrderResponse = await window.firmly.completeCreditCardOrder(
+			window.firmly.domain,
+			ccInfo
 		);
 
 		if (completeOrderResponse.status !== 200) {
@@ -789,24 +782,6 @@
 		);
 		if (placeOrderResponse.status !== 200) {
 			place_order_error = placeOrderResponse.data?.description || placeOrderResponse.data;
-			return;
-		}
-
-		return placeOrderResponse.data;
-	}
-
-	async function placeOrderShopPay() {
-		const tokenizeResponse = await window.firmly.paymentShopPayTokenize(selectedCardOption);
-		if (tokenizeResponse.status !== 200) {
-			place_order_error = tokenizeResponse.data.description || tokenizeResponse.data;
-			return;
-		}
-
-		const placeOrderResponse = await window.firmly.cartCompleteOrder(
-			tokenizeResponse.data.token
-		);
-		if (placeOrderResponse.status !== 200) {
-			place_order_error = placeOrderResponse.data.description || placeOrderResponse.data;
 			return;
 		}
 
@@ -872,9 +847,7 @@
 			const selectedCard =
 				savedCreditCards.find((c) => c.id === selectedCardOption) ||
 				savedCreditCards.find((c) => c.pan === selectedCardOption);
-			if (selectedCard.wallet === 'shoppay' && isEmailvalid && isShippingValid) {
-				return placeOrderShopPay();
-			} else if (selectedCard.wallet === 'c2p' && isEmailvalid && isShippingValid) {
+			if (selectedCard.wallet === 'c2p' && isEmailvalid && isShippingValid) {
 				return placeOrderC2P(selectedCard, additionalData);
 			} else if (
 				['merchant', 'test'].includes(selectedCard.wallet) &&
@@ -1019,17 +992,7 @@
 			setShippingInfo?.(savedAddress);
 			onSetShippingInfo(savedAddress);
 
-			if (wallet === 'shoppay' && selectedShippingAddress !== NEW_SHIPPING_ADDRESS) {
-				collapsedStateShipping = true;
-				collapsedStateShippingMethod = true;
-			}
 		}
-	}
-
-	function onShopPayLoginSuccess(event) {
-		isShopPayOpen = false;
-		email = event.detail.email;
-		updateCreditCardsAndAddresses(event.detail, 'shoppay');
 	}
 
 	function onMerchantLoginSuccess(event) {
@@ -1072,7 +1035,7 @@
 	let shippingAutoCompleteEnabled = true;
 
 	$: {
-		shippingAutoCompleteEnabled = !isShopPayOpen && !isMerchantLoginOpen && !isC2POpen;
+		shippingAutoCompleteEnabled = !isMerchantLoginOpen && !isC2POpen;
 	}
 
 	// Promo code section
@@ -1314,7 +1277,7 @@
 					</div>
 				{:else}
 					<div class="flex flex-col p-4 @md:px-4 @md:py-0">
-						{#if allowMerchantLogin || allowShopPay || allowPayPal}
+						{#if allowMerchantLogin || allowPayPal}
 							<div class="grid grid-cols-1 gap-4 py-2">
 								{#if allowMerchantLogin}
 									<LoginButton
@@ -1324,28 +1287,6 @@
 										disabled={isC2PInProgress || placeOrderInProgress}
 										on:click={loginButtonClicked}
 									/>
-								{/if}
-								{#if allowShopPay}
-									<div class="flex justify-center">
-										<button
-											type="button"
-											class="flex w-full flex-row items-center justify-center rounded bg-[#5a31f4] px-4 py-2 text-white shadow hover:bg-[#390ced]"
-											disabled={isC2PInProgress || placeOrderInProgress}
-											data-testid="shoppay-button"
-											on:click={() => {
-												telemetryEvent('express_payment_clicked', {
-													paymentMethod: 'shoppay'
-												});
-												isShopPayOpen = true;
-											}}
-										>
-											<ShopPayIcon
-												class="fill-white px-2"
-												width={84}
-												height={32}
-											/>
-										</button>
-									</div>
 								{/if}
 								{#if allowPayPal}
 									<div
@@ -1866,12 +1807,6 @@
 				</div>
 			</div>
 		</form>
-		<Shoppay
-			bind:isModalOpen={isShopPayOpen}
-			on:login-successful={onShopPayLoginSuccess}
-			{PUBLIC_DISABLE_HCAPTCHA}
-		/>
-
 		<!-- TODO: Pass termsOfServiceLink (Include it in AirTable all the way down here) -->
 		<MerchantLogin
 			bind:isModalOpen={isMerchantLoginOpen}

@@ -194,13 +194,24 @@ export async function checkoutWithCard({
 		correlationId: withCardResponse.checkoutResponseData.srcCorrelationId
 	};
 
-	const walletResponse = await window.firmly.paymentC2PTokenize(
-		cardId,
-		cvv,
-		null,
-		withCardResponse.checkoutResponse,
-		mastercardPayload
-	);
+	// Prepare wallet data for complete-order
+	const walletData = {
+		wallet: 'mastercard',
+		credit_card_id: String(cardId),
+		access_token: sessionStorage.getItem('FWC2P'),
+		...mastercardPayload
+	};
+	
+	if (cvv) {
+		walletData.verification_value = await window.firmly.paymentRsaEncrypt(cvv);
+	}
+	
+	if (withCardResponse.checkoutResponse) {
+		walletData.jws = withCardResponse.checkoutResponse;
+	}
+	
+	const domain = window.firmly.domain;
+	const walletResponse = await window.firmly.completeWalletOrder(domain, walletData);
 
 	if (walletResponse.data?.cvv_required) {
 		previuslyWithCardResponse = withCardResponse;

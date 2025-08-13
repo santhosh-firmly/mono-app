@@ -120,15 +120,12 @@ export class Cart extends Subscribable {
 			billing_info: billingInfo
 		};
 
-		let resp = await window.firmly.paymentCreditCardTokenize(
-			tokenizeInput,
-			this.payment_handle
+		// Use new complete-order API directly without tokenization
+		const domain = this.shop_id || window.location.hostname;
+		let resp = await window.firmly.completeCreditCardOrder(
+			domain,
+			tokenizeInput
 		);
-		if (resp.status !== 200) {
-			throw resp.data;
-		}
-
-		resp = await window.firmly.cartCompleteOrder(resp.data.token, this.shop_id);
 		if (resp.status !== 200) {
 			throw resp.data;
 		}

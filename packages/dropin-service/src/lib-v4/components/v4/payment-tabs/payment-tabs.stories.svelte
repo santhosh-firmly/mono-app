@@ -31,7 +31,7 @@
 <Story
 	name="Multiple Tabs"
 	args={{
-		allowedPaymentMethods: ['CreditCard', 'PayPal', 'ShopPay']
+		allowedPaymentMethods: ['CreditCard', 'PayPal']
 	}}
 />
 
