@@ -1127,28 +1127,36 @@ async function encryptCCInfoAsJWE(ccInfo) {
 //#region Wallet functions
 
 
-async function walletUnlockStart(walletType, emailAddress, captcha = null) {
+async function walletUnlockStart(walletType, emailAddress, captcha = null, parentContext = null) {
 	const body = { email: emailAddress };
 	if (captcha) {
 		body.hcaptcha_token = captcha;
 	}
 
 	const headers = await getHeaders();
-	const res = await browserFetch(getWalletUrl(walletType, 'unlock-start'), {
-		...headers,
-		method: 'POST',
-		body: JSON.stringify(body)
-	});
+	const res = await browserFetch(
+		getWalletUrl(walletType, 'unlock-start'),
+		{
+			...headers,
+			method: 'POST',
+			body: JSON.stringify(body)
+		},
+		parentContext
+	);
 	return res;
 }
 
-async function walletUnlockComplete(walletType, walletAccessToken, otp) {
+async function walletUnlockComplete(walletType, walletAccessToken, otp, parentContext = null) {
 	const headers = await getHeaders();
-	const res = await browserFetch(getWalletUrl(walletType, 'unlock-complete'), {
-		...headers,
-		method: 'POST',
-		body: JSON.stringify({ access_token: walletAccessToken, otp: otp })
-	});
+	const res = await browserFetch(
+		getWalletUrl(walletType, 'unlock-complete'),
+		{
+			...headers,
+			method: 'POST',
+			body: JSON.stringify({ access_token: walletAccessToken, otp: otp })
+		},
+		parentContext
+	);
 	return res;
 }
 
@@ -1175,24 +1183,24 @@ function changeC2PProvider(provider = 'mastercard-unified') {
 	CLICK_2_PAY = provider;
 }
 
-async function c2pWalletUnlockStart(emailAddress) {
-	const ret = await walletUnlockStart(CLICK_2_PAY, emailAddress);
+async function c2pWalletUnlockStart(emailAddress, parentContext = null) {
+	const ret = await walletUnlockStart(CLICK_2_PAY, emailAddress, null, parentContext);
 	if (ret.status == 200) {
 		setC2PAccessToken(ret.data.access_token);
 	}
 	return ret;
 }
 
-async function c2pWalletUnlockComplete(otp, accessToken = null) {
+async function c2pWalletUnlockComplete(otp, accessToken = null, parentContext = null) {
 	if (!accessToken) {
 		accessToken = getC2PAccessToken();
 	}
 
-	const ret = await walletUnlockComplete(CLICK_2_PAY, accessToken, otp);
+	const ret = await walletUnlockComplete(CLICK_2_PAY, accessToken, otp, parentContext);
+
 	if (ret.status == 200) {
 		setC2PAccessToken(ret.data.access_token);
 	}
-
 	return ret;
 }
 

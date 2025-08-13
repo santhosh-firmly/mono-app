@@ -13,6 +13,7 @@
 		unlockStart,
 		checkoutWithCard
 	} from '$lib-v4/clients/mastercard';
+	import { trackUXEvent } from '$lib-v4/browser/telemetry.js';
 
 	const dispatch = createEventDispatcher();
 	/**
@@ -61,6 +62,9 @@
 	let EmailC2P;
 
 	export async function c2pUnlockStart(email) {
+		const parentContext = trackUXEvent('mastercard_c2p_unlock_start', {
+			email: email?.replace(/(.{3}).*(@.*)/, '$1***$2')
+		});
 		isC2PInProgress = true;
 		EmailC2P = email;
 		const res = await unlockStart(email);
@@ -83,6 +87,10 @@
 		isC2PInProgress = false;
 	}
 	async function C2PValidateOtp(event) {
+		const parentContext = trackUXEvent('mastercard_c2p_validate_otp', {
+			hasOtpReference: !!otpReference,
+			otpLength: event.detail.otpValue?.length
+		});
 		let res;
 		if (!otpReference) {
 			popupStep = BASE_LOGIN_STEPS.PROCESSING_OTP;
@@ -127,6 +135,13 @@
 		}
 	}
 	export async function tokenizeC2P(selectedCard, additionalData, cvv) {
+		const parentContext = trackUXEvent('mastercard_c2p_tokenize', {
+			cardId: selectedCard.id,
+			rememberMe: isChecked,
+			hasCvv: !!cvv,
+			cartValue: cart.total.value,
+			currency: cart.total.currency
+		});
 		const tokenizeResponse = await checkoutWithCard({
 			cardId: selectedCard.id,
 			rememberMe: isChecked,
