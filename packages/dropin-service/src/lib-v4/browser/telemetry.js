@@ -175,12 +175,24 @@ function createEvent(name, eventType, data = {}, traceContext = null) {
 
 		const event = {
 			name,
-			event_type: eventType,
-			event_id: `${trace['trace.trace_id']}_${baseProperties.order}_${baseProperties.timestamp}`,
+			kind: 'client',
+			route: data.url,
+			'service.name': baseProperties.app_name,
+			duration_ms: data.duration_ms,
+			'response.status': data.status,
+			device_id: baseProperties.device_id,
+			error: data.error_description || (data.success === false ? 'Request failed' : null),
 			...baseProperties,
 			...trace,
 			...data
 		};
+
+		// Remove undefined fields
+		Object.keys(event).forEach((key) => {
+			if (event[key] === undefined) {
+				delete event[key];
+			}
+		});
 
 		enqueueEvent(event);
 
