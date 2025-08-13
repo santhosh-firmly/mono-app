@@ -291,7 +291,7 @@ export async function trackPerformance(func, apiName, additionalData, trackEvent
 	}
 }
 
-export function flush() {
+function flush() {
 	clearTimeout(telemetryState.timeout);
 	flushQueue();
 }
