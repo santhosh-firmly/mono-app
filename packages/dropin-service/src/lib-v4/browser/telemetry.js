@@ -258,6 +258,39 @@ export function trackError(error, context = {}, traceContext = null) {
 	return createEvent('error', EVENT_TYPES.ERROR, errorData, traceContext);
 }
 
+/**
+ * Measures the duration of an async operation and tracks the result as a telemetry API event.
+ * @param {Function} func - The async function to execute and measure.
+ * @param {string} apiName - Name of the operation for telemetry.
+ * @param {Object} [additionalData] - Extra data to include in telemetry.
+ * @param {Function} trackEvent - Telemetry tracking function (signature: (name, data) => void).
+ * @returns {Promise<*>} The result of the async function.
+ */
+export async function trackPerformance(func, apiName, additionalData, trackEvent) {
+	const startTime = Date.now();
+	let response;
+	let error = null;
+	try {
+		response = await func();
+		return response;
+	} catch (e) {
+		error = e;
+		throw e;
+	} finally {
+		const endTime = Date.now();
+		const durationMs = endTime - startTime;
+		if (typeof trackEvent === 'function') {
+			trackEvent(apiName, {
+				duration_ms: durationMs,
+				'response.status': response?.status || (error ? 'error' : 'success'),
+				success: !error,
+				error: error?.message,
+				...(additionalData ? additionalData : {})
+			});
+		}
+	}
+}
+
 export function flush() {
 	clearTimeout(telemetryState.timeout);
 	flushQueue();

@@ -1,27 +1,4 @@
-import { trackAPIEvent, trackError } from '../browser/telemetry.js';
-
-async function performanceObserver(func, apiName, additionalData) {
-	const startTime = Date.now();
-	let response;
-	let error = null;
-	try {
-		response = await func();
-		return response;
-	} catch (e) {
-		error = e;
-		throw e;
-	} finally {
-		const endTime = Date.now();
-		const durationMs = endTime - startTime;
-		trackAPIEvent(apiName || 'mastercard_unified', {
-			duration_ms: durationMs,
-			'response.status': response?.status || (error ? 'error' : 'success'),
-			success: !error,
-			error: error?.message,
-			...(additionalData ? additionalData : {})
-		});
-	}
-}
+import { trackAPIEvent, trackError, trackPerformance } from '../browser/telemetry.js';
 
 function fromMaskedCards(maskedCards) {
 	return {
@@ -65,7 +42,7 @@ export async function startMasterCardUnifiedSolution({
 	srcDpaId,
 	presentationName = 'Firmly, Inc.'
 } = {}) {
-	return await performanceObserver(
+	return await trackPerformance(
 		async () => {
 			const baseUrl = sandbox
 				? 'https://sandbox.src.mastercard.com/srci/integration/2/lib.js'
@@ -110,24 +87,30 @@ export async function startMasterCardUnifiedSolution({
 			return { status: 'success' };
 		},
 		'mastercard_unified_init',
-		{ sandbox, dpaLocale, srcDpaId }
+		{ sandbox, dpaLocale, srcDpaId },
+		trackAPIEvent
 	);
 }
 
 export async function isRecognized() {
-	return await performanceObserver(async () => {
-		const maskedCards = await window.mcCheckoutService.getCards();
+	return await trackPerformance(
+		async () => {
+			const maskedCards = await window.mcCheckoutService.getCards();
 
-		if (!maskedCards.length) {
-			return null;
-		}
+			if (!maskedCards.length) {
+				return null;
+			}
 
-		return fromMaskedCards(maskedCards);
-	}, 'mastercard_unified_is_recognized');
+			return fromMaskedCards(maskedCards);
+		},
+		'mastercard_unified_is_recognized',
+		undefined,
+		trackAPIEvent
+	);
 }
 
 export async function unlockStart(email) {
-	return await performanceObserver(
+	return await trackPerformance(
 		async () => {
 			const recognizedData = await isRecognized();
 
@@ -162,8 +145,8 @@ export async function unlockStart(email) {
 					}
 				}
 			} else {
-				const [email, phone] = email.split(',');
-				emails.push(email);
+				const [emailAddr, phone] = email.split(',');
+				emails.push(emailAddr);
 				phones.push(phone);
 			}
 
@@ -182,12 +165,13 @@ export async function unlockStart(email) {
 			};
 		},
 		'mastercard_unified_unlock_start',
-		{ email }
+		{},
+		trackAPIEvent
 	);
 }
 
 export async function unlockComplete(otpCode) {
-	return await performanceObserver(
+	return await trackPerformance(
 		async () => {
 			const maskedCards = await window.mcCheckoutService.validate({
 				value: otpCode
@@ -196,7 +180,8 @@ export async function unlockComplete(otpCode) {
 			return fromMaskedCards(maskedCards);
 		},
 		'mastercard_unified_unlock_complete',
-		{ hasOtp: !!otpCode }
+		{ hasOtp: !!otpCode },
+		trackAPIEvent
 	);
 }
 
@@ -209,7 +194,7 @@ export async function checkoutWithCard({
 	cvv,
 	additionalData = {}
 } = {}) {
-	return await performanceObserver(
+	return await trackPerformance(
 		async () => {
 			let withCardResponse = previuslyWithCardResponse;
 
@@ -267,7 +252,6 @@ export async function checkoutWithCard({
 		},
 		'mastercard_unified_checkout',
 		{
-			cardId,
 			rememberMe,
 			hasCvv: !!cvv,
 			hasAdditionalData: Object.keys(additionalData).length > 0

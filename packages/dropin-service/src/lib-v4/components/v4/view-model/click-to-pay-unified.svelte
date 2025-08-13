@@ -62,7 +62,7 @@
 	let EmailC2P;
 
 	export async function c2pUnlockStart(email) {
-		const parentContext = trackUXEvent('mastercard_c2p_unlock_start', {
+		const parentContext = trackUXEvent('c2p_unlock_start', {
 			email: email?.replace(/(.{3}).*(@.*)/, '$1***$2')
 		});
 		isC2PInProgress = true;
@@ -87,7 +87,7 @@
 		isC2PInProgress = false;
 	}
 	async function C2PValidateOtp(event) {
-		const parentContext = trackUXEvent('mastercard_c2p_validate_otp', {
+		const parentContext = trackUXEvent('c2p_validate_otp', {
 			hasOtpReference: !!otpReference,
 			otpLength: event.detail.otpValue?.length
 		});
@@ -135,8 +135,7 @@
 		}
 	}
 	export async function tokenizeC2P(selectedCard, additionalData, cvv) {
-		const parentContext = trackUXEvent('mastercard_c2p_tokenize', {
-			cardId: selectedCard.id,
+		const parentContext = trackUXEvent('c2p_tokenize', {
 			rememberMe: isChecked,
 			hasCvv: !!cvv,
 			cartValue: cart.total.value,
