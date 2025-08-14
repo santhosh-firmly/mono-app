@@ -59,7 +59,7 @@
 		"classnames": "^2.5.1",
 		"colord": "^2.9.3",
 		"flowbite": "^3.1.2",
-		"foundation": "github:goyalu/foundation#v1.11.4",
+		"foundation": "github:goyalu/foundation#v1.11.10",
 		"msw": "^2.7.3",
 		"sass-embedded": "^1.86.1",
 		"superstruct": "^2.0.2",
