@@ -5,10 +5,9 @@
 	import {
 		initialize,
 		initializeAppVersion,
-		initializeDomain,
-		telemetryEcsEvent,
-		telemetryEvent
+		initializeDomain
 	} from '$lib-v4/browser/api-firmly.js';
+	import { trackUXEvent } from '$lib-v4/browser/telemetry.js';
 	import { postCheckoutClosed, postOrderPlaced } from '$lib-v4/browser/cross.js';
 	import { onMount } from 'svelte';
 	import FlowSinglePage from '$lib-v4/components/v4/flow-single-page.svelte';
@@ -281,7 +280,7 @@
 							iframeDisplay = 'block';
 							console.log('firmly - iframeDisplay', iframeDisplay);
 						} else if (data.action == 'firmly::telemetry') {
-							telemetryEcsEvent(data.data);
+							trackUXEvent('ecs event', { data: data.data });
 						}
 					} catch (ex) {
 						console.log('Firmly message bind error', ex);
@@ -462,7 +461,7 @@
 	});
 
 	function onBackClick() {
-		telemetryEvent('back_button_clicked');
+		trackUXEvent('back_button_clicked');
 
 		if (pageState === 'pdp') {
 			console.log('firmly - onBackClick - postCheckoutClosed');

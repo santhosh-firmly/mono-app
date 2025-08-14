@@ -7,6 +7,7 @@
 	import C2pLogo from '$lib-v4/components/common/c2p-logo.svelte';
 	import Checkbox from '../checkbox.svelte';
 	import { InfoC2PRememberMeLong } from '$lib-v4/browser/localization';
+	import { trackUXEvent } from '$lib-v4/browser/telemetry.js';
 	const dispatch = createEventDispatcher();
 	/**
 	 * Whether or not the Visa pop up is open
@@ -52,7 +53,7 @@
 	let alternativeMethodText = 'Resend code';
 	let EmailC2P;
 	function sendVisaEventToTelemetry(name) {
-		window.firmly?.telemetryVisaEvent?.(name);
+		trackUXEvent(name);
 	}
 	export async function c2pUnlockStart(email) {
 		isC2PInProgress = true;

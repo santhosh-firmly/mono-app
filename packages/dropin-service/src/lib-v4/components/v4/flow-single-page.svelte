@@ -31,7 +31,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import Header from './header.svelte';
 	import classNames from 'classnames';
-	import { telemetryEvent } from '../../browser/api-firmly.js';
+	import { trackUXEvent } from '../../browser/telemetry.js';
 
 	const dispatch = createEventDispatcher();
 	/**
@@ -138,7 +138,7 @@
 				(selectedCardOption === NEW_CARD_OPTION ? 'new_card' : undefined);
 
 			if (cardType) {
-				telemetryEvent('card_selected', { cardType });
+				trackUXEvent('card_selected', { cardType });
 			}
 			lastTrackedCardOption = selectedCardOption;
 		}
@@ -155,7 +155,7 @@
 			selectedPaymentMethod !== lastTrackedPaymentMethod &&
 			selectedPaymentMethod
 		) {
-			telemetryEvent('payment_method_selected', { paymentMethod: selectedPaymentMethod });
+			trackUXEvent('payment_method_selected', { paymentMethod: selectedPaymentMethod });
 			lastTrackedPaymentMethod = selectedPaymentMethod;
 		}
 		if (!paymentTabSelectionInitialized && selectedPaymentMethod) {
@@ -168,7 +168,7 @@
 	let headerExpandedInitialized = false;
 	$: if (typeof headerExpanded === 'boolean') {
 		if (headerExpandedInitialized) {
-			telemetryEvent('header_order_summary_toggled', { expanded: headerExpanded });
+			trackUXEvent('header_order_summary_toggled', { expanded: headerExpanded });
 		} else {
 			headerExpandedInitialized = true;
 		}
@@ -401,15 +401,20 @@
 		let totalQuantity = 0;
 		try {
 			shippingMethodInProgress = true;
-			const result = await window.firmly.cartAddLineItem(sku, quantity, variantHandles);
+			const parentContext = trackUXEvent('cart_item_add', { sku, quantity });
+			const result = await window.firmly.cartAddLineItem(
+				sku,
+				quantity,
+				variantHandles,
+				undefined,
+				false,
+				parentContext
+			);
 			if (result.status === 200) {
 				result.data.line_items.forEach((item) => {
 					totalQuantity += item.quantity;
 				});
 				cart.set(result.data);
-				telemetryEvent('cart_item_added', { sku, quantity });
-			} else {
-				telemetryEvent('cart_item_add_failed', { sku, quantity });
 			}
 		} finally {
 			shippingMethodInProgress = false;
@@ -425,10 +430,17 @@
 			shippingMethodInProgress = true;
 			const productIdentifier =
 				$cart.platform_id === 'bigcommerce' ? item.base_sku : item.sku;
+			const parentContext = trackUXEvent('cart_item_update', {
+				sku: productIdentifier,
+				oldQuantity,
+				newQuantity: quantity
+			});
 			const result = await window.firmly.cartUpdateSku(
 				productIdentifier,
 				quantity,
-				item.variant_handles
+				item.variant_handles,
+				undefined,
+				parentContext
 			);
 
 			if (result.status === 200) {
@@ -446,18 +458,11 @@
 							text: `Product ${item.description} has been removed.`,
 							timeout: 15000,
 							undoCallback: () => {
-								telemetryEvent('cart_item_undo', { sku: productIdentifier });
+								trackUXEvent('cart_item_undo', { sku: productIdentifier });
 								addLineItem(productIdentifier, item.quantity, item.variant_handles);
 							},
 							closeable: true,
 							image: item.image?.url
-						});
-						telemetryEvent('cart_item_removed', { sku: productIdentifier });
-					} else {
-						telemetryEvent('cart_item_quantity_updated', {
-							sku: productIdentifier,
-							oldQuantity,
-							newQuantity: quantity
 						});
 					}
 				}
@@ -468,7 +473,6 @@
 					lineItemErrors = { ...lineItemErrors, [item.line_item_id]: '' };
 				}
 			} else {
-				telemetryEvent('cart_item_update_failed', { sku: productIdentifier, quantity });
 				errorMsg =
 					result?.data?.description || 'Unable to update quantity. Please try again.';
 				lineItemErrors = { ...lineItemErrors, [item.line_item_id]: errorMsg };
@@ -525,18 +529,21 @@
 				const optimisticCart = { ...$cart, shipping_info: { ...shippingInfo } };
 				cart.set(optimisticCart);
 
-				// Make the actual API call
-				const result = await window.firmly.cartUpdateShippingInfo(shippingInfo);
+				// Make the actual API call with telemetry tracking
+				const parentContext = trackUXEvent('shipping_info_update', {
+					country: shippingInfo.country,
+					postal: maskPostalCode(shippingInfo.postal)
+				});
+				const result = await window.firmly.cartUpdateShippingInfo(
+					shippingInfo,
+					undefined,
+					parentContext
+				);
 
 				if (result.status === 200) {
 					// Real update from the server
 					cart.set(result.data);
 					shipping_info_error = '';
-					telemetryEvent('form_shipping_address_filled', {
-						country: shippingInfo.country,
-						postal: maskPostalCode(shippingInfo.postal),
-						shippingMethod: shippingInfo.shipping_method_sku
-					});
 				} else {
 					// Restore the original cart state if there's an error
 					cart.set(originalCart);
@@ -561,7 +568,6 @@
 		try {
 			email_error = '';
 			await Yup.string().email().required(Required).validate(email);
-			telemetryEvent('form_email_filled', { email: maskEmail(email) });
 			return true;
 		} catch (e) {
 			if (showSchemaErrors || e.type !== 'required') {
@@ -624,16 +630,19 @@
 	async function onSetShippingMethod({ detail: shippingMethodSku }) {
 		try {
 			shippingMethodInProgress = true;
-			const result = await window.firmly.cartUpdateDelivery(shippingMethodSku);
+			const parentContext = trackUXEvent('shipping_method_update', {
+				shippingMethodSku
+			});
+			const result = await window.firmly.cartUpdateDelivery(
+				shippingMethodSku,
+				undefined,
+				parentContext
+			);
 			if (result.status === 200) {
 				cart.set(result.data);
-				telemetryEvent('shipping_method_selected', {
-					shippingMethodSku
-				});
 			}
 		} catch (e) {
-			// TODO: Show error to the user
-			console.error('Failed when setting shipping method', e);
+			console.error(e);
 		} finally {
 			shippingMethodInProgress = false;
 		}
@@ -651,33 +660,39 @@
 	async function getConsents() {
 		if (!getConsentsInProgress) {
 			getConsentsInProgress = true;
-			const consents = await window.firmly.getConsents();
-			marketingConsent = (consents?.data?.consents || []).find(
-				(consent) => consent.type === 'marketing'
-			);
+			try {
+				const parentContext = trackUXEvent('consents_fetch');
+				const consents = await window.firmly.getConsents(parentContext);
+				marketingConsent = (consents?.data?.consents || []).find(
+					(consent) => consent.type === 'marketing'
+				);
 
-			if (marketingConsent) {
-				// If the Marketing Consent exists, let's process the metadata to see if there is any terms to be shown to the user
-				const results = marketingConsent.text.split(/(%fterms{.*?}%)/g);
-				marketingConsent.parts = results.map((e) => {
-					if (e.startsWith('%fterms')) {
-						const stringifiedJson = e.replace(/^%fterms/, '').replace(/%$/, '');
-						const text = JSON.parse(stringifiedJson).text;
+				if (marketingConsent) {
+					// If the Marketing Consent exists, let's process the metadata to see if there is any terms to be shown to the user
+					const results = marketingConsent.text.split(/(%fterms{.*?}%)/g);
+					marketingConsent.parts = results.map((e) => {
+						if (e.startsWith('%fterms')) {
+							const stringifiedJson = e.replace(/^%fterms/, '').replace(/%$/, '');
+							const text = JSON.parse(stringifiedJson).text;
+							return {
+								type: 'terms',
+								content: text
+							};
+						}
+
 						return {
-							type: 'terms',
-							content: text
+							type: 'text',
+							content: e
 						};
-					}
+					});
+				}
 
-					return {
-						type: 'text',
-						content: e
-					};
-				});
+				consentsRetrieved = true;
+			} catch (error) {
+				console.error('Failed to get consents:', error);
+			} finally {
+				getConsentsInProgress = false;
 			}
-
-			consentsRetrieved = true;
-			getConsentsInProgress = false;
 		}
 	}
 
@@ -687,7 +702,7 @@
 	}
 
 	function onPaypalHandler(cartData) {
-		telemetryEvent('express_payment_clicked', { paymentMethod: 'paypal' });
+		trackUXEvent('express_payment_clicked', { paymentMethod: 'paypal' });
 		selectedPaymentMethod = 'PayPal';
 		paypalConnected = true;
 		email = cartData?.shipping_info?.email;
@@ -727,7 +742,7 @@
 			billing_info: billingInfo
 		};
 
-		telemetryEvent('form_billing_address_filled', {
+		trackUXEvent('form_billing_address_filled', {
 			country: billingInfo.country,
 			postal: maskPostalCode(billingInfo.postal)
 		});
@@ -875,7 +890,7 @@
 	}
 
 	async function onPlaceOrder(additionalData = {}) {
-		telemetryEvent('form_submitted', {
+		const parentContext = trackUXEvent('form_submitted', {
 			paymentMethod: selectedPaymentMethod
 		});
 		try {
@@ -916,7 +931,7 @@
 					]
 				};
 
-				await window.firmly.setConsents(marketingConsentToSign);
+				await window.firmly.setConsents(marketingConsentToSign, parentContext);
 			}
 
 			let orderPlaceResponse;
@@ -1005,7 +1020,7 @@
 
 	async function loginButtonClicked(event) {
 		event.preventDefault();
-		telemetryEvent('express_payment_clicked', { paymentMethod: 'merchant_login' });
+		trackUXEvent('express_payment_clicked', { paymentMethod: 'merchant_login' });
 		isMerchantLoginOpen = true;
 	}
 
@@ -1023,7 +1038,7 @@
 	async function handleSetShippingInfo(event) {
 		const shippingInfo = event.detail?.selectedShippingAddress;
 
-		telemetryEvent('shipping_address_selected', {
+		const parentContext = trackUXEvent('shipping_address_selected', {
 			addressType: shippingInfo === NEW_SHIPPING_ADDRESS ? 'new_address' : 'saved_address'
 		});
 
@@ -1040,23 +1055,22 @@
 
 	// Promo code section
 	async function addPromoCodeCallback(promoCode) {
-		const result = await window.firmly.addPromoCode(promoCode);
+		const parentContext = trackUXEvent('promo_code_add', { promoCode });
+		const result = await window.firmly.addPromoCode(promoCode, parentContext);
 		if (result.status === 200) {
 			cart.set(result.data);
-			telemetryEvent('promo_code_added', { success: true });
 		} else {
-			telemetryEvent('promo_code_added', { success: false });
 			throw result.data;
 		}
 	}
 
 	async function clearPromoCodesCallback() {
-		const result = await window.firmly.clearPromoCodes();
+		const parentContext = trackUXEvent('promo_code_clear');
+		const result = await window.firmly.clearPromoCodes(parentContext);
 		if (result.status === 200) {
 			cart.set(result.data);
-			telemetryEvent('promo_code_removed');
 		} else {
-			// TODO: How to show such error to the user?
+			throw result.data;
 		}
 	}
 	// end of Promo code section
@@ -1288,6 +1302,28 @@
 										on:click={loginButtonClicked}
 									/>
 								{/if}
+								{#if allowShopPay}
+									<div class="flex justify-center">
+										<button
+											type="button"
+											class="flex w-full flex-row items-center justify-center rounded bg-[#5a31f4] px-4 py-2 text-white shadow hover:bg-[#390ced]"
+											disabled={isC2PInProgress || placeOrderInProgress}
+											data-testid="shoppay-button"
+											on:click={() => {
+												trackUXEvent('express_payment_clicked', {
+													paymentMethod: 'shoppay'
+												});
+												isShopPayOpen = true;
+											}}
+										>
+											<ShopPayIcon
+												class="fill-white px-2"
+												width={84}
+												height={32}
+											/>
+										</button>
+									</div>
+								{/if}
 								{#if allowPayPal}
 									<div
 										class="my-1 flex h-12 w-full flex-row justify-center overflow-hidden rounded bg-[#ffc439] shadow"
@@ -1356,9 +1392,7 @@
 												class="ml-5 rounded-full px-1 text-sm text-blue-500"
 												data-testid="change-shipping-button"
 												on:click={() => {
-													telemetryEvent(
-														'shipping_address_change_clicked'
-													);
+													trackUXEvent('shipping_address_change_clicked');
 													collapsedStateShipping = false;
 													if (savedAddresses.length === 1) {
 														selectedShippingAddress =
@@ -1559,9 +1593,7 @@
 												class="ml-5 rounded-full px-1 text-sm text-blue-500"
 												data-testid="change-shipping-method-button"
 												on:click={() => {
-													telemetryEvent(
-														'shipping_method_change_clicked'
-													);
+													trackUXEvent('shipping_method_change_clicked');
 													collapsedStateShippingMethod = false;
 												}}
 											>
@@ -1626,7 +1658,7 @@
 											type="button"
 											class="ml-5 rounded-full px-1 text-sm text-blue-500"
 											on:click={() => {
-												telemetryEvent('payment_method_change_clicked');
+												trackUXEvent('payment_method_change_clicked');
 												collapsedStatePayment = false;
 											}}
 										>
@@ -1716,7 +1748,7 @@
 								on:click={(ev) => {
 									ev.stopPropagation();
 									toggleLineItemsExpanded = !toggleLineItemsExpanded;
-									telemetryEvent('order_summary_toggled', {
+									trackUXEvent('order_summary_toggled', {
 										expanded: toggleLineItemsExpanded
 									});
 								}}
@@ -1724,7 +1756,7 @@
 									if (ev.key === 'Enter' || ev.key === ' ') {
 										ev.preventDefault();
 										toggleLineItemsExpanded = !toggleLineItemsExpanded;
-										telemetryEvent('order_summary_toggled', {
+										trackUXEvent('order_summary_toggled', {
 											expanded: toggleLineItemsExpanded
 										});
 									}
