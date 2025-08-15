@@ -14,6 +14,7 @@
 	import { NEW_CARD_OPTION } from '$lib-v4/constants.js';
 	import Address from '../address.svelte';
 	import Checkbox from '../checkbox.svelte';
+	import C2pLogo from '$lib-v4/components/common/c2p-logo.svelte';
 
 	export let cardsRequiringCvv = [];
 	export let cvvConfirmationValue = '';
@@ -33,6 +34,8 @@
 	export let cardBrandDetected = false;
 
 	let filteredCards = [];
+
+	let hasC2PCards = false;
 
 	/**
 	 * The function returned by the Address component that validates and submits
@@ -56,6 +59,8 @@
 			filteredCards?.[0]?.id ||
 			filteredCards?.[0]?.pan ||
 			NEW_CARD_OPTION;
+
+		hasC2PCards = filteredCards.find((c) => c.wallet === 'c2p');
 	}
 
 	$: {
@@ -177,11 +182,16 @@
 {#if filteredCards && filteredCards.length > 0}
 	<div class="mb-3">
 		<Group>
+			{#if hasC2PCards}
+				<div class="col-span-2 flex h-14 flex-col justify-center rounded-t-lg">
+					<C2pLogo />
+				</div>
+			{/if}
 			{#each filteredCards as savedCard, index}
 				<label
 					class="col-span-2 flex w-full flex-row items-center gap-3 border-0 px-3 py-3"
 					class:bg-gray-100={disabled}
-					class:rounded-t-lg={index === 0}
+					class:rounded-t-lg={index === 0 && !hasC2PCards}
 				>
 					<input
 						name="credit-card-option"
@@ -250,7 +260,7 @@
 							/>
 						</svg>
 					</div>
-					<span class="text-fy-on-surface text-sm font-bold">Add New Card</span>
+					<span class="text-fy-on-surface text-sm">Add New Card</span>
 				</div>
 			</label>
 		</Group>

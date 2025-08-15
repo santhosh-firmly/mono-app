@@ -16,6 +16,12 @@
 	import { trackUXEvent } from '$lib-v4/browser/telemetry.js';
 
 	const dispatch = createEventDispatcher();
+
+	/**
+	 * Maximum countdown seconds for the resend code button
+	 */
+	const MAX_COUNTDOWN_SECONDS = 30;
+
 	/**
 	 * Whether or not the Visa pop up is open
 	 */
@@ -44,8 +50,17 @@
 	 * Set the default value of the "Remember me" checkbox as checked
 	 */
 	let isChecked = true;
+	/**
+	 * Countdown timer for the resend code button
+	 */
+	let countdown = MAX_COUNTDOWN_SECONDS;
+	/**
+	 * Countdown timer for the resend code button
+	 */
+	let countDownTimer;
+
 	export let cart;
-	export let checkboxTitle = 'Skip verification next time';
+	export let checkboxTitle = 'Remember me in this browser';
 	export let isUserLoggedInC2p = false;
 	export let isC2PInProgress = false;
 	export let showSecondSlot = false;
@@ -163,35 +178,39 @@
 		return tokenizeResponse.data;
 	}
 	async function resendCode() {
-		alternativeMethodText = 'Code sent';
+		countdown = MAX_COUNTDOWN_SECONDS;
+		alternativeMethodText = `Resend code (${countdown} seconds)`;
 		otpAlternativeTextDisabled = true;
+
+		countDownTimer = setInterval(function () {
+			alternativeMethodText = `Resend code (${countdown--} seconds)`;
+			if (countdown < 0) {
+				clearTimeout(countDownTimer);
+				alternativeMethodText = 'Resend code';
+				otpAlternativeTextDisabled = false;
+			}
+		}, 1000);
+
 		if (popupStep === BASE_LOGIN_STEPS.WAITING_OTP) {
 			await c2pUnlockStart(EmailC2P);
 		} else if (popupStep === BASE_LOGIN_STEPS.WAITING_C2P_OTP_STEPUP) {
 			await handleContinueWithC2P(selectedAuthenticationMethod);
 		}
-		setTimeout(function () {
-			alternativeMethodText = 'Resend code';
-			otpAlternativeTextDisabled = false;
-		}, 60000);
 	}
 </script>
 
 <Modal bind:isModalOpen on:modalClosed>
 	<BaseLogin
 		loginProviderName="Click to Pay"
-		subtitle="Click to Pay"
-		secondSubTitle="Bank Verification"
+		subtitle=""
 		buttonClasses="bg-[#1F3F9A] hover:bg-blue-700 text-white"
 		textClasses="text-blue-500"
 		termsOfServiceLink="https://usa.visa.com/legal/checkout/terms-of-service.html"
 		privacyPolicyLink="https://usa.visa.com/legal/global-privacy-notice.html"
-		otpAlternativeMethodText={alternativeMethodText}
 		hideChangeButton={true}
 		{otpDevice}
 		{c2pMaskedCard}
 		{otpReference}
-		{otpAlternativeTextDisabled}
 		{contentHeaderText}
 		{isWaitingStepupOtp}
 		bind:phone={otpPhoneInfo}
@@ -199,7 +218,6 @@
 		bind:currentStep={popupStep}
 		on:otpCompleted={C2PValidateOtp}
 		on:otpMethodSelected={handleContinueWithC2P}
-		on:alternativeTextClicked={resendCode}
 		bind:emailError
 		bind:otpError
 	>
@@ -207,24 +225,46 @@
 		<div slot="under-otp" class="flex flex-col justify-start" class:hidden={!showC2pCheckbox}>
 			<Checkbox title={checkboxTitle} subtitle={InfoC2PRememberMeLong} bind:isChecked />
 		</div>
-		<div
-			slot="second-under-otp-slot"
-			class="flex flex-col justify-start"
-			class:hidden={!showSecondSlot}
-		>
-			<div class="text-fy-on-surface items-center justify-center text-sm font-bold">
+		<div slot="second-under-otp-slot" class="flex flex-col justify-start">
+			<hr class="mt-4" />
+			<span class="text-fy-on-surface-subtle mt-2 text-center text-sm"
+				>{alternativeMethodText}</span
+			>
+			<div
+				class="text-fy-on-surface mt-2 flex flex-row items-center justify-center gap-2 divide-x-2 divide-gray-100 text-sm font-bold"
+			>
 				<button
+					type="button"
 					data-testid="alternative-text-button"
-					class="w-full p-2 text-blue-500 hover:text-[#1F3F9A]
+					class:text-gray-500={otpAlternativeTextDisabled}
+					class:cursor-pointer={!otpAlternativeTextDisabled}
+					class:cursor-auto={otpAlternativeTextDisabled}
+					class="w-full p-2
 					 {otpAlternativeTextDisabled
-						? 'cursor-default'
-						: 'cursor-pointer hover:underline hover:underline-offset-4'}"
+						? ''
+						: 'text-blue-500 hover:text-[#1F3F9A] hover:underline hover:underline-offset-4'}"
 					on:click={() => {
 						resendCode();
 					}}
 					disabled={otpAlternativeTextDisabled}
 				>
-					{alternativeMethodText}
+					Email
+				</button>
+				<button
+					type="button"
+					data-testid="alternative-text-button"
+					class:text-gray-500={otpAlternativeTextDisabled}
+					class:cursor-pointer={!otpAlternativeTextDisabled}
+					class="w-full p-2
+					 {otpAlternativeTextDisabled
+						? ''
+						: 'text-blue-500 hover:text-[#1F3F9A] hover:underline hover:underline-offset-4'}"
+					on:click={() => {
+						resendCode();
+					}}
+					disabled={otpAlternativeTextDisabled}
+				>
+					Phone
 				</button>
 			</div>
 		</div>

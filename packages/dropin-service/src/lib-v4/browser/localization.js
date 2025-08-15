@@ -91,7 +91,7 @@ const InfoC2PEmail = 'Enter your email to continue';
 const InfoC2PTerms = "By continuing, you agree to Visa's Privacy Notice";
 const InfoC2PRememberMe = 'Skip Verification next time';
 export const InfoC2PRememberMeLong =
-	'Select to be remembered on your device and browser at participating stores for faster checkout. Not recommended for shared devices.';
+	'If you’re remembered, you won’t need to enter a code next time to securely access your saved cards.\n\nNot recommended for public or shared devices because this uses cookies.';
 
 const InfoOTP = 'Enter the One-Time Passcode sent to';
 const InfoPhone = 'Phone:';
