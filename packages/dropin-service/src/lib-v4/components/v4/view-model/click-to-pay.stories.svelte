@@ -2,6 +2,7 @@
 	// @ts-nocheck
 
 	import ClickToPay from './click-to-pay.svelte';
+	import ClickToPayUnified from './click-to-pay-unified.svelte';
 	import { Meta, Story, Template } from '@storybook/addon-svelte-csf';
 	import FlowSinglePage from '../flow-single-page.svelte';
 
@@ -34,6 +35,16 @@
 	<FlowSinglePage />
 	<ClickToPay
 		isModalOpen={true}
+		otpEmailInfo="samuelsmith@testing.com"
+		otpPhoneInfo="(•••) •••-•875"
+	/>
+</Story>
+
+<Story name="Unified (Mastercard)">
+	<FlowSinglePage />
+	<ClickToPayUnified
+		isModalOpen={true}
+		showC2pCheckbox={true}
 		otpEmailInfo="samuelsmith@testing.com"
 		otpPhoneInfo="(•••) •••-•875"
 	/>

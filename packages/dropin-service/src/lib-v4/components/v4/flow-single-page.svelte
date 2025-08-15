@@ -61,6 +61,8 @@
 		return postal.slice(0, 3) + '***';
 	}
 
+	let c2pShowMore = false;
+
 	export let PUBLIC_DISABLE_HCAPTCHA = false;
 
 	// Progress control variables
@@ -747,7 +749,6 @@
 			postal: maskPostalCode(billingInfo.postal)
 		});
 
-		
 		completeOrderResponse = await window.firmly.completeCreditCardOrder(
 			window.firmly.domain,
 			ccInfo
@@ -1006,7 +1007,6 @@
 			// Update fields so the user understands what is happening.
 			setShippingInfo?.(savedAddress);
 			onSetShippingInfo(savedAddress);
-
 		}
 	}
 
@@ -1499,15 +1499,61 @@
 										{#if isC2PAvailable()}
 											<div class="my-2 rounded-lg bg-[#F7F7F7] p-2">
 												<span
-													class="text-fy-on-surface-subtle inline-block text-sm leading-normal"
+													class="text-fy-on-surface-subtle relative inline-block text-sm leading-normal"
 												>
 													By entering your email, you consent and direct
 													firmly to send your information to
-													<span class="font-bold">Click to Pay</span> to check
-													if you have any saved cards
+													<span class="font-bold underline"
+														><a
+															href="https://www.mastercard.com/global/click-to-pay/en-us/privacy-notice.html"
+															target="_blank">Click to Pay</a
+														></span
+													>
+													to check if you have any saved cards
+													{#if c2pShowMore}
+														<div
+															transition:slide={{
+																duration: 150,
+																axis: 'y'
+															}}
+														>
+															<br />
+															A one-time passcode may be sent to this mobile
+															to confirm it's you. Message/data rates may
+															apply.
+														</div>
+													{/if}
+													<span
+														class="absolute right-0 bottom-0 mt-2 flex w-full flex-row justify-end"
+													>
+														<button
+															type="button"
+															aria-label="Show more"
+															on:click={() =>
+																(c2pShowMore = !c2pShowMore)}
+															class="rounded p-1 transition-colors hover:bg-gray-100"
+														>
+															<svg
+																class="h-4 w-4 transition-transform duration-200 {c2pShowMore
+																	? 'rotate-180'
+																	: ''}"
+																fill="none"
+																stroke="currentColor"
+																viewBox="0 0 24 24"
+															>
+																<path
+																	stroke-linecap="round"
+																	stroke-linejoin="round"
+																	stroke-width="2"
+																	d="M19 9l-7 7-7-7"
+																/>
+															</svg>
+														</button>
+													</span>
 												</span>
 											</div>
 										{/if}
+
 										{#if marketingConsent && marketingConsent.ui_slot === 'UNDER_EMAIL_INPUT'}
 											<Checkbox
 												disabled={placeOrderInProgress}

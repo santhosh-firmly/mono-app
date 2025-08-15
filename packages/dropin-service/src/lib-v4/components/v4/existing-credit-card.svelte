@@ -50,7 +50,7 @@
 		{/if}
 	</div>
 	<div class="flex flex-col">
-		<div class="text-fy-on-surface flex h-full items-center text-sm font-bold">
+		<div class="text-fy-on-surface flex h-full items-center text-sm">
 			{#if showSkeleton}
 				<div
 					data-testid="card-number-skeleton"

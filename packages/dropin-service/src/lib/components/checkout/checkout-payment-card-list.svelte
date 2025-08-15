@@ -35,7 +35,7 @@
 			>
 				<div class="ml-2 flex w-full items-center gap-3 first:text-2xl">
 					<IconCcBrand first4={card.first4} />
-					<p class="text-sm font-bold">{card.brand} *** {card.last4}</p>
+					<p class="text-sm">{card.brand} *** {card.last4}</p>
 				</div>
 			</UiRadio>
 		</div>
