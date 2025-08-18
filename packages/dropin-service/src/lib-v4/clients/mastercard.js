@@ -109,7 +109,7 @@ export async function isRecognized() {
 	);
 }
 
-export async function unlockStart(email) {
+export async function unlockStart(email, requestedValidationChannelId = 'EMAIL') {
 	return await trackPerformance(
 		async () => {
 			const recognizedData = await isRecognized();
@@ -129,7 +129,7 @@ export async function unlockStart(email) {
 			}
 
 			const validation = await window.mcCheckoutService.initiateValidation({
-				requestedValidationChannelId: 'EMAIL'
+				requestedValidationChannelId
 			});
 
 			let emails = [];
