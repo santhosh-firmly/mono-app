@@ -220,6 +220,9 @@
 		on:otpMethodSelected={handleContinueWithC2P}
 		bind:emailError
 		bind:otpError
+		on:clearError={() => {
+			otpError = '';
+		}}
 	>
 		<C2pLogo slot="logo" width={16} height={16} />
 		<div slot="under-otp" class="flex flex-col justify-start" class:hidden={!showC2pCheckbox}>
