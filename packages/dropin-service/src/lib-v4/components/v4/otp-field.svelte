@@ -1,6 +1,6 @@
 <script>
 	// @ts-nocheck
-	import { onMount, afterUpdate } from 'svelte';
+	import { onMount, afterUpdate, createEventDispatcher } from 'svelte';
 	import Helper from '$lib-v4/components/common/error.svelte';
 	import { OTPValidation } from '$lib-v4/browser/localization.js';
 
@@ -16,7 +16,6 @@
 
 	const otpInput = Array(otpLength);
 
-	import { createEventDispatcher } from 'svelte';
 	const dispatch = createEventDispatcher();
 	let lastError = '';
 
@@ -169,14 +168,14 @@
 	}
 
 	// Reset OTP fields when error changes from empty to non-empty (i.e., after a failed attempt)
-	afterUpdate(() => {
+	$: {
 		if (error && error !== lastError) {
 			otpInput.forEach((el) => {
 				if (el) el.value = '';
 			});
 		}
 		lastError = error;
-	});
+	}
 
 	/**
 	 * Handles the form submission
