@@ -138,9 +138,7 @@
 	}
 
 	async function C2PValidateOtp(event) {
-		const parentContext = trackUXEvent('c2p_validate_otp', {
-			otpReference
-		});
+		const parentContext = trackUXEvent('c2p_validate_otp');
 
 		let res;
 		popupStep = BASE_LOGIN_STEPS.PROCESSING_OTP;
