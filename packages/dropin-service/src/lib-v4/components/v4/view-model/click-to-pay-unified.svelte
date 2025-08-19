@@ -39,10 +39,6 @@
 	 */
 	export let showC2pCheckbox = false;
 	/**
-	 * Selected step-up method
-	 */
-	export let selectedAuthenticationMethod;
-	/**
 	 * Destinations to which device the C2P step-up OTP should be send
 	 */
 	export let otpReference = '';
@@ -63,11 +59,11 @@
 	export let checkboxTitle = 'Remember me in this browser';
 	export let isUserLoggedInC2p = false;
 	export let isC2PInProgress = false;
-	export let showSecondSlot = false;
 	export let popupStep = BASE_LOGIN_STEPS.WAITING_OTP;
 	export let isWaitingStepupOtp = false;
 	export let otpEmailInfo = '';
 	export let otpPhoneInfo = '';
+
 	let c2pMaskedCard;
 	let otpError;
 	let emailError;
@@ -76,23 +72,62 @@
 	let alternativeMethodText = 'Resend code';
 	let EmailC2P;
 
-	export async function c2pUnlockStart(email) {
+	$: resendButtonOptions = [
+		{
+			channel: 'EMAIL',
+			testId: 'send-otp-to-email',
+			label: 'Email',
+			disabled: !otpEmailInfo
+		},
+		{
+			channel: 'SMS',
+			testId: 'send-otp-to-phone',
+			label: 'Phone',
+			disabled: !otpPhoneInfo
+		}
+	];
+
+	$: {
+		if (popupStep === BASE_LOGIN_STEPS.PROCESSING_OTP) {
+			otpAlternativeTextDisabled = true;
+		} else {
+			otpAlternativeTextDisabled = false;
+		}
+	}
+
+	export async function c2pUnlockStart(email, requestedChannelId = 'EMAIL') {
 		const parentContext = trackUXEvent('c2p_unlock_start', {
 			email: email?.replace(/(.{3}).*(@.*)/, '$1***$2')
 		});
+
 		isC2PInProgress = true;
 		EmailC2P = email;
-		const res = await unlockStart(email);
+
+		const res = await unlockStart(email, requestedChannelId);
+
 		if (res.status === 200 && res.data.otp_destination) {
 			c2pOTPDestination = res.data.otp_destination;
 			otpEmailInfo = otpPhoneInfo = null;
+
 			if (c2pOTPDestination?.emails) {
 				otpEmailInfo = c2pOTPDestination.emails[0];
 			}
 			if (c2pOTPDestination?.phones) {
 				otpPhoneInfo = c2pOTPDestination.phones[0];
 			}
-			otpDevice = 'Phone or Email';
+
+			// Set otpReference based on requested channel
+			if (requestedChannelId === 'EMAIL' && c2pOTPDestination?.emails) {
+				otpReference = c2pOTPDestination.emails[0];
+				otpDevice = 'Email';
+			} else if (requestedChannelId === 'SMS' && c2pOTPDestination?.phones) {
+				otpReference = c2pOTPDestination.phones[0];
+				otpDevice = 'Phone';
+			} else {
+				otpReference = '';
+				otpDevice = 'Phone or Email';
+			}
+
 			popupStep = BASE_LOGIN_STEPS.WAITING_OTP;
 			showC2pCheckbox = true;
 			isModalOpen = true;
@@ -101,20 +136,14 @@
 		}
 		isC2PInProgress = false;
 	}
+
 	async function C2PValidateOtp(event) {
-		const parentContext = trackUXEvent('c2p_validate_otp', {
-			hasOtpReference: !!otpReference,
-			otpLength: event.detail.otpValue?.length
-		});
+		const parentContext = trackUXEvent('c2p_validate_otp');
+
 		let res;
-		if (!otpReference) {
-			popupStep = BASE_LOGIN_STEPS.PROCESSING_OTP;
-			res = await unlockComplete(event.detail.otpValue);
-		} else {
-			const cloneAuthenticationMethod = structuredClone(selectedAuthenticationMethod);
-			cloneAuthenticationMethod.methodAttributes.otpValue = event.detail.otpValue;
-			res = await window.firmly.visa.visaAuthenticate(cloneAuthenticationMethod);
-		}
+		popupStep = BASE_LOGIN_STEPS.PROCESSING_OTP;
+		res = await unlockComplete(event.detail.otpValue);
+
 		if (res.status === 200 && res.data.payment_method_options) {
 			otpError = '';
 			isUserLoggedInC2p = true;
@@ -129,26 +158,7 @@
 			popupStep = BASE_LOGIN_STEPS.WAITING_OTP;
 		}
 	}
-	async function handleContinueWithC2P(event) {
-		showC2pCheckbox = false;
-		if (event?.detail?.selectedAuthenticationMethod) {
-			popupStep = BASE_LOGIN_STEPS.PROCESSING_C2P_OTP_STEPUP;
-			selectedAuthenticationMethod = event.detail.selectedAuthenticationMethod;
-		} else if (event.authenticationMethodType) {
-			selectedAuthenticationMethod = event;
-		}
-		const res = await window.firmly.visa.visaAuthenticate(selectedAuthenticationMethod);
-		if (res.status === 200) {
-			contentHeaderText = "Confirm it's you";
-			showSecondSlot = true;
-			popupStep = BASE_LOGIN_STEPS.WAITING_C2P_OTP_STEPUP;
-			isWaitingStepupOtp = true;
-			otpReference = selectedAuthenticationMethod.authenticationCredentialReference;
-			return;
-		} else {
-			popupStep = BASE_LOGIN_STEPS.SELECTING_C2P_STEPUP;
-		}
-	}
+
 	export async function tokenizeC2P(selectedCard, additionalData, cvv) {
 		const parentContext = trackUXEvent('c2p_tokenize', {
 			rememberMe: isChecked,
@@ -177,7 +187,15 @@
 
 		return tokenizeResponse.data;
 	}
-	async function resendCode() {
+
+	/**
+	 * Unified function to handle sending or resending OTP to a channel,
+	 * including countdown logic for resend button.
+	 * @param {'email'|'phone'} [channelType] - Optional channel type to send OTP to.
+	 */
+	async function handleOtpSend(channelType) {
+		if (!channelType) return;
+
 		countdown = MAX_COUNTDOWN_SECONDS;
 		alternativeMethodText = `Resend code (${countdown} seconds)`;
 		otpAlternativeTextDisabled = true;
@@ -191,11 +209,7 @@
 			}
 		}, 1000);
 
-		if (popupStep === BASE_LOGIN_STEPS.WAITING_OTP) {
-			await c2pUnlockStart(EmailC2P);
-		} else if (popupStep === BASE_LOGIN_STEPS.WAITING_C2P_OTP_STEPUP) {
-			await handleContinueWithC2P(selectedAuthenticationMethod);
-		}
+		await c2pUnlockStart(EmailC2P, channelType);
 	}
 </script>
 
@@ -217,7 +231,6 @@
 		bind:clickToPayEmail={otpEmailInfo}
 		bind:currentStep={popupStep}
 		on:otpCompleted={C2PValidateOtp}
-		on:otpMethodSelected={handleContinueWithC2P}
 		bind:emailError
 		bind:otpError
 		on:clearError={() => {
@@ -226,7 +239,12 @@
 	>
 		<C2pLogo slot="logo" width={16} height={16} />
 		<div slot="under-otp" class="flex flex-col justify-start" class:hidden={!showC2pCheckbox}>
-			<Checkbox title={checkboxTitle} subtitle={InfoC2PRememberMeLong} bind:isChecked />
+			<Checkbox
+				disabled={otpAlternativeTextDisabled}
+				title={checkboxTitle}
+				subtitle={InfoC2PRememberMeLong}
+				bind:isChecked
+			/>
 		</div>
 		<div slot="second-under-otp-slot" class="flex flex-col justify-start">
 			<hr class="mt-4" />
@@ -236,39 +254,17 @@
 			<div
 				class="text-fy-on-surface mt-2 flex flex-row items-center justify-center gap-2 divide-x-2 divide-gray-100 text-sm font-bold"
 			>
-				<button
-					type="button"
-					data-testid="alternative-text-button"
-					class:text-gray-500={otpAlternativeTextDisabled}
-					class:cursor-pointer={!otpAlternativeTextDisabled}
-					class:cursor-auto={otpAlternativeTextDisabled}
-					class="w-full p-2
-					 {otpAlternativeTextDisabled
-						? ''
-						: 'text-blue-500 hover:text-[#1F3F9A] hover:underline hover:underline-offset-4'}"
-					on:click={() => {
-						resendCode();
-					}}
-					disabled={otpAlternativeTextDisabled}
-				>
-					Email
-				</button>
-				<button
-					type="button"
-					data-testid="alternative-text-button"
-					class:text-gray-500={otpAlternativeTextDisabled}
-					class:cursor-pointer={!otpAlternativeTextDisabled}
-					class="w-full p-2
-					 {otpAlternativeTextDisabled
-						? ''
-						: 'text-blue-500 hover:text-[#1F3F9A] hover:underline hover:underline-offset-4'}"
-					on:click={() => {
-						resendCode();
-					}}
-					disabled={otpAlternativeTextDisabled}
-				>
-					Phone
-				</button>
+				{#each resendButtonOptions as { channel, testId, label, disabled }}
+					<button
+						type="button"
+						data-testid={testId}
+						class="w-full p-2 text-blue-500 hover:text-[#1F3F9A] hover:underline hover:underline-offset-4 disabled:cursor-not-allowed disabled:text-gray-500 disabled:no-underline"
+						on:click={() => handleOtpSend(channel)}
+						disabled={otpAlternativeTextDisabled || disabled}
+					>
+						{label}
+					</button>
+				{/each}
 			</div>
 		</div>
 	</BaseLogin>
