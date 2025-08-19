@@ -110,6 +110,8 @@ export async function isRecognized() {
 }
 
 export async function unlockStart(email, requestedValidationChannelId = 'EMAIL') {
+	requestedValidationChannelId = requestedValidationChannelId?.toUpperCase();
+
 	return await trackPerformance(
 		async () => {
 			const recognizedData = await isRecognized();
@@ -150,6 +152,9 @@ export async function unlockStart(email, requestedValidationChannelId = 'EMAIL')
 				phones.push(phone);
 			}
 
+			emails = emails.filter((email) => email);
+			phones = phones.filter((phone) => phone);
+
 			console.warn(
 				`[Mastercard Unified]: OTP channels available: ${emails.length} emails, ${phones.length} phones.`
 			);
@@ -177,6 +182,7 @@ export async function unlockComplete(otpCode) {
 				const maskedCards = await window.mcCheckoutService.validate({
 					value: otpCode
 				});
+
 				return fromMaskedCards(maskedCards);
 			} catch (error) {
 				return {
