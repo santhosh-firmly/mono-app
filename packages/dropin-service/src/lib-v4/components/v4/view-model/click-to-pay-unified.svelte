@@ -211,6 +211,14 @@
 
 		await c2pUnlockStart(EmailC2P, channelType);
 	}
+
+	/**
+	 * Handle "Not you?" button click - close modal and focus on address
+	 */
+	function handleNotYou() {
+		isModalOpen = false;
+		dispatch('not-you-clicked');
+	}
 </script>
 
 <Modal bind:isModalOpen on:modalClosed>
@@ -238,6 +246,15 @@
 		}}
 	>
 		<C2pLogo slot="logo" width={16} height={16} />
+		<button
+			slot="email-phone-actions"
+			type="button"
+			class="cursor-pointer rounded-full p-3 text-xs font-bold text-blue-500 hover:underline hover:underline-offset-4"
+			on:click={handleNotYou}
+			data-testid="not-you-button"
+		>
+			Not you?
+		</button>
 		<div slot="under-otp" class="flex flex-col justify-start" class:hidden={!showC2pCheckbox}>
 			<Checkbox
 				disabled={otpAlternativeTextDisabled}

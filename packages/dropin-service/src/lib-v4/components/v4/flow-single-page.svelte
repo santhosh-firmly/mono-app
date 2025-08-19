@@ -1035,6 +1035,15 @@
 		onPlaceOrder(assuranceData);
 	}
 
+	function handleNotYouClicked() {
+		trackUXEvent('c2p_not_you_clicked');
+		collapsedStateShipping = false;
+		collapsedStateShippingMethod = false;
+		if (savedAddresses.length === 1) {
+			selectedShippingAddress = NEW_SHIPPING_ADDRESS;
+		}
+	}
+
 	async function handleSetShippingInfo(event) {
 		const shippingInfo = event.detail?.selectedShippingAddress;
 
@@ -1900,6 +1909,7 @@
 			cart={$cart}
 			on:login-c2p-successful={onC2PLoginSuccess}
 			on:authenticate-c2p-successful={handleC2PAuthenticate}
+			on:not-you-clicked={handleNotYouClicked}
 			{c2pOTPDestination}
 			bind:isModalOpen={isC2POpen}
 			bind:tokenizeC2P
