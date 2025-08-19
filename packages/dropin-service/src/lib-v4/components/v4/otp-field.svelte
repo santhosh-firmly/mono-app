@@ -1,6 +1,6 @@
 <script>
 	// @ts-nocheck
-	import { onMount } from 'svelte';
+	import { onMount, afterUpdate, createEventDispatcher } from 'svelte';
 	import Helper from '$lib-v4/components/common/error.svelte';
 	import { OTPValidation } from '$lib-v4/browser/localization.js';
 
@@ -15,6 +15,9 @@
 	export let onOTPComplete;
 
 	const otpInput = Array(otpLength);
+
+	const dispatch = createEventDispatcher();
+	let lastError = '';
 
 	/**
 	 * This function distributes the pasted or inputted OTP value across all available
@@ -59,6 +62,7 @@
 	function onOTPPaste(ev) {
 		const data = ev.clipboardData.getData('text');
 		ev.preventDefault();
+		if (error) dispatch('clearError');
 		onOTPMultiInsert(data);
 	}
 
@@ -72,6 +76,10 @@
 		const data = ev.data;
 		if (data) {
 			ev.preventDefault();
+			// Emit clearError event to parent if error is present
+			if (error) {
+				dispatch('clearError');
+			}
 			onOTPMultiInsert(ev.data);
 		}
 	}
@@ -110,6 +118,7 @@
 				if (ev.metaKey || ev.ctrlKey) {
 					return true;
 				}
+				if (error) dispatch('clearError');
 
 				if ((ev.keyCode > 47 && ev.keyCode < 58) || (ev.keyCode > 95 && ev.keyCode < 106)) {
 					otpInput[index].value = ev.key;
@@ -158,16 +167,25 @@
 		}
 	}
 
+	// Reset OTP fields when error changes from empty to non-empty (i.e., after a failed attempt)
+	$: {
+		if (error && error !== lastError) {
+			otpInput.forEach((el) => {
+				if (el) el.value = '';
+			});
+		}
+		lastError = error;
+	}
+
 	/**
 	 * Handles the form submission
 	 */
 	export function handleSubmit() {
 		const otpComplete = otpInput.every((el) => el.value !== '');
 		if (!otpComplete) {
-			error = OTPValidation;
+			// Do not mutate error here, let parent handle error state
 			onOTPFocus(0).apply();
 		} else {
-			error = null;
 			const otpValue = otpInput.map((el) => el.value).join('');
 			onOTPComplete(otpValue);
 		}

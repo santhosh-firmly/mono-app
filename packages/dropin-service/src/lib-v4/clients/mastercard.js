@@ -173,11 +173,19 @@ export async function unlockStart(email) {
 export async function unlockComplete(otpCode) {
 	return await trackPerformance(
 		async () => {
-			const maskedCards = await window.mcCheckoutService.validate({
-				value: otpCode
-			});
-
-			return fromMaskedCards(maskedCards);
+			try {
+				const maskedCards = await window.mcCheckoutService.validate({
+					value: otpCode
+				});
+				return fromMaskedCards(maskedCards);
+			} catch (error) {
+				return {
+					status: 400,
+					data: {
+						description: error?.message || error?.reason || 'OTP validation failed'
+					}
+				};
+			}
 		},
 		'mastercard_unified_unlock_complete',
 		{ hasOtp: !!otpCode },
