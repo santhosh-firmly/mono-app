@@ -156,15 +156,9 @@
 				<span class="flex font-bold">{email || clickToPayEmail}</span>
 				<span class="flex">{phone}</span>
 			</div>
-			{#if !hideChangeButton}
-				<button
-					data-testid="change-email-button"
-					class="p-3 text-xs font-bold {textClasses} cursor-pointer rounded-full hover:underline hover:underline-offset-4"
-					on:click={() => changeEmail()}
-				>
-					Change
-				</button>
-			{/if}
+			<div class="flex items-center">
+				<slot name="email-phone-actions" />
+			</div>
 		</div>
 		<hr class="mx-4" />
 	{/if}
