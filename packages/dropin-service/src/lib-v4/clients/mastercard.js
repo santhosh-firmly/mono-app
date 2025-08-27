@@ -274,13 +274,12 @@ export async function checkoutWithCard({
 }
 
 /**
- * Signs out the user from Click to Pay service.
- * This method disassociates a recognized Consumer Application/Device from the Consumer's Profile.
- * Used when a user clicks "Not your cards?" on the card list.
+ * Signs out the user from Click to Pay service, disassociating their device from their profile.
+ * Triggered when a user clicks "Not your cards?" on the card list.
  *
- * @param {Object} options - The options for signing out.
- * @param {string} [options.recognitionToken] - Optional JWT containing the recognition token previously stored.
- * @returns {Promise<Object>} An object with 'recognized' status and potentially a list of cards if logout was unsuccessful.
+ * @param {Object} [options] - Sign out options
+ * @param {string} [options.recognitionToken] - JWT recognition token (if previously stored)
+ * @returns {Promise<Object>} Response with standard status and data fields
  */
 export async function signOut({ recognitionToken } = {}) {
 	return await trackPerformance(
@@ -301,13 +300,24 @@ export async function signOut({ recognitionToken } = {}) {
 				}
 			} catch (error) {
 				trackError('mastercard_unified_signout_error', error);
+
+				// Define specific error responses based on the error reason
+				let errorDescription = 'Failed to sign out from Click to Pay';
+				let errorStatus = 400;
+
+				if (error?.reason === 'REQUEST_TIMEOUT') {
+					errorDescription = 'Sign out request timed out. Please try again.';
+				} else if (error?.reason === 'UNKNOWN_ERROR') {
+					errorDescription = 'An unexpected error occurred during sign out.';
+				} else if (error?.message) {
+					errorDescription = error.message;
+				}
+
 				return {
-					status: 400,
+					status: errorStatus,
 					data: {
-						description:
-							error?.message ||
-							error?.reason ||
-							'Failed to sign out from Click to Pay',
+						description: errorDescription,
+						error_code: error?.reason || 'SIGNOUT_ERROR',
 						recognized: true
 					}
 				};
