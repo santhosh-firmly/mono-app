@@ -272,3 +272,49 @@ export async function checkoutWithCard({
 		}
 	);
 }
+
+/**
+ * Signs out the user from Click to Pay service.
+ * This method disassociates a recognized Consumer Application/Device from the Consumer's Profile.
+ * Used when a user clicks "Not your cards?" on the card list.
+ *
+ * @param {Object} options - The options for signing out.
+ * @param {string} [options.recognitionToken] - Optional JWT containing the recognition token previously stored.
+ * @returns {Promise<Object>} An object with 'recognized' status and potentially a list of cards if logout was unsuccessful.
+ */
+export async function signOut({ recognitionToken } = {}) {
+	return await trackPerformance(
+		async () => {
+			try {
+				const response = await window.mcCheckoutService.signOut({ recognitionToken });
+
+				if (!response.recognized) {
+					return {
+						status: 200,
+						data: {
+							recognized: false,
+							payment_method_options: []
+						}
+					};
+				} else {
+					return fromMaskedCards(response.cards || []);
+				}
+			} catch (error) {
+				trackError('mastercard_unified_signout_error', error);
+				return {
+					status: 400,
+					data: {
+						description:
+							error?.message ||
+							error?.reason ||
+							'Failed to sign out from Click to Pay',
+						recognized: true
+					}
+				};
+			}
+		},
+		'mastercard_unified_signout',
+		{ hasRecognitionToken: !!recognitionToken },
+		trackAPIEvent
+	);
+}

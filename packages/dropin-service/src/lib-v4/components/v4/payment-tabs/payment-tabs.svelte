@@ -62,6 +62,7 @@
 				on:click={() => {
 					selectedPaymentMethod = paymentMethod;
 				}}
+				on:not-your-cards
 			/>
 		{/each}
 	</div>
@@ -81,6 +82,7 @@
 				bind:paypalPayerId
 				{connected}
 				{onPaypalHandler}
+				on:not-your-cards
 				{...$$restProps}
 			/>
 		</div>

@@ -32,6 +32,7 @@
 	import Header from './header.svelte';
 	import classNames from 'classnames';
 	import { trackUXEvent } from '../../browser/telemetry.js';
+	import { signOut } from '$lib-v4/clients/mastercard.js';
 
 	const dispatch = createEventDispatcher();
 	/**
@@ -201,6 +202,7 @@
 	let isUserLoggedInC2p;
 	let cardRequiringCvv = null;
 	let isEmailValidating = false;
+	let c2pSignOutInProgress = false;
 
 	/**
 	 * Boolean variable to set the first card from C2P if needed
@@ -1035,12 +1037,62 @@
 		onPlaceOrder(assuranceData);
 	}
 
-	function handleNotYouClicked() {
+	async function handleNotYouClicked() {
 		trackUXEvent('c2p_not_you_clicked');
 		collapsedStateShipping = false;
 		collapsedStateShippingMethod = false;
 		if (savedAddresses.length === 1) {
 			selectedShippingAddress = NEW_SHIPPING_ADDRESS;
+		}
+	}
+
+	async function handleNotYourCards() {
+		trackUXEvent('c2p_not_your_cards_clicked');
+
+		try {
+			c2pSignOutInProgress = true;
+			const response = await signOut();
+
+			if (response.status === 200 && !response.data.recognized) {
+				c2pCards = [];
+				isUserLoggedInC2p = false;
+				savedCreditCards = savedCreditCards.filter((card) => card.wallet !== 'c2p');
+
+				if (
+					savedCreditCards.length === 0 ||
+					!savedCreditCards.some((card) => card.last_four)
+				) {
+					selectedCardOption = NEW_CARD_OPTION;
+				} else {
+					selectedCardOption =
+						savedCreditCards.filter((c) => c.last_four)[0].id ||
+						savedCreditCards.filter((c) => c.last_four)[0].pan ||
+						NEW_CARD_OPTION;
+				}
+
+				collapsedStatePayment = false;
+			} else if (response.status === 200 && response.data.recognized) {
+				notices = notices.concat({
+					text: 'Unable to sign out from Click to Pay. Please try again.',
+					timeout: 5000,
+					closeable: true
+				});
+			} else {
+				notices = notices.concat({
+					text: response.data.description || 'Failed to sign out from Click to Pay.',
+					timeout: 5000,
+					closeable: true
+				});
+			}
+		} catch (error) {
+			console.error('Error during C2P sign out:', error);
+			notices = notices.concat({
+				text: 'An error occurred while signing out from Click to Pay.',
+				timeout: 5000,
+				closeable: true
+			});
+		} finally {
+			c2pSignOutInProgress = false;
 		}
 	}
 
@@ -1730,7 +1782,7 @@
 									allowedPaymentMethods={$cart?.payment_method_options?.map?.(
 										(p) => p.type
 									) || []}
-									disabled={placeOrderInProgress}
+									disabled={placeOrderInProgress || c2pSignOutInProgress}
 									merchantId={$cart?.shop_properties?.paypal?.merchantId}
 									intent={$cart?.shop_properties?.paypal?.intent}
 									clientId={$cart?.shop_properties?.paypal?.clientId}
@@ -1750,6 +1802,7 @@
 									bind:selectedCardOption
 									bind:isBillingSameShipping
 									bind:getBillingInfo
+									on:not-your-cards={handleNotYourCards}
 								>
 									<div slot="under-tabs">
 										{#if $cart?.available_store_credit?.value > 0}
@@ -1916,6 +1969,7 @@
 			bind:c2pUnlockStart
 			bind:isUserLoggedInC2p
 			bind:isC2PInProgress
+			disabled={c2pSignOutInProgress}
 		/>
 
 		<TermsPopup bind:isModalOpen={isTermsPopupOpen} title={$cart?.display_name} />
