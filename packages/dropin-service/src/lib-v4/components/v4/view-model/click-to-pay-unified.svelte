@@ -33,7 +33,7 @@
 	/**
 	 * Message to be displayed as the header of the main context
 	 */
-	export let contentHeaderText = 'Welcome back to Click to Pay';
+	export let contentHeaderText = 'Click to Pay has found your linked cards';
 	/**
 	 * Whether or not will show the "Remember me" checkbox
 	 */
