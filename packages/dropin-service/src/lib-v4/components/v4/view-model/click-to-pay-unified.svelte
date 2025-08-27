@@ -249,7 +249,7 @@
 		<button
 			slot="email-phone-actions"
 			type="button"
-			class="cursor-pointer rounded-full p-3 text-xs font-bold text-blue-500 hover:underline hover:underline-offset-4"
+			class="cursor-pointer rounded-full p-3 text-xs font-bold text-gray-500 underline"
 			on:click={handleClose}
 			data-testid="not-you-button"
 		>
@@ -270,9 +270,9 @@
 				<div class="h-px flex-grow bg-gray-300"></div>
 			</div>
 			<div
-				class="text-fy-on-surface mt-2 flex flex-row items-center justify-center gap-2 divide-x-2 divide-gray-200 text-sm font-bold"
+				class="text-fy-on-surface mt-2 flex flex-row items-center justify-center text-sm font-bold"
 			>
-				{#each resendButtonOptions as { channel, testId, label, disabled }}
+				{#each resendButtonOptions as { channel, testId, label, disabled }, i}
 					<button
 						type="button"
 						data-testid={testId}
@@ -282,6 +282,9 @@
 					>
 						{label}
 					</button>
+					{#if i === 0}
+						<div class="h-10 w-[3px] bg-gray-200"></div>
+					{/if}
 				{/each}
 			</div>
 			<div class="mt-2 flex w-full items-center justify-center">
