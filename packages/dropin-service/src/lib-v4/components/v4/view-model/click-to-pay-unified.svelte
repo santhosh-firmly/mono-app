@@ -215,7 +215,7 @@
 	/**
 	 * Handle "Not you?" button click - close modal and focus on address
 	 */
-	function handleNotYou() {
+	function handleClose() {
 		isModalOpen = false;
 		dispatch('not-you-clicked');
 	}
@@ -250,7 +250,7 @@
 			slot="email-phone-actions"
 			type="button"
 			class="cursor-pointer rounded-full p-3 text-xs font-bold text-blue-500 hover:underline hover:underline-offset-4"
-			on:click={handleNotYou}
+			on:click={handleClose}
 			data-testid="not-you-button"
 		>
 			Not you?
@@ -264,12 +264,13 @@
 			/>
 		</div>
 		<div slot="second-under-otp-slot" class="flex flex-col justify-start">
-			<hr class="mt-4" />
-			<span class="text-fy-on-surface-subtle mt-2 text-center text-sm"
-				>{alternativeMethodText}</span
-			>
+			<div class="mt-4 flex w-full items-center justify-center">
+				<div class="h-px flex-grow bg-gray-300"></div>
+				<span class="px-3 text-xs font-medium text-gray-500">{alternativeMethodText}</span>
+				<div class="h-px flex-grow bg-gray-300"></div>
+			</div>
 			<div
-				class="text-fy-on-surface mt-2 flex flex-row items-center justify-center gap-2 divide-x-2 divide-gray-100 text-sm font-bold"
+				class="text-fy-on-surface mt-2 flex flex-row items-center justify-center gap-2 divide-x-2 divide-gray-200 text-sm font-bold"
 			>
 				{#each resendButtonOptions as { channel, testId, label, disabled }}
 					<button
@@ -282,6 +283,21 @@
 						{label}
 					</button>
 				{/each}
+			</div>
+			<div class="mt-2 flex w-full items-center justify-center">
+				<div class="h-px flex-grow bg-gray-300"></div>
+				<span class="px-3 text-xs font-medium text-gray-500">OR</span>
+				<div class="h-px flex-grow bg-gray-300"></div>
+			</div>
+			<div class="flex justify-center">
+				<button
+					type="button"
+					class="cursor-pointer rounded-full p-3 text-xs font-bold text-gray-500 underline"
+					on:click={handleClose}
+					data-testid="not-you-button"
+				>
+					Enter card manually
+				</button>
 			</div>
 		</div>
 	</BaseLogin>
