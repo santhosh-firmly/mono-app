@@ -1,5 +1,5 @@
 <script>
-	// @ts-nocheck
+	/* @ts-nocheck */
 	import BaseLogin from '../base-login.svelte';
 	import { BASE_LOGIN_STEPS } from '$lib-v4/constants.js';
 	import { createEventDispatcher, onMount } from 'svelte';
@@ -249,15 +249,20 @@
 		<button
 			slot="email-phone-actions"
 			type="button"
-			class="cursor-pointer rounded-full p-3 text-xs font-bold text-gray-500 underline"
+			class="rounded-full p-3 text-xs font-bold text-gray-500 underline {popupStep ===
+			BASE_LOGIN_STEPS.PROCESSING_OTP
+				? 'cursor-not-allowed opacity-50'
+				: 'cursor-pointer'}"
 			on:click={handleClose}
 			data-testid="not-you-button"
+			disabled={popupStep === BASE_LOGIN_STEPS.PROCESSING_OTP}
 		>
 			Not you?
 		</button>
 		<div slot="under-otp" class="flex flex-col justify-start" class:hidden={!showC2pCheckbox}>
 			<Checkbox
-				disabled={otpAlternativeTextDisabled}
+				disabled={otpAlternativeTextDisabled ||
+					popupStep === BASE_LOGIN_STEPS.PROCESSING_OTP}
 				title={checkboxTitle}
 				subtitle={InfoC2PRememberMeLong}
 				bind:isChecked
@@ -278,7 +283,9 @@
 						data-testid={testId}
 						class="w-full p-2 text-blue-500 hover:text-[#1F3F9A] hover:underline hover:underline-offset-4 disabled:cursor-not-allowed disabled:text-gray-500 disabled:no-underline"
 						on:click={() => handleOtpSend(channel)}
-						disabled={otpAlternativeTextDisabled || disabled}
+						disabled={otpAlternativeTextDisabled ||
+							disabled ||
+							popupStep === BASE_LOGIN_STEPS.PROCESSING_OTP}
 					>
 						{label}
 					</button>
@@ -295,9 +302,13 @@
 			<div class="flex justify-center">
 				<button
 					type="button"
-					class="cursor-pointer rounded-full p-3 text-xs font-bold text-gray-500 underline"
+					class="rounded-full p-3 text-xs font-bold text-gray-500 underline {popupStep ===
+					BASE_LOGIN_STEPS.PROCESSING_OTP
+						? 'cursor-not-allowed opacity-50'
+						: 'cursor-pointer'}"
 					on:click={handleClose}
 					data-testid="not-you-button"
+					disabled={popupStep === BASE_LOGIN_STEPS.PROCESSING_OTP}
 				>
 					Enter card manually
 				</button>

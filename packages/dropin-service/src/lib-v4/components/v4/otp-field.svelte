@@ -1,5 +1,5 @@
 <script>
-	// @ts-nocheck
+	/* @ts-nocheck */
 	import { onMount, afterUpdate, createEventDispatcher } from 'svelte';
 	import Helper from '$lib-v4/components/common/error.svelte';
 	import { OTPValidation } from '$lib-v4/browser/localization.js';
