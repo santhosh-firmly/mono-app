@@ -141,7 +141,13 @@
 		const parentContext = trackUXEvent('c2p_validate_otp');
 
 		let res;
+
+		// Set to processing state immediately to show spinner
 		popupStep = BASE_LOGIN_STEPS.PROCESSING_OTP;
+
+		// Add a small delay before API call to ensure smooth transition to loading state
+		await new Promise((resolve) => setTimeout(resolve, 300));
+
 		res = await unlockComplete(event.detail.otpValue);
 
 		if (res.status === 200 && res.data.payment_method_options) {
@@ -155,6 +161,9 @@
 			dispatch('authenticate-c2p-successful', Object.assign(res.data));
 		} else {
 			otpError = res.data?.description || res.data;
+
+			// Add small delay before showing error state to ensure smooth transition
+			await new Promise((resolve) => setTimeout(resolve, 300));
 			popupStep = BASE_LOGIN_STEPS.WAITING_OTP;
 		}
 	}

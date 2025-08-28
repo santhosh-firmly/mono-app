@@ -2,6 +2,7 @@
 	/* @ts-nocheck */
 
 	import { createEventDispatcher } from 'svelte';
+	import { fade } from 'svelte/transition';
 	import OtpValidation from './otp-validation.svelte';
 	import * as Yup from 'yup';
 	import Helper from '../common/error.svelte';
@@ -299,22 +300,24 @@
 			</div>
 		</div>
 	{:else if currentStep === BASE_LOGIN_STEPS.WAITING_OTP || currentStep === BASE_LOGIN_STEPS.WAITING_C2P_OTP_STEPUP}
-		<OtpValidation
-			on:otpCompleted
-			on:alternativeTextClicked
-			alternativeTextDisabled={otpAlternativeTextDisabled}
-			disabled={false}
-			device={otpDevice}
-			alternativeMethodText={otpAlternativeMethodText}
-			error={otpError}
-			{otpReference}
-			{textClasses}
-			{otpLength}
-			{contentHeaderText}
-			{isWaitingStepupOtp}
-		>
-			<slot name="under-otp" slot="under-otp" />
-			<slot name="second-under-otp-slot" slot="second-under-otp-slot" />
-		</OtpValidation>
+		<div>
+			<OtpValidation
+				on:otpCompleted
+				on:alternativeTextClicked
+				alternativeTextDisabled={otpAlternativeTextDisabled}
+				disabled={false}
+				device={otpDevice}
+				alternativeMethodText={otpAlternativeMethodText}
+				error={otpError}
+				{otpReference}
+				{textClasses}
+				{otpLength}
+				{contentHeaderText}
+				{isWaitingStepupOtp}
+			>
+				<slot name="under-otp" slot="under-otp" />
+				<slot name="second-under-otp-slot" slot="second-under-otp-slot" />
+			</OtpValidation>
+		</div>
 	{/if}
 </div>
