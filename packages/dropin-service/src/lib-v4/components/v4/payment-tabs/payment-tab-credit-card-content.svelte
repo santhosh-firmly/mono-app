@@ -267,16 +267,18 @@
 				</div>
 			</label>
 		</Group>
-		<div class="flex items-center justify-end">
-			<button
-				type="button"
-				class="cursor-pointer rounded-full p-3 text-xs font-bold text-gray-500 underline"
-				on:click={() => dispatch('not-your-cards')}
-				data-testid="not-your-cards-btn"
-			>
-				Not you cards?
-			</button>
-		</div>
+		{#if hasC2PCards}
+			<div class="flex items-center justify-end">
+				<button
+					type="button"
+					class="cursor-pointer rounded-full p-3 text-xs font-bold text-gray-500 underline"
+					on:click={() => dispatch('not-your-cards')}
+					data-testid="not-your-cards-btn"
+				>
+					Not you cards?
+				</button>
+			</div>
+		{/if}
 	</div>
 {/if}
 {#if !filteredCards || filteredCards.length === 0 || selectedCardOption === NEW_CARD_OPTION}
