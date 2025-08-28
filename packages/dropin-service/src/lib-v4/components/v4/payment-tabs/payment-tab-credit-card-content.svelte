@@ -15,6 +15,9 @@
 	import Address from '../address.svelte';
 	import Checkbox from '../checkbox.svelte';
 	import C2pLogo from '$lib-v4/components/common/c2p-logo.svelte';
+	import { createEventDispatcher } from 'svelte';
+
+	const dispatch = createEventDispatcher();
 
 	export let cardsRequiringCvv = [];
 	export let cvvConfirmationValue = '';
@@ -264,6 +267,18 @@
 				</div>
 			</label>
 		</Group>
+		{#if hasC2PCards}
+			<div class="flex items-center justify-end">
+				<button
+					type="button"
+					class="cursor-pointer rounded-full p-3 text-xs font-bold text-gray-500 underline"
+					on:click={() => dispatch('not-your-cards')}
+					data-testid="not-your-cards-btn"
+				>
+					Not you cards?
+				</button>
+			</div>
+		{/if}
 	</div>
 {/if}
 {#if !filteredCards || filteredCards.length === 0 || selectedCardOption === NEW_CARD_OPTION}

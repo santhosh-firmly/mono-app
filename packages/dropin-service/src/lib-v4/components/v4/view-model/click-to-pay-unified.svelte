@@ -33,7 +33,7 @@
 	/**
 	 * Message to be displayed as the header of the main context
 	 */
-	export let contentHeaderText = 'Welcome back to Click to Pay';
+	export let contentHeaderText = 'Click to Pay has found your linked cards';
 	/**
 	 * Whether or not will show the "Remember me" checkbox
 	 */
@@ -215,7 +215,7 @@
 	/**
 	 * Handle "Not you?" button click - close modal and focus on address
 	 */
-	function handleNotYou() {
+	function handleClose() {
 		isModalOpen = false;
 		dispatch('not-you-clicked');
 	}
@@ -249,8 +249,8 @@
 		<button
 			slot="email-phone-actions"
 			type="button"
-			class="cursor-pointer rounded-full p-3 text-xs font-bold text-blue-500 hover:underline hover:underline-offset-4"
-			on:click={handleNotYou}
+			class="cursor-pointer rounded-full p-3 text-xs font-bold text-gray-500 underline"
+			on:click={handleClose}
 			data-testid="not-you-button"
 		>
 			Not you?
@@ -264,14 +264,15 @@
 			/>
 		</div>
 		<div slot="second-under-otp-slot" class="flex flex-col justify-start">
-			<hr class="mt-4" />
-			<span class="text-fy-on-surface-subtle mt-2 text-center text-sm"
-				>{alternativeMethodText}</span
-			>
+			<div class="mt-4 flex w-full items-center justify-center">
+				<div class="h-px flex-grow bg-gray-300"></div>
+				<span class="px-3 text-xs font-medium text-gray-500">{alternativeMethodText}</span>
+				<div class="h-px flex-grow bg-gray-300"></div>
+			</div>
 			<div
-				class="text-fy-on-surface mt-2 flex flex-row items-center justify-center gap-2 divide-x-2 divide-gray-100 text-sm font-bold"
+				class="text-fy-on-surface mt-2 flex flex-row items-center justify-center text-sm font-bold"
 			>
-				{#each resendButtonOptions as { channel, testId, label, disabled }}
+				{#each resendButtonOptions as { channel, testId, label, disabled }, i}
 					<button
 						type="button"
 						data-testid={testId}
@@ -281,7 +282,25 @@
 					>
 						{label}
 					</button>
+					{#if i === 0}
+						<div class="h-10 w-[3px] bg-gray-200"></div>
+					{/if}
 				{/each}
+			</div>
+			<div class="mt-2 flex w-full items-center justify-center">
+				<div class="h-px flex-grow bg-gray-300"></div>
+				<span class="px-3 text-xs font-medium text-gray-500">OR</span>
+				<div class="h-px flex-grow bg-gray-300"></div>
+			</div>
+			<div class="flex justify-center">
+				<button
+					type="button"
+					class="cursor-pointer rounded-full p-3 text-xs font-bold text-gray-500 underline"
+					on:click={handleClose}
+					data-testid="not-you-button"
+				>
+					Enter card manually
+				</button>
 			</div>
 		</div>
 	</BaseLogin>
