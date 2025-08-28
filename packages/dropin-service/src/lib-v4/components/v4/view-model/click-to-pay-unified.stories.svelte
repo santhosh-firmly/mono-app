@@ -1,5 +1,5 @@
 <script>
-	/* @ts-nocheck */
+	// @ts-nocheck
 
 	import ClickToPayUnified from './click-to-pay-unified.svelte';
 	import { Meta, Story, Template } from '@storybook/addon-svelte-csf';

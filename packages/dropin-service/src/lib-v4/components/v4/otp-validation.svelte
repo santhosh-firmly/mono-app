@@ -1,5 +1,5 @@
 <script>
-	/* @ts-nocheck */
+	// @ts-nocheck
 
 	import { createEventDispatcher } from 'svelte';
 	import OtpField from './otp-field.svelte';

@@ -1,5 +1,5 @@
 <script>
-	/* @ts-nocheck */
+	// @ts-nocheck
 
 	import ClickToPay from './click-to-pay.svelte';
 	import ClickToPayUnified from './click-to-pay-unified.svelte';
