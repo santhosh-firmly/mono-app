@@ -242,13 +242,16 @@ export async function checkoutWithCard({
 				correlationId: withCardResponse.checkoutResponseData.srcCorrelationId
 			};
 
-			const walletResponse = await window.firmly.paymentC2PTokenize(
-				cardId,
-				cvv,
-				null,
-				withCardResponse.checkoutResponse,
-				mastercardPayload
-			);
+			// Prepare wallet data for complete-order
+			const walletData = {
+				wallet: 'mastercard-unified',
+				credit_card_id: String(cardId),
+				jws: withCardResponse.checkoutResponse,
+				additional_data: mastercardPayload
+			};
+
+			const domain = window.firmly.domain;
+			const walletResponse = await window.firmly.completeWalletOrder(domain, walletData);
 
 			if (walletResponse.data?.cvv_required) {
 				previuslyWithCardResponse = withCardResponse;

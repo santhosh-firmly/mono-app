@@ -58,7 +58,7 @@
 				}
 			],
 			"vars": {
-				"PUBLIC_firmly_deployment": "prod",
+				"PUBLIC_firmly_deployment": "dev",
 				"PUBLIC_cf_server": "https://api.firmly.tools",
 				"PUBLIC_api_id": "4e015446-be87-4796-93bf-7610bb228fe0",
 				"PUBLIC_DISABLE_HCAPTCHA": "false",
