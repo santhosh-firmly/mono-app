@@ -197,7 +197,7 @@
 	 */
 	let isC2POpen = false;
 	let c2pOTPDestination;
-	let tokenizeC2P;
+	let processC2PCheckout;
 	let c2pUnlockStart;
 	let isC2PInProgress;
 	let c2pCards;
@@ -825,35 +825,26 @@
 	async function placeOrderC2P(selectedCard, additionalData = $cart) {
 		if (c2pSignOutInProgress) return;
 
-		const tokenizeResponse = await tokenizeC2P(
+		const checkoutResponse = await processC2PCheckout(
 			selectedCard,
 			additionalData,
 			cvvConfirmationValue
 		);
 
-		if (tokenizeResponse.cvv_required) {
+		if (checkoutResponse.cvv_required) {
 			if (!cardsRequiringCvv.includes(selectedCardOption)) {
 				cardsRequiringCvv = [...cardsRequiringCvv, selectedCardOption];
 			}
 			return;
 		}
 
-		if (tokenizeResponse?.token) {
+		if (checkoutResponse && !checkoutResponse.place_order_error) {
 			cardsRequiringCvv = cardsRequiringCvv.filter((card) => card !== selectedCardOption);
 			cvvConfirmationValue = '';
 
-			const placeOrderResponse = await window.firmly.cartCompleteOrder(
-				tokenizeResponse.token
-			);
-
-			if (placeOrderResponse.status !== 200) {
-				place_order_error = placeOrderResponse.data.description || placeOrderResponse.data;
-				return;
-			}
-
-			return placeOrderResponse.data;
-		} else if (tokenizeResponse.place_order_error) {
-			place_order_error = tokenizeResponse.place_order_error;
+			return checkoutResponse;
+		} else if (checkoutResponse.place_order_error) {
+			place_order_error = checkoutResponse.place_order_error;
 		}
 	}
 
@@ -1981,7 +1972,7 @@
 				on:not-you-clicked={handleNotYouClicked}
 				{c2pOTPDestination}
 				bind:isModalOpen={isC2POpen}
-				bind:tokenizeC2P
+				bind:processC2PCheckout
 				bind:c2pUnlockStart
 				bind:isUserLoggedInC2p
 				bind:isC2PInProgress
@@ -1994,7 +1985,7 @@
 				on:not-you-clicked={handleNotYouClicked}
 				{c2pOTPDestination}
 				bind:isModalOpen={isC2POpen}
-				bind:tokenizeC2P
+				bind:processC2PCheckout
 				bind:c2pUnlockStart
 				bind:isUserLoggedInC2p
 				bind:isC2PInProgress

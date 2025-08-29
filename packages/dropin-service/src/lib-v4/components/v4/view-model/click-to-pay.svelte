@@ -125,7 +125,7 @@
 			popupStep = BASE_LOGIN_STEPS.SELECTING_C2P_STEPUP;
 		}
 	}
-	export async function tokenizeC2P(selectedCard, additionalData = {}) {
+	export async function processC2PCheckout(selectedCard, additionalData = {}) {
 		const tokenizeResponse = await window.firmly.visa.getVisaCardToken(
 			selectedCard.id,
 			null,
