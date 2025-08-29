@@ -263,7 +263,7 @@ export async function checkoutWithCard({
 			}
 
 			return {
-				status: 200,
+				status: walletResponse.data.code,
 				data: walletResponse.data
 			};
 		},
