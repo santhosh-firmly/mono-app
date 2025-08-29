@@ -14,7 +14,6 @@
 	export let alternativeTextDisabled = false;
 	export let contentHeaderText = "Confirm it's you";
 	export let isWaitingStepupOtp;
-	export let c2pOTPDestination = null;
 
 	const dispatch = createEventDispatcher();
 	function onOTPComplete(otpValue = '') {

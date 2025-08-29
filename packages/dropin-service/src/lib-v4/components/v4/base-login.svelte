@@ -8,6 +8,7 @@
 	import { BASE_LOGIN_STEPS } from '$lib-v4/constants.js';
 	import { isActionDark } from './theme-context.js';
 	import VisaStepUpOptions from './visa-step-up-options.svelte';
+	import LoadingSpinner from '../common/loading-spinner.svelte';
 
 	const dispatch = createEventDispatcher();
 
@@ -269,23 +270,39 @@
 		></VisaStepUpOptions>
 	{/if}
 
-	{#if currentStep === BASE_LOGIN_STEPS.WAITING_OTP || currentStep === BASE_LOGIN_STEPS.PROCESSING_OTP || currentStep === BASE_LOGIN_STEPS.WAITING_C2P_OTP_STEPUP}
-		<OtpValidation
-			on:otpCompleted
-			on:alternativeTextClicked
-			alternativeTextDisabled={otpAlternativeTextDisabled}
-			disabled={currentStep === BASE_LOGIN_STEPS.PROCESSING_OTP}
-			device={otpDevice}
-			alternativeMethodText={otpAlternativeMethodText}
-			error={otpError}
-			{otpReference}
-			{textClasses}
-			{otpLength}
-			{contentHeaderText}
-			{isWaitingStepupOtp}
-		>
-			<slot name="under-otp" slot="under-otp" />
-			<slot name="second-under-otp-slot" slot="second-under-otp-slot" />
-		</OtpValidation>
+	{#if currentStep === BASE_LOGIN_STEPS.PROCESSING_OTP}
+		<div class="p-4">
+			<div class="mt-2 flex w-full justify-center">
+				<div
+					class="min-h-[244px] w-[296px] flex-col items-center justify-center text-center"
+				>
+					<LoadingSpinner
+						message="Validating code..."
+						testId="otp-processing-spinner"
+						className="mx-auto mt-16"
+					/>
+				</div>
+			</div>
+		</div>
+	{:else if currentStep === BASE_LOGIN_STEPS.WAITING_OTP || currentStep === BASE_LOGIN_STEPS.WAITING_C2P_OTP_STEPUP}
+		<div>
+			<OtpValidation
+				on:otpCompleted
+				on:alternativeTextClicked
+				alternativeTextDisabled={otpAlternativeTextDisabled}
+				disabled={false}
+				device={otpDevice}
+				alternativeMethodText={otpAlternativeMethodText}
+				error={otpError}
+				{otpReference}
+				{textClasses}
+				{otpLength}
+				{contentHeaderText}
+				{isWaitingStepupOtp}
+			>
+				<slot name="under-otp" slot="under-otp" />
+				<slot name="second-under-otp-slot" slot="second-under-otp-slot" />
+			</OtpValidation>
+		</div>
 	{/if}
 </div>
