@@ -34,7 +34,6 @@
 	import classNames from 'classnames';
 	import { trackUXEvent } from '../../browser/telemetry.js';
 	import { signOut } from '$lib-v4/clients/mastercard.js';
-	import { PUBLIC_firmly_deployment } from '$env/static/public';
 
 	const dispatch = createEventDispatcher();
 	/**
@@ -78,6 +77,7 @@
 	export let smallLogo;
 	export let termsOfUse;
 	export let privacyPolicy;
+	export let isProduction;
 
 	// Controls the express payment buttons
 	let allowMerchantLogin = true;
@@ -1974,7 +1974,7 @@
 			bind:canCloseModal={canCloseMechantLoginModal}
 			on:login-successful={onMerchantLoginSuccess}
 		/>
-		{#if PUBLIC_firmly_deployment === 'prod'}
+		{#if isProduction}
 			<ClickToPay
 				on:login-c2p-successful={onC2PLoginSuccess}
 				on:authenticate-c2p-successful={handleC2PAuthenticate}

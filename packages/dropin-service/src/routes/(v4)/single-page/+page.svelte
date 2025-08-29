@@ -36,6 +36,7 @@
 	let termsOfUse = $state(undefined);
 	let isParentIframed = $state(false);
 	let order = $state(null);
+	let isProduction = $derived(data.PUBLIC_firmly_deployment === 'prod');
 
 	async function onAddToCart(transferPayload) {
 		cartInitialized = true;
@@ -180,7 +181,7 @@
 		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server);
 		initializeAppVersion(version);
 
-		if (data.PUBLIC_firmly_deployment === 'prod') {
+		if (isProduction) {
 			// Initialize Visa SDK for production
 			// The Visa component will handle its own initialization via the use:loadVisaScript action
 		} else {
@@ -225,6 +226,7 @@
 				{privacyPolicy}
 				{termsOfUse}
 				{isParentIframed}
+				{isProduction}
 				on:back-click={onBackClick}
 				on:orderPlacedEvent={onOrderPlacedEvent}
 				PUBLIC_DISABLE_HCAPTCHA={data.PUBLIC_DISABLE_HCAPTCHA}
