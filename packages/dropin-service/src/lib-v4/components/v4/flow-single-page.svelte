@@ -16,7 +16,8 @@
 	import { writable } from 'svelte/store';
 	import { postOrderPlaced, postQuantityUpdated, postSignIn } from '$lib-v4/browser/cross.js';
 	import LoginButton from './login-button.svelte';
-	import ClickToPay from './view-model/click-to-pay-unified.svelte';
+	import ClickToPayUnified from './view-model/click-to-pay-unified.svelte';
+	import ClickToPay from './view-model/click-to-pay.svelte';
 	import { BASE_LOGIN_STEPS, NEW_CARD_OPTION, NEW_SHIPPING_ADDRESS } from '$lib-v4/constants.js';
 	import MerchantLogin from './view-model/merchant-login.svelte';
 	import Checkbox from './checkbox.svelte';
@@ -33,6 +34,7 @@
 	import classNames from 'classnames';
 	import { trackUXEvent } from '../../browser/telemetry.js';
 	import { signOut } from '$lib-v4/clients/mastercard.js';
+	import { PUBLIC_firmly_deployment } from '$env/static/public';
 
 	const dispatch = createEventDispatcher();
 	/**
@@ -1972,19 +1974,33 @@
 			bind:canCloseModal={canCloseMechantLoginModal}
 			on:login-successful={onMerchantLoginSuccess}
 		/>
-		<ClickToPay
-			cart={$cart}
-			on:login-c2p-successful={onC2PLoginSuccess}
-			on:authenticate-c2p-successful={handleC2PAuthenticate}
-			on:not-you-clicked={handleNotYouClicked}
-			{c2pOTPDestination}
-			bind:isModalOpen={isC2POpen}
-			bind:tokenizeC2P
-			bind:c2pUnlockStart
-			bind:isUserLoggedInC2p
-			bind:isC2PInProgress
-			disabled={c2pSignOutInProgress}
-		/>
+		{#if PUBLIC_firmly_deployment === 'prod'}
+			<ClickToPay
+				on:login-c2p-successful={onC2PLoginSuccess}
+				on:authenticate-c2p-successful={handleC2PAuthenticate}
+				on:not-you-clicked={handleNotYouClicked}
+				{c2pOTPDestination}
+				bind:isModalOpen={isC2POpen}
+				bind:tokenizeC2P
+				bind:c2pUnlockStart
+				bind:isUserLoggedInC2p
+				bind:isC2PInProgress
+			/>
+		{:else}
+			<ClickToPayUnified
+				cart={$cart}
+				on:login-c2p-successful={onC2PLoginSuccess}
+				on:authenticate-c2p-successful={handleC2PAuthenticate}
+				on:not-you-clicked={handleNotYouClicked}
+				{c2pOTPDestination}
+				bind:isModalOpen={isC2POpen}
+				bind:tokenizeC2P
+				bind:c2pUnlockStart
+				bind:isUserLoggedInC2p
+				bind:isC2PInProgress
+				disabled={c2pSignOutInProgress}
+			/>
+		{/if}
 
 		<TermsPopup bind:isModalOpen={isTermsPopupOpen} title={$cart?.display_name} />
 	</div>
