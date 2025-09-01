@@ -331,18 +331,6 @@
 			setFirstCard = false;
 		}
 
-		// Collapse payment when a valid pre-filled card is selected (including from c2p)
-		if (
-			selectedCardOption &&
-			selectedCardOption !== NEW_CARD_OPTION &&
-			!collapsedStatePayment
-		) {
-			collapsedStatePayment = true;
-			if (!selectedPaymentMethod) {
-				selectedPaymentMethod = 'CreditCard';
-			}
-		}
-
 		if (
 			($cart && !previousCart) ||
 			($cart && paypalConnected && !previousCart?.payment_method?.attributes?.paypal_token)
@@ -1051,6 +1039,14 @@
 		c2pCards = event.detail.payment_method_options;
 		savedAddresses.concat(event.detail.shipping_info_options);
 		setFirstCard = true;
+
+		// Auto-collapse when c2p returns pre-filled cards from registered email
+		if (c2pCards && c2pCards.length > 0) {
+			collapsedStatePayment = true;
+			if (!selectedPaymentMethod) {
+				selectedPaymentMethod = 'CreditCard';
+			}
+		}
 	}
 
 	function handleC2PAuthenticate(event) {
