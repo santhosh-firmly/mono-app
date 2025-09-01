@@ -156,7 +156,7 @@
 		}
 	}
 
-	export async function tokenizeC2P(selectedCard, additionalData, cvv) {
+	export async function processC2PCheckout(selectedCard, additionalData, cvv) {
 		const parentContext = trackUXEvent('c2p_tokenize', {
 			rememberMe: isChecked,
 			hasCvv: !!cvv,
