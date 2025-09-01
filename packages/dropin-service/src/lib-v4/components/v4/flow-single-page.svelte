@@ -331,6 +331,18 @@
 			setFirstCard = false;
 		}
 
+		// Collapse payment when a valid pre-filled card is selected (including from c2p)
+		if (
+			selectedCardOption &&
+			selectedCardOption !== NEW_CARD_OPTION &&
+			!collapsedStatePayment
+		) {
+			collapsedStatePayment = true;
+			if (!selectedPaymentMethod) {
+				selectedPaymentMethod = 'CreditCard';
+			}
+		}
+
 		if (
 			($cart && !previousCart) ||
 			($cart && paypalConnected && !previousCart?.payment_method?.attributes?.paypal_token)
@@ -342,7 +354,7 @@
 			// Collapse the shipping method if there is already one set to the cart.
 			collapsedStateShippingMethod =
 				!!$cart.shipping_method || !!$cart.shipping_info_options?.[0];
-			// Collapse the shipping method if there is already one set to the cart.
+			// Collapse the payment method if there is already one set to the cart.
 			collapsedStatePayment = selectedCardOption && selectedCardOption !== NEW_CARD_OPTION;
 			if (collapsedStatePayment && !selectedPaymentMethod) {
 				selectedPaymentMethod = 'CreditCard';
