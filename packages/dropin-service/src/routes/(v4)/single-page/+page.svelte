@@ -36,6 +36,7 @@
 	let termsOfUse = $state(undefined);
 	let isParentIframed = $state(false);
 	let order = $state(null);
+	let isProduction = $derived(data.PUBLIC_firmly_deployment === 'prod');
 
 	async function onAddToCart(transferPayload) {
 		cartInitialized = true;
@@ -179,11 +180,18 @@
 		// Initialize the session in the background.
 		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server);
 		initializeAppVersion(version);
-		startMasterCardUnifiedSolution({
-			srcDpaId: data.PUBLIC_unified_c2p_dpa_id,
-			presentationName: data.PUBLIC_unified_c2p_presentation_name,
-			sandbox: data.PUBLIC_unified_c2p_sandbox
-		});
+
+		if (isProduction) {
+			// Initialize Visa SDK for production
+			// The Visa component will handle its own initialization via the use:loadVisaScript action
+		} else {
+			// Initialize MasterCard Unified Solution for other environments
+			startMasterCardUnifiedSolution({
+				srcDpaId: data.PUBLIC_unified_c2p_dpa_id,
+				presentationName: data.PUBLIC_unified_c2p_presentation_name,
+				sandbox: data.PUBLIC_unified_c2p_sandbox
+			});
+		}
 	});
 
 	function onBackClick() {
@@ -196,12 +204,13 @@
 	}
 </script>
 
-<!-- <VisaUnified /> -->
-<Visa
-	PUBLIC_c2p_dpa_id={data.PUBLIC_c2p_dpa_id}
-	PUBLIC_c2p_initiator_id={data.PUBLIC_c2p_initiator_id}
-	PUBLIC_c2p_sdk_url={data.PUBLIC_c2p_sdk_url}
-/>
+{#if data.PUBLIC_firmly_deployment === 'prod'}
+	<Visa
+		PUBLIC_c2p_sdk_url={data.PUBLIC_c2p_sdk_url}
+		PUBLIC_c2p_dpa_id={data.PUBLIC_c2p_dpa_id}
+		PUBLIC_c2p_initiator_id={data.PUBLIC_c2p_initiator_id}
+	/>
+{/if}
 
 <!-- The following div helps detecting if the iframe is visible or not and correctly showing the contents. -->
 <div class="bottom-0 left-0 h-[1px] w-[1px]" />
@@ -217,6 +226,7 @@
 				{privacyPolicy}
 				{termsOfUse}
 				{isParentIframed}
+				{isProduction}
 				on:back-click={onBackClick}
 				on:orderPlacedEvent={onOrderPlacedEvent}
 				PUBLIC_DISABLE_HCAPTCHA={data.PUBLIC_DISABLE_HCAPTCHA}
