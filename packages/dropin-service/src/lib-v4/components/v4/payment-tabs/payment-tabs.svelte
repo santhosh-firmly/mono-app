@@ -5,23 +5,34 @@
 	import PaymentTabCreditPaypal from './payment-tab-paypal.svelte';
 	import PaymentTabPaypalContent from './payment-tab-paypal-content.svelte';
 
+	// Payment method constants
+	const PAYMENT_METHODS = {
+		CREDIT_CARD: 'CreditCard',
+		PAYPAL: 'PayPal',
+		SHOP_PAY: 'ShopPay'
+	};
+
 	const supportedPaymentMethods = {
-		CreditCard: {
+		[PAYMENT_METHODS.CREDIT_CARD]: {
 			tab: PaymentTabCreditCard,
 			content: PaymentTabCreditCardContent
 		},
-		PayPal: {
+		[PAYMENT_METHODS.PAYPAL]: {
 			tab: PaymentTabCreditPaypal,
 			content: PaymentTabPaypalContent
 		}
-		// ShopPay: {
+		// [PAYMENT_METHODS.SHOP_PAY]: {
 		// 	// TODO: Add content for ShopPay
 		// 	tab: PaymentTabCreditShoppay,
 		// 	content: PaymentTabCreditCardContent,
 		// }
 	};
 
-	export let allowedPaymentMethods = ['CreditCard', 'PayPal', 'ShopPay'];
+	export let allowedPaymentMethods = [
+		PAYMENT_METHODS.CREDIT_CARD,
+		PAYMENT_METHODS.PAYPAL,
+		PAYMENT_METHODS.SHOP_PAY
+	];
 
 	let paymentMethods = [];
 
@@ -30,7 +41,6 @@
 	export let selectedPaymentMethod;
 	export let selectedCardOption;
 	export let validateCreditCard;
-	export let connected;
 	export let paypalPayerId;
 	export let onPaypalHandler = () => {};
 
@@ -50,7 +60,7 @@
 			allowedPaymentMethods.includes(s)
 		);
 		// Don't override PayPal selection if PayPal is connected
-		if (!selectedPaymentMethod && !paypalConnected) {
+		if (!selectedPaymentMethod && !paypalConnected && paymentMethods.length > 0) {
 			selectedPaymentMethod = paymentMethods[0];
 		}
 	}
@@ -84,7 +94,7 @@
 				bind:isBillingSameShipping
 				bind:getBillingInfo
 				bind:paypalPayerId
-				{connected}
+				connected={paypalConnected}
 				{onPaypalHandler}
 				on:not-your-cards
 				{...$$restProps}
