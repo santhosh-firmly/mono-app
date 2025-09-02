@@ -342,7 +342,7 @@
 			// Collapse the shipping method if there is already one set to the cart.
 			collapsedStateShippingMethod =
 				!!$cart.shipping_method || !!$cart.shipping_info_options?.[0];
-			// Collapse the shipping method if there is already one set to the cart.
+			// Collapse the payment method if there is already one set to the cart.
 			collapsedStatePayment = selectedCardOption && selectedCardOption !== NEW_CARD_OPTION;
 			if (collapsedStatePayment && !selectedPaymentMethod) {
 				selectedPaymentMethod = 'CreditCard';
@@ -1039,6 +1039,14 @@
 		c2pCards = event.detail.payment_method_options;
 		savedAddresses.concat(event.detail.shipping_info_options);
 		setFirstCard = true;
+
+		// Auto-collapse when c2p returns pre-filled cards from registered email
+		if (c2pCards && c2pCards.length > 0) {
+			collapsedStatePayment = true;
+			if (!selectedPaymentMethod) {
+				selectedPaymentMethod = 'CreditCard';
+			}
+		}
 	}
 
 	function handleC2PAuthenticate(event) {
