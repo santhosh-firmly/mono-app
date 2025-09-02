@@ -36,6 +36,7 @@
 
 	export let shouldTryFocusOnPaymentTab;
 	export let disabled = false;
+	export let paypalConnected = false;
 
 	export let isBillingSameShipping;
 
@@ -48,7 +49,10 @@
 		paymentMethods = Object.keys(supportedPaymentMethods).filter((s) =>
 			allowedPaymentMethods.includes(s)
 		);
-		selectedPaymentMethod = selectedPaymentMethod || paymentMethods[0];
+		// Don't override PayPal selection if PayPal is connected
+		if (!selectedPaymentMethod && !paypalConnected) {
+			selectedPaymentMethod = paymentMethods[0];
+		}
 	}
 </script>
 

@@ -316,10 +316,11 @@
 	$: {
 		savedCreditCards = ($cart?.payment_method_options || []).concat(c2pCards || []);
 
-		// Try to auto select the credit cards or a new card
+		// Try to auto select the credit cards or a new card, but not if PayPal is connected
 		if (
 			(!selectedCardOption || setFirstCard || savedCreditCards.length !== 0) &&
-			!savedCreditCardAutoSelected
+			!savedCreditCardAutoSelected &&
+			!paypalConnected
 		) {
 			selectedCardOption = selectAvailableCard(savedCreditCards);
 
@@ -342,9 +343,11 @@
 			// Collapse the shipping method if there is already one set to the cart.
 			collapsedStateShippingMethod =
 				!!$cart.shipping_method || !!$cart.shipping_info_options?.[0];
-			// Collapse the payment method if there is already one set to the cart.
-			collapsedStatePayment = selectedCardOption && selectedCardOption !== NEW_CARD_OPTION;
-			if (collapsedStatePayment && !selectedPaymentMethod) {
+			// Don't collapse payment options when PayPal is connected
+			collapsedStatePayment =
+				selectedCardOption && selectedCardOption !== NEW_CARD_OPTION && !paypalConnected;
+			// Only set CreditCard as default if no payment method is selected and PayPal isn't connected
+			if (collapsedStatePayment && !selectedPaymentMethod && !paypalConnected) {
 				selectedPaymentMethod = 'CreditCard';
 			}
 
@@ -359,6 +362,13 @@
 
 			if (selectedPaymentMethod !== 'PayPal' && email && isC2PAvailable()) {
 				validateAndSubmitContactInfo();
+			}
+
+			// Ensure PayPal selection is maintained when cart updates
+			if (paypalConnected && selectedPaymentMethod !== 'PayPal') {
+				selectedPaymentMethod = 'PayPal';
+				selectedCardOption = null;
+				collapsedStatePayment = false; // Keep expanded to show PayPal selection
 			}
 
 			// Automatically set the shipping info if there is none yet set.
@@ -725,6 +735,8 @@
 		trackUXEvent('express_payment_clicked', { paymentMethod: 'paypal' });
 		selectedPaymentMethod = 'PayPal';
 		paypalConnected = true;
+		selectedCardOption = null; // Clear any selected card when PayPal is chosen
+		collapsedStatePayment = false; // Keep payment options expanded
 		email = cartData?.shipping_info?.email;
 		cart.set(cartData);
 	}
@@ -1802,6 +1814,7 @@
 									intent={$cart?.shop_properties?.paypal?.intent}
 									clientId={$cart?.shop_properties?.paypal?.clientId}
 									connected={paypalConnected}
+									{paypalConnected}
 									email={paypalConnected
 										? $cart?.payment_method?.attributes?.email || 'Unknown'
 										: ''}
