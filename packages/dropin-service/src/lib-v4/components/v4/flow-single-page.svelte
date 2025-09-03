@@ -301,6 +301,36 @@
 	let collapsedStatePayment = true;
 	let previousCart;
 
+	// Payment method constants
+	const PAYMENT_METHODS = {
+		PAYPAL: 'PayPal',
+		CREDIT_CARD: 'CreditCard'
+	};
+
+	/**
+	 * Updates collapsed states based on current cart and connection status
+	 * @throws {Error} If cart is not available
+	 */
+	function updateCollapsedStates() {
+		if (!$cart) {
+			console.warn('updateCollapsedStates called without cart');
+			return;
+		}
+
+		collapsedStateShipping = !!$cart.shipping_info || !!$cart.shipping_info_options?.[0];
+		collapsedStateShippingMethod =
+			!!$cart.shipping_method || !!$cart.shipping_info_options?.[0];
+
+		// Use original collapse logic - only prevent collapse when PayPal is actively connected
+		if (paypalConnected && selectedPaymentMethod === PAYMENT_METHODS.PAYPAL) {
+			// Keep expanded when PayPal is actively connected and selected
+			collapsedStatePayment = false;
+		} else {
+			// Original logic for all other cases (including C2P)
+			collapsedStatePayment = selectedCardOption && selectedCardOption !== NEW_CARD_OPTION;
+		}
+	}
+
 	// Update the shipping and contact forms when the cart is updated
 	$: {
 		// Shipping Address
@@ -316,10 +346,11 @@
 	$: {
 		savedCreditCards = ($cart?.payment_method_options || []).concat(c2pCards || []);
 
-		// Try to auto select the credit cards or a new card
+		// Try to auto select the credit cards or a new card, but not if PayPal is connected
 		if (
 			(!selectedCardOption || setFirstCard || savedCreditCards.length !== 0) &&
-			!savedCreditCardAutoSelected
+			!savedCreditCardAutoSelected &&
+			!paypalConnected
 		) {
 			selectedCardOption = selectAvailableCard(savedCreditCards);
 
@@ -336,16 +367,12 @@
 			($cart && paypalConnected && !previousCart?.payment_method?.attributes?.paypal_token)
 		) {
 			setEmail();
-			// A cart got added to the page. i.e., Session Transfer has just been performed.
-			// Collapse the shipping info if there is already one set to the cart.
-			collapsedStateShipping = !!$cart.shipping_info || !!$cart.shipping_info_options?.[0];
-			// Collapse the shipping method if there is already one set to the cart.
-			collapsedStateShippingMethod =
-				!!$cart.shipping_method || !!$cart.shipping_info_options?.[0];
-			// Collapse the payment method if there is already one set to the cart.
-			collapsedStatePayment = selectedCardOption && selectedCardOption !== NEW_CARD_OPTION;
-			if (collapsedStatePayment && !selectedPaymentMethod) {
-				selectedPaymentMethod = 'CreditCard';
+			// Update collapsed states based on current cart and connection status
+			updateCollapsedStates();
+
+			// Only set CreditCard as default if no payment method is selected and PayPal isn't connected
+			if (collapsedStatePayment && !selectedPaymentMethod && !paypalConnected) {
+				selectedPaymentMethod = PAYMENT_METHODS.CREDIT_CARD;
 			}
 
 			// Reset the errors
@@ -359,6 +386,13 @@
 
 			if (selectedPaymentMethod !== 'PayPal' && email && isC2PAvailable()) {
 				validateAndSubmitContactInfo();
+			}
+
+			// Ensure PayPal selection is maintained when cart updates
+			if (paypalConnected && selectedPaymentMethod !== PAYMENT_METHODS.PAYPAL) {
+				selectedPaymentMethod = PAYMENT_METHODS.PAYPAL;
+				selectedCardOption = null;
+				collapsedStatePayment = false;
 			}
 
 			// Automatically set the shipping info if there is none yet set.
@@ -721,12 +755,66 @@
 		getConsents();
 	}
 
+	/**
+	 * Handles PayPal connection state changes
+	 * @param {boolean} connected - Whether PayPal is connected
+	 * @param {Object} cartData - Cart data from PayPal (optional)
+	 * @throws {Error} If connected parameter is not a boolean
+	 */
+	function setPayPalConnectionState(connected, cartData = null) {
+		// Validate input parameters
+		if (typeof connected !== 'boolean') {
+			console.error('setPayPalConnectionState: connected must be a boolean', connected);
+			return;
+		}
+
+		// Early return if already in desired state
+		if (paypalConnected === connected) {
+			return;
+		}
+
+		try {
+			// Batch state updates to prevent multiple re-renders
+			const updates = {
+				selectedPaymentMethod: connected ? PAYMENT_METHODS.PAYPAL : selectedPaymentMethod,
+				paypalConnected: connected,
+				selectedCardOption: connected ? null : selectedCardOption,
+				collapsedStatePayment: connected
+					? false
+					: selectedCardOption && selectedCardOption !== NEW_CARD_OPTION
+			};
+
+			// Apply all state updates atomically
+			selectedPaymentMethod = updates.selectedPaymentMethod;
+			paypalConnected = updates.paypalConnected;
+			selectedCardOption = updates.selectedCardOption;
+			collapsedStatePayment = updates.collapsedStatePayment;
+
+			// Handle cart data if provided
+			if (cartData) {
+				if (cartData.shipping_info?.email) {
+					email = cartData.shipping_info.email;
+				}
+				cart.set(cartData);
+			}
+		} catch (error) {
+			console.error('Error in setPayPalConnectionState:', error);
+			// Fallback: ensure PayPal connection state is at least set
+			paypalConnected = connected;
+		}
+	}
+
 	function onPaypalHandler(cartData) {
-		trackUXEvent('express_payment_clicked', { paymentMethod: 'paypal' });
-		selectedPaymentMethod = 'PayPal';
-		paypalConnected = true;
-		email = cartData?.shipping_info?.email;
-		cart.set(cartData);
+		try {
+			trackUXEvent('express_payment_clicked', { paymentMethod: 'paypal' });
+			setPayPalConnectionState(true, cartData);
+		} catch (error) {
+			console.error('Error in PayPal handler:', error);
+			// Fallback: manually set essential state
+			selectedPaymentMethod = PAYMENT_METHODS.PAYPAL;
+			paypalConnected = true;
+			collapsedStatePayment = false;
+		}
 	}
 
 	async function placeOrderPayPal() {
@@ -947,9 +1035,9 @@
 			}
 
 			let orderPlaceResponse;
-			if (selectedPaymentMethod === 'CreditCard') {
+			if (selectedPaymentMethod === PAYMENT_METHODS.CREDIT_CARD) {
 				orderPlaceResponse = await placeOrderCreditCard(additionalData);
-			} else if (selectedPaymentMethod === 'PayPal') {
+			} else if (selectedPaymentMethod === PAYMENT_METHODS.PAYPAL) {
 				orderPlaceResponse = await placeOrderPayPal();
 			} else {
 				// Unexpected
@@ -1079,7 +1167,7 @@
 				isUserLoggedInC2p = false;
 				savedCreditCards = savedCreditCards.filter((card) => card.wallet !== 'c2p');
 				selectedCardOption = selectAvailableCard(savedCreditCards);
-				collapsedStatePayment = false;
+				updateCollapsedStates();
 			} else if (response.status === 200 && response.data.recognized) {
 				notices = notices.concat({
 					text: 'Unable to sign out from Click to Pay. Please try again.',
@@ -1801,7 +1889,7 @@
 									merchantId={$cart?.shop_properties?.paypal?.merchantId}
 									intent={$cart?.shop_properties?.paypal?.intent}
 									clientId={$cart?.shop_properties?.paypal?.clientId}
-									connected={paypalConnected}
+									{paypalConnected}
 									email={paypalConnected
 										? $cart?.payment_method?.attributes?.email || 'Unknown'
 										: ''}
@@ -1943,7 +2031,8 @@
 							on:click={onPlaceOrder}
 							disabled={shippingInfoInProgress ||
 								shippingMethodInProgress ||
-								(selectedPaymentMethod === 'PayPal' && !paypalConnected) ||
+								(selectedPaymentMethod === PAYMENT_METHODS.PAYPAL &&
+									!paypalConnected) ||
 								(cardsRequiringCvv.includes(selectedCardOption) &&
 									!cvvConfirmationValue)}
 							inProgress={placeOrderInProgress}
