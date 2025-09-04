@@ -229,11 +229,15 @@
 		let productDetails = [];
 		if (!skipCatalogApi) {
 			// Using the PDP URL, get variant ID.
-			const resp = await fetch(`${data.PUBLIC_cf_server}/api/v1/domains-pdp?url=${url}`, {
-				headers: {
-					'x-firmly-app-id': window.firmly.appId
+			const decodedUrl = encodeURIComponent(url);
+			const resp = await fetch(
+				`${data.PUBLIC_cf_server}/api/v1/domains-pdp?url=${decodedUrl}`,
+				{
+					headers: {
+						'x-firmly-app-id': window.firmly.appId
+					}
 				}
-			});
+			);
 
 			if (!resp.ok) {
 				error = `Unable to find this product`;
