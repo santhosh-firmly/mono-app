@@ -25,6 +25,7 @@
 	import PdpSkeleton from './pdp-skeleton.svelte';
 	import { startMasterCardUnifiedSolution } from '$lib-v4/clients/mastercard';
 	import Visa from '$lib-v4/clients/visa.svelte';
+	import { getNestedUrlParam } from '$lib-v4/utils.js';
 
 	let { data } = $props();
 
@@ -332,8 +333,9 @@
 
 	async function initiateFlow() {
 		// Using the PDP URL, get variant ID.
-		const url = $page.url.searchParams.get('url');
+		let url = getNestedUrlParam($page.url.href, 'url');
 		const flushCart = $page.url.searchParams.get('flush_cart') !== 'false';
+
 		console.log('firmly - initiateFlow - url', url);
 		if (url) {
 			return initiateCheckoutByUrl(url, flushCart);
