@@ -337,12 +337,12 @@
 
 	async function initiateFlow() {
 		// Using the PDP URL, get variant ID.
-		let url = getNestedUrlParam($page.url.href, 'url');
+		let productUrl = getNestedUrlParam($page.url.href, 'url');
 		const flushCart = $page.url.searchParams.get('flush_cart') !== 'false';
 
-		console.log('firmly - initiateFlow - url', url);
-		if (url) {
-			return initiateCheckoutByUrl(url, flushCart);
+		console.log('firmly - initiateFlow - url', productUrl);
+		if (productUrl) {
+			return initiateCheckoutByUrl(productUrl, flushCart);
 		}
 
 		const variantId = $page.url.searchParams.get('variant_id');

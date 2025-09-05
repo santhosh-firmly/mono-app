@@ -48,9 +48,24 @@ export function getNestedUrlParam(fullUrl, paramName = 'url') {
 			return null;
 		}
 
-		// Take everything after the parameter name
-		const urlValue = queryString.substring(paramIndex + paramPrefix.length);
-		return decodeURIComponent(urlValue);
+		// Extract the URL parameter value
+		let urlValue = queryString.substring(paramIndex + paramPrefix.length);
+
+		// Check if the URL looks encoded (starts with http%3A or https%3A)
+		const isEncoded = urlValue.startsWith('http%3A') || urlValue.startsWith('https%3A');
+
+		if (isEncoded) {
+			// For encoded URLs, find the next unencoded parameter separator
+			const nextParamIndex = urlValue.indexOf('&');
+			if (nextParamIndex !== -1) {
+				urlValue = urlValue.substring(0, nextParamIndex);
+			}
+			return decodeURIComponent(urlValue);
+		} else {
+			// For unencoded URLs, take everything (assuming it's the last parameter)
+			// This handles the legacy case where the URL is not properly encoded
+			return urlValue;
+		}
 	} catch (error) {
 		console.error('Error extracting nested URL:', error);
 		return null;

@@ -11,4 +11,38 @@ describe('getNestedUrlParam', () => {
 		const result = getNestedUrlParam(fullUrl);
 		expect(result).toBe(expected);
 	});
+
+	it('should extract only the URL parameter and ignore other parameters like ui_mode', () => {
+		const fullUrl =
+			'https://dropin.firmly.dev/buy?url=https%3A%2F%2Favenlur.com%2Fproducts%2Fhazel-foldable-pikler-triangle-ladder&ui_mode=sidebar';
+		const expected = 'https://avenlur.com/products/hazel-foldable-pikler-triangle-ladder';
+
+		const result = getNestedUrlParam(fullUrl);
+		expect(result).toBe(expected);
+	});
+
+	it('should handle multiple parameters after the URL parameter', () => {
+		const fullUrl =
+			'https://dropin.firmly.dev/buy?url=https%3A%2F%2Fexample.com%2Fpage&theme=dark&lang=en';
+		const expected = 'https://example.com/page';
+
+		const result = getNestedUrlParam(fullUrl);
+		expect(result).toBe(expected);
+	});
+
+	it('should handle URL parameter with query parameters in the middle of other parameters', () => {
+		const fullUrl =
+			'https://dropin.firmly.dev/buy?start=true&url=https%3A%2F%2Fshop.com%2Fitem%3Fid%3D123&end=true';
+		const expected = 'https://shop.com/item?id=123';
+
+		const result = getNestedUrlParam(fullUrl);
+		expect(result).toBe(expected);
+	});
+
+	it('should return null when URL parameter is not found', () => {
+		const fullUrl = 'https://dropin.firmly.dev/buy?theme=dark&lang=en';
+
+		const result = getNestedUrlParam(fullUrl);
+		expect(result).toBe(null);
+	});
 });
