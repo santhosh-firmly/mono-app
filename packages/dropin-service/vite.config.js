@@ -15,8 +15,12 @@ export default defineConfig((ctx) => {
 		})
 	];
 
+	const isBuild = ['build'].includes(ctx.command);
+	const isPreview = ctx.isPreview === true;
+	const isTest = ctx.mode === 'test';
+
 	// Only add the Cloudflare plugin if we are not building for production, SvelteKit is already bulding for Cloudflare Workers
-	if (!['build'].includes(ctx.command) && ctx.isPreview === false) {
+	if (!isBuild && !isPreview && !isTest) {
 		plugins.push(cloudflare());
 	}
 

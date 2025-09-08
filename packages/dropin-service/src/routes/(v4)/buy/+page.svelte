@@ -25,6 +25,7 @@
 	import PdpSkeleton from './pdp-skeleton.svelte';
 	import { startMasterCardUnifiedSolution } from '$lib-v4/clients/mastercard';
 	import Visa from '$lib-v4/clients/visa.svelte';
+	import { getNestedUrlParam } from '$lib-v4/utils.js';
 
 	let { data } = $props();
 
@@ -228,11 +229,15 @@
 		let productDetails = [];
 		if (!skipCatalogApi) {
 			// Using the PDP URL, get variant ID.
-			const resp = await fetch(`${data.PUBLIC_cf_server}/api/v1/domains-pdp?url=${url}`, {
-				headers: {
-					'x-firmly-app-id': window.firmly.appId
+			const decodedUrl = encodeURIComponent(url);
+			const resp = await fetch(
+				`${data.PUBLIC_cf_server}/api/v1/domains-pdp?url=${decodedUrl}`,
+				{
+					headers: {
+						'x-firmly-app-id': window.firmly.appId
+					}
 				}
-			});
+			);
 
 			if (!resp.ok) {
 				error = `Unable to find this product`;
@@ -332,11 +337,12 @@
 
 	async function initiateFlow() {
 		// Using the PDP URL, get variant ID.
-		const url = $page.url.searchParams.get('url');
+		let productUrl = getNestedUrlParam($page.url.href, 'url');
 		const flushCart = $page.url.searchParams.get('flush_cart') !== 'false';
-		console.log('firmly - initiateFlow - url', url);
-		if (url) {
-			return initiateCheckoutByUrl(url, flushCart);
+
+		console.log('firmly - initiateFlow - url', productUrl);
+		if (productUrl) {
+			return initiateCheckoutByUrl(productUrl, flushCart);
 		}
 
 		const variantId = $page.url.searchParams.get('variant_id');
