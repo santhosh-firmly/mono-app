@@ -29,7 +29,7 @@ function getAPIServer(hostname) {
 	return 'https://api' + hostname;
 }
 
-export async function GET({ request }) {
+export async function GET({ request, platform }) {
 	const url = new URL(request.url);
 	const appId = url.searchParams.get('appId');
 	const isDropIn = url.searchParams.get('isDropIn');
@@ -53,7 +53,8 @@ export async function GET({ request }) {
 			.replaceAll('#F_APP_ID#', appId)
 			.replaceAll('#F_API_SERVER#', getAPIServer(url.hostname))
 			.replaceAll('#F_DROP_IN#', isDropIn)
-			.replaceAll('#F_DROPIN_URL#', dropinUrl.href),
+			.replaceAll('#F_DROPIN_URL#', dropinUrl.href)
+			.replaceAll('#F_APERTURE_DOMAIN#', platform.env.PUBLIC_aperture_domain),
 		{
 			headers: {
 				'content-type': 'application/javascript',

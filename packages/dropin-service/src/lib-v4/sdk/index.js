@@ -5,6 +5,7 @@ import { bindEvent } from '../browser/dash.js';
 import { CartHive } from './cart-hive.js';
 import { Cart } from './cart.js';
 import { getAllOrders } from './orders.js';
+import { convertToFirmlyDomain } from '../utils/domain-utils.js';
 
 const uuidRegex =
 	/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/m;
@@ -12,6 +13,7 @@ const appId = '#F_APP_ID#';
 const apiServer = '#F_API_SERVER#';
 const isDropIn = '#F_DROP_IN#' || null;
 const dropInUrl = '#F_DROPIN_URL#';
+const apertureDomain = '#F_APERTURE_DOMAIN#';
 
 //#region iFrame AutoCreation for Drop-in Checkout.
 
@@ -390,7 +392,7 @@ export function bootstrap() {
 			} else if (checkoutConfig.mode === 'full-pdp') {
 				console.log('firmly - full pdp mode');
 				const pdpUrl = new URL(checkoutConfig.pdp_url);
-				pdpUrl.hostname = 'firmlydev.firmly.dev';
+				pdpUrl.hostname = convertToFirmlyDomain(pdpUrl.hostname, apertureDomain);
 				window.firmly.pdpIframe = createIframe(
 					pdpUrl.toString(),
 					checkoutConfig,

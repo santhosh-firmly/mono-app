@@ -18,6 +18,7 @@
 	import { colord } from 'colord';
 	import { bindEvent } from '$lib-v4/browser/dash';
 	import Header from '$lib-v4/components/v4/header.svelte';
+	import { updateUrlWithFirmlyDomain } from '$lib-v4/utils/domain-utils.js';
 	import SidebarLayout from './sidebar-layout.svelte';
 	import FullscreenLayout from './fullscreen-layout.svelte';
 	import PopupLayout from './popup-layout.svelte';
@@ -39,11 +40,6 @@
 	let uiMode = $state('fullscreen');
 	let pageState = $state('pdp');
 	let isProduction = $derived(data.PUBLIC_firmly_deployment === 'prod');
-
-	// Special cases that don't follow the standard domain conversion pattern
-	const specialEcsUrlMap = {
-		'test.victoriassecret.com': 'test-victoriassecret.firmly.in'
-	};
 
 	const bypassCatalogApiMerchants = ['test.victoriassecret.com', 'dermstore.com'];
 
@@ -168,36 +164,9 @@
 		return addToCart(variantId, quantity, domain, flushCart);
 	}
 
-	function convertToFirmlyDomain(hostname) {
-		// Remove 'www.' prefix if present
-		let domain = hostname.replace(/^www\./, '');
-
-		// Check special cases first
-		if (specialEcsUrlMap[hostname]) {
-			return specialEcsUrlMap[hostname];
-		}
-
-		// Handle myshopify.com domains
-		if (domain.endsWith('myshopify.com')) {
-			return domain.replace('myshopify.com', 'firmly.in');
-		}
-
-		// For regular domains, extract the main domain name without TLD
-		// and append .firmly.in
-		const domainParts = domain.split('.');
-		if (domainParts.length >= 2) {
-			// Take the domain name without TLD (e.g., 'example' from 'example.com')
-			return `${domainParts[0]}.firmly.in`;
-		}
-
-		// Fallback if the domain doesn't match expected patterns
-		return `${domain}.firmly.in`;
-	}
-
 	function getEcsUrl(url) {
 		const urlObj = new SvelteURL(url);
-		urlObj.hostname = convertToFirmlyDomain(urlObj.hostname);
-		return urlObj;
+		return updateUrlWithFirmlyDomain(urlObj, data.PUBLIC_aperture_domain);
 	}
 
 	async function onAddToCart(transferPayload) {
