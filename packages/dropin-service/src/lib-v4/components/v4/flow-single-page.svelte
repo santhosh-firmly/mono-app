@@ -34,6 +34,7 @@
 	import classNames from 'classnames';
 	import { trackUXEvent } from '../../browser/telemetry.js';
 	import { signOut } from '$lib-v4/clients/mastercard.js';
+	import MastercardC2pLogo from '../common/svg/mastercard-c2p-logo.svelte';
 
 	const dispatch = createEventDispatcher();
 	/**
@@ -1854,14 +1855,20 @@
 							>
 								<Group>
 									<div
-										class="col-span-2 flex flex-row items-center rounded-b-lg p-5"
+										class="col-span-2 flex flex-row items-center justify-between rounded-b-lg p-5"
 										class:rounded-t-lg={!collapsedStateShippingMethod}
 									>
-										<ExistingCreditCard
-											number="**** {selectedCard?.last_four}"
-											type={selectedCard.card_type}
-											customArtUrl={selectedCard?.art}
-										/>
+										<div class="flex items-center">
+											{#if selectedCard?.wallet === 'c2p'}
+												<MastercardC2pLogo />
+												<div class="mx-2 h-6 w-px bg-gray-300"></div>
+											{/if}
+											<ExistingCreditCard
+												number="**** {selectedCard?.last_four}"
+												type={selectedCard.card_type}
+												customArtUrl={selectedCard?.art}
+											/>
+										</div>
 										<button
 											type="button"
 											class="ml-5 rounded-full px-1 text-sm text-blue-500"
