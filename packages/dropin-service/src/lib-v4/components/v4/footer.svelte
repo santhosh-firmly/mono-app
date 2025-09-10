@@ -29,44 +29,81 @@
 	 * @param {Object} term - Term object with text and optional links
 	 * @returns {string} - Safe HTML string with proper links
 	 */
+	/**
+	 * Validates if a URL is safe to use
+	 * @param {string} url - The URL to validate
+	 * @returns {boolean} - Whether the URL is safe
+	 */
+	function isValidUrl(url) {
+		if (!url || typeof url !== 'string') return false;
+
+		try {
+			const urlObj = new URL(url);
+			// Only allow http and https protocols
+			return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+		} catch {
+			return false;
+		}
+	}
+
+	/**
+	 * Escapes HTML characters to prevent XSS
+	 * @param {string} text - Text to escape
+	 * @returns {string} - Escaped text
+	 */
+	function escapeHtml(text) {
+		const div = document.createElement('div');
+		div.textContent = text;
+		return div.innerHTML;
+	}
+
+	/**
+	 * Creates safe HTML for terms text with proper link replacements
+	 * @param {Object} term - Term object with text and optional links
+	 * @returns {string} - Safe HTML string with proper links
+	 */
 	function createTermHTML(term) {
 		if (!term || !term.text) {
 			return '';
 		}
 
-		let htmlText = term.text;
+		let htmlText = escapeHtml(term.text);
 
 		// Only process links if they exist
 		if (term.links) {
 			// Replace Terms of Service
-			if (term.links.termsOfService) {
+			if (term.links.termsOfService && isValidUrl(term.links.termsOfService)) {
+				const escapedUrl = escapeHtml(term.links.termsOfService);
 				htmlText = htmlText.replace(
 					/Terms of Service/g,
-					`<a class="underline" target="_blank" href="${term.links.termsOfService}">Terms of Service</a>`
+					`<a class="underline" target="_blank" rel="noopener noreferrer" href="${escapedUrl}">Terms of Service</a>`
 				);
 			}
 
 			// Replace Terms of Use
-			if (term.links.termsOfUse) {
+			if (term.links.termsOfUse && isValidUrl(term.links.termsOfUse)) {
+				const escapedUrl = escapeHtml(term.links.termsOfUse);
 				htmlText = htmlText.replace(
 					/Terms of Use/g,
-					`<a class="underline" target="_blank" href="${term.links.termsOfUse}">Terms of Use</a>`
+					`<a class="underline" target="_blank" rel="noopener noreferrer" href="${escapedUrl}">Terms of Use</a>`
 				);
 			}
 
 			// Replace Privacy Policy
-			if (term.links.privacyPolicy) {
+			if (term.links.privacyPolicy && isValidUrl(term.links.privacyPolicy)) {
+				const escapedUrl = escapeHtml(term.links.privacyPolicy);
 				htmlText = htmlText.replace(
 					/Privacy Policy/g,
-					`<a class="underline" target="_blank" href="${term.links.privacyPolicy}">Privacy Policy</a>`
+					`<a class="underline" target="_blank" rel="noopener noreferrer" href="${escapedUrl}">Privacy Policy</a>`
 				);
 			}
 
 			// Replace FTC compliance policy if link is provided
-			if (term.links.ftcCompliance) {
+			if (term.links.ftcCompliance && isValidUrl(term.links.ftcCompliance)) {
+				const escapedUrl = escapeHtml(term.links.ftcCompliance);
 				htmlText = htmlText.replace(
 					/FTC compliance policy/g,
-					`<a class="underline" target="_blank" href="${term.links.ftcCompliance}">FTC compliance policy</a>`
+					`<a class="underline" target="_blank" rel="noopener noreferrer" href="${escapedUrl}">FTC compliance policy</a>`
 				);
 			}
 		}
