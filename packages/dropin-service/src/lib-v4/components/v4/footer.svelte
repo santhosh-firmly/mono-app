@@ -7,10 +7,11 @@
 	/**
 	 * Partner-specific disclaimer configuration
 	 * @type {Object|null} partnerDisclaimer - Partner disclaimer object
-	 * @property {string} text - The disclaimer text with "Terms of Service" and "Privacy Policy" placeholders
-	 * @property {Object} links - URLs for terms and privacy policy links
+	 * @property {string} text - The disclaimer text with placeholders for links
+	 * @property {Object} links - URLs for legal links
 	 * @property {string} links.termsOfService - URL for Terms of Service link
 	 * @property {string} links.privacyPolicy - URL for Privacy Policy link
+	 * @property {string} [links.ftcCompliance] - URL for FTC Compliance link (optional)
 	 */
 	let {
 		total,
@@ -20,22 +21,54 @@
 		termsOfUse,
 		privacyPolicy,
 		partnerDisclaimer = null,
+		buttonText = 'Place Order',
 		onclick
 	} = $props();
+
+	/**
+	 * Creates a safe HTML template for disclaimer text with proper link replacements
+	 * @param {Object} disclaimer - The disclaimer configuration
+	 * @returns {string} - Safe HTML string with proper links
+	 */
+	function createDisclaimerHTML(disclaimer) {
+		if (!disclaimer || !disclaimer.text || !disclaimer.links) {
+			return '';
+		}
+
+		let htmlText = disclaimer.text;
+
+		// Replace Terms of Service
+		if (disclaimer.links.termsOfService) {
+			htmlText = htmlText.replace(
+				/Terms of Service/g,
+				`<a class="underline" target="_blank" href="${disclaimer.links.termsOfService}">Terms of Service</a>`
+			);
+		}
+
+		// Replace Privacy Policy
+		if (disclaimer.links.privacyPolicy) {
+			htmlText = htmlText.replace(
+				/Privacy Policy/g,
+				`<a class="underline" target="_blank" href="${disclaimer.links.privacyPolicy}">Privacy Policy</a>`
+			);
+		}
+
+		// Replace FTC compliance policy if link is provided
+		if (disclaimer.links.ftcCompliance) {
+			htmlText = htmlText.replace(
+				/FTC compliance policy/g,
+				`<a class="underline" target="_blank" href="${disclaimer.links.ftcCompliance}">FTC compliance policy</a>`
+			);
+		}
+
+		return htmlText;
+	}
 </script>
 
 <div class="flex flex-col gap-4 pt-4 text-center">
 	{#if partnerDisclaimer}
 		<span class="text-fy-on-primary-subtle p-2 text-xs">
-			{@html partnerDisclaimer.text
-				.replace(
-					'Terms of Service',
-					`<a class="underline" target="_blank" href="${partnerDisclaimer.links.termsOfService}">Terms of Service</a>`
-				)
-				.replace(
-					'Privacy Policy',
-					`<a class="underline" target="_blank" href="${partnerDisclaimer.links.privacyPolicy}">Privacy Policy</a>`
-				)}
+			{@html createDisclaimerHTML(partnerDisclaimer)}
 		</span>
 	{:else if termsOfUse && privacyPolicy}
 		<span class="text-fy-on-primary-subtle p-2 text-xs">
@@ -47,7 +80,7 @@
 			and <a class="underline" target="_blank" href={privacyPolicy}>Privacy Policy</a>.
 		</span>
 	{/if}
-	<PaymentButton {onclick} {total} {disabled} {inProgress} {isOrderPlaced} />
+	<PaymentButton {onclick} {total} {disabled} {inProgress} {isOrderPlaced} {buttonText} />
 	<span
 		class="text-fy-on-primary-subtle flex flex-row items-start justify-center gap-2 text-xs leading-normal"
 	>

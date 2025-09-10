@@ -44,13 +44,14 @@
 />
 
 <Story
-	name="Partner Disclaimer (Gannett/USA Today)"
+	name="Custom Terms and Privacy"
 	args={{
 		partnerDisclaimer: {
-			text: 'By tapping "Buy Now", you agree that we can share information about you and your purchase transaction with our commerce partners to facilitate payment and with the merchant to fulfill the order. By completing this transaction you agree to our Terms of Service, Privacy Policy, and FTC compliance policy.',
+			text: 'By tapping "Place Order", you agree that we can share information about you and your purchase transaction with our commerce partners to facilitate payment and with the merchant to fulfill the order. By completing this transaction you agree to our Terms of Service, Privacy Policy, and FTC compliance policy.',
 			links: {
 				termsOfService: 'https://cm.usatoday.com/terms/',
-				privacyPolicy: 'https://cm.usatoday.com/privacy'
+				privacyPolicy: 'https://cm.usatoday.com/privacy',
+				ftcCompliance: null
 			}
 		},
 		total: {

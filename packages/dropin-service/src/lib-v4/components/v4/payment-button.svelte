@@ -14,9 +14,17 @@
 	 * @property {boolean} [inProgress=false] - Whether or not API calls that changes the shipping methods are in progress
 	 * @property {boolean} isOrderPlaced - Whether the order has been placed
 	 * @property {Function} [onclick] - Click event handler callback
+	 * @property {string} [buttonText='Place Order'] - Text to display on the button
 	 */
 
-	let { total, disabled = false, inProgress = false, isOrderPlaced, onclick } = $props();
+	let {
+		total,
+		disabled = false,
+		inProgress = false,
+		isOrderPlaced,
+		onclick,
+		buttonText = 'Place Order'
+	} = $props();
 </script>
 
 <div class="flex items-center justify-center">
@@ -64,7 +72,7 @@
 					/>
 				</svg>
 			{:else}
-				Place Order
+				{buttonText}
 				{#if total}
 					({formatCurrency(total)})
 				{/if}

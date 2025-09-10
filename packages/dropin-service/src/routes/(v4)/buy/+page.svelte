@@ -45,6 +45,7 @@
 
 	let partnerInfo = $derived(data.partnerInfo);
 	let partnerDisclaimer = $derived(data.partnerInfo?.disclaimer);
+	let partnerButtonText = $derived(data.partnerInfo?.buttonText);
 
 	let layout = $state(FullscreenLayout);
 
@@ -562,6 +563,7 @@
 							{isParentIframed}
 							{isProduction}
 							{partnerDisclaimer}
+							buttonText={partnerButtonText || 'Place Order'}
 							on:back-click={onBackClick}
 							on:orderPlacedEvent={onOrderPlacedEvent}
 							PUBLIC_DISABLE_HCAPTCHA={data.PUBLIC_DISABLE_HCAPTCHA}

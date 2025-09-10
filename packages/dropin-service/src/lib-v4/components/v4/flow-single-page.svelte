@@ -80,6 +80,7 @@
 	export let privacyPolicy;
 	export let isProduction;
 	export let partnerDisclaimer = null;
+	export let buttonText = 'Place Order';
 
 	// Controls the express payment buttons
 	let allowMerchantLogin = true;
@@ -2049,6 +2050,7 @@
 							{termsOfUse}
 							{privacyPolicy}
 							{partnerDisclaimer}
+							{buttonText}
 						/>
 					</div>
 				{/if}
