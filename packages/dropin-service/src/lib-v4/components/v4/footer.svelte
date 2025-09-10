@@ -1,6 +1,5 @@
 <script>
 	// @ts-nocheck
-
 	import FooterLinks from './footer-links.svelte';
 	import PaymentButton from './payment-button.svelte';
 
@@ -11,10 +10,32 @@
 
 	export let termsOfUse;
 	export let privacyPolicy;
+
+	/**
+	 * Partner-specific disclaimer configuration
+	 * @type {Object|null} partnerDisclaimer - Partner disclaimer object
+	 * @property {string} text - The disclaimer text with "Terms of Service" and "Privacy Policy" placeholders
+	 * @property {Object} links - URLs for terms and privacy policy links
+	 * @property {string} links.termsOfService - URL for Terms of Service link
+	 * @property {string} links.privacyPolicy - URL for Privacy Policy link
+	 */
+	export let partnerDisclaimer = null;
 </script>
 
 <div class="flex flex-col gap-4 pt-4 text-center">
-	{#if termsOfUse && privacyPolicy}
+	{#if partnerDisclaimer}
+		<span class="text-fy-on-primary-subtle p-2 text-xs">
+			{@html partnerDisclaimer.text
+				.replace(
+					'Terms of Service',
+					`<a class="underline" target="_blank" href="${partnerDisclaimer.links.termsOfService}">Terms of Service</a>`
+				)
+				.replace(
+					'Privacy Policy',
+					`<a class="underline" target="_blank" href="${partnerDisclaimer.links.privacyPolicy}">Privacy Policy</a>`
+				)}
+		</span>
+	{:else if termsOfUse && privacyPolicy}
 		<span class="text-fy-on-primary-subtle p-2 text-xs">
 			By selecting "Place Order", I agree to the merchant´s <a
 				class="underline"
@@ -28,7 +49,13 @@
 	<span
 		class="text-fy-on-primary-subtle flex flex-row items-start justify-center gap-2 text-xs leading-normal"
 	>
-		<svg xmlns="http://www.w3.org/2000/svg" width="11" height="16" viewBox="0 0 11 16" fill="none">
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			width="11"
+			height="16"
+			viewBox="0 0 11 16"
+			fill="none"
+		>
 			<path
 				fill-rule="evenodd"
 				clip-rule="evenodd"
@@ -38,7 +65,7 @@
 		</svg>
 		Payments are secure and encrypted
 	</span>
-	<span class="text-fy-on-primary-subtle text-xs mt-6 @md:hidden">
+	<span class="text-fy-on-primary-subtle mt-6 text-xs @md:hidden">
 		<FooterLinks />
 	</span>
 </div>

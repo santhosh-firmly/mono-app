@@ -79,6 +79,7 @@
 	export let termsOfUse;
 	export let privacyPolicy;
 	export let isProduction;
+	export let partnerDisclaimer = null;
 
 	// Controls the express payment buttons
 	let allowMerchantLogin = true;
@@ -2047,6 +2048,7 @@
 							{isOrderPlaced}
 							{termsOfUse}
 							{privacyPolicy}
+							{partnerDisclaimer}
 						/>
 					</div>
 				{/if}

@@ -44,6 +44,7 @@
 	const bypassCatalogApiMerchants = ['test.victoriassecret.com', 'dermstore.com'];
 
 	let partnerInfo = $derived(data.partnerInfo);
+	let partnerDisclaimer = $derived(data.partnerInfo?.disclaimer);
 
 	let layout = $state(FullscreenLayout);
 
@@ -560,6 +561,7 @@
 							{termsOfUse}
 							{isParentIframed}
 							{isProduction}
+							{partnerDisclaimer}
 							on:back-click={onBackClick}
 							on:orderPlacedEvent={onOrderPlacedEvent}
 							PUBLIC_DISABLE_HCAPTCHA={data.PUBLIC_DISABLE_HCAPTCHA}
