@@ -175,6 +175,17 @@ export async function unlockStart(email, requestedValidationChannelId = 'EMAIL')
 	);
 }
 
+function getUnlockErrorMessage(error) {
+	const errorStatus = error?.reason;
+
+	switch (errorStatus) {
+		case 'CODE_INVALID':
+			return "That's not the right code. Confirm and try again.";
+		default:
+			return error?.message || 'OTP validation failed';
+	}
+}
+
 export async function unlockComplete(otpCode) {
 	return await trackPerformance(
 		async () => {
@@ -188,7 +199,7 @@ export async function unlockComplete(otpCode) {
 				return {
 					status: 400,
 					data: {
-						description: error?.message || error?.reason || 'OTP validation failed'
+						description: getUnlockErrorMessage(error)
 					}
 				};
 			}
