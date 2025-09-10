@@ -45,16 +45,12 @@
 				requires_shipping: true,
 				image: {
 					url: 'http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_large.jpg?v=1565574386',
-					large:
-						'http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_large.jpg?v=1565574386',
-					grande:
-						'http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_grande.jpg?v=1565574386',
-					medium:
-						'http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_medium.jpg?v=1565574386',
+					large: 'http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_large.jpg?v=1565574386',
+					grande: 'http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_grande.jpg?v=1565574386',
+					medium: 'http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_medium.jpg?v=1565574386',
 					compact:
 						'http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_compact.jpg?v=1565574386',
-					small:
-						'http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_small.jpg?v=1565574386'
+					small: 'http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_small.jpg?v=1565574386'
 				},
 				platform_line_item_id: '310b03b0be9f37edb3ae55631fdb8c0a',
 				description: 'Plant 5 : Do not order'
@@ -874,6 +870,51 @@
 			}
 		]
 	});
+
+	const cartDataWithC2PCollapsed = {
+		...cartDataWithMultipleCards,
+		// Make sure we have complete shipping info to trigger collapsed states
+		shipping_info: {
+			first_name: 'John',
+			last_name: 'Smith',
+			phone: '(206) 555-1212',
+			address1: '123 Nice St.',
+			city: 'Newcastle',
+			state_or_province: 'WA',
+			country: 'United States',
+			postal_code: '98056',
+			email: 'john@firmly.ai'
+		},
+		shipping_method: {
+			sku: 'shopify-Economy-2.00',
+			description: 'Economy',
+			price: {
+				currency: 'USD',
+				value: 2
+			},
+			applicable_line_items: []
+		},
+		shipping_method_options: [
+			{
+				sku: 'shopify-Economy-2.00',
+				description: 'Economy',
+				price: {
+					currency: 'USD',
+					value: 2
+				}
+			}
+		],
+		shipping_total: {
+			currency: 'USD',
+			value: 2.0
+		},
+		total: {
+			currency: 'USD',
+			value: 15.0
+		}
+	};
+
+	const cartWithC2PCollapsed = writable(cartDataWithC2PCollapsed);
 </script>
 
 <Meta
@@ -1098,4 +1139,8 @@
 
 <Story name="With several items">
 	<FlowSinglePage cart={cartWithSeveralItems} />
+</Story>
+
+<Story name="C2P Logo in Collapsed State">
+	<FlowSinglePage cart={cartWithC2PCollapsed} />
 </Story>
