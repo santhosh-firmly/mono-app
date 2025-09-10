@@ -32,31 +32,62 @@
 />
 
 <Story
-	name="Terms and Privacy Policy notice"
+	name="Merchant Terms Only"
 	args={{
-		termsOfUse: 'termsOfUse',
-		privacyPolicy: 'privacyPolicy',
+		terms: [
+			{
+				text: 'By selecting "Place Order", I agree to the merchant´s Terms of Use and Privacy Policy.',
+				links: {
+					termsOfUse: 'https://example.com/terms',
+					privacyPolicy: 'https://example.com/privacy'
+				}
+			}
+		],
 		total: {
 			currency: 'USD',
-			value: 0
+			value: 99.99
 		}
 	}}
 />
 
 <Story
-	name="Custom Terms and Privacy"
+	name="Partner Disclaimer"
 	args={{
-		partnerDisclaimer: {
-			text: 'By tapping "Place Order", you agree that we can share information about you and your purchase transaction with our commerce partners to facilitate payment and with the merchant to fulfill the order. By completing this transaction you agree to our Terms of Service, Privacy Policy, and FTC compliance policy.',
-			links: {
-				termsOfService: 'https://cm.usatoday.com/terms/',
-				privacyPolicy: 'https://cm.usatoday.com/privacy',
-				ftcCompliance: null
+		terms: [
+			{
+				text: 'By tapping "Buy Now", you agree that we can share information about you and your purchase transaction with our commerce partners to facilitate payment and with the merchant to fulfill the order. By completing this transaction you agree to our Terms of Service, Privacy Policy, and FTC compliance policy.',
+				links: {
+					termsOfService: 'https://cm.usatoday.com/terms/',
+					privacyPolicy: 'https://cm.usatoday.com/privacy',
+					ftcCompliance: null
+				}
 			}
-		},
+		],
 		total: {
 			currency: 'USD',
 			value: 49.99
+		}
+	}}
+/>
+
+<Story
+	name="Multiple Terms"
+	args={{
+		terms: [
+			{
+				text: 'By tapping "Buy Now", you agree that we can share information about you and your purchase transaction with our commerce partners.'
+			},
+			{
+				text: 'By completing this transaction you agree to the merchant´s Terms of Use and Privacy Policy.',
+				links: {
+					termsOfUse: 'https://example.com/terms',
+					privacyPolicy: 'https://example.com/privacy'
+				}
+			}
+		],
+		total: {
+			currency: 'USD',
+			value: 29.99
 		}
 	}}
 />

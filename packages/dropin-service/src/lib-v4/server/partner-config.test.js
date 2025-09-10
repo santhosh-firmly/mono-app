@@ -40,6 +40,7 @@ describe('Partner Configuration', () => {
 			expect(result.partnerInfo).toBeDefined();
 			expect(result.partnerInfo).toHaveProperty('name');
 			expect(result.partnerInfo).toHaveProperty('largeLogo');
+			expect(result.partnerInfo).toHaveProperty('disclaimer');
 		});
 
 		it('should return null info for non-partner domains', () => {
@@ -53,9 +54,6 @@ describe('Partner Configuration', () => {
 			if (result.partnerInfo?.disclaimer) {
 				expect(result.partnerInfo.disclaimer).toHaveProperty('text');
 				expect(result.partnerInfo.disclaimer).toHaveProperty('links');
-				expect(result.partnerInfo.disclaimer.links).toHaveProperty('termsOfService');
-				expect(result.partnerInfo.disclaimer.links).toHaveProperty('privacyPolicy');
-				expect(result.partnerInfo.disclaimer.links).toHaveProperty('ftcCompliance');
 			}
 		});
 	});

@@ -5,60 +5,70 @@
 	import PaymentButton from './payment-button.svelte';
 
 	/**
-	 * Partner-specific disclaimer configuration
-	 * @type {Object|null} partnerDisclaimer - Partner disclaimer object
-	 * @property {string} text - The disclaimer text with placeholders for links
-	 * @property {Object} links - URLs for legal links
-	 * @property {string} links.termsOfService - URL for Terms of Service link
-	 * @property {string} links.privacyPolicy - URL for Privacy Policy link
-	 * @property {string} [links.ftcCompliance] - URL for FTC Compliance link (optional)
+	 * Footer component props
+	 * @param {Array|null} terms - Array of terms/disclaimers to display
+	 * @param {string} buttonText - Text for the payment button
+	 * @param {Function} onclick - Click handler for payment button
+	 * @param {Object} total - Total amount object
+	 * @param {boolean} disabled - Whether payment button is disabled
+	 * @param {boolean} inProgress - Whether payment is in progress
+	 * @param {boolean} isOrderPlaced - Whether order has been placed
 	 */
 	let {
+		terms = null,
+		buttonText = 'Place Order',
+		onclick,
 		total,
 		disabled,
 		inProgress,
-		isOrderPlaced,
-		termsOfUse,
-		privacyPolicy,
-		partnerDisclaimer = null,
-		buttonText = 'Place Order',
-		onclick
+		isOrderPlaced
 	} = $props();
 
 	/**
-	 * Creates a safe HTML template for disclaimer text with proper link replacements
-	 * @param {Object} disclaimer - The disclaimer configuration
+	 * Creates safe HTML for terms text with proper link replacements
+	 * @param {Object} term - Term object with text and optional links
 	 * @returns {string} - Safe HTML string with proper links
 	 */
-	function createDisclaimerHTML(disclaimer) {
-		if (!disclaimer || !disclaimer.text || !disclaimer.links) {
+	function createTermHTML(term) {
+		if (!term || !term.text) {
 			return '';
 		}
 
-		let htmlText = disclaimer.text;
+		let htmlText = term.text;
 
-		// Replace Terms of Service
-		if (disclaimer.links.termsOfService) {
-			htmlText = htmlText.replace(
-				/Terms of Service/g,
-				`<a class="underline" target="_blank" href="${disclaimer.links.termsOfService}">Terms of Service</a>`
-			);
-		}
+		// Only process links if they exist
+		if (term.links) {
+			// Replace Terms of Service
+			if (term.links.termsOfService) {
+				htmlText = htmlText.replace(
+					/Terms of Service/g,
+					`<a class="underline" target="_blank" href="${term.links.termsOfService}">Terms of Service</a>`
+				);
+			}
 
-		// Replace Privacy Policy
-		if (disclaimer.links.privacyPolicy) {
-			htmlText = htmlText.replace(
-				/Privacy Policy/g,
-				`<a class="underline" target="_blank" href="${disclaimer.links.privacyPolicy}">Privacy Policy</a>`
-			);
-		}
+			// Replace Terms of Use
+			if (term.links.termsOfUse) {
+				htmlText = htmlText.replace(
+					/Terms of Use/g,
+					`<a class="underline" target="_blank" href="${term.links.termsOfUse}">Terms of Use</a>`
+				);
+			}
 
-		// Replace FTC compliance policy if link is provided
-		if (disclaimer.links.ftcCompliance) {
-			htmlText = htmlText.replace(
-				/FTC compliance policy/g,
-				`<a class="underline" target="_blank" href="${disclaimer.links.ftcCompliance}">FTC compliance policy</a>`
-			);
+			// Replace Privacy Policy
+			if (term.links.privacyPolicy) {
+				htmlText = htmlText.replace(
+					/Privacy Policy/g,
+					`<a class="underline" target="_blank" href="${term.links.privacyPolicy}">Privacy Policy</a>`
+				);
+			}
+
+			// Replace FTC compliance policy if link is provided
+			if (term.links.ftcCompliance) {
+				htmlText = htmlText.replace(
+					/FTC compliance policy/g,
+					`<a class="underline" target="_blank" href="${term.links.ftcCompliance}">FTC compliance policy</a>`
+				);
+			}
 		}
 
 		return htmlText;
@@ -66,19 +76,14 @@
 </script>
 
 <div class="flex flex-col gap-4 pt-4 text-center">
-	{#if partnerDisclaimer}
-		<span class="text-fy-on-primary-subtle p-2 text-xs">
-			{@html createDisclaimerHTML(partnerDisclaimer)}
-		</span>
-	{:else if termsOfUse && privacyPolicy}
-		<span class="text-fy-on-primary-subtle p-2 text-xs">
-			By selecting "Place Order", I agree to the merchant´s <a
-				class="underline"
-				target="_blank"
-				href={termsOfUse}>Terms of Use</a
-			>
-			and <a class="underline" target="_blank" href={privacyPolicy}>Privacy Policy</a>.
-		</span>
+	{#if terms && terms.length > 0}
+		<div class="flex flex-col gap-2">
+			{#each terms as term}
+				<span class="text-fy-on-primary-subtle p-2 text-xs">
+					{@html createTermHTML(term)}
+				</span>
+			{/each}
+		</div>
 	{/if}
 	<PaymentButton {onclick} {total} {disabled} {inProgress} {isOrderPlaced} {buttonText} />
 	<span

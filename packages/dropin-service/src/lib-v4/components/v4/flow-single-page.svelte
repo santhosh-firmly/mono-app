@@ -82,6 +82,32 @@
 	export let partnerDisclaimer = null;
 	export let buttonText = 'Place Order';
 
+	/**
+	 * Creates array of terms/disclaimers for footer
+	 * @returns {Array} Array of term objects
+	 */
+	function createTermsArray() {
+		const terms = [];
+
+		// Add partner disclaimer if present
+		if (partnerDisclaimer) {
+			terms.push(partnerDisclaimer);
+		}
+
+		// Add merchant terms if present
+		if (termsOfUse && privacyPolicy) {
+			terms.push({
+				text: 'By selecting "Place Order", I agree to the merchant´s Terms of Use and Privacy Policy.',
+				links: {
+					termsOfUse: termsOfUse,
+					privacyPolicy: privacyPolicy
+				}
+			});
+		}
+
+		return terms;
+	}
+
 	// Controls the express payment buttons
 	let allowMerchantLogin = true;
 	let allowShopPay = false;
@@ -2047,9 +2073,7 @@
 							inProgress={placeOrderInProgress}
 							total={$cart?.total}
 							{isOrderPlaced}
-							{termsOfUse}
-							{privacyPolicy}
-							{partnerDisclaimer}
+							terms={createTermsArray()}
 							{buttonText}
 						/>
 					</div>
