@@ -8,7 +8,7 @@
 <Meta title="Checkout V4/Checkout/Footer" component={Footer} tags={['autodocs']} />
 
 <Template let:args>
-	<Footer {...args} />
+	<Footer {...args} onclick={() => console.log('Footer clicked')} />
 </Template>
 
 <Story

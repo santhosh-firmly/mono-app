@@ -2036,7 +2036,7 @@
 							</span>
 						{/if}
 						<Footer
-							on:click={onPlaceOrder}
+							onclick={onPlaceOrder}
 							disabled={shippingInfoInProgress ||
 								shippingMethodInProgress ||
 								(selectedPaymentMethod === PAYMENT_METHODS.PAYPAL &&

@@ -1,15 +1,8 @@
 <script>
 	// @ts-nocheck
+
 	import FooterLinks from './footer-links.svelte';
 	import PaymentButton from './payment-button.svelte';
-
-	export let total;
-	export let disabled;
-	export let inProgress;
-	export let isOrderPlaced;
-
-	export let termsOfUse;
-	export let privacyPolicy;
 
 	/**
 	 * Partner-specific disclaimer configuration
@@ -19,7 +12,16 @@
 	 * @property {string} links.termsOfService - URL for Terms of Service link
 	 * @property {string} links.privacyPolicy - URL for Privacy Policy link
 	 */
-	export let partnerDisclaimer = null;
+	let {
+		total,
+		disabled,
+		inProgress,
+		isOrderPlaced,
+		termsOfUse,
+		privacyPolicy,
+		partnerDisclaimer = null,
+		onclick
+	} = $props();
 </script>
 
 <div class="flex flex-col gap-4 pt-4 text-center">
@@ -45,7 +47,7 @@
 			and <a class="underline" target="_blank" href={privacyPolicy}>Privacy Policy</a>.
 		</span>
 	{/if}
-	<PaymentButton on:click {total} {disabled} {inProgress} {isOrderPlaced} />
+	<PaymentButton {onclick} {total} {disabled} {inProgress} {isOrderPlaced} />
 	<span
 		class="text-fy-on-primary-subtle flex flex-row items-start justify-center gap-2 text-xs leading-normal"
 	>
