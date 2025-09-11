@@ -36,17 +36,23 @@ describe('Partner Configuration', () => {
 	describe('getPartnerInfo', () => {
 		it('should return partner info when domain matches', () => {
 			const result = getPartnerInfo('gannett.firmly.com');
-			expect(result.partnerId).toBe('gannett');
 			expect(result.partnerInfo).toBeDefined();
 			expect(result.partnerInfo).toHaveProperty('name');
+			expect(result.partnerInfo).toHaveProperty('displayName');
 			expect(result.partnerInfo).toHaveProperty('largeLogo');
 			expect(result.partnerInfo).toHaveProperty('disclaimer');
+			expect(result.partnerInfo).toHaveProperty('buttonText');
 		});
 
-		it('should return null info for non-partner domains', () => {
+		it('should return firmly info for non-partner domains', () => {
 			const result = getPartnerInfo('unknown.firmly.com');
-			expect(result.partnerId).toBe(null);
-			expect(result.partnerInfo).toBe(null);
+			expect(result.partnerInfo).toBeDefined();
+			expect(result.partnerInfo).toHaveProperty('name', 'Firmly');
+			expect(result.partnerInfo).toHaveProperty('displayName', 'Firmly');
+			expect(result.partnerInfo).toHaveProperty('largeLogo');
+			expect(result.partnerInfo).toHaveProperty('smallLogo');
+			expect(result.partnerInfo).toHaveProperty('disclaimer');
+			expect(result.partnerInfo).toHaveProperty('buttonText');
 		});
 
 		it('should include disclaimer structure when present', () => {

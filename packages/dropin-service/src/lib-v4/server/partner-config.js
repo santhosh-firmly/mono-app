@@ -83,20 +83,26 @@ export function getPartnerInfo(domain) {
 
 	if (partnerConfig) {
 		return {
-			partnerId,
 			partnerInfo: {
 				largeLogo: partnerConfig.largeLogo,
 				smallLogo: partnerConfig.smallLogo,
 				name: partnerConfig.name,
+				displayName: partnerConfig.name,
 				disclaimer: partnerConfig.disclaimer,
 				buttonText: partnerConfig.buttonText
 			}
 		};
 	}
 
-	// Return default (no partner detected)
+	// Return default values when no partner is found
 	return {
-		partnerId: null,
-		partnerInfo: null
+		partnerInfo: {
+			largeLogo: null,
+			smallLogo: null,
+			name: 'Firmly',
+			displayName: 'Firmly',
+			disclaimer: null,
+			buttonText: 'Place Order'
+		}
 	};
 }

@@ -17,7 +17,7 @@ export const load = async ({ url, platform }) => {
 	const merchantUrl = url.searchParams.get('domain') || url.searchParams.get('url');
 	const merchantDomain = getDomain(merchantUrl);
 
-	const { partnerId, partnerInfo } = getPartnerInfo(domain);
+	const { partnerInfo } = getPartnerInfo(domain);
 
 	const envVars = {
 		PUBLIC_api_id: appId || platform.env.PUBLIC_api_id,
@@ -48,7 +48,6 @@ export const load = async ({ url, platform }) => {
 	return {
 		...envVars,
 		merchantPresentation,
-		partner: partnerId,
 		partnerInfo
 	};
 };
