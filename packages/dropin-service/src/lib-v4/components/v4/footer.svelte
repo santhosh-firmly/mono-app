@@ -25,11 +25,6 @@
 	} = $props();
 
 	/**
-	 * Creates safe HTML for terms text with proper link replacements
-	 * @param {Object} term - Term object with text and optional links
-	 * @returns {string} - Safe HTML string with proper links
-	 */
-	/**
 	 * Validates if a URL is safe to use
 	 * @param {string} url - The URL to validate
 	 * @returns {boolean} - Whether the URL is safe
