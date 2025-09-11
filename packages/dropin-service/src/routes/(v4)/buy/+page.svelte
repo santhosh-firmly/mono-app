@@ -398,6 +398,7 @@
 
 	onMount(async () => {
 		// Initialize the session in the background.
+		// Use appId from server if available, otherwise fallback to PUBLIC_api_id
 		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server);
 		initializeAppVersion(version);
 
@@ -408,9 +409,16 @@
 			// Initialize MasterCard Unified Solution for other environments
 			startMasterCardUnifiedSolution({
 				srcDpaId: data.PUBLIC_unified_c2p_dpa_id,
-				presentationName: data.PUBLIC_unified_c2p_presentation_name,
+				presentationName: data.PUBLIC_unified_c2p_dpa_presentation_name,
 				sandbox: data.PUBLIC_unified_c2p_sandbox
 			});
+		}
+
+		// Clean _appId from URL to keep it clean for users
+		if (typeof window !== 'undefined' && window.location.search.includes('_appId=')) {
+			const url = new URL(window.location);
+			url.searchParams.delete('_appId');
+			window.history.replaceState({}, '', url.toString());
 		}
 
 		uiMode = $page.url.searchParams.get('ui_mode') || 'fullscreen';

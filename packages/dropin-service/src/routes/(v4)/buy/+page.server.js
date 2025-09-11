@@ -10,6 +10,9 @@ import { getPartnerInfo } from '$lib-v4/server/partner-config.js';
  * @returns {Object} - Data object with platform environment variables and merchant presentation
  */
 export const load = async ({ url, platform }) => {
+	// Extract appId from _appId query parameter
+	const appId = url.searchParams.get('_appId');
+
 	const domain = getDomain(url);
 	const merchantUrl = url.searchParams.get('domain') || url.searchParams.get('url');
 	const merchantDomain = getDomain(merchantUrl);
@@ -17,7 +20,7 @@ export const load = async ({ url, platform }) => {
 	const { partnerId, partnerInfo } = getPartnerInfo(domain);
 
 	const envVars = {
-		PUBLIC_api_id: platform.env.PUBLIC_api_id,
+		PUBLIC_api_id: appId || platform.env.PUBLIC_api_id,
 		PUBLIC_cf_server: platform.env.PUBLIC_cf_server,
 		PUBLIC_firmly_deployment: platform.env.PUBLIC_firmly_deployment,
 		PUBLIC_aperture_domain: platform.env.PUBLIC_aperture_domain,
