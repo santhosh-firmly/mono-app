@@ -25,21 +25,6 @@ function buildEnvVars(appId, env) {
 }
 
 /**
- * Returns default partner info when no partner is found
- * @returns {Object} - Default partner information
- */
-function getDefaultPartnerInfo() {
-	return {
-		largeLogo: null,
-		smallLogo: null,
-		name: 'Firmly',
-		displayName: 'Firmly',
-		disclaimer: null,
-		buttonText: 'Place Order'
-	};
-}
-
-/**
  * Server load function that fetches merchant and partner data
  * @param {Object} params - The parameters object
  * @param {URL} params.url - The request URL
@@ -55,10 +40,11 @@ export const load = async ({ url, platform }) => {
 
 	if (!merchantDomain) {
 		console.error('Missing merchant domain', { merchantUrl });
+		const { partnerInfo } = await getPartnerInfo(appId, platform.env);
 		return {
 			...envVars,
 			merchantPresentation: null,
-			partnerInfo: getDefaultPartnerInfo()
+			partnerInfo
 		};
 	}
 
