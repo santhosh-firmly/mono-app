@@ -8,21 +8,23 @@
 	import orderPlacedAnimation from '$lib-v4/assets/order-placed-animation.json';
 
 	/**
-	 * Total price of the current order
+	 * @typedef {Object} PaymentButtonProps
+	 * @property {Object} total - Total price of the current order
+	 * @property {boolean} [disabled=false] - Whether or not to show the button as disabled
+	 * @property {boolean} [inProgress=false] - Whether or not API calls that changes the shipping methods are in progress
+	 * @property {boolean} isOrderPlaced - Whether the order has been placed
+	 * @property {Function} [onclick] - Click event handler callback
+	 * @property {string} [buttonText='Place Order'] - Text to display on the button
 	 */
-	export let total;
 
-	/**
-	 * Whether or not to show the button as disabled
-	 */
-	export let disabled = false;
-
-	/**
-	 * Whether or not API calls that changes the shippig methods are in progress
-	 */
-	export let inProgress = false;
-
-	export let isOrderPlaced;
+	let {
+		total,
+		disabled = false,
+		inProgress = false,
+		isOrderPlaced,
+		onclick,
+		buttonText = 'Place Order'
+	} = $props();
 </script>
 
 <div class="flex items-center justify-center">
@@ -45,7 +47,10 @@
 			class:smaller-button={inProgress}
 			class:text-fy-on-action-subtle={disabled}
 			class:text-fy-on-action={!disabled}
-			on:click|preventDefault
+			onclick={(event) => {
+				event.preventDefault();
+				onclick?.(event);
+			}}
 		>
 			{#if inProgress}
 				<svg
@@ -67,7 +72,7 @@
 					/>
 				</svg>
 			{:else}
-				Place Order
+				{buttonText}
 				{#if total}
 					({formatCurrency(total)})
 				{/if}

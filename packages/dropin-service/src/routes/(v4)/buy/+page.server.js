@@ -1,5 +1,6 @@
 import { getDomain } from 'foundation/utils/url.js';
 import { getMerchantPresentation } from '$lib-v4/server/db-acessor.js';
+import { getPartnerInfo } from '$lib-v4/server/partner-config.js';
 
 /**
  * Server load function that fetches merchant presentation data
@@ -13,18 +14,7 @@ export const load = async ({ url, platform }) => {
 	const merchantUrl = url.searchParams.get('domain') || url.searchParams.get('url');
 	const merchantDomain = getDomain(merchantUrl);
 
-	const partnerSubdomains = {
-		gannett: 'gannett',
-		forbes: 'forbes'
-	};
-
-	let partner = null;
-
-	const domainParts = domain.split('.');
-	const firstSubdomain = domainParts.length > 2 ? domainParts[0] : null;
-	if (firstSubdomain && partnerSubdomains[firstSubdomain]) {
-		partner = partnerSubdomains[firstSubdomain];
-	}
+	const { partnerId, partnerInfo } = getPartnerInfo(domain);
 
 	const envVars = {
 		PUBLIC_api_id: platform.env.PUBLIC_api_id,
@@ -55,6 +45,7 @@ export const load = async ({ url, platform }) => {
 	return {
 		...envVars,
 		merchantPresentation,
-		partner
+		partner: partnerId,
+		partnerInfo
 	};
 };
