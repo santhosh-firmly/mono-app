@@ -1,5 +1,9 @@
-export const load = async ({ platform }) => {
+export const load = async ({ platform, url }) => {
+	// Extract appId from _appId query parameter
+	const appId = url.searchParams.get('_appId');
+
 	return {
+		appId,
 		PUBLIC_api_id: platform.env.PUBLIC_api_id,
 		PUBLIC_cf_server: platform.env.PUBLIC_cf_server,
 		PUBLIC_firmly_deployment: platform.env.PUBLIC_firmly_deployment,

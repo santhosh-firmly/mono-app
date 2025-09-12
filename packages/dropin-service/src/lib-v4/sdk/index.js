@@ -152,7 +152,11 @@ function setupDropinCheckout(dropinUrl) {
 		iframe.id = 'firmlydropincheckout';
 		iframe.style =
 			'position:fixed; top:0; left:0; height:100%; width:100%; display:none; z-index:9999999; border: 0';
-		iframe.src = dropinUrl;
+
+		const url = new URL(dropinUrl);
+		url.searchParams.set('_appId', appId);
+		iframe.src = url.href;
+
 		iframe.allow = 'payment';
 		dropin.iframe = iframe;
 		document.body.appendChild(iframe);
@@ -362,6 +366,7 @@ export function bootstrap() {
 
 			const dropinBuyNowUrl = new URL(dropInUrl);
 			dropinBuyNowUrl.pathname = '/buy';
+			dropinBuyNowUrl.searchParams.set('_appId', appId);
 
 			if (checkoutConfig.pdp_url) {
 				dropinBuyNowUrl.searchParams.set('url', checkoutConfig.pdp_url);
@@ -393,6 +398,8 @@ export function bootstrap() {
 				console.log('firmly - full pdp mode');
 				const pdpUrl = new URL(checkoutConfig.pdp_url);
 				pdpUrl.hostname = convertToFirmlyDomain(pdpUrl.hostname, apertureDomain);
+				pdpUrl.searchParams.set('_appId', appId);
+
 				window.firmly.pdpIframe = createIframe(
 					pdpUrl.toString(),
 					checkoutConfig,

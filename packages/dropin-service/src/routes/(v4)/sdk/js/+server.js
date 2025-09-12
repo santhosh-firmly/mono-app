@@ -36,6 +36,7 @@ export async function GET({ request, platform }) {
 	const dropinUrl = new URL(request.url);
 	dropinUrl.pathname = '/single-page';
 	dropinUrl.search = '';
+	dropinUrl.searchParams.set('_appId', appId);
 
 	if (!appId || !uuidRegex.test(appId)) {
 		return json(

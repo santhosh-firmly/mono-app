@@ -177,8 +177,16 @@
 		});
 		postGetParentInfo();
 
+		// Clean _appId from URL to keep it clean for users
+		if (typeof window !== 'undefined' && window.location.search.includes('_appId=')) {
+			const url = new URL(window.location);
+			url.searchParams.delete('_appId');
+			window.history.replaceState({}, '', url.toString());
+		}
+
 		// Initialize the session in the background.
-		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server);
+		// Use appId from server if available, otherwise fallback to PUBLIC_api_id
+		initialize(data.appId || data.PUBLIC_api_id, data.PUBLIC_cf_server);
 		initializeAppVersion(version);
 
 		if (isProduction) {
