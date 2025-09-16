@@ -264,10 +264,16 @@ const defaultOptions = {
 };
 
 let ongoingRequest;
+let initializationPhase = true; // Allow parallel requests during initialization
 
 // Do not allow the UI to call firmly services in parallel.
 // Firmly services are not transactional and do not control parallel access by itself.
 async function semaphore(func) {
+	// Skip semaphore during initialization phase for better performance
+	if (initializationPhase) {
+		return await func();
+	}
+
 	while (ongoingRequest) {
 		await ongoingRequest;
 	}
@@ -470,16 +476,39 @@ async function paymentInitialize(ccServer) {
 
 		let paymentKey = getPaymentKey();
 		if (!paymentKey) {
-			let pay = await browserFetch(`${ccServer}/api/v1/payment/key`);
-			if (pay.status == 200) {
-				setPaymentKey(pay.data);
-				paymentKey = pay.data;
+			try {
+				// Add timeout to prevent blocking
+				const controller = new AbortController();
+				const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+				let pay = await browserFetch(`${ccServer}/api/v1/payment/key`, {
+					...defaultOptions,
+					signal: controller.signal
+				});
+
+				clearTimeout(timeoutId);
+
+				if (pay.status == 200) {
+					setPaymentKey(pay.data);
+					paymentKey = pay.data;
+				}
+			} catch (error) {
+				if (error.name === 'AbortError') {
+					console.warn('Payment key request timed out');
+				} else {
+					console.warn('Payment key fetch failed:', error);
+				}
+				return; // Exit early if payment key can't be fetched
 			}
 		}
 
 		if (paymentKey) {
-			firmly.paymentRSAKey = await getRSAKey(paymentKey);
-			firmly.paymentJWKKey = paymentKey;
+			try {
+				firmly.paymentRSAKey = await getRSAKey(paymentKey);
+				firmly.paymentJWKKey = paymentKey;
+			} catch (error) {
+				console.warn('Payment key processing failed:', error);
+			}
 		}
 	}
 }
@@ -586,6 +615,19 @@ async function sessionGetAllActiveCarts(excludes = []) {
 }
 
 async function getApiAccessToken() {
+	// Try to get JWT from SDK first (for /buy route and SDK usage)
+	if (typeof window !== 'undefined' && window.firmly?.sdk?.getApiAccessToken) {
+		try {
+			const sdkToken = await window.firmly.sdk.getApiAccessToken();
+			if (sdkToken) {
+				return sdkToken;
+			}
+		} catch (error) {
+			console.warn('Failed to get token from SDK, falling back to dropin session:', error);
+		}
+	}
+
+	// Fallback to dropin's own session management
 	let session = getBrowserSession();
 	if (!session || session.expires - 300 <= getSecondsSinceEpoch()) {
 		session = await fetchBrowserSession();
@@ -623,13 +665,50 @@ export async function initialize(appId, apiServer, domain = null) {
 	// performanceInit(); // Removed to stop api-PerformanceResourceTiming events
 	mutationInit();
 
-	// initialize payment keys
-	paymentInitialize(firmly.ccServer);
+	// initialize payment keys in background (non-blocking)
+	paymentInitialize(firmly.ccServer).catch((error) => {
+		console.warn('Payment initialization delayed:', error);
+	});
 
-	// initialize browser session
-	await getApiAccessToken();
-	if (firmly.isNewSessionId) {
-		trackUXEvent('sessionStart');
+	// initialize browser session - only if SDK hasn't already initialized it
+	if (!firmly.sdk || !firmly.sdk.getApiAccessToken) {
+		// Initialize session in background without blocking
+		getApiAccessToken()
+			.then(() => {
+				if (firmly.isNewSessionId) {
+					trackUXEvent('sessionStart');
+				}
+				// End initialization phase after session is ready
+				setTimeout(() => {
+					initializationPhase = false;
+				}, 100);
+			})
+			.catch((error) => {
+				console.warn('Dropin session initialization delayed:', error);
+				// End initialization phase even on error
+				setTimeout(() => {
+					initializationPhase = false;
+				}, 100);
+			});
+	} else {
+		// SDK is managing the session, verify token availability in background
+		getApiAccessToken()
+			.then((token) => {
+				if (!token) {
+					console.warn('SDK initialized but no token available');
+				}
+				// End initialization phase after token check
+				setTimeout(() => {
+					initializationPhase = false;
+				}, 100);
+			})
+			.catch((error) => {
+				console.warn('Token verification delayed:', error);
+				// End initialization phase even on error
+				setTimeout(() => {
+					initializationPhase = false;
+				}, 100);
+			});
 	}
 }
 
@@ -729,6 +808,19 @@ function getDynamoUrl(suffix) {
 }
 
 async function getHeaders() {
+	// Try to get headers from SDK first (for /buy route and SDK usage)
+	if (typeof window !== 'undefined' && window.firmly?.sdk?.getHeaders) {
+		try {
+			const sdkHeaders = await window.firmly.sdk.getHeaders();
+			if (sdkHeaders && sdkHeaders.headers && sdkHeaders.headers['x-firmly-authorization']) {
+				return sdkHeaders;
+			}
+		} catch (error) {
+			console.warn('Failed to get headers from SDK, falling back to dropin headers:', error);
+		}
+	}
+
+	// Fallback to dropin's own header generation
 	const auth = await getApiAccessToken();
 	const ret = {
 		headers: {
@@ -1102,7 +1194,6 @@ async function completeWalletOrder(domain, walletData) {
 	return res;
 }
 
-
 async function encryptCCInfoAsJWE(ccInfo) {
 	const firmly = window.firmly;
 	const jwkKey = firmly.paymentJWKKey;
@@ -1121,11 +1212,9 @@ async function encryptCCInfoAsJWE(ccInfo) {
 	return placeOrderV3Payload;
 }
 
-
 //#endregion
 
 //#region Wallet functions
-
 
 async function walletUnlockStart(walletType, emailAddress, captcha = null, parentContext = null) {
 	const body = { email: emailAddress };
@@ -1203,7 +1292,6 @@ async function c2pWalletUnlockComplete(otp, accessToken = null, parentContext = 
 	}
 	return ret;
 }
-
 
 // ShopPay support has been removed
 

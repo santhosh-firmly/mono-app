@@ -7,6 +7,179 @@ import { Cart } from './cart.js';
 import { getAllOrders } from './orders.js';
 import { convertToFirmlyDomain } from '../utils/domain-utils.js';
 
+// JWT Session Management
+const BROWSER_SESSION = 'FBS_SDK';
+const SESSION_ID = 'FRSID_SDK';
+
+let currentBrowserSession = null;
+let sdkInitialized = false;
+
+function getSecondsSinceEpoch() {
+	return ~~(Date.now() / 1000);
+}
+
+function getBrowserSession() {
+	if (typeof window === 'undefined') return null;
+
+	const lbs = localStorage.getItem(BROWSER_SESSION);
+	let lbj = null;
+	if (lbs) {
+		try {
+			lbj = JSON.parse(lbs);
+		} catch (e) {
+			console.error('Error parsing browser session:', e);
+			return null;
+		}
+	}
+	return currentBrowserSession || lbj || null;
+}
+
+function setBrowserSession(browserSession) {
+	if (typeof window === 'undefined') return;
+
+	currentBrowserSession = browserSession;
+	const stringifiedBrowserSession = JSON.stringify(browserSession);
+	localStorage.setItem(BROWSER_SESSION, stringifiedBrowserSession);
+}
+
+function getSessionId() {
+	if (typeof window === 'undefined') return null;
+
+	const value = sessionStorage.getItem(SESSION_ID);
+	return value || null;
+}
+
+function setSessionId(value) {
+	if (typeof window === 'undefined') return;
+
+	sessionStorage.setItem(SESSION_ID, value);
+}
+
+function initSessionId() {
+	let id = getSessionId();
+	if (!id) {
+		id = 's' + generateRandomId(16);
+		setSessionId(id);
+		if (window.firmly) {
+			window.firmly.isNewSessionId = true;
+		}
+	} else {
+		if (window.firmly) {
+			window.firmly.isNewSessionId = false;
+		}
+	}
+	return id;
+}
+
+function generateRandomId(length = 16) {
+	const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	let result = '';
+	for (let i = 0; i < length; i++) {
+		result += chars.charAt(Math.floor(Math.random() * chars.length));
+	}
+	return result;
+}
+
+async function fetchBrowserSession(appId, apiServer) {
+	if (typeof window === 'undefined') return null;
+
+	const requestOptions = {
+		method: 'POST',
+		headers: {
+			'x-firmly-app-id': appId,
+			'Content-type': 'application/json'
+		}
+	};
+
+	const accessToken = currentBrowserSession?.access_token;
+	if (accessToken) {
+		requestOptions.headers['Content-Type'] = 'application/json';
+		requestOptions.body = JSON.stringify({
+			access_token: accessToken
+		});
+	}
+
+	try {
+		// Add timeout to prevent long waits
+		const controller = new AbortController();
+		const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+		const response = await fetch(`${apiServer}/api/v1/browser-session`, {
+			...requestOptions,
+			signal: controller.signal
+		});
+
+		clearTimeout(timeoutId);
+
+		if (response.ok) {
+			const data = await response.json();
+			setBrowserSession(data);
+			if (window.firmly) {
+				window.firmly.deviceId = data.device_id;
+			}
+			return data;
+		}
+	} catch (error) {
+		if (error.name === 'AbortError') {
+			console.warn('Browser session request timed out');
+		} else {
+			console.error('Error fetching browser session:', error);
+		}
+	}
+
+	return null;
+}
+
+export async function getApiAccessToken() {
+	if (typeof window === 'undefined') return null;
+	if (!window.firmly?.appId || !window.firmly?.apiServer) return null;
+
+	let session = getBrowserSession();
+	if (!session || session.expires - 300 <= getSecondsSinceEpoch()) {
+		try {
+			session = await fetchBrowserSession(window.firmly.appId, window.firmly.apiServer);
+		} catch (error) {
+			console.warn(
+				'Failed to fetch browser session, using cached session if available:',
+				error
+			);
+			// Return cached session even if expired, better than nothing
+			session = getBrowserSession();
+		}
+	}
+
+	return session?.access_token || null;
+}
+
+export async function getHeaders() {
+	const auth = await getApiAccessToken();
+	return {
+		headers: {
+			'Content-Type': 'application/json',
+			'x-firmly-authorization': auth
+		}
+	};
+}
+
+async function initializeSDKSession(appId, apiServer) {
+	if (sdkInitialized) return;
+
+	if (typeof window !== 'undefined') {
+		initWindowFirmly();
+		window.firmly.appId = appId;
+		window.firmly.apiServer = apiServer;
+
+		initSessionId();
+
+		// Initialize JWT in background without blocking
+		getApiAccessToken().catch((error) => {
+			console.warn('JWT initialization delayed:', error);
+		});
+
+		sdkInitialized = true;
+	}
+}
+
 const uuidRegex =
 	/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/m;
 const appId = '#F_APP_ID#';
@@ -183,7 +356,7 @@ export function subscribe(action, status, fn, context = window) {
 	});
 }
 
-export function bootstrap() {
+export async function bootstrap() {
 	if (typeof window === 'undefined') {
 		console.error('Window is undefined');
 		return;
@@ -198,6 +371,32 @@ export function bootstrap() {
 			},
 			Cart,
 			CartHive,
+			getApiAccessToken,
+			getHeaders,
+			JWT: {
+				getToken: getApiAccessToken,
+				getHeaders: getHeaders,
+				isSessionValid: () => {
+					const session = getBrowserSession();
+					return session && session.expires > getSecondsSinceEpoch() + 300;
+				},
+				refreshSession: async () => {
+					if (window.firmly?.appId && window.firmly?.apiServer) {
+						return await fetchBrowserSession(
+							window.firmly.appId,
+							window.firmly.apiServer
+						);
+					}
+					return null;
+				},
+				clearSession: () => {
+					if (typeof window !== 'undefined') {
+						localStorage.removeItem(BROWSER_SESSION);
+						sessionStorage.removeItem(SESSION_ID);
+						currentBrowserSession = null;
+					}
+				}
+			},
 			init: async (config) => {
 				if (!config) {
 					throw new Error('Please specify the init configuration');
@@ -211,6 +410,10 @@ export function bootstrap() {
 					throw new Error('Please specify a valid appId');
 				}
 
+				// Initialize SDK session management first
+				await initializeSDKSession(config.appId, config.env.apiServer);
+
+				// Then initialize the dropin system
 				await initialize(config.appId, config.env.apiServer);
 
 				if (config.isDropIn) {
@@ -308,7 +511,7 @@ export function bootstrap() {
 			}
 		};
 
-		window.firmly.buyNow = function (checkoutConfig) {
+		window.firmly.buyNow = async function (checkoutConfig) {
 			function createIframe(url, config, id = 'firmly-dropin-frame') {
 				let iframe = document.querySelector(`[id="${id}"]`);
 				let targetContainer = document.body;
@@ -419,6 +622,19 @@ export function bootstrap() {
 			if (checkoutConfig.onOrderPlaced) {
 				window.firmly.callbacks.onOrderPlaced = checkoutConfig.onOrderPlaced;
 			}
+
+			// For /buy route, ensure SDK session is initialized
+			if (
+				window.location?.pathname === '/buy' &&
+				window.firmly?.appId &&
+				window.firmly?.apiServer
+			) {
+				try {
+					await initializeSDKSession(window.firmly.appId, window.firmly.apiServer);
+				} catch (error) {
+					console.error('Failed to initialize SDK session for /buy route:', error);
+				}
+			}
 		};
 
 		bindEvent(window, 'message', async (event) => {
@@ -483,6 +699,22 @@ export function bootstrap() {
 						console.log('firmly - add to cart clicked', event);
 						window.firmly.dropinIframe.style.display = 'block';
 						window.firmly.dropinIframe.contentWindow.postMessage(event.data, '*');
+					} else if (data.action === 'firmly::requestJWT') {
+						// Provide JWT to dropin when requested
+						try {
+							const token = await getApiAccessToken();
+							if (token) {
+								event.source.postMessage(
+									{
+										action: 'firmly::jwtResponse',
+										token: token
+									},
+									'*'
+								);
+							}
+						} catch (error) {
+							console.error('Failed to provide JWT to dropin:', error);
+						}
 					}
 				} catch (e) {
 					//ignored
@@ -498,10 +730,17 @@ export function bootstrap() {
 		});
 
 		if (uuidRegex.test(appId)) {
+			// Initialize SDK session management for auto-initialization (non-blocking)
+			initializeSDKSession(appId, apiServer).catch((error) => {
+				console.error('Failed to initialize SDK session:', error);
+			});
+
 			// If the condition does not match, the client must call init explicitely
 			return window.firmly.sdk.init({ env: { apiServer }, appId, isDropIn, dropInUrl });
 		}
 	}
 }
 
-bootstrap();
+bootstrap().catch((error) => {
+	console.error('Bootstrap initialization error:', error);
+});

@@ -192,22 +192,41 @@
 
 		let productDetails = [];
 		if (!skipCatalogApi) {
-			// Using the PDP URL, get variant ID.
-			const decodedUrl = encodeURIComponent(url);
-			const resp = await fetch(
-				`${data.PUBLIC_cf_server}/api/v1/domains-pdp?url=${decodedUrl}`,
-				{
-					headers: {
-						'x-firmly-app-id': window.firmly.appId
-					}
-				}
-			);
+			try {
+				// Using the PDP URL, get variant ID.
+				const decodedUrl = encodeURIComponent(url);
 
-			if (!resp.ok) {
-				error = `Unable to find this product`;
+				// Add timeout to prevent hanging
+				const controller = new AbortController();
+				const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+				const resp = await fetch(
+					`${data.PUBLIC_cf_server}/api/v1/domains-pdp?url=${decodedUrl}`,
+					{
+						headers: {
+							'x-firmly-app-id': window.firmly.appId
+						},
+						signal: controller.signal
+					}
+				);
+
+				clearTimeout(timeoutId);
+
+				if (!resp.ok) {
+					error = `Unable to find this product`;
+					return;
+				}
+				productDetails = await resp.json();
+			} catch (err) {
+				if (err.name === 'AbortError') {
+					console.warn('Product details request timed out');
+					error = `Request timed out - please try again`;
+				} else {
+					console.error('Product details fetch failed:', err);
+					error = `Unable to find this product`;
+				}
 				return;
 			}
-			productDetails = await resp.json();
 		}
 
 		if (
@@ -403,10 +422,37 @@
 	}
 
 	onMount(async () => {
-		// Initialize the session in the background.
-		// Use appId from server if available, otherwise fallback to PUBLIC_api_id
+		// Initialize the dropin session immediately - don't wait for SDK
 		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server);
 		initializeAppVersion(version);
+
+		// Initialize SDK in parallel (non-blocking)
+		const initSDK = async () => {
+			let attempts = 0;
+			while (attempts < 10) {
+				// Reduced from 50 to 10 attempts (1 second max)
+				if (window.firmly && window.firmly.sdk) {
+					try {
+						await window.firmly.sdk.init({
+							env: { apiServer: data.PUBLIC_cf_server },
+							appId: data.PUBLIC_api_id,
+							isDropIn: false
+						});
+						console.log('SDK initialized successfully for JWT management');
+						return;
+					} catch (error) {
+						console.error('Failed to initialize SDK:', error);
+						return;
+					}
+				}
+				await new Promise((resolve) => setTimeout(resolve, 100));
+				attempts++;
+			}
+			console.warn('SDK initialization skipped - continuing without SDK JWT');
+		};
+
+		// Run SDK initialization in background without blocking
+		initSDK();
 
 		if (isProduction) {
 			// Initialize Visa SDK for production
@@ -446,6 +492,17 @@
 
 		setupLayout();
 		initiateFlow();
+
+		// Log JWT initialization in development
+		if (!isProduction && window.location?.hostname?.includes('lvh.me')) {
+			setTimeout(async () => {
+				console.log('🔧 Development mode: JWT SDK initialized');
+				if (window.firmly?.sdk?.getApiAccessToken) {
+					const token = await window.firmly.sdk.getApiAccessToken();
+					console.log('✅ JWT token available:', !!token);
+				}
+			}, 3000);
+		}
 	});
 
 	function handlePostCheckoutClose() {
@@ -485,6 +542,8 @@
 </script>
 
 <svelte:head>
+	<!-- Load SDK script for JWT management -->
+	<script src="/v4/sdk/js?appId={data.PUBLIC_api_id}&isDropIn=false"></script>
 	<title>Firmly - Buy Now</title>
 	<meta
 		name="description"
