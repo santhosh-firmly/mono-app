@@ -8,43 +8,26 @@ import { getAllOrders } from './orders.js';
 import { convertToFirmlyDomain } from '../utils/domain-utils.js';
 import { sdkSessionManager } from '../utils/session-manager.js';
 import { initializationState, INITIALIZATION_STATES } from '../utils/initialization-state.js';
+import {
+	getApiAccessToken as getApiAccessTokenUtil,
+	getAuthHeaders as getAuthHeadersUtil,
+	SESSION_CONTEXT
+} from '../utils/session-utils.js';
 
 let sdkInitialized = false;
 
 export async function getApiAccessToken() {
-	if (!window.firmly?.appId || !window.firmly?.apiServer) {
-		return null;
-	}
-
-	try {
-		return await sdkSessionManager.getAccessToken(
-			window.firmly.appId,
-			window.firmly.apiServer,
-			{
-				allowStaleToken: true,
-				onDeviceCreated: (sessionData) => {
-					if (window.firmly) {
-						window.firmly.deviceId = sessionData.device_id;
-					}
-				}
+	return await getApiAccessTokenUtil(SESSION_CONTEXT.SDK, {
+		onDeviceCreated: (sessionData) => {
+			if (window.firmly) {
+				window.firmly.deviceId = sessionData.device_id;
 			}
-		);
-	} catch (error) {
-		console.warn('SDK JWT acquisition failed:', error);
-		return null;
-	}
+		}
+	});
 }
 
 export async function getHeaders() {
-	if (!window.firmly?.appId || !window.firmly?.apiServer) {
-		return {
-			headers: {
-				'Content-Type': 'application/json'
-			}
-		};
-	}
-
-	return await sdkSessionManager.getAuthHeaders(window.firmly.appId, window.firmly.apiServer);
+	return await getAuthHeadersUtil(SESSION_CONTEXT.SDK);
 }
 
 async function initializeSDKSession(appId, apiServer) {

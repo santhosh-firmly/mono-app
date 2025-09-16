@@ -1,8 +1,16 @@
 /**
  * @fileoverview Browser session functions for managing user sessions.
- * This is a legacy compatibility layer that uses the new SessionManager under the hood.
+ * This is a legacy compatibility layer that uses shared session utilities.
  */
 
+import {
+	getApiAccessToken as getApiAccessTokenUtil,
+	getAuthHeaders as getAuthHeadersUtil,
+	initializeSession,
+	getDeviceId as getDeviceIdUtil,
+	initializeSessionId as initializeSessionIdUtil,
+	SESSION_CONTEXT
+} from '../../lib-v4/utils/session-utils.js';
 import { dropinSessionManager } from '../../lib-v4/utils/session-manager.js';
 import { telemetryDeviceCreated } from './telemetry';
 
@@ -43,8 +51,7 @@ export function setSessionId(value) {
  * @returns {string} The initialized session ID.
  */
 export function initSessionId() {
-	const result = dropinSessionManager.initializeSessionId();
-	window.firmly.isNewSessionId = result.isNew;
+	const result = initializeSessionIdUtil(SESSION_CONTEXT.DROPIN);
 	return result.sessionId;
 }
 
@@ -61,27 +68,10 @@ export function getSecondsSinceEpoch() {
  * @returns {Promise<object|null>} The browser session object, or null if the fetch fails.
  */
 export async function fetchBrowserSession() {
-	try {
-		const session = await dropinSessionManager.fetchBrowserSession(
-			window.firmly.appId,
-			window.firmly.apiServer,
-			{
-				onDeviceCreated: (sessionData) => {
-					window.firmly.deviceId = sessionData.device_id;
-					telemetryDeviceCreated();
-				}
-			}
-		);
-
-		if (session?.device_id) {
-			window.firmly.deviceId = session.device_id;
-		}
-
-		return session;
-	} catch (error) {
-		console.error('Failed to fetch browser session:', error);
-		return null;
-	}
+	return await initializeSession(SESSION_CONTEXT.DROPIN, (sessionData) => {
+		window.firmly.deviceId = sessionData.device_id;
+		telemetryDeviceCreated();
+	});
 }
 
 /**
@@ -89,16 +79,7 @@ export async function fetchBrowserSession() {
  * @returns {Promise<string|null>} The API access token, or null if not available.
  */
 export async function getApiAccessToken() {
-	try {
-		return await dropinSessionManager.getAccessToken(
-			window.firmly?.appId,
-			window.firmly?.apiServer,
-			{ allowStaleToken: true }
-		);
-	} catch (error) {
-		console.warn('Failed to get API access token:', error);
-		return null;
-	}
+	return await getApiAccessTokenUtil(SESSION_CONTEXT.DROPIN);
 }
 
 /**
@@ -106,7 +87,7 @@ export async function getApiAccessToken() {
  * @returns {string|null} The device ID, or null if not found.
  */
 export function getDeviceId() {
-	return dropinSessionManager.getDeviceId();
+	return getDeviceIdUtil(SESSION_CONTEXT.DROPIN);
 }
 
 /**
@@ -114,18 +95,5 @@ export function getDeviceId() {
  * @returns {Promise<object>} The headers object with the access token.
  */
 export async function getHeaders() {
-	try {
-		return await dropinSessionManager.getAuthHeaders(
-			window.firmly?.appId,
-			window.firmly?.apiServer,
-			{ allowStaleToken: true }
-		);
-	} catch (error) {
-		console.warn('Failed to get headers:', error);
-		return {
-			headers: {
-				'Content-Type': 'application/json'
-			}
-		};
-	}
+	return await getAuthHeadersUtil(SESSION_CONTEXT.DROPIN);
 }

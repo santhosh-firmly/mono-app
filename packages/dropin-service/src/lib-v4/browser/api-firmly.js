@@ -10,6 +10,14 @@ import {
 	INITIALIZATION_STATES,
 	isInitializing
 } from '../utils/initialization-state.js';
+import {
+	getApiAccessToken as getApiAccessTokenUtil,
+	getAuthHeaders as getAuthHeadersUtil,
+	initializeSession,
+	getDeviceId as getDeviceIdUtil,
+	initializeSessionId as initializeSessionIdUtil,
+	SESSION_CONTEXT
+} from '../utils/session-utils.js';
 
 //#region Session Storage
 
@@ -521,33 +529,15 @@ async function paymentInitialize(ccServer) {
 //#region Browser Session API functions
 
 function initSessionId() {
-	const result = dropinSessionManager.initializeSessionId();
-	window.firmly.isNewSessionId = result.isNew;
+	const result = initializeSessionIdUtil(SESSION_CONTEXT.DROPIN);
 	return result.sessionId;
 }
 
 async function fetchBrowserSession() {
-	try {
-		const session = await dropinSessionManager.fetchBrowserSession(
-			window.firmly.appId,
-			window.firmly.apiServer,
-			{
-				onDeviceCreated: (sessionData) => {
-					window.firmly.deviceId = sessionData.device_id;
-					trackUXEvent('deviceCreated');
-				}
-			}
-		);
-
-		if (session?.device_id) {
-			window.firmly.deviceId = session.device_id;
-		}
-
-		return session;
-	} catch (error) {
-		console.error('Failed to fetch browser session:', error);
-		return null;
-	}
+	return await initializeSession(SESSION_CONTEXT.DROPIN, (sessionData) => {
+		window.firmly.deviceId = sessionData.device_id;
+		trackUXEvent('deviceCreated');
+	});
 }
 
 async function sessionGetAllActiveCarts(excludes = []) {
@@ -562,21 +552,11 @@ async function sessionGetAllActiveCarts(excludes = []) {
 }
 
 async function getApiAccessToken() {
-	// Use dropin's own session management
-	try {
-		return await dropinSessionManager.getAccessToken(
-			window.firmly?.appId,
-			window.firmly?.apiServer,
-			{ allowStaleToken: true }
-		);
-	} catch (error) {
-		console.warn('Dropin session management failed:', error);
-		return null;
-	}
+	return await getApiAccessTokenUtil(SESSION_CONTEXT.DROPIN);
 }
 
 function getDeviceId() {
-	return dropinSessionManager.getDeviceId();
+	return getDeviceIdUtil(SESSION_CONTEXT.DROPIN);
 }
 
 export async function initialize(appId, apiServer, domain = null) {
@@ -716,21 +696,7 @@ function getDynamoUrl(suffix) {
 }
 
 async function getHeaders() {
-	// Use dropin's own session management
-	try {
-		return await dropinSessionManager.getAuthHeaders(
-			window.firmly?.appId,
-			window.firmly?.apiServer,
-			{ allowStaleToken: true }
-		);
-	} catch (error) {
-		console.warn('Failed to get headers:', error);
-		return {
-			headers: {
-				'Content-Type': 'application/json'
-			}
-		};
-	}
+	return await getAuthHeadersUtil(SESSION_CONTEXT.DROPIN);
 }
 
 async function cartSessionTransfer(body, domain, parentContext = null) {
