@@ -23,8 +23,19 @@ export class SessionManager {
 	generateRandomId(length = 16) {
 		const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 		let result = '';
-		for (let i = 0; i < length; i++) {
-			result += chars.charAt(Math.floor(Math.random() * chars.length));
+
+		// Use crypto.getRandomValues for better entropy when available
+		if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+			const array = new Uint8Array(length);
+			crypto.getRandomValues(array);
+			for (let i = 0; i < length; i++) {
+				result += chars.charAt(array[i] % chars.length);
+			}
+		} else {
+			// Fallback to Math.random for older environments
+			for (let i = 0; i < length; i++) {
+				result += chars.charAt(Math.floor(Math.random() * chars.length));
+			}
 		}
 		return result;
 	}
@@ -37,10 +48,42 @@ export class SessionManager {
 	}
 
 	/**
+	 * Check if storage is available and accessible
+	 */
+	isStorageAvailable(type) {
+		if (!this.isBrowser()) return false;
+
+		let storage;
+		try {
+			storage = window[type];
+			const x = '__storage_test__';
+			storage.setItem(x, x);
+			storage.removeItem(x);
+			return true;
+		} catch (e) {
+			return (
+				e instanceof DOMException &&
+				// everything except Firefox
+				(e.code === 22 ||
+					// Firefox
+					e.code === 1014 ||
+					// test name field too, because code might not be present
+					// everything except Firefox
+					e.name === 'QuotaExceededError' ||
+					// Firefox
+					e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+				// acknowledge QuotaExceededError only if there's something already stored
+				storage &&
+				storage.length !== 0
+			);
+		}
+	}
+
+	/**
 	 * Get stored browser session from localStorage
 	 */
 	getStoredSession() {
-		if (!this.isBrowser()) return null;
+		if (!this.isBrowser() || !this.isStorageAvailable('localStorage')) return null;
 
 		const stored = localStorage.getItem(this.storagePrefix);
 		if (!stored) return this.currentSession;
@@ -61,11 +104,15 @@ export class SessionManager {
 		if (!this.isBrowser()) return;
 
 		this.currentSession = session;
-		try {
-			const serialized = JSON.stringify(session);
-			localStorage.setItem(this.storagePrefix, serialized);
-		} catch (error) {
-			console.error('Error storing session:', error);
+
+		// Try to store in localStorage if available
+		if (this.isStorageAvailable('localStorage')) {
+			try {
+				const serialized = JSON.stringify(session);
+				localStorage.setItem(this.storagePrefix, serialized);
+			} catch (error) {
+				console.error('Error storing session:', error);
+			}
 		}
 	}
 
@@ -73,7 +120,7 @@ export class SessionManager {
 	 * Get session ID from sessionStorage
 	 */
 	getSessionId() {
-		if (!this.isBrowser()) return null;
+		if (!this.isBrowser() || !this.isStorageAvailable('sessionStorage')) return null;
 		return sessionStorage.getItem(this.sessionIdPrefix);
 	}
 
@@ -81,7 +128,7 @@ export class SessionManager {
 	 * Set session ID in sessionStorage
 	 */
 	setSessionId(sessionId) {
-		if (!this.isBrowser()) return;
+		if (!this.isBrowser() || !this.isStorageAvailable('sessionStorage')) return;
 		sessionStorage.setItem(this.sessionIdPrefix, sessionId);
 	}
 
@@ -105,7 +152,10 @@ export class SessionManager {
 		const sessionToCheck = session || this.getStoredSession();
 		if (!sessionToCheck || !sessionToCheck.expires) return false;
 
-		return sessionToCheck.expires > this.getSecondsSinceEpoch() + 300; // 5 minute buffer
+		return (
+			sessionToCheck.expires >
+			this.getSecondsSinceEpoch() + SESSION_CONFIG.EXPIRY_BUFFER_SECONDS
+		);
 	}
 
 	/**
@@ -147,6 +197,20 @@ export class SessionManager {
 
 			if (response.ok) {
 				const sessionData = await response.json();
+
+				// Validate session data shape
+				if (!sessionData || typeof sessionData !== 'object') {
+					throw new Error('Invalid session data received from server');
+				}
+
+				if (!sessionData.access_token) {
+					console.warn('Session data missing access_token');
+				}
+
+				if (!sessionData.expires) {
+					console.warn('Session data missing expires field');
+				}
+
 				this.setStoredSession(sessionData);
 
 				// Notify about device creation if applicable
@@ -219,8 +283,13 @@ export class SessionManager {
 		if (!this.isBrowser()) return;
 
 		this.currentSession = null;
-		localStorage.removeItem(this.storagePrefix);
-		sessionStorage.removeItem(this.sessionIdPrefix);
+
+		if (this.isStorageAvailable('localStorage')) {
+			localStorage.removeItem(this.storagePrefix);
+		}
+		if (this.isStorageAvailable('sessionStorage')) {
+			sessionStorage.removeItem(this.sessionIdPrefix);
+		}
 	}
 
 	/**

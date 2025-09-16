@@ -562,19 +562,7 @@ async function sessionGetAllActiveCarts(excludes = []) {
 }
 
 async function getApiAccessToken() {
-	// Try to get JWT from SDK first (for /buy route and SDK usage)
-	if (typeof window !== 'undefined' && window.firmly?.sdk?.getApiAccessToken) {
-		try {
-			const sdkToken = await window.firmly.sdk.getApiAccessToken();
-			if (sdkToken) {
-				return sdkToken;
-			}
-		} catch (error) {
-			console.warn('Failed to get token from SDK, falling back to dropin session:', error);
-		}
-	}
-
-	// Fallback to dropin's own session management using shared session manager
+	// Use dropin's own session management
 	try {
 		return await dropinSessionManager.getAccessToken(
 			window.firmly?.appId,
@@ -617,36 +605,21 @@ export async function initialize(appId, apiServer, domain = null) {
 		console.warn('Payment initialization delayed:', error);
 	});
 
-	// initialize browser session - only if SDK hasn't already initialized it
-	if (!firmly.sdk || !firmly.sdk.getApiAccessToken) {
-		initializationState.setState(INITIALIZATION_STATES.SESSIONS_READY);
+	// Initialize dropin session
+	initializationState.setState(INITIALIZATION_STATES.SESSIONS_READY);
 
-		// Initialize session in background without blocking
-		getApiAccessToken()
-			.then(() => {
-				if (firmly.isNewSessionId) {
-					trackUXEvent('sessionStart');
-				}
-				initializationState.complete({ source: 'dropin' });
-			})
-			.catch((error) => {
-				console.warn('Dropin session initialization delayed:', error);
-				initializationState.addError(error, { source: 'dropin-session' });
-			});
-	} else {
-		// SDK is managing the session, verify token availability in background
-		getApiAccessToken()
-			.then((token) => {
-				if (!token) {
-					console.warn('SDK initialized but no token available');
-				}
-				initializationState.complete({ source: 'dropin-with-sdk' });
-			})
-			.catch((error) => {
-				console.warn('Token verification delayed:', error);
-				initializationState.addError(error, { source: 'dropin-token-verification' });
-			});
-	}
+	// Initialize session in background without blocking
+	getApiAccessToken()
+		.then(() => {
+			if (firmly.isNewSessionId) {
+				trackUXEvent('sessionStart');
+			}
+			initializationState.complete({ source: 'dropin' });
+		})
+		.catch((error) => {
+			console.warn('Dropin session initialization delayed:', error);
+			initializationState.addError(error, { source: 'dropin-session' });
+		});
 }
 
 export async function initializeDomain(domain) {
@@ -743,19 +716,7 @@ function getDynamoUrl(suffix) {
 }
 
 async function getHeaders() {
-	// Try to get headers from SDK first (for /buy route and SDK usage)
-	if (typeof window !== 'undefined' && window.firmly?.sdk?.getHeaders) {
-		try {
-			const sdkHeaders = await window.firmly.sdk.getHeaders();
-			if (sdkHeaders && sdkHeaders.headers && sdkHeaders.headers['x-firmly-authorization']) {
-				return sdkHeaders;
-			}
-		} catch (error) {
-			console.warn('Failed to get headers from SDK, falling back to dropin headers:', error);
-		}
-	}
-
-	// Fallback to dropin's own header generation using shared session manager
+	// Use dropin's own session management
 	try {
 		return await dropinSessionManager.getAuthHeaders(
 			window.firmly?.appId,
@@ -763,7 +724,7 @@ async function getHeaders() {
 			{ allowStaleToken: true }
 		);
 	} catch (error) {
-		console.warn('Failed to get dropin headers:', error);
+		console.warn('Failed to get headers:', error);
 		return {
 			headers: {
 				'Content-Type': 'application/json'

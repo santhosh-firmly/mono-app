@@ -30,10 +30,7 @@
 	import Visa from '$lib-v4/clients/visa.svelte';
 	import { getNestedUrlParam } from '$lib-v4/utils.js';
 	import { SESSION_CONFIG } from '$lib-v4/utils/session-manager.js';
-	import {
-		initializationState,
-		INITIALIZATION_STATES
-	} from '$lib-v4/utils/initialization-state.js';
+	import { initializationState } from '$lib-v4/utils/initialization-state.js';
 
 	let { data } = $props();
 
@@ -442,41 +439,6 @@
 		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server);
 		initializeAppVersion(version);
 
-		// Initialize SDK in parallel (non-blocking)
-		const initSDK = async () => {
-			initializationState.setState(INITIALIZATION_STATES.SDK_LOADING);
-
-			let attempts = 0;
-			const maxAttempts = 10; // 1 second max
-
-			while (attempts < maxAttempts) {
-				if (window.firmly && window.firmly.sdk) {
-					try {
-						initializationState.setState(INITIALIZATION_STATES.SDK_INITIALIZING);
-
-						await window.firmly.sdk.init({
-							env: { apiServer: data.PUBLIC_cf_server },
-							appId: data.PUBLIC_api_id,
-							isDropIn: false
-						});
-
-						console.log('SDK initialized successfully for JWT management');
-						return;
-					} catch (error) {
-						console.error('Failed to initialize SDK:', error);
-						initializationState.addError(error, { source: 'sdk-init' });
-						return;
-					}
-				}
-				await new Promise((resolve) => setTimeout(resolve, 100));
-				attempts++;
-			}
-			console.warn('SDK initialization skipped - continuing without SDK JWT');
-		};
-
-		// Run SDK initialization in background without blocking
-		initSDK();
-
 		if (isProduction) {
 			// Initialize Visa SDK for production
 			// The Visa component will handle its own initialization via the use:loadVisaScript action
@@ -516,16 +478,11 @@
 		setupLayout();
 		initiateFlow();
 
-		// Log JWT initialization in development
+		// Log initialization in development
 		if (!isProduction && window.location?.hostname?.includes('lvh.me')) {
 			setTimeout(async () => {
-				console.log('🔧 Development mode: JWT SDK initialized');
+				console.log('🔧 Development mode: Dropin initialized');
 				console.log('Initialization state:', initializationState.getSummary());
-
-				if (window.firmly?.sdk?.getApiAccessToken) {
-					const token = await window.firmly.sdk.getApiAccessToken();
-					console.log('✅ JWT token available:', !!token);
-				}
 			}, 3000);
 		}
 	});
@@ -579,8 +536,6 @@
 </script>
 
 <svelte:head>
-	<!-- Load SDK script for JWT management -->
-	<script src="/v4/sdk/js?appId={data.PUBLIC_api_id}&isDropIn=false"></script>
 	<title>Firmly - Buy Now</title>
 	<meta
 		name="description"

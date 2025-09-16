@@ -95,7 +95,6 @@ export class InitializationStateManager {
 		// Notify listeners
 		this._notifyListeners(newState, previousState, context);
 
-		console.log(`Initialization state: ${previousState} → ${newState}`, context);
 		return true;
 	}
 
@@ -170,9 +169,10 @@ export class InitializationStateManager {
 	 */
 	getDuration() {
 		if (!this.startTime) return 0;
-		const endTime = this.isCompleted() ?
-			this.stateHistory.find(h => h.to === INITIALIZATION_STATES.COMPLETED)?.timestamp || Date.now() :
-			Date.now();
+		const endTime = this.isCompleted()
+			? this.stateHistory.find((h) => h.to === INITIALIZATION_STATES.COMPLETED)?.timestamp ||
+				Date.now()
+			: Date.now();
 		return endTime - this.startTime;
 	}
 
@@ -197,9 +197,7 @@ export class InitializationStateManager {
 	 */
 	_isValidTransition(from, to) {
 		const validTransitions = {
-			[INITIALIZATION_STATES.IDLE]: [
-				INITIALIZATION_STATES.STARTING
-			],
+			[INITIALIZATION_STATES.IDLE]: [INITIALIZATION_STATES.STARTING],
 			[INITIALIZATION_STATES.STARTING]: [
 				INITIALIZATION_STATES.SDK_LOADING,
 				INITIALIZATION_STATES.DROPIN_INITIALIZING,

@@ -154,12 +154,14 @@ describe('SessionManager', () => {
 		});
 
 		it('should return current session when localStorage fails', () => {
+			const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 			const testSession = { access_token: 'memory-token' };
 			sessionManager.currentSession = testSession;
 			mockLocalStorage.storage.set('TEST_SESSION', 'invalid-json');
 
 			const session = sessionManager.getStoredSession();
 			expect(session).toEqual(testSession);
+			consoleSpy.mockRestore();
 		});
 
 		it('should handle JSON parse errors gracefully', () => {
@@ -191,6 +193,9 @@ describe('SessionManager', () => {
 		it('should handle localStorage errors gracefully', () => {
 			const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 			const testSession = { access_token: 'test-token' };
+
+			// Mock storage availability to pass but then setItem to fail
+			sessionManager.isStorageAvailable = vi.fn().mockReturnValue(true);
 			mockLocalStorage.setItem.mockImplementation(() => {
 				throw new Error('Storage error');
 			});
@@ -265,7 +270,12 @@ describe('SessionManager', () => {
 		it('should fetch new session successfully', async () => {
 			const mockResponse = {
 				ok: true,
-				json: () => Promise.resolve({ access_token: 'new-token', device_id: 'device-456' })
+				json: () =>
+					Promise.resolve({
+						access_token: 'new-token',
+						device_id: 'device-456',
+						expires: Math.floor(Date.now() / 1000) + 3600
+					})
 			};
 			mockFetch.mockResolvedValue(mockResponse);
 
@@ -284,7 +294,11 @@ describe('SessionManager', () => {
 				credentials: 'include'
 			});
 
-			expect(session).toEqual({ access_token: 'new-token', device_id: 'device-456' });
+			expect(session).toEqual({
+				access_token: 'new-token',
+				device_id: 'device-456',
+				expires: Math.floor(Date.now() / 1000) + 3600
+			});
 		});
 
 		it('should include existing token in request body', async () => {
@@ -293,7 +307,11 @@ describe('SessionManager', () => {
 
 			const mockResponse = {
 				ok: true,
-				json: () => Promise.resolve({ access_token: 'refreshed-token' })
+				json: () =>
+					Promise.resolve({
+						access_token: 'refreshed-token',
+						expires: Math.floor(Date.now() / 1000) + 3600
+					})
 			};
 			mockFetch.mockResolvedValue(mockResponse);
 
@@ -319,7 +337,8 @@ describe('SessionManager', () => {
 					Promise.resolve({
 						access_token: 'new-token',
 						device_id: 'device-789',
-						device_created: true
+						device_created: true,
+						expires: Math.floor(Date.now() / 1000) + 3600
 					})
 			};
 			mockFetch.mockResolvedValue(mockResponse);
@@ -335,7 +354,8 @@ describe('SessionManager', () => {
 			expect(onDeviceCreated).toHaveBeenCalledWith({
 				access_token: 'new-token',
 				device_id: 'device-789',
-				device_created: true
+				device_created: true,
+				expires: Math.floor(Date.now() / 1000) + 3600
 			});
 		});
 

@@ -113,12 +113,10 @@ describe('InitializationStateManager', () => {
 			stateManager.addError(error, context);
 
 			expect(stateManager.errors).toHaveLength(1);
-			expect(stateManager.errors[0]).toEqual({
-				error,
-				context,
-				timestamp: expect.any(Number),
-				state: INITIALIZATION_STATES.ERROR
-			});
+			expect(stateManager.errors[0].error.message).toBe('Test error');
+			expect(stateManager.errors[0].context).toEqual(context);
+			expect(stateManager.errors[0].state).toBe(INITIALIZATION_STATES.STARTING);
+			expect(stateManager.errors[0].timestamp).toBeTypeOf('number');
 		});
 
 		it('should add error without context', () => {
@@ -127,12 +125,10 @@ describe('InitializationStateManager', () => {
 
 			stateManager.addError(error);
 
-			expect(stateManager.errors[0]).toEqual({
-				error,
-				context: {},
-				timestamp: expect.any(Number),
-				state: INITIALIZATION_STATES.ERROR
-			});
+			expect(stateManager.errors[0].error.message).toBe('Test error');
+			expect(stateManager.errors[0].context).toEqual({});
+			expect(stateManager.errors[0].state).toBe(INITIALIZATION_STATES.STARTING);
+			expect(stateManager.errors[0].timestamp).toBeTypeOf('number');
 		});
 
 		it('should transition to error state', () => {
@@ -208,14 +204,19 @@ describe('InitializationStateManager', () => {
 			expect(stateManager.getCurrentState()).toBe(INITIALIZATION_STATES.COMPLETED);
 		});
 
-		it('should calculate duration', () => {
+		it('should calculate duration', async () => {
 			stateManager.start();
 
 			// Wait a bit to ensure duration > 0
-			setTimeout(() => {
-				stateManager.complete();
-				expect(stateManager.getDuration()).toBeGreaterThan(0);
-			}, 10);
+			await new Promise((resolve) => {
+				setTimeout(() => {
+					stateManager.setState(INITIALIZATION_STATES.DROPIN_INITIALIZING);
+					stateManager.setState(INITIALIZATION_STATES.SESSIONS_READY);
+					stateManager.complete();
+					expect(stateManager.getDuration()).toBeGreaterThan(0);
+					resolve();
+				}, 10);
+			});
 		});
 	});
 
@@ -374,6 +375,8 @@ describe('InitializationStateManager', () => {
 
 		it('should allow reset from completed state', () => {
 			stateManager.start();
+			stateManager.setState(INITIALIZATION_STATES.DROPIN_INITIALIZING);
+			stateManager.setState(INITIALIZATION_STATES.SESSIONS_READY);
 			stateManager.complete();
 			expect(stateManager.setState(INITIALIZATION_STATES.IDLE)).toBe(true);
 		});
@@ -415,51 +418,67 @@ describe('Helper functions', () => {
 		initializationState.reset();
 	});
 
-	describe('getInitializationState', () => {
-		it('should return current state from global instance', () => {
-			expect(getInitializationState()).toBe(INITIALIZATION_STATES.IDLE);
-
-			initializationState.start();
-			expect(getInitializationState()).toBe(INITIALIZATION_STATES.STARTING);
-		});
-	});
-
-	describe('isInitializing', () => {
-		it('should return true when global state is initializing', () => {
-			initializationState.start();
-			expect(isInitializing()).toBe(true);
+	describe('Helper functions', () => {
+		beforeEach(() => {
+			initializationState.reset();
 		});
 
-		it('should return false when global state is not initializing', () => {
-			expect(isInitializing()).toBe(false); // idle
-
-			initializationState.start();
-			initializationState.complete();
-			expect(isInitializing()).toBe(false); // completed
+		afterEach(() => {
+			initializationState.reset();
 		});
-	});
 
-	describe('isInitializationComplete', () => {
-		it('should return completion status from global instance', () => {
-			expect(isInitializationComplete()).toBe(false);
+		describe('getInitializationState', () => {
+			it('should return current state from global instance', () => {
+				expect(getInitializationState()).toBe(INITIALIZATION_STATES.IDLE);
 
-			initializationState.start();
-			initializationState.complete();
-			expect(isInitializationComplete()).toBe(true);
-		});
-	});
-
-	describe('waitForInitialization', () => {
-		it('should wait for global instance completion', async () => {
-			const promise = waitForInitialization(1000);
-
-			setTimeout(() => {
 				initializationState.start();
-				initializationState.complete();
-			}, 50);
+				expect(getInitializationState()).toBe(INITIALIZATION_STATES.STARTING);
+			});
+		});
 
-			const result = await promise;
-			expect(result).toBe(INITIALIZATION_STATES.COMPLETED);
+		describe('isInitializing', () => {
+			it('should return true when global state is initializing', () => {
+				initializationState.start();
+				expect(isInitializing()).toBe(true);
+			});
+
+			it('should return false when global state is not initializing', () => {
+				expect(isInitializing()).toBe(false); // idle
+
+				initializationState.start();
+				initializationState.setState(INITIALIZATION_STATES.DROPIN_INITIALIZING);
+				initializationState.setState(INITIALIZATION_STATES.SESSIONS_READY);
+				initializationState.complete();
+				expect(isInitializing()).toBe(false); // completed
+			});
+		});
+
+		describe('isInitializationComplete', () => {
+			it('should return completion status from global instance', () => {
+				expect(isInitializationComplete()).toBe(false);
+
+				initializationState.start();
+				initializationState.setState(INITIALIZATION_STATES.DROPIN_INITIALIZING);
+				initializationState.setState(INITIALIZATION_STATES.SESSIONS_READY);
+				initializationState.complete();
+				expect(isInitializationComplete()).toBe(true);
+			});
+		});
+
+		describe('waitForInitialization', () => {
+			it('should wait for global instance completion', async () => {
+				const promise = waitForInitialization(1000);
+
+				setTimeout(() => {
+					initializationState.start();
+					initializationState.setState(INITIALIZATION_STATES.DROPIN_INITIALIZING);
+					initializationState.setState(INITIALIZATION_STATES.SESSIONS_READY);
+					initializationState.complete();
+				}, 50);
+
+				const result = await promise;
+				expect(result).toBe(INITIALIZATION_STATES.COMPLETED);
+			});
 		});
 	});
 });
