@@ -11,6 +11,15 @@ import {
 	isInitializing
 } from '../utils/initialization-state.js';
 
+// Storage key constants
+const BROWSER_ID_KEY = 'FLDID';
+const PAYMENT_KEY = 'FPKEY';
+const PAYMENT_SESSION_KEY = 'FPS';
+const PARENT_UTM_KEY = 'FPARUTM';
+const SESSION_CART_KEY = 'FSSCAR';
+const C2P_ACCESS_TOKEN_KEY = 'FWC2P';
+const PAYMENT_KEY_FETCH_TIMEOUT_MS = 3000;
+
 //#region Session Storage
 
 // Session Storage checks
@@ -90,7 +99,7 @@ function createOrResetCartHealtCheckTimer(platform, domain, minutes = 15) {
 }
 
 function getBrowserId() {
-	const value = localStorage.getItem('FLDID');
+	const value = localStorage.getItem(BROWSER_ID_KEY);
 	if (value) {
 		return value;
 	}
@@ -98,7 +107,7 @@ function getBrowserId() {
 }
 
 function setBrowserId(value) {
-	localStorage.setItem('FLDID', value);
+	localStorage.setItem(BROWSER_ID_KEY, value);
 }
 
 function initBrowserId() {
@@ -430,7 +439,7 @@ async function rsaEncrypt(inputData) {
 //#region Payment API functions
 
 function getPaymentKey() {
-	const value = sessionStorage.getItem('FPKEY');
+	const value = sessionStorage.getItem(PAYMENT_KEY);
 	if (value) {
 		return JSON.parse(value);
 	}
@@ -439,11 +448,11 @@ function getPaymentKey() {
 
 function setPaymentKey(value) {
 	const js = JSON.stringify(value);
-	sessionStorage.setItem('FPKEY', js);
+	sessionStorage.setItem(PAYMENT_KEY, js);
 }
 
 function getCCServer() {
-	const value = sessionStorage.getItem('FPS');
+	const value = sessionStorage.getItem(PAYMENT_SESSION_KEY);
 	if (value) {
 		return value;
 	}
@@ -451,12 +460,12 @@ function getCCServer() {
 }
 
 function setCCServer(value) {
-	sessionStorage.setItem('FPS', value);
+	sessionStorage.setItem(PAYMENT_SESSION_KEY, value);
 }
 
 function clearPaymentSession() {
-	sessionStorage.removeItem('FPS');
-	sessionStorage.removeItem('FPKEY');
+	sessionStorage.removeItem(PAYMENT_SESSION_KEY);
+	sessionStorage.removeItem(PAYMENT_KEY);
 }
 
 function getCCUrl(suffix) {
@@ -478,7 +487,10 @@ async function paymentInitialize(ccServer) {
 		if (!paymentKey) {
 			try {
 				const controller = new AbortController();
-				const timeoutId = setTimeout(() => controller.abort(), 3000);
+				const timeoutId = setTimeout(
+					() => controller.abort(),
+					PAYMENT_KEY_FETCH_TIMEOUT_MS
+				);
 
 				let pay = await browserFetch(`${ccServer}/api/v1/payment/key`, {
 					...defaultOptions,
@@ -493,6 +505,7 @@ async function paymentInitialize(ccServer) {
 				}
 			} catch (error) {
 				// Payment key fetch failed - continue without payment key
+				console.warn('Payment key fetch failed:', error);
 				return;
 			}
 		}
@@ -503,6 +516,7 @@ async function paymentInitialize(ccServer) {
 				firmly.paymentJWKKey = paymentKey;
 			} catch (error) {
 				// Payment key processing failed
+				console.warn('Payment key processing failed:', error);
 			}
 		}
 	}
@@ -632,7 +646,7 @@ export async function initializeAppVersion(version, appname = 'dropin-service') 
 }
 */
 function getSessionParentUTM() {
-	const value = sessionStorage.getItem('FPARUTM');
+	const value = sessionStorage.getItem(PARENT_UTM_KEY);
 	if (value) {
 		return JSON.parse(value);
 	}
@@ -641,7 +655,7 @@ function getSessionParentUTM() {
 
 function setSessionParentUTM(value) {
 	const js = JSON.stringify(value);
-	sessionStorage.setItem('FPARUTM', js);
+	sessionStorage.setItem(PARENT_UTM_KEY, js);
 }
 
 const TAG_LIST = [
@@ -675,7 +689,7 @@ export async function initializeParentInfo(parentInfo) {
 
 //#region Cart API functions
 function getSessionCart() {
-	const value = sessionStorage.getItem('FSSCAR');
+	const value = sessionStorage.getItem(SESSION_CART_KEY);
 	if (value) {
 		return JSON.parse(value);
 	}
@@ -684,7 +698,7 @@ function getSessionCart() {
 
 function setSessionCart(value) {
 	const js = JSON.stringify(value);
-	sessionStorage.setItem('FSSCAR', js);
+	sessionStorage.setItem(SESSION_CART_KEY, js);
 }
 
 function getDomainUrl(suffix, domain) {
@@ -1135,7 +1149,7 @@ async function walletUnlockComplete(walletType, walletAccessToken, otp, parentCo
 //#region Click to Pay Wallet
 
 function getC2PAccessToken() {
-	const value = sessionStorage.getItem('FWC2P');
+	const value = sessionStorage.getItem(C2P_ACCESS_TOKEN_KEY);
 	if (value) {
 		return value;
 	}
@@ -1143,7 +1157,7 @@ function getC2PAccessToken() {
 }
 
 function setC2PAccessToken(value) {
-	sessionStorage.setItem('FWC2P', value);
+	sessionStorage.setItem(C2P_ACCESS_TOKEN_KEY, value);
 }
 
 let CLICK_2_PAY = 'visa';

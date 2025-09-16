@@ -74,8 +74,9 @@ async function initializeSDKSession(appId, apiServer) {
 					}
 				}
 			})
-			.catch(() => {
+			.catch((error) => {
 				// JWT initialization failed - will retry on demand
+				console.warn('SDK session initialization failed', error);
 			});
 
 		sdkInitialized = true;
@@ -647,6 +648,7 @@ export async function bootstrap() {
 		if (uuidRegex.test(appId)) {
 			// Initialize SDK session management for auto-initialization (non-blocking)
 			initializeSDKSession(appId, apiServer).catch((error) => {
+				console.warn('SDK auto-initialization failed:', error);
 				initializationState.addError(error);
 			});
 

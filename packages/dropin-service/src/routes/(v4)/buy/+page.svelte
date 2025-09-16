@@ -171,11 +171,6 @@
 		try {
 			console.log('onAddToCart called with payload:', transferPayload);
 
-			// Prevent any default actions or navigation
-			if (event && event.preventDefault) {
-				event.preventDefault();
-			}
-
 			showCheckout = true;
 			pageState = 'checkout';
 
@@ -539,7 +534,7 @@
 					if (typeof cleanup === 'function') {
 						cleanup();
 					}
-				} catch (error) {
+				} catch {
 					// Silently handle cleanup errors
 				}
 			});

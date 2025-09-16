@@ -3,6 +3,9 @@
  * Handles browser sessions and JWT tokens with minimal complexity
  */
 
+// Session expiration buffer in seconds (5 minutes)
+const SESSION_EXPIRATION_BUFFER_SECONDS = 300;
+
 export class SessionManager {
 	constructor(options = {}) {
 		this.storagePrefix = options.storagePrefix || 'FBS';
@@ -82,7 +85,7 @@ export class SessionManager {
 		if (!sessionToCheck?.expires) return false;
 
 		const currentTime = Math.floor(Date.now() / 1000);
-		return sessionToCheck.expires > currentTime + 300; // 5 minute buffer
+		return sessionToCheck.expires > currentTime + SESSION_EXPIRATION_BUFFER_SECONDS;
 	}
 
 	async fetchBrowserSession(appId, apiServer, options = {}) {
