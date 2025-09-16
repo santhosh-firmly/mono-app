@@ -4,6 +4,12 @@ import { platformsToMakeCartHealthCheck } from './api-config';
 import { postUpdateCart } from './cross';
 import { importJWK, CompactEncrypt } from 'foundation/auth/ext-jose.js';
 import { trackUXEvent, trackAPIEvent, trackError, getSessionTraceId } from './telemetry.js';
+import { dropinSessionManager, SESSION_CONFIG } from '../utils/session-manager.js';
+import {
+	initializationState,
+	INITIALIZATION_STATES,
+	isInitializing
+} from '../utils/initialization-state.js';
 
 //#region Session Storage
 
@@ -57,8 +63,6 @@ class InMemory {
 let sessionStorage = new InMemory();
 let localStorage = new InMemory();
 
-let currentBrowserSession;
-
 //#endregion
 
 //#region Telemetry
@@ -85,9 +89,8 @@ function createOrResetCartHealtCheckTimer(platform, domain, minutes = 15) {
 	}
 }
 
-const BROWSER_ID = 'FLDID';
 function getBrowserId() {
-	const value = localStorage.getItem(BROWSER_ID);
+	const value = localStorage.getItem(SESSION_CONFIG.STORAGE.BROWSER_ID);
 	if (value) {
 		return value;
 	}
@@ -95,7 +98,7 @@ function getBrowserId() {
 }
 
 function setBrowserId(value) {
-	localStorage.setItem(BROWSER_ID, value);
+	localStorage.setItem(SESSION_CONFIG.STORAGE.BROWSER_ID, value);
 }
 
 function initBrowserId() {
@@ -264,13 +267,12 @@ const defaultOptions = {
 };
 
 let ongoingRequest;
-let initializationPhase = true; // Allow parallel requests during initialization
 
 // Do not allow the UI to call firmly services in parallel.
 // Firmly services are not transactional and do not control parallel access by itself.
 async function semaphore(func) {
 	// Skip semaphore during initialization phase for better performance
-	if (initializationPhase) {
+	if (isInitializing()) {
 		return await func();
 	}
 
@@ -427,9 +429,8 @@ async function rsaEncrypt(inputData) {
 
 //#region Payment API functions
 
-const PAYMENT_KEY = 'FPKEY';
 function getPaymentKey() {
-	const value = sessionStorage.getItem(PAYMENT_KEY);
+	const value = sessionStorage.getItem(SESSION_CONFIG.STORAGE.PAYMENT_KEY);
 	if (value) {
 		return JSON.parse(value);
 	}
@@ -438,12 +439,11 @@ function getPaymentKey() {
 
 function setPaymentKey(value) {
 	const js = JSON.stringify(value);
-	sessionStorage.setItem(PAYMENT_KEY, js);
+	sessionStorage.setItem(SESSION_CONFIG.STORAGE.PAYMENT_KEY, js);
 }
 
-const CC_SERVER = 'FPS';
 function getCCServer() {
-	const value = sessionStorage.getItem(CC_SERVER);
+	const value = sessionStorage.getItem(SESSION_CONFIG.STORAGE.CC_SERVER);
 	if (value) {
 		return value;
 	}
@@ -451,12 +451,12 @@ function getCCServer() {
 }
 
 function setCCServer(value) {
-	sessionStorage.setItem(CC_SERVER, value);
+	sessionStorage.setItem(SESSION_CONFIG.STORAGE.CC_SERVER, value);
 }
 
 function clearPaymentSession() {
-	sessionStorage.removeItem(CC_SERVER);
-	sessionStorage.removeItem(PAYMENT_KEY);
+	sessionStorage.removeItem(SESSION_CONFIG.STORAGE.CC_SERVER);
+	sessionStorage.removeItem(SESSION_CONFIG.STORAGE.PAYMENT_KEY);
 }
 
 function getCCUrl(suffix) {
@@ -479,7 +479,10 @@ async function paymentInitialize(ccServer) {
 			try {
 				// Add timeout to prevent blocking
 				const controller = new AbortController();
-				const timeoutId = setTimeout(() => controller.abort(), 3000);
+				const timeoutId = setTimeout(
+					() => controller.abort(),
+					SESSION_CONFIG.TIMEOUTS.PAYMENT_KEY
+				);
 
 				let pay = await browserFetch(`${ccServer}/api/v1/payment/key`, {
 					...defaultOptions,
@@ -517,90 +520,34 @@ async function paymentInitialize(ccServer) {
 
 //#region Browser Session API functions
 
-const BROWSER_SESSION = 'FBS';
-function getBrowserSession() {
-	const lbs = localStorage.getItem(BROWSER_SESSION);
-	let lbj = null;
-	if (lbs) {
-		lbj = JSON.parse(lbs);
-	}
-	return currentBrowserSession || lbj || null;
-}
-
-/**
- * Set browser session both on local storage and locally (in case local storage or cookies are blocked)
- * @param {*} browserSession
- */
-function setBrowserSession(browserSession) {
-	currentBrowserSession = browserSession;
-	const stringifiedBrowserSession = JSON.stringify(browserSession);
-	localStorage.setItem(BROWSER_SESSION, stringifiedBrowserSession);
-}
-
-const SESSION_ID = 'FRSID';
-function getSessionId() {
-	const value = sessionStorage.getItem(SESSION_ID);
-	if (value) {
-		return value;
-	}
-	return null;
-}
-
-function setSessionId(value) {
-	sessionStorage.setItem(SESSION_ID, value);
-}
-
 function initSessionId() {
-	let id = getSessionId();
-	if (!id) {
-		id = 's' + getRandomId();
-		setSessionId(id);
-		window.firmly.isNewSessionId = true;
-	} else {
-		window.firmly.isNewSessionId = false;
-	}
-
-	return id;
-}
-
-// The static Date.now() method returns the number of milliseconds elapsed since January 1, 1970 00:00:00 UTC
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now
-function getSecondsSinceEpoch() {
-	return ~~(Date.now() / 1000);
+	const result = dropinSessionManager.initializeSessionId();
+	window.firmly.isNewSessionId = result.isNew;
+	return result.sessionId;
 }
 
 async function fetchBrowserSession() {
-	const firmly = window.firmly;
+	try {
+		const session = await dropinSessionManager.fetchBrowserSession(
+			window.firmly.appId,
+			window.firmly.apiServer,
+			{
+				onDeviceCreated: (sessionData) => {
+					window.firmly.deviceId = sessionData.device_id;
+					trackUXEvent('deviceCreated');
+				}
+			}
+		);
 
-	const requestOptions = {
-		method: 'POST',
-		headers: {
-			'x-firmly-app-id': firmly.appId,
-			'Content-type': 'application/json'
+		if (session?.device_id) {
+			window.firmly.deviceId = session.device_id;
 		}
-	};
 
-	const accessToken = currentBrowserSession?.access_token;
-
-	if (accessToken) {
-		requestOptions.headers['Content-Type'] = 'application/json';
-		requestOptions.body = JSON.stringify({
-			access_token: accessToken
-		});
+		return session;
+	} catch (error) {
+		console.error('Failed to fetch browser session:', error);
+		return null;
 	}
-
-	const ret = await browserFetch(`${firmly.apiServer}/api/v1/browser-session`, requestOptions);
-
-	if (ret.status == 200) {
-		setBrowserSession(ret.data);
-		firmly.deviceId = ret.data.device_id;
-		if (ret.data.device_created) {
-			trackUXEvent('deviceCreated');
-		}
-		return ret.data;
-	}
-
-	return null;
 }
 
 async function sessionGetAllActiveCarts(excludes = []) {
@@ -627,24 +574,21 @@ async function getApiAccessToken() {
 		}
 	}
 
-	// Fallback to dropin's own session management
-	let session = getBrowserSession();
-	if (!session || session.expires - 300 <= getSecondsSinceEpoch()) {
-		session = await fetchBrowserSession();
+	// Fallback to dropin's own session management using shared session manager
+	try {
+		return await dropinSessionManager.getAccessToken(
+			window.firmly?.appId,
+			window.firmly?.apiServer,
+			{ allowStaleToken: true }
+		);
+	} catch (error) {
+		console.warn('Dropin session management failed:', error);
+		return null;
 	}
-
-	if (session) {
-		return session.access_token;
-	}
-	return null;
 }
 
 function getDeviceId() {
-	let session = getBrowserSession();
-	if (session) {
-		return session.device_id;
-	}
-	return null;
+	return dropinSessionManager.getDeviceId();
 }
 
 export async function initialize(appId, apiServer, domain = null) {
@@ -665,6 +609,9 @@ export async function initialize(appId, apiServer, domain = null) {
 	// performanceInit(); // Removed to stop api-PerformanceResourceTiming events
 	mutationInit();
 
+	// Update initialization state
+	initializationState.setState(INITIALIZATION_STATES.PAYMENT_INITIALIZING);
+
 	// initialize payment keys in background (non-blocking)
 	paymentInitialize(firmly.ccServer).catch((error) => {
 		console.warn('Payment initialization delayed:', error);
@@ -672,23 +619,19 @@ export async function initialize(appId, apiServer, domain = null) {
 
 	// initialize browser session - only if SDK hasn't already initialized it
 	if (!firmly.sdk || !firmly.sdk.getApiAccessToken) {
+		initializationState.setState(INITIALIZATION_STATES.SESSIONS_READY);
+
 		// Initialize session in background without blocking
 		getApiAccessToken()
 			.then(() => {
 				if (firmly.isNewSessionId) {
 					trackUXEvent('sessionStart');
 				}
-				// End initialization phase after session is ready
-				setTimeout(() => {
-					initializationPhase = false;
-				}, 100);
+				initializationState.complete({ source: 'dropin' });
 			})
 			.catch((error) => {
 				console.warn('Dropin session initialization delayed:', error);
-				// End initialization phase even on error
-				setTimeout(() => {
-					initializationPhase = false;
-				}, 100);
+				initializationState.addError(error, { source: 'dropin-session' });
 			});
 	} else {
 		// SDK is managing the session, verify token availability in background
@@ -697,17 +640,11 @@ export async function initialize(appId, apiServer, domain = null) {
 				if (!token) {
 					console.warn('SDK initialized but no token available');
 				}
-				// End initialization phase after token check
-				setTimeout(() => {
-					initializationPhase = false;
-				}, 100);
+				initializationState.complete({ source: 'dropin-with-sdk' });
 			})
 			.catch((error) => {
 				console.warn('Token verification delayed:', error);
-				// End initialization phase even on error
-				setTimeout(() => {
-					initializationPhase = false;
-				}, 100);
+				initializationState.addError(error, { source: 'dropin-token-verification' });
 			});
 	}
 }
@@ -737,9 +674,8 @@ export async function initializeAppVersion(version, appname = 'dropin-service') 
 	"version": "0.0.79"
 }
 */
-const PARENT_UTM = 'FPARUTM';
 function getSessionParentUTM() {
-	const value = sessionStorage.getItem(PARENT_UTM);
+	const value = sessionStorage.getItem(SESSION_CONFIG.STORAGE.PARENT_UTM);
 	if (value) {
 		return JSON.parse(value);
 	}
@@ -748,7 +684,7 @@ function getSessionParentUTM() {
 
 function setSessionParentUTM(value) {
 	const js = JSON.stringify(value);
-	sessionStorage.setItem(PARENT_UTM, js);
+	sessionStorage.setItem(SESSION_CONFIG.STORAGE.PARENT_UTM, js);
 }
 
 const TAG_LIST = [
@@ -781,9 +717,8 @@ export async function initializeParentInfo(parentInfo) {
 //#endregion
 
 //#region Cart API functions
-const SESSION_CART = 'FSSCAR';
 function getSessionCart() {
-	const value = sessionStorage.getItem(SESSION_CART);
+	const value = sessionStorage.getItem(SESSION_CONFIG.STORAGE.SESSION_CART);
 	if (value) {
 		return JSON.parse(value);
 	}
@@ -792,7 +727,7 @@ function getSessionCart() {
 
 function setSessionCart(value) {
 	const js = JSON.stringify(value);
-	sessionStorage.setItem(SESSION_CART, js);
+	sessionStorage.setItem(SESSION_CONFIG.STORAGE.SESSION_CART, js);
 }
 
 function getDomainUrl(suffix, domain) {
@@ -820,16 +755,21 @@ async function getHeaders() {
 		}
 	}
 
-	// Fallback to dropin's own header generation
-	const auth = await getApiAccessToken();
-	const ret = {
-		headers: {
-			'Content-Type': 'application/json',
-			'x-firmly-authorization': auth
-		}
-	};
-
-	return ret;
+	// Fallback to dropin's own header generation using shared session manager
+	try {
+		return await dropinSessionManager.getAuthHeaders(
+			window.firmly?.appId,
+			window.firmly?.apiServer,
+			{ allowStaleToken: true }
+		);
+	} catch (error) {
+		console.warn('Failed to get dropin headers:', error);
+		return {
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		};
+	}
 }
 
 async function cartSessionTransfer(body, domain, parentContext = null) {
@@ -1253,9 +1193,8 @@ async function walletUnlockComplete(walletType, walletAccessToken, otp, parentCo
 
 //#region Click to Pay Wallet
 
-const WALLET_C2P_ACCESS_TOKEN = 'FWC2P';
 function getC2PAccessToken() {
-	const value = sessionStorage.getItem(WALLET_C2P_ACCESS_TOKEN);
+	const value = sessionStorage.getItem(SESSION_CONFIG.STORAGE.WALLET_C2P_ACCESS_TOKEN);
 	if (value) {
 		return value;
 	}
@@ -1263,7 +1202,7 @@ function getC2PAccessToken() {
 }
 
 function setC2PAccessToken(value) {
-	sessionStorage.setItem(WALLET_C2P_ACCESS_TOKEN, value);
+	sessionStorage.setItem(SESSION_CONFIG.STORAGE.WALLET_C2P_ACCESS_TOKEN, value);
 }
 
 let CLICK_2_PAY = 'visa';

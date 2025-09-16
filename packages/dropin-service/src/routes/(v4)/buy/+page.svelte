@@ -9,7 +9,7 @@
 	} from '$lib-v4/browser/api-firmly.js';
 	import { trackUXEvent } from '$lib-v4/browser/telemetry.js';
 	import { postCheckoutClosed, postOrderPlaced } from '$lib-v4/browser/cross.js';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import FlowSinglePage from '$lib-v4/components/v4/flow-single-page.svelte';
 	import { writable } from 'svelte/store';
 	import ThankYouPage from '$lib-v4/components/v4/thank-you-page.svelte';
@@ -29,6 +29,11 @@
 	import { startMasterCardUnifiedSolution } from '$lib-v4/clients/mastercard';
 	import Visa from '$lib-v4/clients/visa.svelte';
 	import { getNestedUrlParam } from '$lib-v4/utils.js';
+	import { SESSION_CONFIG } from '$lib-v4/utils/session-manager.js';
+	import {
+		initializationState,
+		INITIALIZATION_STATES
+	} from '$lib-v4/utils/initialization-state.js';
 
 	let { data } = $props();
 
@@ -53,6 +58,8 @@
 	let layout = $state(FullscreenLayout);
 	let layoutTransitionTime = $state();
 	let isLayoutActive = $state(true);
+	
+	let eventListeners = [];
 
 	function initializeTheme(theme) {
 		if (theme) {
@@ -198,7 +205,10 @@
 
 				// Add timeout to prevent hanging
 				const controller = new AbortController();
-				const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+				const timeoutId = setTimeout(
+					() => controller.abort(),
+					SESSION_CONFIG.TIMEOUTS.PRODUCT_DETAILS
+				);
 
 				const resp = await fetch(
 					`${data.PUBLIC_cf_server}/api/v1/domains-pdp?url=${decodedUrl}`,
@@ -241,7 +251,7 @@
 			pageState = 'pdp';
 
 			// Listen for the message from the ECS Service
-			bindEvent(window, 'message', (e) => {
+			const messageHandler = (e) => {
 				let data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
 
 				if (data?.action) {
@@ -276,7 +286,10 @@
 						console.log('Firmly message bind error', ex);
 					}
 				}
-			});
+			};
+
+			bindEvent(window, 'message', messageHandler);
+			eventListeners.push(() => window.removeEventListener('message', messageHandler));
 
 			// Add ECS Service in iFrame
 			ecsUrl = getEcsUrl(url);
@@ -422,26 +435,36 @@
 	}
 
 	onMount(async () => {
+		// Start initialization tracking
+		initializationState.start({ route: '/buy' });
+
 		// Initialize the dropin session immediately - don't wait for SDK
 		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server);
 		initializeAppVersion(version);
 
 		// Initialize SDK in parallel (non-blocking)
 		const initSDK = async () => {
+			initializationState.setState(INITIALIZATION_STATES.SDK_LOADING);
+
 			let attempts = 0;
-			while (attempts < 10) {
-				// Reduced from 50 to 10 attempts (1 second max)
+			const maxAttempts = 10; // 1 second max
+
+			while (attempts < maxAttempts) {
 				if (window.firmly && window.firmly.sdk) {
 					try {
+						initializationState.setState(INITIALIZATION_STATES.SDK_INITIALIZING);
+
 						await window.firmly.sdk.init({
 							env: { apiServer: data.PUBLIC_cf_server },
 							appId: data.PUBLIC_api_id,
 							isDropIn: false
 						});
+
 						console.log('SDK initialized successfully for JWT management');
 						return;
 					} catch (error) {
 						console.error('Failed to initialize SDK:', error);
+						initializationState.addError(error, { source: 'sdk-init' });
 						return;
 					}
 				}
@@ -497,6 +520,8 @@
 		if (!isProduction && window.location?.hostname?.includes('lvh.me')) {
 			setTimeout(async () => {
 				console.log('🔧 Development mode: JWT SDK initialized');
+				console.log('Initialization state:', initializationState.getSummary());
+
 				if (window.firmly?.sdk?.getApiAccessToken) {
 					const token = await window.firmly.sdk.getApiAccessToken();
 					console.log('✅ JWT token available:', !!token);
@@ -516,6 +541,18 @@
 			}, layoutTransitionTime);
 		}
 	}
+
+	// Cleanup event listeners on component destroy
+	onDestroy(() => {
+		eventListeners.forEach((cleanup) => {
+			try {
+				cleanup();
+			} catch (error) {
+				console.warn('Error cleaning up event listener:', error);
+			}
+		});
+		eventListeners = [];
+	});
 
 	function onBackClick() {
 		trackUXEvent('back_button_clicked');
