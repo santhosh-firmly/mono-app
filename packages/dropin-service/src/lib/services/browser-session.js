@@ -1,17 +1,9 @@
 /**
  * @fileoverview Browser session functions for managing user sessions.
- * This is a legacy compatibility layer that uses shared session utilities.
+ * This is a legacy compatibility layer that uses the simplified SessionManager.
  */
 
-import {
-	getApiAccessToken as getApiAccessTokenUtil,
-	getAuthHeaders as getAuthHeadersUtil,
-	initializeSession,
-	getDeviceId as getDeviceIdUtil,
-	initializeSessionId as initializeSessionIdUtil,
-	SESSION_CONTEXT
-} from '../../lib-v4/utils/session-utils.js';
-import { dropinSessionManager } from '../../lib-v4/utils/session-manager.js';
+import { sessionManager } from '../../lib-v4/utils/session-manager.js';
 import { telemetryDeviceCreated } from './telemetry';
 
 /**
@@ -19,15 +11,15 @@ import { telemetryDeviceCreated } from './telemetry';
  * @returns {object|null} The browser session object, or null if not found.
  */
 export function getBrowserSession() {
-	return dropinSessionManager.getStoredSession();
+	return sessionManager.getStoredSession();
 }
 
 /**
- * Sets the browser session in local storage and the current session.
+ * Sets the browser session in local storage and memory.
  * @param {object} browserSession The browser session object to set.
  */
 export function setBrowserSession(browserSession) {
-	dropinSessionManager.setStoredSession(browserSession);
+	sessionManager.setStoredSession(browserSession);
 }
 
 /**
@@ -35,7 +27,7 @@ export function setBrowserSession(browserSession) {
  * @returns {string|null} The session ID, or null if not found.
  */
 export function getSessionId() {
-	return dropinSessionManager.getSessionId();
+	return sessionManager.getSessionId();
 }
 
 /**
@@ -43,57 +35,99 @@ export function getSessionId() {
  * @param {string} value The session ID to set.
  */
 export function setSessionId(value) {
-	dropinSessionManager.setSessionId(value);
+	sessionManager.setSessionId(value);
 }
 
 /**
- * Initializes the session ID, creating a new one if it doesn't exist.
+ * Initializes the session ID if it doesn't exist.
  * @returns {string} The initialized session ID.
  */
 export function initSessionId() {
-	const result = initializeSessionIdUtil(SESSION_CONTEXT.DROPIN);
+	const result = sessionManager.initializeSessionId();
+	if (window.firmly) {
+		window.firmly.isNewSessionId = result.isNew;
+	}
 	return result.sessionId;
 }
 
 /**
- * Gets the number of seconds since the epoch.
+ * Gets the current timestamp in seconds since the epoch.
  * @returns {number} The number of seconds since the epoch.
  */
 export function getSecondsSinceEpoch() {
-	return dropinSessionManager.getSecondsSinceEpoch();
+	return Math.floor(Date.now() / 1000);
 }
 
 /**
- * Fetches the browser session from the server.
+ * Fetches a new browser session from the server.
  * @returns {Promise<object|null>} The browser session object, or null if the fetch fails.
  */
 export async function fetchBrowserSession() {
-	return await initializeSession(SESSION_CONTEXT.DROPIN, (sessionData) => {
-		window.firmly.deviceId = sessionData.device_id;
-		telemetryDeviceCreated();
-	});
+	if (!window.firmly?.appId || !window.firmly?.apiServer) return null;
+
+	try {
+		const session = await sessionManager.fetchBrowserSession(
+			window.firmly.appId,
+			window.firmly.apiServer,
+			{
+				onDeviceCreated: (sessionData) => {
+					window.firmly.deviceId = sessionData.device_id;
+					telemetryDeviceCreated();
+				}
+			}
+		);
+		return session;
+	} catch (error) {
+		return null;
+	}
 }
 
 /**
- * Gets the API access token, fetching a new session if necessary.
+ * Gets the API access token, fetching a new session if needed.
  * @returns {Promise<string|null>} The API access token, or null if not available.
  */
 export async function getApiAccessToken() {
-	return await getApiAccessTokenUtil(SESSION_CONTEXT.DROPIN);
+	if (!window.firmly?.appId || !window.firmly?.apiServer) return null;
+
+	try {
+		return await sessionManager.getAccessToken(window.firmly.appId, window.firmly.apiServer, {
+			allowStaleToken: true
+		});
+	} catch (error) {
+		return null;
+	}
 }
 
 /**
- * Gets the device ID from the browser session.
+ * Gets the device ID from the current session.
  * @returns {string|null} The device ID, or null if not found.
  */
 export function getDeviceId() {
-	return getDeviceIdUtil(SESSION_CONTEXT.DROPIN);
+	return sessionManager.getDeviceId();
 }
 
 /**
- * Gets the headers for API requests, including the access token.
+ * Gets headers with the API access token for authenticated requests.
  * @returns {Promise<object>} The headers object with the access token.
  */
 export async function getHeaders() {
-	return await getAuthHeadersUtil(SESSION_CONTEXT.DROPIN);
+	if (!window.firmly?.appId || !window.firmly?.apiServer) {
+		return {
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		};
+	}
+
+	try {
+		return await sessionManager.getAuthHeaders(window.firmly.appId, window.firmly.apiServer, {
+			allowStaleToken: true
+		});
+	} catch (error) {
+		return {
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		};
+	}
 }

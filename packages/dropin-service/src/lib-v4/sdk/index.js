@@ -8,26 +8,47 @@ import { getAllOrders } from './orders.js';
 import { convertToFirmlyDomain } from '../utils/domain-utils.js';
 import { sdkSessionManager } from '../utils/session-manager.js';
 import { initializationState, INITIALIZATION_STATES } from '../utils/initialization-state.js';
-import {
-	getApiAccessToken as getApiAccessTokenUtil,
-	getAuthHeaders as getAuthHeadersUtil,
-	SESSION_CONTEXT
-} from '../utils/session-utils.js';
 
 let sdkInitialized = false;
+let globalMessageListener = null;
 
 export async function getApiAccessToken() {
-	return await getApiAccessTokenUtil(SESSION_CONTEXT.SDK, {
-		onDeviceCreated: (sessionData) => {
-			if (window.firmly) {
-				window.firmly.deviceId = sessionData.device_id;
+	if (!window.firmly?.appId || !window.firmly?.apiServer) return null;
+
+	try {
+		return await sdkSessionManager.getAccessToken(
+			window.firmly.appId,
+			window.firmly.apiServer,
+			{
+				allowStaleToken: true,
+				onDeviceCreated: (sessionData) => {
+					if (window.firmly) {
+						window.firmly.deviceId = sessionData.device_id;
+					}
+				}
 			}
-		}
-	});
+		);
+	} catch (error) {
+		return null;
+	}
 }
 
 export async function getHeaders() {
-	return await getAuthHeadersUtil(SESSION_CONTEXT.SDK);
+	if (!window.firmly?.appId || !window.firmly?.apiServer) {
+		return { headers: { 'Content-Type': 'application/json' } };
+	}
+
+	try {
+		return await sdkSessionManager.getAuthHeaders(
+			window.firmly.appId,
+			window.firmly.apiServer,
+			{
+				allowStaleToken: true
+			}
+		);
+	} catch (error) {
+		return { headers: { 'Content-Type': 'application/json' } };
+	}
 }
 
 async function initializeSDKSession(appId, apiServer) {
@@ -38,13 +59,12 @@ async function initializeSDKSession(appId, apiServer) {
 		window.firmly.appId = appId;
 		window.firmly.apiServer = apiServer;
 
-		// Initialize session ID
 		const { sessionId, isNew } = sdkSessionManager.initializeSessionId();
 		if (window.firmly) {
 			window.firmly.isNewSessionId = isNew;
 		}
 
-		// Initialize JWT in background without blocking
+		// Initialize JWT in background
 		sdkSessionManager
 			.getAccessToken(appId, apiServer, {
 				allowStaleToken: true,
@@ -54,8 +74,8 @@ async function initializeSDKSession(appId, apiServer) {
 					}
 				}
 			})
-			.catch((error) => {
-				console.warn('JWT initialization delayed:', error);
+			.catch(() => {
+				// JWT initialization failed - will retry on demand
 			});
 
 		sdkInitialized = true;
@@ -244,9 +264,8 @@ export async function bootstrap() {
 		return;
 	}
 
-	// Start initialization state tracking
-	initializationState.start({ source: 'bootstrap' });
-	initializationState.setState(INITIALIZATION_STATES.SDK_LOADING);
+	initializationState.start();
+	initializationState.setState(INITIALIZATION_STATES.SDK_READY);
 
 	initWindowFirmly();
 
@@ -265,7 +284,7 @@ export async function bootstrap() {
 
 				refreshSession: async () => {
 					if (window.firmly?.appId && window.firmly?.apiServer) {
-						return await sdkSessionManager.refreshSession(
+						return await sdkSessionManager.fetchBrowserSession(
 							window.firmly.appId,
 							window.firmly.apiServer
 						);
@@ -295,24 +314,17 @@ export async function bootstrap() {
 					throw new Error('Please specify a valid appId');
 				}
 
-				initializationState.setState(INITIALIZATION_STATES.SDK_INITIALIZING, {
-					appId: config.appId,
-					apiServer: config.env.apiServer
-				});
+				initializationState.setState(INITIALIZATION_STATES.SDK_READY);
 
-				// Initialize SDK session management first
 				await initializeSDKSession(config.appId, config.env.apiServer);
 
-				initializationState.setState(INITIALIZATION_STATES.DROPIN_INITIALIZING);
+				initializationState.setState(INITIALIZATION_STATES.DROPIN_READY);
 
-				// Then initialize the dropin system
 				await initialize(config.appId, config.env.apiServer);
 
 				if (config.isDropIn) {
 					setupDropinCheckout(config.dropInUrl);
 				}
-
-				initializationState.setState(INITIALIZATION_STATES.SESSIONS_READY);
 			},
 			CartUI: {
 				openCart: async function () {
@@ -526,12 +538,18 @@ export async function bootstrap() {
 				try {
 					await initializeSDKSession(window.firmly.appId, window.firmly.apiServer);
 				} catch (error) {
-					console.error('Failed to initialize SDK session for /buy route:', error);
+					// SDK session initialization failed - will retry on demand
 				}
 			}
 		};
 
-		bindEvent(window, 'message', async (event) => {
+		// Remove existing global message listener if it exists
+		if (globalMessageListener) {
+			window.removeEventListener('message', globalMessageListener);
+		}
+
+		// Create new global message listener
+		globalMessageListener = async (event) => {
 			if (event.data.action === 'firmly::executeSessionTransfer') {
 				window.firmly.sdk.CartUI.openCart();
 
@@ -607,14 +625,17 @@ export async function bootstrap() {
 								);
 							}
 						} catch (error) {
-							console.error('Failed to provide JWT to dropin:', error);
+							// JWT provision failed
 						}
 					}
 				} catch (e) {
 					//ignored
 				}
 			}
-		});
+		};
+
+		// Bind the global message listener
+		bindEvent(window, 'message', globalMessageListener);
 
 		window.firmly.sdk.CartUI.onOpenCart('end', function () {
 			isOpen = true;
@@ -626,8 +647,7 @@ export async function bootstrap() {
 		if (uuidRegex.test(appId)) {
 			// Initialize SDK session management for auto-initialization (non-blocking)
 			initializeSDKSession(appId, apiServer).catch((error) => {
-				console.error('Failed to initialize SDK session:', error);
-				initializationState.addError(error, { source: 'auto-init' });
+				initializationState.addError(error);
 			});
 
 			// If the condition does not match, the client must call init explicitely
@@ -640,19 +660,19 @@ export async function bootstrap() {
 
 			initPromise
 				.then(() => {
-					initializationState.complete({ source: 'bootstrap' });
+					initializationState.complete();
 				})
 				.catch((error) => {
-					initializationState.addError(error, { source: 'bootstrap' });
+					initializationState.addError(error);
 				});
 
 			return initPromise;
 		} else {
-			initializationState.complete({ source: 'bootstrap', skipped: true });
+			initializationState.complete();
 		}
 	}
 }
 
 bootstrap().catch((error) => {
-	console.error('Bootstrap initialization error:', error);
+	initializationState.addError(error);
 });

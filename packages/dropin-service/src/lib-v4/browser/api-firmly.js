@@ -4,20 +4,12 @@ import { platformsToMakeCartHealthCheck } from './api-config';
 import { postUpdateCart } from './cross';
 import { importJWK, CompactEncrypt } from 'foundation/auth/ext-jose.js';
 import { trackUXEvent, trackAPIEvent, trackError, getSessionTraceId } from './telemetry.js';
-import { dropinSessionManager, SESSION_CONFIG } from '../utils/session-manager.js';
+import { sessionManager } from '../utils/session-manager.js';
 import {
 	initializationState,
 	INITIALIZATION_STATES,
 	isInitializing
 } from '../utils/initialization-state.js';
-import {
-	getApiAccessToken as getApiAccessTokenUtil,
-	getAuthHeaders as getAuthHeadersUtil,
-	initializeSession,
-	getDeviceId as getDeviceIdUtil,
-	initializeSessionId as initializeSessionIdUtil,
-	SESSION_CONTEXT
-} from '../utils/session-utils.js';
 
 //#region Session Storage
 
@@ -98,15 +90,15 @@ function createOrResetCartHealtCheckTimer(platform, domain, minutes = 15) {
 }
 
 function getBrowserId() {
-	const value = localStorage.getItem(SESSION_CONFIG.STORAGE.BROWSER_ID);
+	const value = localStorage.getItem('FLDID');
 	if (value) {
 		return value;
 	}
-	return null;
+	return getRandomId();
 }
 
 function setBrowserId(value) {
-	localStorage.setItem(SESSION_CONFIG.STORAGE.BROWSER_ID, value);
+	localStorage.setItem('FLDID', value);
 }
 
 function initBrowserId() {
@@ -438,7 +430,7 @@ async function rsaEncrypt(inputData) {
 //#region Payment API functions
 
 function getPaymentKey() {
-	const value = sessionStorage.getItem(SESSION_CONFIG.STORAGE.PAYMENT_KEY);
+	const value = sessionStorage.getItem('FPKEY');
 	if (value) {
 		return JSON.parse(value);
 	}
@@ -447,11 +439,11 @@ function getPaymentKey() {
 
 function setPaymentKey(value) {
 	const js = JSON.stringify(value);
-	sessionStorage.setItem(SESSION_CONFIG.STORAGE.PAYMENT_KEY, js);
+	sessionStorage.setItem('FPKEY', js);
 }
 
 function getCCServer() {
-	const value = sessionStorage.getItem(SESSION_CONFIG.STORAGE.CC_SERVER);
+	const value = sessionStorage.getItem('FPS');
 	if (value) {
 		return value;
 	}
@@ -459,12 +451,12 @@ function getCCServer() {
 }
 
 function setCCServer(value) {
-	sessionStorage.setItem(SESSION_CONFIG.STORAGE.CC_SERVER, value);
+	sessionStorage.setItem('FPS', value);
 }
 
 function clearPaymentSession() {
-	sessionStorage.removeItem(SESSION_CONFIG.STORAGE.CC_SERVER);
-	sessionStorage.removeItem(SESSION_CONFIG.STORAGE.PAYMENT_KEY);
+	sessionStorage.removeItem('FPS');
+	sessionStorage.removeItem('FPKEY');
 }
 
 function getCCUrl(suffix) {
@@ -485,12 +477,8 @@ async function paymentInitialize(ccServer) {
 		let paymentKey = getPaymentKey();
 		if (!paymentKey) {
 			try {
-				// Add timeout to prevent blocking
 				const controller = new AbortController();
-				const timeoutId = setTimeout(
-					() => controller.abort(),
-					SESSION_CONFIG.TIMEOUTS.PAYMENT_KEY
-				);
+				const timeoutId = setTimeout(() => controller.abort(), 3000);
 
 				let pay = await browserFetch(`${ccServer}/api/v1/payment/key`, {
 					...defaultOptions,
@@ -504,12 +492,8 @@ async function paymentInitialize(ccServer) {
 					paymentKey = pay.data;
 				}
 			} catch (error) {
-				if (error.name === 'AbortError') {
-					console.warn('Payment key request timed out');
-				} else {
-					console.warn('Payment key fetch failed:', error);
-				}
-				return; // Exit early if payment key can't be fetched
+				// Payment key fetch failed - continue without payment key
+				return;
 			}
 		}
 
@@ -518,7 +502,7 @@ async function paymentInitialize(ccServer) {
 				firmly.paymentRSAKey = await getRSAKey(paymentKey);
 				firmly.paymentJWKKey = paymentKey;
 			} catch (error) {
-				console.warn('Payment key processing failed:', error);
+				// Payment key processing failed
 			}
 		}
 	}
@@ -529,15 +513,31 @@ async function paymentInitialize(ccServer) {
 //#region Browser Session API functions
 
 function initSessionId() {
-	const result = initializeSessionIdUtil(SESSION_CONTEXT.DROPIN);
+	const result = sessionManager.initializeSessionId();
+	if (window.firmly) {
+		window.firmly.isNewSessionId = result.isNew;
+	}
 	return result.sessionId;
 }
 
 async function fetchBrowserSession() {
-	return await initializeSession(SESSION_CONTEXT.DROPIN, (sessionData) => {
-		window.firmly.deviceId = sessionData.device_id;
-		trackUXEvent('deviceCreated');
-	});
+	if (!window.firmly?.appId || !window.firmly?.apiServer) return null;
+
+	try {
+		const session = await sessionManager.fetchBrowserSession(
+			window.firmly.appId,
+			window.firmly.apiServer,
+			{
+				onDeviceCreated: (sessionData) => {
+					window.firmly.deviceId = sessionData.device_id;
+					trackUXEvent('deviceCreated');
+				}
+			}
+		);
+		return session;
+	} catch (error) {
+		return null;
+	}
 }
 
 async function sessionGetAllActiveCarts(excludes = []) {
@@ -552,11 +552,19 @@ async function sessionGetAllActiveCarts(excludes = []) {
 }
 
 async function getApiAccessToken() {
-	return await getApiAccessTokenUtil(SESSION_CONTEXT.DROPIN);
+	if (!window.firmly?.appId || !window.firmly?.apiServer) return null;
+
+	try {
+		return await sessionManager.getAccessToken(window.firmly.appId, window.firmly.apiServer, {
+			allowStaleToken: true
+		});
+	} catch (error) {
+		return null;
+	}
 }
 
 function getDeviceId() {
-	return getDeviceIdUtil(SESSION_CONTEXT.DROPIN);
+	return sessionManager.getDeviceId();
 }
 
 export async function initialize(appId, apiServer, domain = null) {
@@ -577,28 +585,24 @@ export async function initialize(appId, apiServer, domain = null) {
 	// performanceInit(); // Removed to stop api-PerformanceResourceTiming events
 	mutationInit();
 
-	// Update initialization state
-	initializationState.setState(INITIALIZATION_STATES.PAYMENT_INITIALIZING);
+	initializationState.setState(INITIALIZATION_STATES.DROPIN_READY);
 
-	// initialize payment keys in background (non-blocking)
+	// initialize payment keys in background
 	paymentInitialize(firmly.ccServer).catch((error) => {
 		console.warn('Payment initialization delayed:', error);
 	});
 
-	// Initialize dropin session
-	initializationState.setState(INITIALIZATION_STATES.SESSIONS_READY);
-
-	// Initialize session in background without blocking
+	// Initialize session in background
 	getApiAccessToken()
 		.then(() => {
 			if (firmly.isNewSessionId) {
 				trackUXEvent('sessionStart');
 			}
-			initializationState.complete({ source: 'dropin' });
+			initializationState.complete();
 		})
 		.catch((error) => {
-			console.warn('Dropin session initialization delayed:', error);
-			initializationState.addError(error, { source: 'dropin-session' });
+			console.warn('Session initialization delayed:', error);
+			initializationState.addError(error);
 		});
 }
 
@@ -628,7 +632,7 @@ export async function initializeAppVersion(version, appname = 'dropin-service') 
 }
 */
 function getSessionParentUTM() {
-	const value = sessionStorage.getItem(SESSION_CONFIG.STORAGE.PARENT_UTM);
+	const value = sessionStorage.getItem('FPARUTM');
 	if (value) {
 		return JSON.parse(value);
 	}
@@ -637,7 +641,7 @@ function getSessionParentUTM() {
 
 function setSessionParentUTM(value) {
 	const js = JSON.stringify(value);
-	sessionStorage.setItem(SESSION_CONFIG.STORAGE.PARENT_UTM, js);
+	sessionStorage.setItem('FPARUTM', js);
 }
 
 const TAG_LIST = [
@@ -671,7 +675,7 @@ export async function initializeParentInfo(parentInfo) {
 
 //#region Cart API functions
 function getSessionCart() {
-	const value = sessionStorage.getItem(SESSION_CONFIG.STORAGE.SESSION_CART);
+	const value = sessionStorage.getItem('FSSCAR');
 	if (value) {
 		return JSON.parse(value);
 	}
@@ -680,7 +684,7 @@ function getSessionCart() {
 
 function setSessionCart(value) {
 	const js = JSON.stringify(value);
-	sessionStorage.setItem(SESSION_CONFIG.STORAGE.SESSION_CART, js);
+	sessionStorage.setItem('FSSCAR', js);
 }
 
 function getDomainUrl(suffix, domain) {
@@ -696,7 +700,17 @@ function getDynamoUrl(suffix) {
 }
 
 async function getHeaders() {
-	return await getAuthHeadersUtil(SESSION_CONTEXT.DROPIN);
+	if (!window.firmly?.appId || !window.firmly?.apiServer) {
+		return { headers: { 'Content-Type': 'application/json' } };
+	}
+
+	try {
+		return await sessionManager.getAuthHeaders(window.firmly.appId, window.firmly.apiServer, {
+			allowStaleToken: true
+		});
+	} catch (error) {
+		return { headers: { 'Content-Type': 'application/json' } };
+	}
 }
 
 async function cartSessionTransfer(body, domain, parentContext = null) {
@@ -1121,7 +1135,7 @@ async function walletUnlockComplete(walletType, walletAccessToken, otp, parentCo
 //#region Click to Pay Wallet
 
 function getC2PAccessToken() {
-	const value = sessionStorage.getItem(SESSION_CONFIG.STORAGE.WALLET_C2P_ACCESS_TOKEN);
+	const value = sessionStorage.getItem('FWC2P');
 	if (value) {
 		return value;
 	}
@@ -1129,7 +1143,7 @@ function getC2PAccessToken() {
 }
 
 function setC2PAccessToken(value) {
-	sessionStorage.setItem(SESSION_CONFIG.STORAGE.WALLET_C2P_ACCESS_TOKEN, value);
+	sessionStorage.setItem('FWC2P', value);
 }
 
 let CLICK_2_PAY = 'visa';

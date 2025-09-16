@@ -29,7 +29,6 @@
 	import { startMasterCardUnifiedSolution } from '$lib-v4/clients/mastercard';
 	import Visa from '$lib-v4/clients/visa.svelte';
 	import { getNestedUrlParam } from '$lib-v4/utils.js';
-	import { SESSION_CONFIG } from '$lib-v4/utils/session-manager.js';
 	import { initializationState } from '$lib-v4/utils/initialization-state.js';
 
 	let { data } = $props();
@@ -169,25 +168,53 @@
 	}
 
 	async function onAddToCart(transferPayload) {
-		showCheckout = true;
-		pageState = 'checkout';
+		try {
+			console.log('onAddToCart called with payload:', transferPayload);
 
-		const res = await window.firmly.cartSessionTransfer(transferPayload);
-		if (res.status == 200) {
-			cart.set(res.data);
-
-			// Handle custom properties if available
-			const customProperties = window.firmly.customProperties;
-			if (customProperties && res.data?.shop_id) {
-				try {
-					console.log('Attempting to set custom properties after session transfer');
-					await window.firmly.setCustomProperties(res.data.shop_id, customProperties);
-				} catch (error) {
-					console.error('Failed to set custom properties:', error);
-				}
+			// Prevent any default actions or navigation
+			if (event && event.preventDefault) {
+				event.preventDefault();
 			}
-		} else {
-			// Show some error dialog to the customer
+
+			showCheckout = true;
+			pageState = 'checkout';
+
+			// Check if window.firmly and required functions exist
+			if (!window.firmly || typeof window.firmly.cartSessionTransfer !== 'function') {
+				console.error('window.firmly or cartSessionTransfer not available');
+				return;
+			}
+
+			const res = await window.firmly.cartSessionTransfer(transferPayload);
+			console.log('cartSessionTransfer response:', res);
+
+			if (res.status == 200) {
+				cart.set(res.data);
+
+				// Handle custom properties if available
+				const customProperties = window.firmly.customProperties;
+				if (customProperties && res.data?.shop_id) {
+					try {
+						console.log('Attempting to set custom properties after session transfer');
+						if (typeof window.firmly.setCustomProperties === 'function') {
+							await window.firmly.setCustomProperties(
+								res.data.shop_id,
+								customProperties
+							);
+						} else {
+							console.warn('setCustomProperties function not available');
+						}
+					} catch (error) {
+						console.error('Failed to set custom properties:', error);
+					}
+				}
+			} else {
+				console.error('Cart session transfer failed with status:', res.status);
+				// Show some error dialog to the customer
+			}
+		} catch (error) {
+			console.error('Error in onAddToCart:', error);
+			// Prevent page reload on error
 		}
 	}
 
@@ -199,25 +226,14 @@
 			try {
 				// Using the PDP URL, get variant ID.
 				const decodedUrl = encodeURIComponent(url);
-
-				// Add timeout to prevent hanging
-				const controller = new AbortController();
-				const timeoutId = setTimeout(
-					() => controller.abort(),
-					SESSION_CONFIG.TIMEOUTS.PRODUCT_DETAILS
-				);
-
 				const resp = await fetch(
 					`${data.PUBLIC_cf_server}/api/v1/domains-pdp?url=${decodedUrl}`,
 					{
 						headers: {
 							'x-firmly-app-id': window.firmly.appId
-						},
-						signal: controller.signal
+						}
 					}
 				);
-
-				clearTimeout(timeoutId);
 
 				if (!resp.ok) {
 					error = `Unable to find this product`;
@@ -225,13 +241,8 @@
 				}
 				productDetails = await resp.json();
 			} catch (err) {
-				if (err.name === 'AbortError') {
-					console.warn('Product details request timed out');
-					error = `Request timed out - please try again`;
-				} else {
-					console.error('Product details fetch failed:', err);
-					error = `Unable to find this product`;
-				}
+				console.error('Product details fetch failed:', err);
+				error = `Unable to find this product`;
 				return;
 			}
 		}
@@ -249,11 +260,22 @@
 
 			// Listen for the message from the ECS Service
 			const messageHandler = (e) => {
-				let data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+				try {
+					// Prevent any default handling that might cause navigation
+					if (e && e.preventDefault) {
+						e.preventDefault();
+					}
 
-				if (data?.action) {
-					try {
+					// Check if this is a valid message we should handle
+					if (!e.data || typeof e.data === 'undefined') {
+						return;
+					}
+
+					let data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+
+					if (data?.action) {
 						console.log('firmly - message data.action', data.action);
+
 						if (data.action == 'firmly::addToCart') {
 							// This will redirect the user to Firmly's thank you page
 							isParentIframed = data.isIframed;
@@ -268,6 +290,7 @@
 								);
 							}
 
+							// Call onAddToCart without propagating the event
 							onAddToCart(data.transfer);
 						} else if (data.action == 'firmly::adjustSize') {
 							if (iframeHeight === 0) {
@@ -279,14 +302,23 @@
 						} else if (data.action == 'firmly::telemetry') {
 							trackUXEvent('ecs event', { data: data.data });
 						}
-					} catch (ex) {
-						console.log('Firmly message bind error', ex);
 					}
+				} catch (ex) {
+					console.error('Firmly message handler error:', ex);
+					// Don't let errors bubble up and cause page issues
 				}
 			};
 
-			bindEvent(window, 'message', messageHandler);
-			eventListeners.push(() => window.removeEventListener('message', messageHandler));
+			// Check if we already have a message listener to avoid duplicates
+			if (!window.firmlyBuyPageMessageListener) {
+				window.firmlyBuyPageMessageListener = messageHandler;
+				bindEvent(window, 'message', messageHandler);
+
+				eventListeners.push(() => {
+					window.removeEventListener('message', messageHandler);
+					window.firmlyBuyPageMessageListener = null;
+				});
+			}
 
 			// Add ECS Service in iFrame
 			ecsUrl = getEcsUrl(url);
@@ -433,7 +465,7 @@
 
 	onMount(async () => {
 		// Start initialization tracking
-		initializationState.start({ route: '/buy' });
+		initializationState.start();
 
 		// Initialize the dropin session immediately - don't wait for SDK
 		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server);
@@ -480,9 +512,9 @@
 
 		// Log initialization in development
 		if (!isProduction && window.location?.hostname?.includes('lvh.me')) {
-			setTimeout(async () => {
+			setTimeout(() => {
 				console.log('🔧 Development mode: Dropin initialized');
-				console.log('Initialization state:', initializationState.getSummary());
+				console.log('Initialization state:', initializationState.getCurrentState());
 			}, 3000);
 		}
 	});
@@ -501,14 +533,18 @@
 
 	// Cleanup event listeners on component destroy
 	onDestroy(() => {
-		eventListeners.forEach((cleanup) => {
-			try {
-				cleanup();
-			} catch (error) {
-				console.warn('Error cleaning up event listener:', error);
-			}
-		});
-		eventListeners = [];
+		if (eventListeners?.length > 0) {
+			eventListeners.forEach((cleanup) => {
+				try {
+					if (typeof cleanup === 'function') {
+						cleanup();
+					}
+				} catch (error) {
+					// Silently handle cleanup errors
+				}
+			});
+			eventListeners = [];
+		}
 	});
 
 	function onBackClick() {
