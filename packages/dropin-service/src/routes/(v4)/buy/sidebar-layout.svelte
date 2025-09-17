@@ -1,13 +1,14 @@
+<script module>
+	export const TRANSITION_DURATION = 300;
+</script>
+
 <script>
 	import { onMount } from 'svelte';
 	import { cubicInOut } from 'svelte/easing';
 	import { fade, slide } from 'svelte/transition';
 	import { clickOutside } from '$lib/directives/click-outside';
 
-	const TRANSITION_DURATION = 300;
-
-	let visible = $state(false);
-	let { children, onClose = () => {} } = $props();
+	let { children, onClose = () => {}, visible = $bindable(false) } = $props();
 
 	function handleOutsideClick() {
 		visible = false;
