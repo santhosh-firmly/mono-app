@@ -12,11 +12,6 @@
 
 	function handleOutsideClick() {
 		visible = false;
-
-		// Only call onClose after transition duration
-		setTimeout(() => {
-			onClose();
-		}, TRANSITION_DURATION);
 	}
 
 	onMount(() => {
@@ -28,6 +23,7 @@
 	{#if visible}
 		<div
 			transition:fade={{ duration: TRANSITION_DURATION, easing: cubicInOut }}
+			onoutroend={onClose}
 			class="fixed inset-0 z-40 flex h-full w-full justify-end bg-black/50"
 		>
 			<div

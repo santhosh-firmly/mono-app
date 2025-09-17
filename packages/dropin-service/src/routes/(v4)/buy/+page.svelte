@@ -453,11 +453,11 @@
 
 		if (!layoutTransitionTime) {
 			postCheckoutClosed();
+		} else {
+			setTimeout(() => {
+				postCheckoutClosed();
+			}, layoutTransitionTime);
 		}
-
-		setTimeout(() => {
-			postCheckoutClosed();
-		}, layoutTransitionTime);
 	}
 
 	function onBackClick() {
