@@ -23,6 +23,17 @@ let prevBodyOverflow;
 let prevBodyWidth;
 let scrollDisabled;
 
+function removeElement(el) {
+	try {
+		if (!el) return;
+		if (el.parentNode) {
+			el.parentNode.removeChild(el);
+		}
+	} catch (e) {
+		// ignore
+	}
+}
+
 function disableScroll() {
 	if (scrollDisabled) {
 		return;
@@ -474,7 +485,7 @@ export function bootstrap() {
 						window.firmly?.callbacks?.onClose?.();
 
 						if (window.firmly.dropinIframe && window.firmly.removeOnClose) {
-							window.firmly.dropinIframe.style.display = 'none';
+							removeElement(window.firmly.dropinIframe);
 						}
 					} else if (data.action === 'firmlyOrderPlaced') {
 						console.log('firmly - order placed successfully');
