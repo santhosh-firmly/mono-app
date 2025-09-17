@@ -474,7 +474,7 @@ export function bootstrap() {
 						window.firmly?.callbacks?.onClose?.();
 
 						if (window.firmly.dropinIframe && window.firmly.removeOnClose) {
-							window.firmly.dropinIframe.style.display = 'none';
+							window.firmly.dropinIframe?.remove();
 						}
 					} else if (data.action === 'firmlyOrderPlaced') {
 						console.log('firmly - order placed successfully');

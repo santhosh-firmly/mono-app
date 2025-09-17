@@ -19,7 +19,9 @@
 	import { bindEvent } from '$lib-v4/browser/dash';
 	import Header from '$lib-v4/components/v4/header.svelte';
 	import { updateUrlWithFirmlyDomain } from '$lib-v4/utils/domain-utils.js';
-	import SidebarLayout from './sidebar-layout.svelte';
+	import SidebarLayout, {
+		TRANSITION_DURATION as SIDEBAR_TRANSITION_DURATION
+	} from './sidebar-layout.svelte';
 	import FullscreenLayout from './fullscreen-layout.svelte';
 	import PopupLayout from './popup-layout.svelte';
 	import BottomsheetLayout from './bottom-sheet-layout.svelte';
@@ -47,7 +49,10 @@
 	let partnerDisclaimer = $derived(data.partnerInfo?.disclaimer);
 	let partnerButtonText = $derived(data.partnerInfo?.buttonText);
 
+	// Used for Layout configuration.
 	let layout = $state(FullscreenLayout);
+	let layoutTransitionTime = $state();
+	let isLayoutActive = $state(true);
 
 	function initializeTheme(theme) {
 		if (theme) {
@@ -378,6 +383,7 @@
 	function setupLayout() {
 		if (uiMode === 'sidebar') {
 			layout = SidebarLayout;
+			layoutTransitionTime = SIDEBAR_TRANSITION_DURATION;
 			return;
 		}
 
@@ -442,12 +448,24 @@
 		initiateFlow();
 	});
 
+	function handlePostCheckoutClose() {
+		isLayoutActive = false;
+
+		if (!layoutTransitionTime) {
+			postCheckoutClosed();
+		} else {
+			setTimeout(() => {
+				postCheckoutClosed();
+			}, layoutTransitionTime);
+		}
+	}
+
 	function onBackClick() {
 		trackUXEvent('back_button_clicked');
 
 		if (pageState === 'pdp') {
 			console.log('firmly - onBackClick - postCheckoutClosed');
-			postCheckoutClosed();
+			handlePostCheckoutClose();
 			return;
 		}
 
@@ -457,7 +475,7 @@
 			return;
 		}
 
-		postCheckoutClosed();
+		handlePostCheckoutClose();
 	}
 
 	function onOrderPlacedEvent(event) {
@@ -508,7 +526,7 @@
 {:else}
 	{@const Layout = layout}
 	<div class="theme-provider">
-		<Layout>
+		<Layout onClose={postCheckoutClosed} visible={isLayoutActive}>
 			<div class="h-full w-full transition-all duration-300">
 				<!-- {#if !multipleVariants && !order}
 					<div
