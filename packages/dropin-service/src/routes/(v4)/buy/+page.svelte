@@ -508,7 +508,7 @@
 {:else}
 	{@const Layout = layout}
 	<div class="theme-provider">
-		<Layout>
+		<Layout onClose={postCheckoutClosed}>
 			<div class="h-full w-full transition-all duration-300">
 				<!-- {#if !multipleVariants && !order}
 					<div
