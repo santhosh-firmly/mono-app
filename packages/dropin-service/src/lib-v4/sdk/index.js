@@ -626,7 +626,7 @@ export async function bootstrap() {
 								);
 							}
 						} catch (error) {
-							// JWT provision failed
+							console.warn('JWT provision failed:', error);
 						}
 					}
 				} catch (e) {

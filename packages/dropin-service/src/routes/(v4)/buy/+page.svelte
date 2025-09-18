@@ -54,7 +54,7 @@
 	let layout = $state(FullscreenLayout);
 	let layoutTransitionTime = $state();
 	let isLayoutActive = $state(true);
-	
+
 	let eventListeners = [];
 
 	function initializeTheme(theme) {
@@ -169,8 +169,6 @@
 
 	async function onAddToCart(transferPayload) {
 		try {
-			console.log('onAddToCart called with payload:', transferPayload);
-
 			showCheckout = true;
 			pageState = 'checkout';
 
