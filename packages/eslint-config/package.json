@@ -1,6 +1,6 @@
 {
 	"name": "@firmly/eslint-config",
-	"version": "0.21.3",
+	"version": "0.22.0",
 	"type": "module",
 	"exports": {
 		".": "./index.js",
