@@ -6,6 +6,82 @@ import { CartHive } from './cart-hive.js';
 import { Cart } from './cart.js';
 import { getAllOrders } from './orders.js';
 import { convertToFirmlyDomain } from '../utils/domain-utils.js';
+import { sdkSessionManager } from '../utils/session-manager.js';
+import { initializationState, INITIALIZATION_STATES } from '../utils/initialization-state.js';
+
+let sdkInitialized = false;
+let globalMessageListener = null;
+
+export async function getApiAccessToken() {
+	if (!window.firmly?.appId || !window.firmly?.apiServer) return null;
+
+	try {
+		return await sdkSessionManager.getAccessToken(
+			window.firmly.appId,
+			window.firmly.apiServer,
+			{
+				allowStaleToken: true,
+				onDeviceCreated: (sessionData) => {
+					if (window.firmly) {
+						window.firmly.deviceId = sessionData.device_id;
+					}
+				}
+			}
+		);
+	} catch (error) {
+		return null;
+	}
+}
+
+export async function getHeaders() {
+	if (!window.firmly?.appId || !window.firmly?.apiServer) {
+		return { headers: { 'Content-Type': 'application/json' } };
+	}
+
+	try {
+		return await sdkSessionManager.getAuthHeaders(
+			window.firmly.appId,
+			window.firmly.apiServer,
+			{
+				allowStaleToken: true
+			}
+		);
+	} catch (error) {
+		return { headers: { 'Content-Type': 'application/json' } };
+	}
+}
+
+async function initializeSDKSession(appId, apiServer) {
+	if (sdkInitialized) return;
+
+	if (typeof window !== 'undefined') {
+		initWindowFirmly();
+		window.firmly.appId = appId;
+		window.firmly.apiServer = apiServer;
+
+		const { sessionId, isNew } = sdkSessionManager.initializeSessionId();
+		if (window.firmly) {
+			window.firmly.isNewSessionId = isNew;
+		}
+
+		// Initialize JWT in background
+		sdkSessionManager
+			.getAccessToken(appId, apiServer, {
+				allowStaleToken: true,
+				onDeviceCreated: (sessionData) => {
+					if (window.firmly) {
+						window.firmly.deviceId = sessionData.device_id;
+					}
+				}
+			})
+			.catch((error) => {
+				// JWT initialization failed - will retry on demand
+				console.warn('SDK session initialization failed', error);
+			});
+
+		sdkInitialized = true;
+	}
+}
 
 const uuidRegex =
 	/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/m;
@@ -183,11 +259,14 @@ export function subscribe(action, status, fn, context = window) {
 	});
 }
 
-export function bootstrap() {
+export async function bootstrap() {
 	if (typeof window === 'undefined') {
 		console.error('Window is undefined');
 		return;
 	}
+
+	initializationState.start();
+	initializationState.setState(INITIALIZATION_STATES.SDK_READY);
 
 	initWindowFirmly();
 
@@ -198,6 +277,31 @@ export function bootstrap() {
 			},
 			Cart,
 			CartHive,
+			getApiAccessToken,
+			getHeaders,
+			JWT: {
+				getToken: getApiAccessToken,
+				getHeaders: getHeaders,
+
+				refreshSession: async () => {
+					if (window.firmly?.appId && window.firmly?.apiServer) {
+						return await sdkSessionManager.fetchBrowserSession(
+							window.firmly.appId,
+							window.firmly.apiServer
+						);
+					}
+					return null;
+				},
+				clearSession: () => {
+					sdkSessionManager.clearSession();
+				},
+				isSessionValid: () => {
+					return sdkSessionManager.isSessionValid();
+				},
+				getDeviceId: () => {
+					return sdkSessionManager.getDeviceId();
+				}
+			},
 			init: async (config) => {
 				if (!config) {
 					throw new Error('Please specify the init configuration');
@@ -207,9 +311,15 @@ export function bootstrap() {
 					throw new Error('Please specify the environment and API server');
 				}
 
-				if (!config.appId || !uuidRegex.test(appId)) {
+				if (!config.appId || !uuidRegex.test(config.appId)) {
 					throw new Error('Please specify a valid appId');
 				}
+
+				initializationState.setState(INITIALIZATION_STATES.SDK_READY);
+
+				await initializeSDKSession(config.appId, config.env.apiServer);
+
+				initializationState.setState(INITIALIZATION_STATES.DROPIN_READY);
 
 				await initialize(config.appId, config.env.apiServer);
 
@@ -308,7 +418,7 @@ export function bootstrap() {
 			}
 		};
 
-		window.firmly.buyNow = function (checkoutConfig) {
+		window.firmly.buyNow = async function (checkoutConfig) {
 			function createIframe(url, config, id = 'firmly-dropin-frame') {
 				let iframe = document.querySelector(`[id="${id}"]`);
 				let targetContainer = document.body;
@@ -419,9 +529,28 @@ export function bootstrap() {
 			if (checkoutConfig.onOrderPlaced) {
 				window.firmly.callbacks.onOrderPlaced = checkoutConfig.onOrderPlaced;
 			}
+
+			// For /buy route, ensure SDK session is initialized
+			if (
+				window.location?.pathname === '/buy' &&
+				window.firmly?.appId &&
+				window.firmly?.apiServer
+			) {
+				try {
+					await initializeSDKSession(window.firmly.appId, window.firmly.apiServer);
+				} catch (error) {
+					// SDK session initialization failed - will retry on demand
+				}
+			}
 		};
 
-		bindEvent(window, 'message', async (event) => {
+		// Remove existing global message listener if it exists
+		if (globalMessageListener) {
+			window.removeEventListener('message', globalMessageListener);
+		}
+
+		// Create new global message listener
+		globalMessageListener = async (event) => {
 			if (event.data.action === 'firmly::executeSessionTransfer') {
 				window.firmly.sdk.CartUI.openCart();
 
@@ -483,12 +612,31 @@ export function bootstrap() {
 						console.log('firmly - add to cart clicked', event);
 						window.firmly.dropinIframe.style.display = 'block';
 						window.firmly.dropinIframe.contentWindow.postMessage(event.data, '*');
+					} else if (data.action === 'firmly::requestJWT') {
+						// Provide JWT to dropin when requested
+						try {
+							const token = await getApiAccessToken();
+							if (token) {
+								event.source.postMessage(
+									{
+										action: 'firmly::jwtResponse',
+										token: token
+									},
+									'*'
+								);
+							}
+						} catch (error) {
+							console.warn('JWT provision failed:', error);
+						}
 					}
 				} catch (e) {
 					//ignored
 				}
 			}
-		});
+		};
+
+		// Bind the global message listener
+		bindEvent(window, 'message', globalMessageListener);
 
 		window.firmly.sdk.CartUI.onOpenCart('end', function () {
 			isOpen = true;
@@ -498,10 +646,35 @@ export function bootstrap() {
 		});
 
 		if (uuidRegex.test(appId)) {
+			// Initialize SDK session management for auto-initialization (non-blocking)
+			initializeSDKSession(appId, apiServer).catch((error) => {
+				console.warn('SDK auto-initialization failed:', error);
+				initializationState.addError(error);
+			});
+
 			// If the condition does not match, the client must call init explicitely
-			return window.firmly.sdk.init({ env: { apiServer }, appId, isDropIn, dropInUrl });
+			const initPromise = window.firmly.sdk.init({
+				env: { apiServer },
+				appId,
+				isDropIn,
+				dropInUrl
+			});
+
+			initPromise
+				.then(() => {
+					initializationState.complete();
+				})
+				.catch((error) => {
+					initializationState.addError(error);
+				});
+
+			return initPromise;
+		} else {
+			initializationState.complete();
 		}
 	}
 }
 
-bootstrap();
+bootstrap().catch((error) => {
+	initializationState.addError(error);
+});

@@ -9,7 +9,7 @@
 	} from '$lib-v4/browser/api-firmly.js';
 	import { trackUXEvent } from '$lib-v4/browser/telemetry.js';
 	import { postCheckoutClosed, postOrderPlaced } from '$lib-v4/browser/cross.js';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import FlowSinglePage from '$lib-v4/components/v4/flow-single-page.svelte';
 	import { writable } from 'svelte/store';
 	import ThankYouPage from '$lib-v4/components/v4/thank-you-page.svelte';
@@ -29,6 +29,7 @@
 	import { startMasterCardUnifiedSolution } from '$lib-v4/clients/mastercard';
 	import Visa from '$lib-v4/clients/visa.svelte';
 	import { getNestedUrlParam } from '$lib-v4/utils.js';
+	import { initializationState } from '$lib-v4/utils/initialization-state.js';
 
 	let { data } = $props();
 
@@ -53,6 +54,8 @@
 	let layout = $state(FullscreenLayout);
 	let layoutTransitionTime = $state();
 	let isLayoutActive = $state(true);
+
+	let eventListeners = [];
 
 	function initializeTheme(theme) {
 		if (theme) {
@@ -165,25 +168,46 @@
 	}
 
 	async function onAddToCart(transferPayload) {
-		showCheckout = true;
-		pageState = 'checkout';
+		try {
+			showCheckout = true;
+			pageState = 'checkout';
 
-		const res = await window.firmly.cartSessionTransfer(transferPayload);
-		if (res.status == 200) {
-			cart.set(res.data);
-
-			// Handle custom properties if available
-			const customProperties = window.firmly.customProperties;
-			if (customProperties && res.data?.shop_id) {
-				try {
-					console.log('Attempting to set custom properties after session transfer');
-					await window.firmly.setCustomProperties(res.data.shop_id, customProperties);
-				} catch (error) {
-					console.error('Failed to set custom properties:', error);
-				}
+			// Check if window.firmly and required functions exist
+			if (!window.firmly || typeof window.firmly.cartSessionTransfer !== 'function') {
+				console.error('window.firmly or cartSessionTransfer not available');
+				return;
 			}
-		} else {
-			// Show some error dialog to the customer
+
+			const res = await window.firmly.cartSessionTransfer(transferPayload);
+			console.log('cartSessionTransfer response:', res);
+
+			if (res.status == 200) {
+				cart.set(res.data);
+
+				// Handle custom properties if available
+				const customProperties = window.firmly.customProperties;
+				if (customProperties && res.data?.shop_id) {
+					try {
+						console.log('Attempting to set custom properties after session transfer');
+						if (typeof window.firmly.setCustomProperties === 'function') {
+							await window.firmly.setCustomProperties(
+								res.data.shop_id,
+								customProperties
+							);
+						} else {
+							console.warn('setCustomProperties function not available');
+						}
+					} catch (error) {
+						console.error('Failed to set custom properties:', error);
+					}
+				}
+			} else {
+				console.error('Cart session transfer failed with status:', res.status);
+				// Show some error dialog to the customer
+			}
+		} catch (error) {
+			console.error('Error in onAddToCart:', error);
+			// Prevent page reload on error
 		}
 	}
 
@@ -192,22 +216,28 @@
 
 		let productDetails = [];
 		if (!skipCatalogApi) {
-			// Using the PDP URL, get variant ID.
-			const decodedUrl = encodeURIComponent(url);
-			const resp = await fetch(
-				`${data.PUBLIC_cf_server}/api/v1/domains-pdp?url=${decodedUrl}`,
-				{
-					headers: {
-						'x-firmly-app-id': window.firmly.appId
+			try {
+				// Using the PDP URL, get variant ID.
+				const decodedUrl = encodeURIComponent(url);
+				const resp = await fetch(
+					`${data.PUBLIC_cf_server}/api/v1/domains-pdp?url=${decodedUrl}`,
+					{
+						headers: {
+							'x-firmly-app-id': window.firmly.appId
+						}
 					}
-				}
-			);
+				);
 
-			if (!resp.ok) {
+				if (!resp.ok) {
+					error = `Unable to find this product`;
+					return;
+				}
+				productDetails = await resp.json();
+			} catch (err) {
+				console.error('Product details fetch failed:', err);
 				error = `Unable to find this product`;
 				return;
 			}
-			productDetails = await resp.json();
 		}
 
 		if (
@@ -222,12 +252,23 @@
 			pageState = 'pdp';
 
 			// Listen for the message from the ECS Service
-			bindEvent(window, 'message', (e) => {
-				let data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+			const messageHandler = (e) => {
+				try {
+					// Prevent any default handling that might cause navigation
+					if (e && e.preventDefault) {
+						e.preventDefault();
+					}
 
-				if (data?.action) {
-					try {
+					// Check if this is a valid message we should handle
+					if (!e.data || typeof e.data === 'undefined') {
+						return;
+					}
+
+					let data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+
+					if (data?.action) {
 						console.log('firmly - message data.action', data.action);
+
 						if (data.action == 'firmly::addToCart') {
 							// This will redirect the user to Firmly's thank you page
 							isParentIframed = data.isIframed;
@@ -242,6 +283,7 @@
 								);
 							}
 
+							// Call onAddToCart without propagating the event
 							onAddToCart(data.transfer);
 						} else if (data.action == 'firmly::adjustSize') {
 							if (iframeHeight === 0) {
@@ -253,11 +295,23 @@
 						} else if (data.action == 'firmly::telemetry') {
 							trackUXEvent('ecs event', { data: data.data });
 						}
-					} catch (ex) {
-						console.log('Firmly message bind error', ex);
 					}
+				} catch (ex) {
+					console.error('Firmly message handler error:', ex);
+					// Don't let errors bubble up and cause page issues
 				}
-			});
+			};
+
+			// Check if we already have a message listener to avoid duplicates
+			if (!window.firmlyBuyPageMessageListener) {
+				window.firmlyBuyPageMessageListener = messageHandler;
+				bindEvent(window, 'message', messageHandler);
+
+				eventListeners.push(() => {
+					window.removeEventListener('message', messageHandler);
+					window.firmlyBuyPageMessageListener = null;
+				});
+			}
 
 			// Add ECS Service in iFrame
 			ecsUrl = getEcsUrl(url);
@@ -403,8 +457,10 @@
 	}
 
 	onMount(async () => {
-		// Initialize the session in the background.
-		// Use appId from server if available, otherwise fallback to PUBLIC_api_id
+		// Start initialization tracking
+		initializationState.start();
+
+		// Initialize the dropin session immediately - don't wait for SDK
 		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server);
 		initializeAppVersion(version);
 
@@ -446,6 +502,14 @@
 
 		setupLayout();
 		initiateFlow();
+
+		// Log initialization in development
+		if (!isProduction && window.location?.hostname?.includes('lvh.me')) {
+			setTimeout(() => {
+				console.log('🔧 Development mode: Dropin initialized');
+				console.log('Initialization state:', initializationState.getCurrentState());
+			}, 3000);
+		}
 	});
 
 	function handlePostCheckoutClose() {
@@ -459,6 +523,22 @@
 			}, layoutTransitionTime);
 		}
 	}
+
+	// Cleanup event listeners on component destroy
+	onDestroy(() => {
+		if (eventListeners?.length > 0) {
+			eventListeners.forEach((cleanup) => {
+				try {
+					if (typeof cleanup === 'function') {
+						cleanup();
+					}
+				} catch {
+					// Silently handle cleanup errors
+				}
+			});
+			eventListeners = [];
+		}
+	});
 
 	function onBackClick() {
 		trackUXEvent('back_button_clicked');

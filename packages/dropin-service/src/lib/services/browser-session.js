@@ -1,36 +1,25 @@
 /**
  * @fileoverview Browser session functions for managing user sessions.
+ * This is a legacy compatibility layer that uses the simplified SessionManager.
  */
 
-import { browserFetch } from './browser-fetch';
+import { sessionManager } from '../../lib-v4/utils/session-manager.js';
 import { telemetryDeviceCreated } from './telemetry';
-
-const BROWSER_SESSION = 'FBS';
-const SESSION_ID = 'FRSID';
-
-let currentBrowserSession;
 
 /**
  * Gets the browser session from local storage or the current session.
  * @returns {object|null} The browser session object, or null if not found.
  */
 export function getBrowserSession() {
-	const lbs = localStorage.getItem(BROWSER_SESSION);
-	let lbj = null;
-	if (lbs) {
-		lbj = JSON.parse(lbs);
-	}
-	return currentBrowserSession || lbj || null;
+	return sessionManager.getStoredSession();
 }
 
 /**
- * Sets the browser session in local storage and the current session.
+ * Sets the browser session in local storage and memory.
  * @param {object} browserSession The browser session object to set.
  */
 export function setBrowserSession(browserSession) {
-	currentBrowserSession = browserSession;
-	const stringifiedBrowserSession = JSON.stringify(browserSession);
-	localStorage.setItem(BROWSER_SESSION, stringifiedBrowserSession);
+	sessionManager.setStoredSession(browserSession);
 }
 
 /**
@@ -38,11 +27,7 @@ export function setBrowserSession(browserSession) {
  * @returns {string|null} The session ID, or null if not found.
  */
 export function getSessionId() {
-	const value = sessionStorage.getItem(SESSION_ID);
-	if (value) {
-		return value;
-	}
-	return null;
+	return sessionManager.getSessionId();
 }
 
 /**
@@ -50,112 +35,99 @@ export function getSessionId() {
  * @param {string} value The session ID to set.
  */
 export function setSessionId(value) {
-	sessionStorage.setItem(SESSION_ID, value);
+	sessionManager.setSessionId(value);
 }
 
 /**
- * Initializes the session ID, creating a new one if it doesn't exist.
+ * Initializes the session ID if it doesn't exist.
  * @returns {string} The initialized session ID.
  */
 export function initSessionId() {
-	let id = getSessionId();
-	if (!id) {
-		id = 's' + crypto.randomUUID();
-		setSessionId(id);
-		window.firmly.isNewSessionId = true;
-	} else {
-		window.firmly.isNewSessionId = false;
+	const result = sessionManager.initializeSessionId();
+	if (window.firmly) {
+		window.firmly.isNewSessionId = result.isNew;
 	}
-
-	return id;
+	return result.sessionId;
 }
 
 /**
- * Gets the number of seconds since the epoch.
+ * Gets the current timestamp in seconds since the epoch.
  * @returns {number} The number of seconds since the epoch.
  */
 export function getSecondsSinceEpoch() {
-	return ~~(Date.now() / 1000);
+	return Math.floor(Date.now() / 1000);
 }
 
 /**
- * Fetches the browser session from the server.
+ * Fetches a new browser session from the server.
  * @returns {Promise<object|null>} The browser session object, or null if the fetch fails.
  */
 export async function fetchBrowserSession() {
-	const firmly = window.firmly;
+	if (!window.firmly?.appId || !window.firmly?.apiServer) return null;
 
-	const requestOptions = {
-		method: 'POST',
-		headers: {
-			'x-firmly-app-id': firmly.appId,
-			'Content-type': 'application/json'
-		}
-	};
-
-	const accessToken = currentBrowserSession?.access_token;
-
-	if (accessToken) {
-		requestOptions.headers['Content-Type'] = 'application/json';
-		requestOptions.body = JSON.stringify({
-			access_token: accessToken
-		});
+	try {
+		const session = await sessionManager.fetchBrowserSession(
+			window.firmly.appId,
+			window.firmly.apiServer,
+			{
+				onDeviceCreated: (sessionData) => {
+					window.firmly.deviceId = sessionData.device_id;
+					telemetryDeviceCreated();
+				}
+			}
+		);
+		return session;
+	} catch (error) {
+		return null;
 	}
-
-	const ret = await browserFetch(`${firmly.apiServer}/api/v1/browser-session`, requestOptions);
-
-	if (ret.status == 200) {
-		setBrowserSession(ret.data);
-		firmly.deviceId = ret.data.device_id;
-		if (ret.data.device_created) {
-			telemetryDeviceCreated();
-		}
-		return ret.data;
-	}
-
-	return null;
 }
 
 /**
- * Gets the API access token, fetching a new session if necessary.
+ * Gets the API access token, fetching a new session if needed.
  * @returns {Promise<string|null>} The API access token, or null if not available.
  */
 export async function getApiAccessToken() {
-	let session = getBrowserSession();
-	if (!session || session.expires - 300 <= getSecondsSinceEpoch()) {
-		session = await fetchBrowserSession();
-	}
+	if (!window.firmly?.appId || !window.firmly?.apiServer) return null;
 
-	if (session) {
-		return session.access_token;
+	try {
+		return await sessionManager.getAccessToken(window.firmly.appId, window.firmly.apiServer, {
+			allowStaleToken: true
+		});
+	} catch (error) {
+		return null;
 	}
-	return null;
 }
 
 /**
- * Gets the device ID from the browser session.
+ * Gets the device ID from the current session.
  * @returns {string|null} The device ID, or null if not found.
  */
 export function getDeviceId() {
-	let session = getBrowserSession();
-	if (session) {
-		return session.device_id;
-	}
-	return null;
+	return sessionManager.getDeviceId();
 }
 
 /**
- * Gets the headers for API requests, including the access token.
+ * Gets headers with the API access token for authenticated requests.
  * @returns {Promise<object>} The headers object with the access token.
  */
 export async function getHeaders() {
-	const auth = await getApiAccessToken();
-	const ret = {
-		headers: {
-			'Content-Type': 'application/json',
-			'x-firmly-authorization': auth
-		}
-	};
+	if (!window.firmly?.appId || !window.firmly?.apiServer) {
+		return {
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		};
+	}
 
-	return ret;
+	try {
+		return await sessionManager.getAuthHeaders(window.firmly.appId, window.firmly.apiServer, {
+			allowStaleToken: true
+		});
+	} catch (error) {
+		return {
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		};
+	}
 }
