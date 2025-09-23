@@ -548,8 +548,6 @@
 		const currentUrl = new URL(ecsUrl);
 		currentUrl.searchParams.set('_reload', Date.now().toString());
 		ecsUrl = currentUrl.toString();
-
-		console.log('firmly - reloadIframe - reloading with URL:', ecsUrl);
 	}
 
 	function onBackClick() {
