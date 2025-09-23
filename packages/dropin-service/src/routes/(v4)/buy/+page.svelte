@@ -540,6 +540,18 @@
 		}
 	});
 
+	function reloadIframe() {
+		// Reset iframe display to show skeleton
+		iframeDisplay = 'none';
+
+		// Force iframe reload by updating the src with a cache-busting parameter
+		const currentUrl = new URL(ecsUrl);
+		currentUrl.searchParams.set('_reload', Date.now().toString());
+		ecsUrl = currentUrl.toString();
+
+		console.log('firmly - reloadIframe - reloading with URL:', ecsUrl);
+	}
+
 	function onBackClick() {
 		trackUXEvent('back_button_clicked');
 
@@ -552,6 +564,7 @@
 		if (multipleVariants) {
 			pageState = 'pdp';
 			showCheckout = false;
+			reloadIframe();
 			return;
 		}
 
