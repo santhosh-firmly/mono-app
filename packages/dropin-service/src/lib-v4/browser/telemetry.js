@@ -46,7 +46,14 @@ function initializeSessionTracing() {
 			'trace.sampled': true
 		};
 
-		createEvent('session_start', EVENT_TYPES.UX, {}, rootTraceContext);
+		createEvent(
+			'session_start',
+			EVENT_TYPES.UX,
+			{
+				url: window.location.href
+			},
+			rootTraceContext
+		);
 	}
 }
 
