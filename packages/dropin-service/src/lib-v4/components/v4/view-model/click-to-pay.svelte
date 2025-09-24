@@ -58,26 +58,31 @@
 	export async function c2pUnlockStart(email) {
 		isC2PInProgress = true;
 		EmailC2P = email;
-		const res = await window.firmly.visa.unlockStart(email);
-		if (res.status === 200 && res.data.otp_destination) {
-			c2pOTPDestination = res.data.otp_destination;
-			otpEmailInfo = otpPhoneInfo = null;
-			if (c2pOTPDestination?.emails) {
-				otpEmailInfo = c2pOTPDestination.emails[0];
+		try {
+			const res = await window.firmly.visa.unlockStart(email);
+			if (res.status === 200 && res.data.otp_destination) {
+				c2pOTPDestination = res.data.otp_destination;
+				otpEmailInfo = otpPhoneInfo = null;
+				if (c2pOTPDestination?.emails) {
+					otpEmailInfo = c2pOTPDestination.emails[0];
+				}
+				if (c2pOTPDestination?.phones) {
+					otpPhoneInfo = c2pOTPDestination.phones[0];
+				}
+				otpDevice = 'Phone or Email';
+				sendVisaEventToTelemetry('openC2pOTPModal');
+				popupStep = BASE_LOGIN_STEPS.WAITING_OTP;
+				showC2pCheckbox = true;
+				isModalOpen = true;
+			} else if (res.status === 200 && res.data.recognized) {
+				sendVisaEventToTelemetry('login-c2p-successful');
+				dispatch('login-c2p-successful', Object.assign(res.data));
 			}
-			if (c2pOTPDestination?.phones) {
-				otpPhoneInfo = c2pOTPDestination.phones[0];
-			}
-			otpDevice = 'Phone or Email';
-			sendVisaEventToTelemetry('openC2pOTPModal');
-			popupStep = BASE_LOGIN_STEPS.WAITING_OTP;
-			showC2pCheckbox = true;
-			isModalOpen = true;
-		} else if (res.status === 200 && res.data.recognized) {
-			sendVisaEventToTelemetry('login-c2p-successful');
-			dispatch('login-c2p-successful', Object.assign(res.data));
+		} catch (error) {
+			console.error('C2P unlock start failed:', error);
+		} finally {
+			isC2PInProgress = false;
 		}
-		isC2PInProgress = false;
 	}
 	async function C2PValidateOtp(event) {
 		let res;
