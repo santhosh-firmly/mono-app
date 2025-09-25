@@ -694,12 +694,7 @@
 					await merchantLoginCreateOtp(email);
 				}
 
-				if (
-					isC2PAvailable() &&
-					areModalsClosed() &&
-					!isUserLoggedInC2p &&
-					!isC2PInProgress
-				) {
+				if (isC2PAvailable() && areModalsClosed() && !isUserLoggedInC2p) {
 					await c2pUnlockStart(email);
 				}
 
@@ -707,6 +702,10 @@
 			}
 		} finally {
 			isEmailValidating = false;
+			// Safety mechanism: Reset C2P progress if no modal is open and user is not logged in
+			if (!isC2POpen && !isUserLoggedInC2p) {
+				isC2PInProgress = false;
+			}
 		}
 	}
 
