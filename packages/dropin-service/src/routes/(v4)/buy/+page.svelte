@@ -293,7 +293,7 @@
 							iframeDisplay = 'block';
 							console.log('firmly - iframeDisplay', iframeDisplay);
 						} else if (data.action == 'firmly::telemetry') {
-							trackUXEvent('ecs event', { data: data.data });
+							trackUXEvent('aperture_event', { data: data.data });
 						}
 					}
 				} catch (ex) {
@@ -461,7 +461,7 @@
 		initializationState.start();
 
 		// Initialize the dropin session immediately - don't wait for SDK
-		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server);
+		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server, null, partnerInfo.name);
 		initializeAppVersion(version);
 
 		if (isProduction) {

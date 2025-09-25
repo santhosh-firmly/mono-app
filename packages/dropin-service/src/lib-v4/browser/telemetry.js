@@ -87,7 +87,10 @@ function getBaseProperties() {
 		app_name: firmly.appName,
 		app_version: firmly.appVersion,
 		timestamp: Date.now(),
-		order: ++telemetryState.order
+		order: ++telemetryState.order,
+		app_id: firmly.appId,
+		partner: firmly.partner,
+		domain: firmly.domain
 	};
 
 	if (firmly.parentInfo) {

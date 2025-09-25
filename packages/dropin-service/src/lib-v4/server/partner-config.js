@@ -18,19 +18,28 @@ export async function getPartnerInfo(appId, env) {
 	};
 
 	try {
-		const data = await accessData(context, 'partner_presentation', appId);
+		const [partnerInfo, partnerPresentation] = await Promise.all([
+			accessData(context, 'app_identifiers', appId),
+			accessData(context, 'partner_presentation', appId)
+		]);
 
-		if (data) {
-			const configData = typeof data === 'string' ? JSON.parse(data) : data;
+		if (partnerPresentation) {
+			const presentation =
+				typeof partnerPresentation === 'string'
+					? JSON.parse(partnerPresentation)
+					: partnerPresentation;
+
+			const info = typeof partnerInfo === 'string' ? JSON.parse(partnerInfo) : partnerInfo;
 
 			return {
 				partnerInfo: {
-					largeLogo: configData.largeLogo,
-					smallLogo: configData.smallLogo,
-					name: configData.name,
-					displayName: configData.name,
-					disclaimer: configData.disclaimer,
-					buttonText: configData.buttonText
+					id: appId,
+					largeLogo: presentation.largeLogo,
+					smallLogo: presentation.smallLogo,
+					name: info.subject,
+					displayName: presentation.name,
+					disclaimer: presentation.disclaimer,
+					buttonText: presentation.buttonText
 				}
 			};
 		}
@@ -48,9 +57,10 @@ export async function getPartnerInfo(appId, env) {
 function getDefaultPartnerInfo() {
 	return {
 		partnerInfo: {
+			id: null,
 			largeLogo: null,
 			smallLogo: null,
-			name: 'Firmly',
+			name: 'live edge',
 			displayName: 'Firmly',
 			disclaimer: null,
 			buttonText: 'Place Order'
