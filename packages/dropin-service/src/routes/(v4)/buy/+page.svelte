@@ -514,6 +514,7 @@
 
 	function handlePostCheckoutClose() {
 		isLayoutActive = false;
+		trackUXEvent('session_end');
 
 		if (!layoutTransitionTime) {
 			postCheckoutClosed();
@@ -572,6 +573,7 @@
 	function onOrderPlacedEvent(event) {
 		postOrderPlaced(null, null, event.detail.order);
 		order = event.detail.order;
+		trackUXEvent('order_placed');
 	}
 </script>
 
@@ -617,7 +619,7 @@
 {:else}
 	{@const Layout = layout}
 	<div class="theme-provider">
-		<Layout onClose={postCheckoutClosed} visible={isLayoutActive}>
+		<Layout onClose={handlePostCheckoutClose} visible={isLayoutActive}>
 			<div class="h-full w-full transition-all duration-300">
 				<!-- {#if !multipleVariants && !order}
 					<div
