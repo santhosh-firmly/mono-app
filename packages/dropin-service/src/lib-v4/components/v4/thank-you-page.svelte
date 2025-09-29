@@ -126,7 +126,9 @@
 	/>
 </div>
 
-<div class="bg-fy-primary flex w-full flex-col items-center justify-center gap-6 px-3 pb-5 pt-16">
+<div
+	class="bg-fy-primary flex h-full w-full flex-col items-center justify-center gap-6 px-3 pt-16 pb-5"
+>
 	<div class="max-w-md">
 		<div bind:this={animationContainer} class="flex flex-col items-center justify-center p-4">
 			<LottiePlayer
@@ -181,7 +183,7 @@
 					<span class="text-fy-on-primary-subtle text-start text-sm font-normal">
 						Order Number
 					</span>
-					<span class="break-words text-end text-sm font-medium">
+					<span class="text-end text-sm font-medium break-words">
 						{orderNumber}
 					</span>
 					<span class="text-fy-on-primary-subtle text-start text-sm font-normal">
@@ -207,7 +209,7 @@
 					<span class="text-fy-on-primary-subtle text-start text-sm font-normal">
 						Email
 					</span>
-					<span class="break-words text-end text-sm font-medium">
+					<span class="text-end text-sm font-medium break-words">
 						{shippingInfo.email}
 					</span>
 					<span class="text-fy-on-primary-subtle text-start text-sm font-normal">
