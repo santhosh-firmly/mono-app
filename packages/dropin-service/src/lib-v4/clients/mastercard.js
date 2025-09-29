@@ -181,6 +181,8 @@ function getUnlockErrorMessage(error) {
 	switch (errorStatus) {
 		case 'CODE_INVALID':
 			return "That's not the right code. Confirm and try again.";
+		case 'CODE_EXPIRED':
+			return 'The code has expired. Please request a new one.';
 		default:
 			return error?.message || 'OTP validation failed';
 	}
@@ -199,7 +201,8 @@ export async function unlockComplete(otpCode) {
 				return {
 					status: 400,
 					data: {
-						description: getUnlockErrorMessage(error)
+						description: getUnlockErrorMessage(error),
+						error_code: error?.reason
 					}
 				};
 			}

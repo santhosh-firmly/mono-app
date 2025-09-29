@@ -1181,6 +1181,15 @@
 		}
 	}
 
+	function handleRetriesExceeded(event) {
+		trackUXEvent('c2p_retries_exceeded');
+		notices = notices.concat({
+			text: event.detail.message,
+			timeout: 15000,
+			closeable: true
+		});
+	}
+
 	async function handleNotYourCards() {
 		if (c2pSignOutInProgress) return;
 
@@ -2114,6 +2123,7 @@
 				on:login-c2p-successful={onC2PLoginSuccess}
 				on:authenticate-c2p-successful={handleC2PAuthenticate}
 				on:not-you-clicked={handleNotYouClicked}
+				on:retries-exceeded={handleRetriesExceeded}
 				{c2pOTPDestination}
 				bind:isModalOpen={isC2POpen}
 				bind:processC2PCheckout
