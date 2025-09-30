@@ -228,11 +228,13 @@ export async function checkoutWithCard({
 } = {}) {
 	return await trackPerformance(
 		async () => {
+			let iframe;
+
 			try {
 				let withCardResponse = previuslyWithCardResponse;
 
 				if (!cvv || !withCardResponse) {
-					const iframe = document.createElement('iframe');
+					iframe = document.createElement('iframe');
 					iframe.style.position = 'fixed';
 					iframe.style.top = '0';
 					iframe.style.left = '0';
@@ -287,10 +289,13 @@ export async function checkoutWithCard({
 				};
 			} catch (error) {
 				trackError('mastercard_unified_checkout_error', error);
+				document.body.removeChild(iframe);
 				return {
 					status: 400,
 					data: {
-						description: error?.message || 'Checkout with card failed',
+						description:
+							error?.message ||
+							'Checkout with Click to pay failed, please try again or use a different payment method',
 						error_code: error?.reason || 'CHECKOUT_ERROR'
 					}
 				};
