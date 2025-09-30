@@ -77,7 +77,8 @@ export async function fetchBrowserSession() {
 			}
 		);
 		return session;
-	} catch {
+	} catch (error) {
+		console.error('Failed to fetch browser session:', error);
 		return null;
 	}
 }
@@ -93,7 +94,8 @@ export async function getApiAccessToken() {
 		return await sessionManager.getAccessToken(window.firmly.appId, window.firmly.apiServer, {
 			allowStaleToken: true
 		});
-	} catch {
+	} catch (error) {
+		console.error('Failed to get API access token:', error);
 		return null;
 	}
 }
