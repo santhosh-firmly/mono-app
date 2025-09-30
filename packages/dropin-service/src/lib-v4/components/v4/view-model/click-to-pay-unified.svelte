@@ -176,6 +176,7 @@
 			cartValue: cart.total.value,
 			currency: cart.total.currency
 		});
+
 		const tokenizeResponse = await checkoutWithCard({
 			cardId: selectedCard.id,
 			rememberMe: isChecked,

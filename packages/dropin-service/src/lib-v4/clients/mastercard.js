@@ -183,6 +183,8 @@ function getUnlockErrorMessage(error) {
 			return "That's not the right code. Confirm and try again.";
 		case 'CODE_EXPIRED':
 			return 'The code has expired. Please request a new one.';
+		case 'ACCT_INACCESSIBLE':
+			return 'The account exists but is not currently accessible due to multiple incorrect OTP attempts.';
 		default:
 			return error?.message || 'OTP validation failed';
 	}
@@ -224,62 +226,73 @@ export async function checkoutWithCard({
 } = {}) {
 	return await trackPerformance(
 		async () => {
-			let withCardResponse = previuslyWithCardResponse;
+			try {
+				let withCardResponse = previuslyWithCardResponse;
 
-			if (!cvv || !withCardResponse) {
-				const iframe = document.createElement('iframe');
-				iframe.style.position = 'fixed';
-				iframe.style.top = '0';
-				iframe.style.left = '0';
-				iframe.style.width = '100vw';
-				iframe.style.height = '100vh';
-				iframe.style.border = 'none';
-				iframe.style.zIndex = '2147483647';
-				iframe.allow = 'payment *; clipboard-write;';
+				if (!cvv || !withCardResponse) {
+					const iframe = document.createElement('iframe');
+					iframe.style.position = 'fixed';
+					iframe.style.top = '0';
+					iframe.style.left = '0';
+					iframe.style.width = '100vw';
+					iframe.style.height = '100vh';
+					iframe.style.border = 'none';
+					iframe.style.zIndex = '2147483647';
+					iframe.allow = 'payment *; clipboard-write;';
 
-				document.body.appendChild(iframe);
+					document.body.appendChild(iframe);
 
-				withCardResponse = await window.mcCheckoutService.checkoutWithCard({
-					srcDigitalCardId: cardId,
-					windowRef: iframe.contentWindow,
-					rememberMe
-				});
+					withCardResponse = await window.mcCheckoutService.checkoutWithCard({
+						srcDigitalCardId: cardId,
+						windowRef: iframe.contentWindow,
+						rememberMe
+					});
 
-				// Optionally, remove the iframe after checkout completes
-				document.body.removeChild(iframe);
-			}
+					// Optionally, remove the iframe after checkout completes
+					document.body.removeChild(iframe);
+				}
 
-			const mastercardPayload = {
-				...additionalData,
-				flowId: withCardResponse.headers['x-src-cx-flow-id'],
-				merchantTransactionId: withCardResponse.headers['merchant-transaction-id'],
-				correlationId: withCardResponse.checkoutResponseData.srcCorrelationId
-			};
+				const mastercardPayload = {
+					...additionalData,
+					flowId: withCardResponse.headers['x-src-cx-flow-id'],
+					merchantTransactionId: withCardResponse.headers['merchant-transaction-id'],
+					correlationId: withCardResponse.checkoutResponseData.srcCorrelationId
+				};
 
-			// Prepare wallet data for complete-order
-			const walletData = {
-				wallet: 'mastercard-unified',
-				credit_card_id: String(cardId),
-				jws: withCardResponse.checkoutResponse,
-				additional_data: mastercardPayload
-			};
+				// Prepare wallet data for complete-order
+				const walletData = {
+					wallet: 'mastercard-unified',
+					credit_card_id: String(cardId),
+					jws: withCardResponse.checkoutResponse,
+					additional_data: mastercardPayload
+				};
 
-			const domain = window.firmly.domain;
-			const walletResponse = await window.firmly.completeWalletOrder(domain, walletData);
+				const domain = window.firmly.domain;
+				const walletResponse = await window.firmly.completeWalletOrder(domain, walletData);
 
-			if (walletResponse.data?.cvv_required) {
-				previuslyWithCardResponse = withCardResponse;
+				if (walletResponse.data?.cvv_required) {
+					previuslyWithCardResponse = withCardResponse;
+
+					return {
+						status: 200,
+						data: walletResponse.data
+					};
+				}
 
 				return {
-					status: 200,
+					status: walletResponse.data.code,
 					data: walletResponse.data
 				};
+			} catch (error) {
+				trackError('mastercard_unified_checkout_error', error);
+				return {
+					status: 400,
+					data: {
+						description: error?.message || 'Checkout with card failed',
+						error_code: error?.reason || 'CHECKOUT_ERROR'
+					}
+				};
 			}
-
-			return {
-				status: walletResponse.data.code,
-				data: walletResponse.data
-			};
 		},
 		'mastercard_unified_checkout',
 		{
