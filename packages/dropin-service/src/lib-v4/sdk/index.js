@@ -484,11 +484,15 @@ export async function bootstrap() {
 			if (checkoutConfig.ui_mode) {
 				dropinBuyNowUrl.searchParams.set('ui_mode', checkoutConfig.ui_mode);
 			}
-			if (checkoutConfig.skip_pdp) {
-				dropinBuyNowUrl.searchParams.set('skip_pdp', checkoutConfig.skip_pdp);
+			if (checkoutConfig.force_pdp && checkoutConfig.skip_pdp) {
+				console.warn(
+					'`force_pdp` and `skip_pdp` are mutually exclusive and should not be used together. `skip_pdp` will be ignored.'
+				);
 			}
 			if (checkoutConfig.force_pdp) {
 				dropinBuyNowUrl.searchParams.set('force_pdp', checkoutConfig.force_pdp);
+			} else if (checkoutConfig.skip_pdp) {
+				dropinBuyNowUrl.searchParams.set('skip_pdp', checkoutConfig.skip_pdp);
 			}
 			if (checkoutConfig.custom_properties) {
 				dropinBuyNowUrl.searchParams.set(
