@@ -17,19 +17,18 @@ export async function getPartnerInfo(appId, env) {
 		env: { DATA_ACCESS_STRATEGY: 'd1', firmlyConfigs: env.firmlyConfigs }
 	};
 
+	// Helper function to parse data if it's a string
+	const parseIfString = (data) => (typeof data === 'string' ? JSON.parse(data) : data);
+
 	try {
 		const [partnerInfo, partnerPresentation] = await Promise.all([
 			accessData(context, 'app_identifiers', appId),
 			accessData(context, 'partner_presentation', appId)
 		]);
 
-		if (partnerPresentation) {
-			const presentation =
-				typeof partnerPresentation === 'string'
-					? JSON.parse(partnerPresentation)
-					: partnerPresentation;
-
-			const info = typeof partnerInfo === 'string' ? JSON.parse(partnerInfo) : partnerInfo;
+		if (partnerPresentation && partnerInfo) {
+			const presentation = parseIfString(partnerPresentation);
+			const info = parseIfString(partnerInfo);
 
 			return {
 				partnerInfo: {

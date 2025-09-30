@@ -293,7 +293,7 @@
 							iframeDisplay = 'block';
 							console.log('firmly - iframeDisplay', iframeDisplay);
 						} else if (data.action == 'firmly::telemetry') {
-							trackUXEvent('aperture_event', { data: data.data });
+							trackUXEvent('aperture_event', data.data);
 						}
 					}
 				} catch (ex) {
