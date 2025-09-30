@@ -77,7 +77,7 @@ export async function fetchBrowserSession() {
 			}
 		);
 		return session;
-	} catch (error) {
+	} catch {
 		return null;
 	}
 }
@@ -93,7 +93,7 @@ export async function getApiAccessToken() {
 		return await sessionManager.getAccessToken(window.firmly.appId, window.firmly.apiServer, {
 			allowStaleToken: true
 		});
-	} catch (error) {
+	} catch {
 		return null;
 	}
 }
@@ -123,7 +123,7 @@ export async function getHeaders() {
 		return await sessionManager.getAuthHeaders(window.firmly.appId, window.firmly.apiServer, {
 			allowStaleToken: true
 		});
-	} catch (error) {
+	} catch {
 		return {
 			headers: {
 				'Content-Type': 'application/json'

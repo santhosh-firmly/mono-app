@@ -487,6 +487,9 @@ export async function bootstrap() {
 			if (checkoutConfig.skip_pdp) {
 				dropinBuyNowUrl.searchParams.set('skip_pdp', checkoutConfig.skip_pdp);
 			}
+			if (checkoutConfig.force_pdp) {
+				dropinBuyNowUrl.searchParams.set('force_pdp', checkoutConfig.force_pdp);
+			}
 			if (checkoutConfig.custom_properties) {
 				dropinBuyNowUrl.searchParams.set(
 					'custom_properties',
