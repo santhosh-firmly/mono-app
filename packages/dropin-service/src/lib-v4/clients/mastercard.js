@@ -185,6 +185,8 @@ function getUnlockErrorMessage(error) {
 			return 'The code has expired. Please request a new one.';
 		case 'ACCT_INACCESSIBLE':
 			return 'The account exists but is not currently accessible due to multiple incorrect OTP attempts.';
+		case 'RETRIES_EXCEEDED':
+			return 'You have exceeded the maximum number of attempts for Click to Pay, you can continue with guest checkout.';
 		default:
 			return error?.message || 'OTP validation failed';
 	}

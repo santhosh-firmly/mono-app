@@ -159,8 +159,7 @@
 			if (res.data?.error_code === 'RETRIES_EXCEEDED') {
 				isModalOpen = false;
 				dispatch('retries-exceeded', {
-					message:
-						'You have exceeded the maximum number of attempts for Click to Pay, you can continue with guest checkout.'
+					message: res.data?.description
 				});
 			} else {
 				otpError = res.data?.description || res.data;
