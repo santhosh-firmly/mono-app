@@ -78,6 +78,7 @@ export async function fetchBrowserSession() {
 		);
 		return session;
 	} catch (error) {
+		console.error('Failed to fetch browser session:', error);
 		return null;
 	}
 }
@@ -94,6 +95,7 @@ export async function getApiAccessToken() {
 			allowStaleToken: true
 		});
 	} catch (error) {
+		console.error('Failed to get API access token:', error);
 		return null;
 	}
 }
@@ -123,7 +125,7 @@ export async function getHeaders() {
 		return await sessionManager.getAuthHeaders(window.firmly.appId, window.firmly.apiServer, {
 			allowStaleToken: true
 		});
-	} catch (error) {
+	} catch {
 		return {
 			headers: {
 				'Content-Type': 'application/json'

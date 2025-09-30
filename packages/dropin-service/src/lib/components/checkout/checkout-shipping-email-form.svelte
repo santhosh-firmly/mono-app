@@ -38,6 +38,7 @@
 		<UiCheckbox onChange={onAcceptTerms}>
 			<p class="text-muted flex items-center gap-1 text-xs">
 				{m.marketing_consent()}
+				<!-- eslint-disable-next-line svelte/no-navigation-without-resolve The next link is an external link and should not be calculated using `resolve`-->
 				<a href={termsUrl} class="text-primary underline">{m.terms_and_conditions()}</a>
 			</p>
 		</UiCheckbox>
