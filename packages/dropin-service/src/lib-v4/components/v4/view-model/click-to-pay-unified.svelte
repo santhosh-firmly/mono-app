@@ -156,8 +156,15 @@
 			isModalOpen = false;
 			dispatch('authenticate-c2p-successful', Object.assign(res.data));
 		} else {
-			otpError = res.data?.description || res.data;
-			popupStep = BASE_LOGIN_STEPS.WAITING_OTP;
+			if (res.data?.error_code === 'RETRIES_EXCEEDED') {
+				isModalOpen = false;
+				dispatch('retries-exceeded', {
+					message: res.data?.description
+				});
+			} else {
+				otpError = res.data?.description || res.data;
+				popupStep = BASE_LOGIN_STEPS.WAITING_OTP;
+			}
 		}
 	}
 
@@ -168,6 +175,7 @@
 			cartValue: cart.total.value,
 			currency: cart.total.currency
 		});
+
 		const tokenizeResponse = await checkoutWithCard({
 			cardId: selectedCard.id,
 			rememberMe: isChecked,
