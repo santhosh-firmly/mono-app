@@ -1021,6 +1021,24 @@ async function cartSavedPaymentCompleteOrder(paymentId, parentContext = null) {
 	return res;
 }
 
+async function affiliateStartJourney(url, parentContext = null) {
+	const headers = await getHeaders();
+	const body = {
+		url: url
+	};
+	const res = await browserFetch(
+		`${window.firmly.apiServer}/api/v1/carts/affiliate/start-journey`,
+		{
+			...headers,
+			method: 'POST',
+			body: JSON.stringify(body)
+		},
+		parentContext
+	);
+
+	return res;
+}
+
 //#region  Promo code functions
 
 async function addPromoCode(promoCode, parentContext = null) {
@@ -1357,6 +1375,9 @@ if (typeof window !== 'undefined') {
 	firmly.sessionCreateOtp = sessionCreateOtp;
 	firmly.sessionValidateOtp = sessionValidateOtp;
 	firmly.cartSavedPaymentCompleteOrder = cartSavedPaymentCompleteOrder;
+
+	// Affiliate functions
+	firmly.affiliateStartJourney = affiliateStartJourney;
 
 	// Promo code functions
 	firmly.addPromoCode = addPromoCode;

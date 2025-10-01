@@ -481,6 +481,9 @@ export async function bootstrap() {
 			if (checkoutConfig.pdp_url) {
 				dropinBuyNowUrl.searchParams.set('url', checkoutConfig.pdp_url);
 			}
+			if (checkoutConfig.affiliate_url) {
+				dropinBuyNowUrl.searchParams.set('affiliate_url', checkoutConfig.affiliate_url);
+			}
 			if (checkoutConfig.ui_mode) {
 				dropinBuyNowUrl.searchParams.set('ui_mode', checkoutConfig.ui_mode);
 			}

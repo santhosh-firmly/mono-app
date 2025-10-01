@@ -28,7 +28,6 @@
 	import PdpSkeleton from './pdp-skeleton.svelte';
 	import { startMasterCardUnifiedSolution } from '$lib-v4/clients/mastercard';
 	import Visa from '$lib-v4/clients/visa.svelte';
-	import { getNestedUrlParam } from '$lib-v4/utils.js';
 	import { initializationState } from '$lib-v4/utils/initialization-state.js';
 
 	let { data } = $props();
@@ -212,7 +211,9 @@
 	}
 
 	async function initiateCheckoutByUrl(url, flushCart = false) {
-		const skipCatalogApi = bypassCatalogApiMerchants.some((merchant) => url.includes(merchant));
+		const forcePdp = $page.url.searchParams.get('force_pdp') === 'true';
+		const skipCatalogApi =
+			forcePdp || bypassCatalogApiMerchants.some((merchant) => url.includes(merchant));
 
 		let productDetails = [];
 		if (!skipCatalogApi) {
@@ -240,11 +241,7 @@
 			}
 		}
 
-		if (
-			$page.url.searchParams.get('force_pdp') ||
-			productDetails?.variants?.length > 1 ||
-			skipCatalogApi
-		) {
+		if (productDetails?.variants?.length > 1 || skipCatalogApi) {
 			// Multiple variants, show PDP.
 			console.log('firmly - Multiple variants, show PDP.');
 			multipleVariants = true;
@@ -333,6 +330,18 @@
 		}
 	}
 
+	async function initiateCheckoutByAffiliateUrl(affiliateUrl, flushCart = false) {
+		const response = await window.firmly.affiliateStartJourney(affiliateUrl);
+		if (response.status !== 200 || !response.data?.final_url) {
+			console.error('firmly - affiliateStartJourney failed', response.data);
+			error = 'There was an issue processing the affiliate link. Please try again.';
+			return;
+		}
+		const pdpUrl = response.data.final_url;
+
+		return initiateCheckoutByUrl(pdpUrl, flushCart);
+	}
+
 	function initializeDomainInfo(domain) {
 		if (domain) {
 			initializeDomain(domain);
@@ -355,10 +364,14 @@
 
 	async function initiateFlow() {
 		// Using the PDP URL, get variant ID.
-		let productUrl = getNestedUrlParam($page.url.href, 'url');
+		let productUrl = $page.url.searchParams.get('url');
+		let affiliateUrl = $page.url.searchParams.get('affiliate_url');
 		const flushCart = $page.url.searchParams.get('flush_cart') !== 'false';
 
-		console.log('firmly - initiateFlow - url', productUrl);
+		if (affiliateUrl) {
+			return initiateCheckoutByAffiliateUrl(affiliateUrl, flushCart);
+		}
+
 		if (productUrl) {
 			return initiateCheckoutByUrl(productUrl, flushCart);
 		}
