@@ -20,7 +20,9 @@ const CONFIG = {
 let sessionTracing = {
 	traceId: null,
 	rootSpanId: null,
-	initialized: false
+	initialized: false,
+	startTime: null,
+	sessionEnded: false
 };
 
 function generateRandomId(byteLength) {
@@ -36,6 +38,7 @@ function initializeSessionTracing() {
 	if (!sessionTracing.initialized) {
 		sessionTracing.traceId = generateRandomId(CONFIG.TRACE_ID_BYTES);
 		sessionTracing.rootSpanId = generateRandomId(CONFIG.SPAN_ID_BYTES);
+		sessionTracing.startTime = Date.now();
 		sessionTracing.initialized = true;
 
 		// Send session_start event as the root span
@@ -87,7 +90,9 @@ function getBaseProperties() {
 		app_name: firmly.appName,
 		app_version: firmly.appVersion,
 		timestamp: Date.now(),
-		order: ++telemetryState.order
+		order: ++telemetryState.order,
+		app_id: firmly.appId,
+		domain: firmly.domain
 	};
 
 	if (firmly.parentInfo) {
@@ -224,6 +229,17 @@ export function getSessionTraceId() {
 }
 
 /**
+ * Get session duration in milliseconds if session has started
+ * @returns {number|null} Session duration in ms or null if not started
+ */
+function getSessionDuration() {
+	if (sessionTracing.startTime) {
+		return Date.now() - sessionTracing.startTime;
+	}
+	return null;
+}
+
+/**
  * Track a user experience event (clicks, page views, form submissions)
  * @param {string} name - Event name
  * @param {object} data - Additional event data
@@ -231,6 +247,24 @@ export function getSessionTraceId() {
  * @returns {object} Trace context with traceId, spanId, parentId
  */
 export function trackUXEvent(name, data = {}, traceContext = null) {
+	// Automatically add session duration for session_end events
+	if (name === 'session_end') {
+		// Prevent duplicate session_end events
+		if (sessionTracing.sessionEnded) {
+			return null;
+		}
+
+		sessionTracing.sessionEnded = true;
+
+		const sessionDuration = getSessionDuration();
+		if (sessionDuration !== null) {
+			data = {
+				...data,
+				session_duration_ms: sessionDuration
+			};
+		}
+	}
+
 	return createEvent(name, EVENT_TYPES.UX, data, traceContext);
 }
 
@@ -303,7 +337,15 @@ function flush() {
 	flushQueue();
 }
 
+function handleWindowClose() {
+	// Track session_end when user closes browser/tab
+	if (sessionTracing.initialized && sessionTracing.startTime) {
+		trackUXEvent('session_end', { close_reason: 'window_close' });
+	}
+	flush();
+}
+
 if (typeof window !== 'undefined') {
-	window.addEventListener('beforeunload', flush);
-	window.addEventListener('pagehide', flush);
+	window.addEventListener('beforeunload', handleWindowClose);
+	window.addEventListener('pagehide', handleWindowClose);
 }

@@ -46,9 +46,9 @@
 
 	const bypassCatalogApiMerchants = ['test.victoriassecret.com', 'dermstore.com'];
 
-	let partnerInfo = $derived(data.partnerInfo);
-	let partnerDisclaimer = $derived(data.partnerInfo?.disclaimer);
-	let partnerButtonText = $derived(data.partnerInfo?.buttonText);
+	let partnerPresentation = $derived(data.partnerPresentation);
+	let partnerDisclaimer = $derived(data.partnerPresentation?.disclaimer);
+	let partnerButtonText = $derived(data.partnerPresentation?.buttonText);
 
 	// Used for Layout configuration.
 	let layout = $state(FullscreenLayout);
@@ -293,7 +293,7 @@
 							iframeDisplay = 'block';
 							console.log('firmly - iframeDisplay', iframeDisplay);
 						} else if (data.action == 'firmly::telemetry') {
-							trackUXEvent('ecs event', { data: data.data });
+							trackUXEvent('aperture_event', data.data);
 						}
 					}
 				} catch (ex) {
@@ -514,6 +514,7 @@
 
 	function handlePostCheckoutClose() {
 		isLayoutActive = false;
+		trackUXEvent('session_end');
 
 		if (!layoutTransitionTime) {
 			postCheckoutClosed();
@@ -572,6 +573,7 @@
 	function onOrderPlacedEvent(event) {
 		postOrderPlaced(null, null, event.detail.order);
 		order = event.detail.order;
+		trackUXEvent('order_placed');
 	}
 </script>
 
@@ -617,7 +619,7 @@
 {:else}
 	{@const Layout = layout}
 	<div class="theme-provider">
-		<Layout onClose={postCheckoutClosed} visible={isLayoutActive}>
+		<Layout onClose={handlePostCheckoutClose} visible={isLayoutActive}>
 			<div class="h-full w-full transition-all duration-300">
 				<!-- {#if !multipleVariants && !order}
 					<div
@@ -637,7 +639,7 @@
 					<div class="flex h-full w-full flex-col">
 						<div class="z-10 shadow-(--fy-surface-box-shadow)">
 							<Header
-								merchantInfo={partnerInfo}
+								merchantInfo={partnerPresentation}
 								doNotExpand={true}
 								on:back-click={onBackClick}
 							/>
