@@ -581,7 +581,7 @@ function getDeviceId() {
 	return sessionManager.getDeviceId();
 }
 
-export async function initialize(appId, apiServer, domain = null, partner = null) {
+export async function initialize(appId, apiServer, domain = null) {
 	const firmly = window.firmly;
 	if (firmly.appId) {
 		// Already initialized
@@ -594,7 +594,6 @@ export async function initialize(appId, apiServer, domain = null, partner = null
 	//firmly.telemetryServer = "https://u1.ai:3000";
 	firmly.ccServer = apiServer.replace('api', 'cc');
 	firmly.domain = domain;
-	firmly.partner = partner;
 
 	// Observers
 	// performanceInit(); // Removed to stop api-PerformanceResourceTiming events

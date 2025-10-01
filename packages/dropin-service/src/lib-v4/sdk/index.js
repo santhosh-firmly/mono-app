@@ -321,7 +321,7 @@ export async function bootstrap() {
 
 				initializationState.setState(INITIALIZATION_STATES.DROPIN_READY);
 
-				await initialize(config.appId, config.env.apiServer, config.domain, config.partner);
+				await initialize(config.appId, config.env.apiServer, config.domain);
 
 				if (config.isDropIn) {
 					setupDropinCheckout(config.dropInUrl);

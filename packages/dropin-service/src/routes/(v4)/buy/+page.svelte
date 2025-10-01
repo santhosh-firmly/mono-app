@@ -46,9 +46,9 @@
 
 	const bypassCatalogApiMerchants = ['test.victoriassecret.com', 'dermstore.com'];
 
-	let partnerInfo = $derived(data.partnerInfo);
-	let partnerDisclaimer = $derived(data.partnerInfo?.disclaimer);
-	let partnerButtonText = $derived(data.partnerInfo?.buttonText);
+	let partnerPresentation = $derived(data.partnerPresentation);
+	let partnerDisclaimer = $derived(data.partnerPresentation?.disclaimer);
+	let partnerButtonText = $derived(data.partnerPresentation?.buttonText);
 
 	// Used for Layout configuration.
 	let layout = $state(FullscreenLayout);
@@ -461,7 +461,7 @@
 		initializationState.start();
 
 		// Initialize the dropin session immediately - don't wait for SDK
-		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server, null, partnerInfo.name);
+		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server);
 		initializeAppVersion(version);
 
 		if (isProduction) {
@@ -639,7 +639,7 @@
 					<div class="flex h-full w-full flex-col">
 						<div class="z-10 shadow-(--fy-surface-box-shadow)">
 							<Header
-								merchantInfo={partnerInfo}
+								merchantInfo={partnerPresentation}
 								doNotExpand={true}
 								on:back-click={onBackClick}
 							/>

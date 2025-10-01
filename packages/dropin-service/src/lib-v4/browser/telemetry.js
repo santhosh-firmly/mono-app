@@ -92,7 +92,6 @@ function getBaseProperties() {
 		timestamp: Date.now(),
 		order: ++telemetryState.order,
 		app_id: firmly.appId,
-		partner: firmly.partner,
 		domain: firmly.domain
 	};
 

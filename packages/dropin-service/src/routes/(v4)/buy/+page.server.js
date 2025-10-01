@@ -1,6 +1,6 @@
 import { getDomain } from 'foundation/utils/url.js';
-import { getMerchantPresentation } from '$lib-v4/server/db-acessor.js';
-import { getPartnerInfo } from '$lib-v4/server/partner-config.js';
+import { getMerchantPresentation } from '$lib-v4/server/merchant-config.js';
+import { getPartnerPresentation } from '$lib-v4/server/partner-config.js';
 
 /**
  * Builds environment variables object
@@ -40,22 +40,23 @@ export const load = async ({ url, platform }) => {
 
 	if (!merchantDomain) {
 		console.error('Missing merchant domain', { merchantUrl });
-		const { partnerInfo } = await getPartnerInfo(appId, platform.env);
+		const { partnerPresentation } = await getPartnerPresentation(appId, platform.env);
+
 		return {
 			...envVars,
 			merchantPresentation: null,
-			partnerInfo
+			partnerPresentation
 		};
 	}
 
-	const [merchantPresentation, { partnerInfo }] = await Promise.all([
+	const [merchantPresentation, { partnerPresentation }] = await Promise.all([
 		getMerchantPresentation(merchantDomain, platform.env),
-		getPartnerInfo(appId, platform.env)
+		getPartnerPresentation(appId, platform.env)
 	]);
 
 	return {
 		...envVars,
 		merchantPresentation,
-		partnerInfo
+		partnerPresentation
 	};
 };
