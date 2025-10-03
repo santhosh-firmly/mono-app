@@ -1039,6 +1039,21 @@ async function affiliateStartJourney(url, parentContext = null) {
 	return res;
 }
 
+async function setAttribution(attribution, domain, parentContext = null) {
+	const headers = await getHeaders();
+	const res = await browserFetch(
+		`${getDomainUrl('cart/attribution', domain)}`,
+		{
+			...headers,
+			method: 'PUT',
+			body: JSON.stringify({ attribution })
+		},
+		parentContext
+	);
+
+	return res;
+}
+
 //#region  Promo code functions
 
 async function addPromoCode(promoCode, parentContext = null) {
@@ -1378,6 +1393,7 @@ if (typeof window !== 'undefined') {
 
 	// Affiliate functions
 	firmly.affiliateStartJourney = affiliateStartJourney;
+	firmly.setAttribution = setAttribution;
 
 	// Promo code functions
 	firmly.addPromoCode = addPromoCode;
