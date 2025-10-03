@@ -42,6 +42,7 @@
 	let uiMode = $state('fullscreen');
 	let pageState = $state('pdp');
 	let isProduction = $derived(data.PUBLIC_firmly_deployment === 'prod');
+	let finalpdpUrl = $state('');
 
 	const bypassCatalogApiMerchants = ['test.victoriassecret.com', 'dermstore.com'];
 
@@ -166,6 +167,18 @@
 		return updateUrlWithFirmlyDomain(urlObj, data.PUBLIC_aperture_domain);
 	}
 
+	async function setAttribution() {
+		const url = new URL(finalpdpUrl);
+		const setAttributionRes = await window.firmly.setAttribution({
+			utm: url.search,
+			referrer_url: document.referrer,
+			landing_page: url.toString()
+		});
+		if (setAttributionRes.status < 200 || setAttributionRes.status >= 300) {
+			console.error('setAttribution failed with status:', setAttributionRes.status);
+		}
+	}
+
 	async function onAddToCart(transferPayload) {
 		try {
 			showCheckout = true;
@@ -182,6 +195,8 @@
 
 			if (res.status == 200) {
 				cart.set(res.data);
+
+				await setAttribution();
 
 				// Handle custom properties if available
 				const customProperties = window.firmly.customProperties;
@@ -211,6 +226,7 @@
 	}
 
 	async function initiateCheckoutByUrl(url, flushCart = false) {
+		finalpdpUrl = url;
 		const forcePdp = $page.url.searchParams.get('force_pdp') === 'true';
 		const skipCatalogApi =
 			forcePdp || bypassCatalogApiMerchants.some((merchant) => url.includes(merchant));
@@ -337,9 +353,9 @@
 			error = 'There was an issue processing the affiliate link. Please try again.';
 			return;
 		}
-		const pdpUrl = response.data.final_url;
+		finalpdpUrl = response.data.final_url;
 
-		return initiateCheckoutByUrl(pdpUrl, flushCart);
+		return initiateCheckoutByUrl(finalpdpUrl, flushCart);
 	}
 
 	function initializeDomainInfo(domain) {
