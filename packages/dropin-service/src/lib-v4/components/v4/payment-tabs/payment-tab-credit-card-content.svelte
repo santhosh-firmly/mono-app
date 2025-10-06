@@ -28,6 +28,41 @@
 
 	export let disabled = false;
 
+	let expiryInputElement;
+	let numberInputElement;
+
+	/**
+	 * Restores cursor position after input formatting
+	 * @param {HTMLInputElement} inputElement - The input element
+	 * @param {string} oldValue - Value before formatting
+	 * @param {string} newValue - Value after formatting
+	 * @param {number} cursorPosition - Original cursor position
+	 */
+	function restoreCursorPosition(inputElement, oldValue, newValue, cursorPosition) {
+		if (!inputElement || oldValue === newValue || cursorPosition == null) return;
+
+		requestAnimationFrame(() => {
+			// Count digits before cursor in old value
+			const digitsBefore = oldValue.slice(0, cursorPosition).replace(/\D/g, '').length;
+
+			// Find position after same number of digits in new value
+			let newCursorPosition = 0;
+			let digitCount = 0;
+
+			for (let i = 0; i < newValue.length; i++) {
+				if (/\d/.test(newValue[i])) {
+					digitCount++;
+				}
+				if (digitCount >= digitsBefore) {
+					newCursorPosition = i + 1;
+					break;
+				}
+			}
+
+			inputElement.setSelectionRange(newCursorPosition, newCursorPosition);
+		});
+	}
+
 	export let onCreditCardUpdated = () => {};
 	export let savedCreditCards = [];
 
@@ -144,13 +179,22 @@
 	};
 
 	$: {
+		const cursorPosition = numberInputElement?.selectionStart;
+		const oldValue = number;
+
 		const ret = formatCardNumberRaw(number);
 		number = ret.formatted;
+
+		restoreCursorPosition(numberInputElement, oldValue, number, cursorPosition);
 	}
 
 	$: {
+		const cursorPosition = expiryInputElement?.selectionStart;
+		const oldValue = expiryDate;
+
 		expiryDate = expiryDate.replace(/[^\d/]/g, '');
 		let expiry = expiryDate;
+
 		if (/^[2-9]$/.test(expiry)) {
 			expiry = `0${expiry}`;
 		}
@@ -174,6 +218,8 @@
 				expiryDate = expiry.join('/');
 			}
 		}
+
+		restoreCursorPosition(expiryInputElement, oldValue, expiryDate, cursorPosition);
 	}
 
 	/**
@@ -297,6 +343,7 @@
 						{disabled}
 						bind:value={number}
 						bind:this={numberElement}
+						bind:this={numberInputElement}
 						data-testid="card-number"
 						placeholder="1234 1234 1234 1234"
 						autocomplete="cc-number"
@@ -324,6 +371,7 @@
 					class:error
 					{disabled}
 					bind:value={expiryDate}
+					bind:this={expiryInputElement}
 					data-testid="expiry"
 					placeholder="MM / YY"
 					autocomplete="cc-exp"
