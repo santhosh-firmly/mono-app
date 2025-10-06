@@ -84,10 +84,9 @@
 	let cardComponent = EmptyCardInfo.component;
 
 	export let shouldTryFocusOnPaymentTab;
-	let numberElement;
 	$: {
-		if (shouldTryFocusOnPaymentTab && numberElement) {
-			numberElement.focus();
+		if (shouldTryFocusOnPaymentTab && numberInputElement) {
+			numberInputElement.focus();
 		}
 	}
 	$: {
@@ -342,7 +341,6 @@
 						class:error
 						{disabled}
 						bind:value={number}
-						bind:this={numberElement}
 						bind:this={numberInputElement}
 						data-testid="card-number"
 						placeholder="1234 1234 1234 1234"
