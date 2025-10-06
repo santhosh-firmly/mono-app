@@ -16,6 +16,7 @@
 	import Checkbox from '../checkbox.svelte';
 	import C2pLogo from '$lib-v4/components/common/c2p-logo.svelte';
 	import { createEventDispatcher } from 'svelte';
+	import { restoreCursorPosition } from '$lib-v4/utils/cursor-position.js';
 
 	const dispatch = createEventDispatcher();
 
@@ -27,6 +28,9 @@
 	export let verification_value;
 
 	export let disabled = false;
+
+	let expiryInputElement;
+	let numberInputElement;
 
 	export let onCreditCardUpdated = () => {};
 	export let savedCreditCards = [];
@@ -49,10 +53,9 @@
 	let cardComponent = EmptyCardInfo.component;
 
 	export let shouldTryFocusOnPaymentTab;
-	let numberElement;
 	$: {
-		if (shouldTryFocusOnPaymentTab && numberElement) {
-			numberElement.focus();
+		if (shouldTryFocusOnPaymentTab && numberInputElement) {
+			numberInputElement.focus();
 		}
 	}
 	$: {
@@ -144,13 +147,35 @@
 	};
 
 	$: {
+		const cursorPosition = numberInputElement?.selectionStart;
+		const oldValue = number;
+
 		const ret = formatCardNumberRaw(number);
 		number = ret.formatted;
+
+		restoreCursorPosition(numberInputElement, oldValue, number, cursorPosition);
 	}
 
+
+	function handleExpiryInput(event) {
+		// Prevent input if it would exceed 4 digits
+		if (event.inputType === 'insertText' || event.inputType === 'insertFromPaste') {
+			const currentDigits = expiryDate.replace(/\D/g, '');
+			const newData = event.data || '';
+			const newDigits = newData.replace(/\D/g, '');
+			
+			if (currentDigits.length + newDigits.length > 4) {
+				event.preventDefault();
+			}
+		}
+	}
 	$: {
+		const cursorPosition = expiryInputElement?.selectionStart;
+		const oldValue = expiryDate;
+
 		expiryDate = expiryDate.replace(/[^\d/]/g, '');
 		let expiry = expiryDate;
+
 		if (/^[2-9]$/.test(expiry)) {
 			expiry = `0${expiry}`;
 		}
@@ -174,6 +199,8 @@
 				expiryDate = expiry.join('/');
 			}
 		}
+
+		restoreCursorPosition(expiryInputElement, oldValue, expiryDate, cursorPosition);
 	}
 
 	/**
@@ -296,7 +323,7 @@
 						class:error
 						{disabled}
 						bind:value={number}
-						bind:this={numberElement}
+						bind:this={numberInputElement}
 						data-testid="card-number"
 						placeholder="1234 1234 1234 1234"
 						autocomplete="cc-number"
@@ -324,6 +351,8 @@
 					class:error
 					{disabled}
 					bind:value={expiryDate}
+					bind:this={expiryInputElement}
+					on:beforeinput={handleExpiryInput}
 					data-testid="expiry"
 					placeholder="MM / YY"
 					autocomplete="cc-exp"
