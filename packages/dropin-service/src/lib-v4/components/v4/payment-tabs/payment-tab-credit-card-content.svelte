@@ -16,6 +16,7 @@
 	import Checkbox from '../checkbox.svelte';
 	import C2pLogo from '$lib-v4/components/common/c2p-logo.svelte';
 	import { createEventDispatcher } from 'svelte';
+	import { restoreCursorPosition } from '$lib-v4/utils/cursor-position.js';
 
 	const dispatch = createEventDispatcher();
 
@@ -30,38 +31,6 @@
 
 	let expiryInputElement;
 	let numberInputElement;
-
-	/**
-	 * Restores cursor position after input formatting
-	 * @param {HTMLInputElement} inputElement - The input element
-	 * @param {string} oldValue - Value before formatting
-	 * @param {string} newValue - Value after formatting
-	 * @param {number} cursorPosition - Original cursor position
-	 */
-	function restoreCursorPosition(inputElement, oldValue, newValue, cursorPosition) {
-		if (!inputElement || oldValue === newValue || cursorPosition == null) return;
-
-		requestAnimationFrame(() => {
-			// Count digits before cursor in old value
-			const digitsBefore = oldValue.slice(0, cursorPosition).replace(/\D/g, '').length;
-
-			// Find position after same number of digits in new value
-			let newCursorPosition = 0;
-			let digitCount = 0;
-
-			for (let i = 0; i < newValue.length; i++) {
-				if (/\d/.test(newValue[i])) {
-					digitCount++;
-				}
-				if (digitCount >= digitsBefore) {
-					newCursorPosition = i + 1;
-					break;
-				}
-			}
-
-			inputElement.setSelectionRange(newCursorPosition, newCursorPosition);
-		});
-	}
 
 	export let onCreditCardUpdated = () => {};
 	export let savedCreditCards = [];

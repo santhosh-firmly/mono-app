@@ -9,6 +9,7 @@
 		ShippingAddressWithoutPhoneSchema
 	} from '$lib-v4/browser/schema.js';
 	import AddressAutocomplete from './address-autocomplete.svelte';
+	import { restoreCursorPosition } from '$lib-v4/utils/cursor-position.js';
 	let currentCountry = Countries[0];
 
 	/**
@@ -164,7 +165,7 @@
 		}
 	}
 
-	let phoneEl;
+	let phoneInputElement;
 
 	let allowBrowserAutoFill = true;
 	let showAutocomplete = false;
@@ -207,7 +208,7 @@
 			showAutocomplete = false;
 
 			if (hasPhone) {
-				phoneEl.focus();
+				phoneInputElement.focus();
 			}
 		}
 	}
@@ -254,7 +255,12 @@
 
 	// Format phone number
 	$: {
+		const cursorPosition = phoneInputElement?.selectionStart;
+		const oldValue = phone;
+
 		formatPhone(phone);
+
+		restoreCursorPosition(phoneInputElement, oldValue, phone, cursorPosition);
 	}
 
 	// Format postal code
@@ -347,7 +353,8 @@
 				postal_code
 			};
 
-			let schemaToBeUsed = addressType === 'shipping' ? ShippingAddressSchema : BillingInfoSchema;
+			let schemaToBeUsed =
+				addressType === 'shipping' ? ShippingAddressSchema : BillingInfoSchema;
 
 			if (hasPhone) {
 				addressInfo.phone = phone;
@@ -432,7 +439,7 @@
 	}
 
 	export function focusOnPhone() {
-		phoneEl?.focus();
+		phoneInputElement?.focus();
 	}
 
 	export function setAddressInfo(addr) {
@@ -602,7 +609,7 @@
 		{#if hasPhone}
 			<div class="relative col-span-2 flex w-full flex-col justify-center rounded-b-lg">
 				<input
-					bind:this={phoneEl}
+					bind:this={phoneInputElement}
 					{disabled}
 					class="placeholder:text-fy-on-primary-subtle w-full rounded-b-lg border-0 pl-10 disabled:bg-gray-100"
 					data-testid="phone"
