@@ -22,6 +22,7 @@ export function convertToFirmlyDomain(hostname, apertureBaseDomain) {
 }
 
 export function updateUrlWithFirmlyDomain(urlObj, apertureBaseDomain) {
-	urlObj.hostname = convertToFirmlyDomain(urlObj.hostname, apertureBaseDomain);
-	return urlObj;
+	const stringUrl = urlObj.toString();
+	const firmlyHostname = convertToFirmlyDomain(urlObj.hostname, apertureBaseDomain);
+	return new URL(stringUrl.replaceAll(urlObj.hostname, firmlyHostname));
 }

@@ -30,6 +30,8 @@
 	import Visa from '$lib-v4/clients/visa.svelte';
 	import { initializationState } from '$lib-v4/utils/initialization-state.js';
 
+	const PDP_MAX_WAIT_TIMEOUT = 2000;
+
 	let { data } = $props();
 
 	let error = $state();
@@ -263,6 +265,14 @@
 			multipleVariants = true;
 			showCheckout = false;
 			pageState = 'pdp';
+
+			// Timeout to force show the PDP if it's not already shown.
+			setTimeout(() => {
+				if (iframeDisplay !== 'block') {
+					console.log('firmly - show PDP forced by timeout');
+					iframeDisplay = 'block';
+				}
+			}, PDP_MAX_WAIT_TIMEOUT);
 
 			// Listen for the message from the ECS Service
 			const messageHandler = (e) => {
