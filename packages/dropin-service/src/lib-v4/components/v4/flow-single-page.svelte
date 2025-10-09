@@ -1298,7 +1298,7 @@
 				<div
 					slot="smallSummary"
 					class="relative mx-2 h-7 w-7 rounded bg-gray-300 bg-cover shadow"
-					style={`background-image: url(${$cart?.line_items?.[0]?.image.url});`}
+					style={`background-image: url(${$cart?.line_items?.[0]?.image?.url});`}
 				>
 					<span
 						class={classNames(
@@ -1361,7 +1361,7 @@
 				<Overview
 					on:back-click
 					total={$cart?.total}
-					images={$cart?.line_items?.map?.((l) => l.image.medium || l.image.url)}
+					images={$cart?.line_items?.map?.((l) => l.image?.medium || l.image?.url)}
 					itemQuantity={$cart?.line_items?.reduce?.((sum, l) => sum + l.quantity, 0)}
 					toggleExpanded={toggleHeaderExpanded}
 					merchantInfo={{
