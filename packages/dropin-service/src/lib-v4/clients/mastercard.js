@@ -271,6 +271,15 @@ export async function checkoutWithCard({
 					additional_data: mastercardPayload
 				};
 
+				// If CVV is provided (after cvv_required), encrypt and include it
+				if (cvv) {
+					try {
+						walletData.verification_value = await window.firmly.paymentRsaEncrypt(cvv);
+					} catch (e) {
+						// proceed without CVV if encryption fails; backend will request again if necessary
+					}
+				}
+
 				const domain = window.firmly.domain;
 				const walletResponse = await window.firmly.completeWalletOrder(domain, walletData);
 
