@@ -712,7 +712,8 @@
 				{#if sessionTransferError}
 					<div class="absolute top-0 left-0 h-full w-full">
 						<SimpleError
-							errorMessage={`We encountered an issue loading your cart. Please try again. (${sessionTransferErrorMessage})`}
+							errorMessage="We encountered an issue loading your cart. Please try again."
+							errorDetails={sessionTransferErrorMessage}
 							onBack={onBackClick}
 						/>
 					</div>

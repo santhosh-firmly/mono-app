@@ -26,14 +26,13 @@
 <Story
 	name="Default Error"
 	args={{
-		errorMessage: 'We encountered an issue loading your cart. Please try again.',
-		pdpUrl: 'https://example.com/product'
+		errorMessage: 'We encountered an issue loading your cart. Please try again.'
 	}}
 >
 	<div class="theme-provider" use:setLightTheme>
 		<SimpleError
 			errorMessage="We encountered an issue loading your cart. Please try again."
-			pdpUrl="https://example.com/product"
+			onBack={() => console.log('Back clicked')}
 		/>
 	</div>
 </Story>
