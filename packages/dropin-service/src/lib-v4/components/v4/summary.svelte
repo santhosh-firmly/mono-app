@@ -68,7 +68,7 @@
 		<div class="flex flex-col gap-4" transition:slide={{ duration: 300 }}>
 			{#each lineItems || [] as item (item.line_item_id)}
 				<LineItem
-					image={item.image.url}
+					image={item.image?.url}
 					quantity={item.quantity}
 					description={item.description}
 					variantDescription={item.variant_description}
