@@ -1113,13 +1113,13 @@ async function completeCreditCardOrder(domain, ccInfo) {
 
 // New function for wallet complete orders
 async function completeWalletOrder(domain, walletData) {
-	const headers = await getHeaders();
-	const res = await browserFetch(getCCUrl(`wallet-complete-order`), {
-		...headers,
-		method: 'POST',
-		body: JSON.stringify(walletData)
-	});
-	return res;
+    const headers = await getHeaders();
+    const res = await browserFetch(getCCUrl(`wallet-complete-order`), {
+        ...headers,
+        method: 'POST',
+        body: JSON.stringify(walletData)
+    });
+    return res;
 }
 
 async function encryptCCInfoAsJWE(ccInfo) {

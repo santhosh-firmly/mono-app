@@ -297,15 +297,16 @@ async function completeC2PPayment(cardId, rememberMe = false, cvv = null, additi
 	sApiProgressInfo.set(ProgressC2PTokenize);
 	
 	const domain = storeId; // Get domain from store context
-	const billingInfo = getBillingInfoFromCart(); // Get billing info from cart or form
-	
 	// Prepare wallet data for complete-order
 	const walletData = {
 		wallet: 'visa', // or 'paze' depending on provider
 		credit_card_id: String(cardId),
-		access_token: sessionStorage.getItem('FWC2P'),
-		billing_info: billingInfo
 	};
+
+	const c2pAccessToken = sessionStorage.getItem('FWC2P');
+	if (c2pAccessToken) {
+		walletData.access_token = c2pAccessToken;
+	}
 	
 	if (cvv) {
 		walletData.verification_value = await window.firmly.paymentRsaEncrypt(cvv);
