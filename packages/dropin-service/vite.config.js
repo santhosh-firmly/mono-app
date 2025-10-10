@@ -18,9 +18,12 @@ export default defineConfig((ctx) => {
 	const isBuild = ['build'].includes(ctx.command);
 	const isPreview = ctx.isPreview === true;
 	const isTest = ctx.mode === 'test';
+	const isStorybook =
+		process.env.npm_lifecycle_script?.includes('storybook') || process.env.STORYBOOK === 'true';
 
 	// Only add the Cloudflare plugin if we are not building for production, SvelteKit is already bulding for Cloudflare Workers
-	if (!isBuild && !isPreview && !isTest) {
+	// Also skip Cloudflare plugin when running Storybook to avoid configuration conflicts
+	if (!isBuild && !isPreview && !isTest && !isStorybook) {
 		plugins.push(cloudflare());
 	}
 

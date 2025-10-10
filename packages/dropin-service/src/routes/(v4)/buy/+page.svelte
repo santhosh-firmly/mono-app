@@ -29,6 +29,7 @@
 	import { startMasterCardUnifiedSolution } from '$lib-v4/clients/mastercard';
 	import Visa from '$lib-v4/clients/visa.svelte';
 	import { initializationState } from '$lib-v4/utils/initialization-state.js';
+	import SimpleError from '$lib-v4/components/v4/simple-error.svelte';
 
 	const PDP_MAX_WAIT_TIMEOUT = 2000;
 
@@ -45,6 +46,8 @@
 	let pageState = $state('pdp');
 	let isProduction = $derived(data.PUBLIC_firmly_deployment === 'prod');
 	let finalpdpUrl = $state('');
+	let sessionTransferError = $state(false);
+	let sessionTransferErrorMessage = $state('');
 
 	const bypassCatalogApiMerchants = ['test.victoriassecret.com', 'dermstore.com'];
 
@@ -219,11 +222,21 @@
 				}
 			} else {
 				console.error('Cart session transfer failed with status:', res.status);
-				// Show some error dialog to the customer
+				sessionTransferError = true;
+				showCheckout = false;
+				// Extract error message from response
+				sessionTransferErrorMessage =
+					res.data?.message ||
+					res.data?.error ||
+					'We encountered an issue loading your cart. Please try again.';
 			}
 		} catch (error) {
 			console.error('Error in onAddToCart:', error);
-			// Prevent page reload on error
+			sessionTransferError = true;
+			showCheckout = false;
+			// Extract error message from caught error
+			sessionTransferErrorMessage =
+				error?.message || 'An unexpected error occurred. Please try again.';
 		}
 	}
 
@@ -696,7 +709,15 @@
 					</div>
 				{/if}
 
-				{#if order}
+				{#if sessionTransferError}
+					<div class="absolute top-0 left-0 h-full w-full">
+						<SimpleError
+							errorMessage="We encountered an issue loading your cart. Please try again."
+							errorDetails={sessionTransferErrorMessage}
+							onBack={onBackClick}
+						/>
+					</div>
+				{:else if order}
 					<div class="absolute top-0 left-0 h-full w-full">
 						<ThankYouPage
 							merchantInfo={{
