@@ -54,6 +54,10 @@
 	 * Countdown timer for the resend code button
 	 */
 	let countDownTimer;
+	/**
+	 * Network used to start the validation flow
+	 */
+	let network;
 
 	export let cart;
 	export let checkboxTitle = 'Remember me in this browser';
@@ -103,6 +107,7 @@
 			if (res.status === 200 && res.data.otp_destination) {
 				c2pOTPDestination = res.data.otp_destination;
 				otpEmailInfo = otpPhoneInfo = null;
+				network = res.data.network;
 
 				if (c2pOTPDestination?.emails) {
 					otpEmailInfo = c2pOTPDestination.emails[0];
@@ -245,6 +250,7 @@
 		{otpReference}
 		{contentHeaderText}
 		{isWaitingStepupOtp}
+		otpNetwork={network}
 		bind:phone={otpPhoneInfo}
 		bind:clickToPayEmail={otpEmailInfo}
 		bind:currentStep={popupStep}

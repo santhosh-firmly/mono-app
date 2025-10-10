@@ -162,6 +162,7 @@ export async function unlockStart(email, requestedValidationChannelId = 'EMAIL')
 			return {
 				status: 200,
 				data: {
+					network: validation.network,
 					otp_destination: {
 						emails,
 						phones

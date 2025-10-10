@@ -80,6 +80,11 @@
 	export let otpError = '';
 
 	/**
+	 * OTP Network
+	 */
+	export let otpNetwork = '';
+
+	/**
 	 * Control if the OTP alternative text button is disabled
 	 */
 	export let otpAlternativeTextDisabled = false;
@@ -294,6 +299,7 @@
 				device={otpDevice}
 				alternativeMethodText={otpAlternativeMethodText}
 				error={otpError}
+				{otpNetwork}
 				{otpReference}
 				{textClasses}
 				{otpLength}
