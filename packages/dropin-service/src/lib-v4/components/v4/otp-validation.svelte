@@ -30,12 +30,11 @@
 	<div class="text-center text-sm font-bold text-[#5e5e5e]">{contentHeaderText}</div>
 	{#if otpReference}
 		<div class="pt-2 text-center text-sm font-medium">
+			Enter the code
 			{#if otpNetwork}
-				Enter the code <span class="capitalize">{otpNetwork}</span> sent to
-				<b>{otpReference}</b> to use your saved information
-			{:else}
-				Enter the code sent to <b>{otpReference}</b> to use your saved information
+				<span class="capitalize">{otpNetwork}</span>
 			{/if}
+			sent to <b>{otpReference}</b> to use your saved information
 		</div>
 	{:else}
 		<div class="pt-2 text-center text-sm font-medium">
