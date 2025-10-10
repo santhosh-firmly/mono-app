@@ -359,8 +359,7 @@
 			// Prepare wallet data for complete-order
 			const walletData = {
 				wallet: 'visa',
-				credit_card_id: String(cardId),
-				access_token: sessionStorage.getItem('FWC2P')
+				credit_card_id: String(cardId)
 			};
 			
 			if (cvv) {

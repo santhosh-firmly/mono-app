@@ -301,8 +301,12 @@ async function completeC2PPayment(cardId, rememberMe = false, cvv = null, additi
 	const walletData = {
 		wallet: 'visa', // or 'paze' depending on provider
 		credit_card_id: String(cardId),
-		access_token: sessionStorage.getItem('FWC2P'),
 	};
+
+	const c2pAccessToken = sessionStorage.getItem('FWC2P');
+	if (c2pAccessToken) {
+		walletData.access_token = c2pAccessToken;
+	}
 	
 	if (cvv) {
 		walletData.verification_value = await window.firmly.paymentRsaEncrypt(cvv);
