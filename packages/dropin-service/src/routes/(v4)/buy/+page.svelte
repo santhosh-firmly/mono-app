@@ -369,16 +369,11 @@
 		}
 	}
 
-	async function initiateCheckoutByAffiliateUrl(affiliateUrl, flushCart = false) {
+	async function startJourneyAsynchronously(affiliateUrl) {
 		const response = await window.firmly.affiliateStartJourney(affiliateUrl);
 		if (response.status !== 200 || !response.data?.final_url) {
 			console.error('firmly - affiliateStartJourney failed', response.data);
-			error = 'There was an issue processing the affiliate link. Please try again.';
-			return;
 		}
-		finalpdpUrl = response.data.final_url;
-
-		return initiateCheckoutByUrl(finalpdpUrl, flushCart);
 	}
 
 	function initializeDomainInfo(domain) {
@@ -408,7 +403,8 @@
 		const flushCart = $page.url.searchParams.get('flush_cart') !== 'false';
 
 		if (affiliateUrl) {
-			return initiateCheckoutByAffiliateUrl(affiliateUrl, flushCart);
+			// Start journey asynchronously, use the productUrl to show the PDP page.
+			startJourneyAsynchronously(affiliateUrl);
 		}
 
 		if (productUrl) {
