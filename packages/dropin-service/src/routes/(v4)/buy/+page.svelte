@@ -703,7 +703,7 @@
 							title="Product Details"
 							id="firmly-pdp-frame"
 							class="grow"
-							style={`height: ${iframeHeight}px; visibility: ${iframeVisibility}`}
+							style={`height: ${iframeHeight}px; visibility: ${showCheckout ? 'hidden' : iframeVisibility}`}
 							src={ecsUrl}
 						></iframe>
 					</div>
