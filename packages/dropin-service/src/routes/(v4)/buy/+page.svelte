@@ -40,7 +40,7 @@
 	let showCheckout = $state(true);
 	let multipleVariants = $state(false);
 	let iframeHeight = $state(0);
-	let iframeDisplay = $state('none');
+	let iframeVisibility = $state('hidden');
 	let ecsUrl = $state('');
 	let uiMode = $state('fullscreen');
 	let pageState = $state('pdp');
@@ -281,9 +281,9 @@
 
 			// Timeout to force show the PDP if it's not already shown.
 			setTimeout(() => {
-				if (iframeDisplay !== 'block') {
+				if (iframeVisibility !== 'visible') {
 					console.log('firmly - show PDP forced by timeout');
-					iframeDisplay = 'block';
+					iframeVisibility = 'visible';
 				}
 			}, PDP_MAX_WAIT_TIMEOUT);
 
@@ -326,8 +326,8 @@
 								iframeHeight = data.data.height;
 							}
 						} else if (data.action == 'firmly::onDOMContentLoaded') {
-							iframeDisplay = 'block';
-							console.log('firmly - iframeDisplay', iframeDisplay);
+							iframeVisibility = 'visible';
+							console.log('firmly - iframeVisibility', iframeVisibility);
 						} else if (data.action == 'firmly::telemetry') {
 							trackUXEvent('aperture_event', data.data);
 						}
@@ -590,8 +590,8 @@
 	});
 
 	function reloadIframe() {
-		// Reset iframe display to show skeleton
-		iframeDisplay = 'none';
+		// Reset iframe visibility to show skeleton
+		iframeVisibility = 'hidden';
 
 		// Force iframe reload by updating the src with a cache-busting parameter
 		const currentUrl = new URL(ecsUrl);
@@ -692,14 +692,14 @@
 								on:back-click={onBackClick}
 							/>
 						</div>
-						{#if iframeDisplay === 'none'}
+						{#if iframeVisibility === 'hidden'}
 							<PdpSkeleton />
 						{/if}
 						<iframe
 							title="Product Details"
 							id="firmly-pdp-frame"
 							class="grow"
-							style={`height: ${iframeHeight}px; display: ${iframeDisplay}`}
+							style={`height: ${iframeHeight}px; visibility: ${showCheckout ? 'hidden' : iframeVisibility}`}
 							src={ecsUrl}
 						></iframe>
 					</div>
