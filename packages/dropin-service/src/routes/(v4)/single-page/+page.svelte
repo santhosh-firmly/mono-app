@@ -37,6 +37,7 @@
 	let isParentIframed = $state(false);
 	let order = $state(null);
 	let isProduction = $derived(data.PUBLIC_firmly_deployment === 'prod');
+	let isC2PSDKInitialized = $state(false);
 
 	async function onAddToCart(transferPayload) {
 		cartInitialized = true;
@@ -135,7 +136,7 @@
 		visible = true;
 	}
 
-	onMount(() => {
+	onMount(async () => {
 		if (document.body.clientHeight > 0) {
 			cartInitialized = false;
 			setVisibleTrue();
@@ -192,13 +193,15 @@
 		if (isProduction) {
 			// Initialize Visa SDK for production
 			// The Visa component will handle its own initialization via the use:loadVisaScript action
+			isC2PSDKInitialized = true;
 		} else {
 			// Initialize MasterCard Unified Solution for other environments
-			startMasterCardUnifiedSolution({
+			const initResult = await startMasterCardUnifiedSolution({
 				srcDpaId: data.PUBLIC_unified_c2p_dpa_id,
 				presentationName: data.PUBLIC_unified_c2p_presentation_name,
 				sandbox: data.PUBLIC_unified_c2p_sandbox
 			});
+			isC2PSDKInitialized = initResult?.status === 'success';
 		}
 	});
 
@@ -235,6 +238,7 @@
 				{termsOfUse}
 				{isParentIframed}
 				{isProduction}
+				{isC2PSDKInitialized}
 				on:back-click={onBackClick}
 				on:orderPlacedEvent={onOrderPlacedEvent}
 				PUBLIC_DISABLE_HCAPTCHA={data.PUBLIC_DISABLE_HCAPTCHA}

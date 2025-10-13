@@ -45,6 +45,7 @@
 	let uiMode = $state('fullscreen');
 	let pageState = $state('pdp');
 	let isProduction = $derived(data.PUBLIC_firmly_deployment === 'prod');
+	let isC2PSDKInitialized = $state(false);
 	let finalpdpUrl = $state('');
 	let sessionTransferError = $state(false);
 	let sessionTransferErrorMessage = $state('');
@@ -515,13 +516,15 @@
 		if (isProduction) {
 			// Initialize Visa SDK for production
 			// The Visa component will handle its own initialization via the use:loadVisaScript action
+			isC2PSDKInitialized = true;
 		} else {
 			// Initialize MasterCard Unified Solution for other environments
-			startMasterCardUnifiedSolution({
+			const initResult = await startMasterCardUnifiedSolution({
 				srcDpaId: data.PUBLIC_unified_c2p_dpa_id,
 				presentationName: data.PUBLIC_unified_c2p_dpa_presentation_name,
 				sandbox: data.PUBLIC_unified_c2p_sandbox
 			});
+			isC2PSDKInitialized = initResult?.status === 'success';
 		}
 
 		// Clean _appId from URL to keep it clean for users
@@ -737,6 +740,7 @@
 							{termsOfUse}
 							{isParentIframed}
 							{isProduction}
+							{isC2PSDKInitialized}
 							{partnerDisclaimer}
 							buttonText={partnerButtonText || 'Place Order'}
 							on:back-click={onBackClick}
