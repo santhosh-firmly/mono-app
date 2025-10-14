@@ -129,7 +129,22 @@
 			};
 		}
 
-		// Priority 3: Fallback to generic message
+		// Priority 3: Fallback to any available channel if the requested one is not available
+		if (hasEmail) {
+			return {
+				reference: otpDestination.emails[0],
+				device: 'Email'
+			};
+		}
+
+		if (hasPhone) {
+			return {
+				reference: otpDestination.phones[0],
+				device: 'Phone'
+			};
+		}
+
+		// Priority 4: Fallback to generic message
 		return {
 			reference: '',
 			device: 'Phone or Email'

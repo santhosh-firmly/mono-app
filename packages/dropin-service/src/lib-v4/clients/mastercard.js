@@ -122,20 +122,22 @@ export async function isRecognized() {
  * @returns {{emails: string[], phones: string[]}}
  */
 function parseVisaValidationChannels(maskedValidationChannel) {
-	const emails = [];
-	const phones = [];
-	const parts = maskedValidationChannel.split(',');
-
-	for (const part of parts) {
-		const trimmed = part.trim();
-		if (trimmed.includes('@')) {
-			emails.push(trimmed);
-		} else if (/\d/.test(trimmed)) {
-			phones.push(trimmed);
-		}
+	if (!maskedValidationChannel) {
+		return { emails: [], phones: [] };
 	}
 
-	return { emails, phones };
+	return maskedValidationChannel.split(',').reduce(
+		(channels, part) => {
+			const trimmed = part.trim();
+			if (trimmed.includes('@')) {
+				channels.emails.push(trimmed);
+			} else if (/\d/.test(trimmed)) {
+				channels.phones.push(trimmed);
+			}
+			return channels;
+		},
+		{ emails: [], phones: [] }
+	);
 }
 
 /**
@@ -143,19 +145,18 @@ function parseVisaValidationChannels(maskedValidationChannel) {
  * @param {Array} supportedValidationChannels - Array of channel objects with identityType
  * @returns {{emails: string[], phones: string[]}}
  */
-function parseSupportedValidationChannels(supportedValidationChannels) {
-	const emails = [];
-	const phones = [];
-
-	for (const channel of supportedValidationChannels) {
-		if (channel.identityType === 'EMAIL') {
-			emails.push(channel.maskedValidationChannel);
-		} else if (channel.identityType === 'SMS') {
-			phones.push(channel.maskedValidationChannel);
-		}
-	}
-
-	return { emails, phones };
+function parseSupportedValidationChannels(supportedValidationChannels = []) {
+	return supportedValidationChannels.reduce(
+		(channels, channel) => {
+			if (channel.identityType === 'EMAIL') {
+				channels.emails.push(channel.maskedValidationChannel);
+			} else if (channel.identityType === 'SMS') {
+				channels.phones.push(channel.maskedValidationChannel);
+			}
+			return channels;
+		},
+		{ emails: [], phones: [] }
+	);
 }
 
 export async function unlockStart(email, requestedValidationChannelId = 'EMAIL') {
