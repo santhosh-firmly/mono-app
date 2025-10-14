@@ -361,15 +361,15 @@
 				wallet: 'visa',
 				credit_card_id: String(cardId)
 			};
-			
+
 			if (cvv) {
 				walletData.verification_value = await window.firmly.paymentRsaEncrypt(cvv);
 			}
-			
+
 			if (jws) {
 				walletData.jws = jws;
 			}
-			
+
 			const domain = window.firmly.domain;
 			const res = await performanceObserver(
 				() => window.firmly.completeWalletOrder(domain, walletData),
@@ -430,7 +430,9 @@
 </script>
 
 <script>
-	import { onMount } from 'svelte';
+	import { onMount, createEventDispatcher } from 'svelte';
+
+	const dispatch = createEventDispatcher();
 
 	// Declare props with runes
 	let { PUBLIC_c2p_sdk_url, PUBLIC_c2p_dpa_id, PUBLIC_c2p_initiator_id } = $props();
@@ -521,8 +523,15 @@
 				visaAuthenticate: (authenticationMethod) =>
 					visaAuthenticate(authenticationMethod, vSrc)
 			};
+
+			// Dispatch success event to parent component
+			dispatch('initialized', { status: 'success' });
 		} catch (error) {
 			console.error('Failed to initialize Visa SDK:', error);
+			trackError('visa_sdk_init_error', error);
+
+			// Dispatch error event to parent component
+			dispatch('initialized', { status: 'error', error });
 		}
 	}
 </script>

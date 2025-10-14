@@ -42,54 +42,61 @@ export async function startMasterCardUnifiedSolution({
 	srcDpaId,
 	presentationName = 'Firmly, Inc.'
 } = {}) {
-	return await trackPerformance(
-		async () => {
-			const baseUrl = sandbox
-				? 'https://sandbox.src.mastercard.com/srci/integration/2/lib.js'
-				: 'https://src.mastercard.com/srci/integration/2/lib.js';
+	try {
+		return await trackPerformance(
+			async () => {
+				const baseUrl = sandbox
+					? 'https://sandbox.src.mastercard.com/srci/integration/2/lib.js'
+					: 'https://src.mastercard.com/srci/integration/2/lib.js';
 
-			const queryParams = new URLSearchParams({
-				srcDpaId,
-				locale: dpaLocale
-			}).toString();
+				const queryParams = new URLSearchParams({
+					srcDpaId,
+					locale: dpaLocale
+				}).toString();
 
-			const scriptSrc = `${baseUrl}?${queryParams}`;
+				const scriptSrc = `${baseUrl}?${queryParams}`;
 
-			const script = document.createElement('script');
-			script.src = scriptSrc;
+				const script = document.createElement('script');
+				script.src = scriptSrc;
 
-			await new Promise((resolve, reject) => {
-				script.onload = resolve;
-				script.onerror = (e) =>
-					reject(new Error(`[Mastercard Unified]: failed to load ${scriptSrc}`));
-				document.head.appendChild(script);
-			});
+				await new Promise((resolve, reject) => {
+					script.onload = resolve;
+					script.onerror = (e) =>
+						reject(new Error(`[Mastercard Unified]: failed to load ${scriptSrc}`));
+					document.head.appendChild(script);
+				});
 
-			window.mcCheckoutService = new MastercardCheckoutServices();
-			window.firmly.changeC2PProvider();
+				window.mcCheckoutService = new MastercardCheckoutServices();
+				window.firmly.changeC2PProvider();
 
-			await window.mcCheckoutService.init({
-				srcDpaId,
-				dpaTransactionOptions: {
-					dpaLocale,
-					dpaBillingPreference: 'FULL',
-					consumerNameRequested: true,
-					consumerEmailAddressRequested: true,
-					consumerPhoneNumberRequested: true,
-					confirmPayment: false,
-					paymentOptions: [{ dynamicDataType: 'NONE' }]
-				},
-				checkoutExperience: 'PAYMENT_SETTINGS',
-				dpaData: { dpaName: presentationName, applicationType: 'WEB_BROWSER' },
-				cardBrands: ['mastercard', 'maestro', 'visa', 'amex', 'discover']
-			});
+				await window.mcCheckoutService.init({
+					srcDpaId,
+					dpaTransactionOptions: {
+						dpaLocale,
+						dpaBillingPreference: 'FULL',
+						consumerNameRequested: true,
+						consumerEmailAddressRequested: true,
+						consumerPhoneNumberRequested: true,
+						confirmPayment: false,
+						paymentOptions: [{ dynamicDataType: 'NONE' }]
+					},
+					checkoutExperience: 'PAYMENT_SETTINGS',
+					dpaData: { dpaName: presentationName, applicationType: 'WEB_BROWSER' },
+					cardBrands: ['mastercard', 'maestro', 'visa', 'amex', 'discover']
+				});
 
-			return { status: 'success' };
-		},
-		'mastercard_unified_init',
-		{ sandbox, dpaLocale, srcDpaId },
-		trackAPIEvent
-	);
+				return { status: 'success' };
+			},
+			'mastercard_unified_init',
+			{ sandbox, dpaLocale, srcDpaId },
+			trackAPIEvent
+		);
+	} catch (error) {
+		// Track the error to telemetry
+		trackError('mastercard_unified_init_error', error);
+		console.error('[Mastercard Unified]: SDK initialization failed', error);
+		return { status: 'error', error };
+	}
 }
 
 export async function isRecognized() {

@@ -79,6 +79,7 @@
 	export let termsOfUse;
 	export let privacyPolicy;
 	export let isProduction;
+	export let isC2PSDKInitialized = false;
 	export let partnerDisclaimer = null;
 	export let buttonText = 'Place Order';
 
@@ -661,7 +662,7 @@
 	}
 
 	function isC2PAvailable() {
-		return true;
+		return isC2PSDKInitialized;
 	}
 
 	let merchantLoginCurrentStep;
@@ -1782,7 +1783,11 @@
 											</Checkbox>
 										{/if}
 									</div>
-									<div data-testid="shipping-address-form">
+									<div
+										data-testid="shipping-address-form"
+										class:mt-4={!isC2PAvailable() &&
+											marketingConsent?.ui_slot !== 'UNDER_EMAIL_INPUT'}
+									>
 										<h3 class="py-1 text-sm">Shipping Address</h3>
 										<Address
 											on:focusremoved={() => onSetShippingInfo()}
@@ -1917,6 +1922,19 @@
 										</button>
 									</div>
 								</Group>
+								{#if selectedCard?.wallet === 'c2p'}
+									<div class="flex items-center justify-end">
+										<button
+											type="button"
+											class="cursor-pointer rounded-full p-3 text-xs font-bold text-gray-500 underline"
+											on:click={handleNotYourCards}
+											data-testid="not-your-cards-btn-collapsed"
+											disabled={c2pSignOutInProgress}
+										>
+											Not your cards?
+										</button>
+									</div>
+								{/if}
 							</div>
 						{:else}
 							<div class="py-2" transition:fadeSlide>

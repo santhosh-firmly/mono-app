@@ -156,14 +156,13 @@
 		restoreCursorPosition(numberInputElement, oldValue, number, cursorPosition);
 	}
 
-
 	function handleExpiryInput(event) {
 		// Prevent input if it would exceed 4 digits
 		if (event.inputType === 'insertText' || event.inputType === 'insertFromPaste') {
 			const currentDigits = expiryDate.replace(/\D/g, '');
 			const newData = event.data || '';
 			const newDigits = newData.replace(/\D/g, '');
-			
+
 			if (currentDigits.length + newDigits.length > 4) {
 				event.preventDefault();
 			}
@@ -302,7 +301,7 @@
 					on:click={() => dispatch('not-your-cards')}
 					data-testid="not-your-cards-btn"
 				>
-					Not you cards?
+					Not your cards?
 				</button>
 			</div>
 		{/if}

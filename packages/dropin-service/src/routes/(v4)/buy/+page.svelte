@@ -45,6 +45,7 @@
 	let uiMode = $state('fullscreen');
 	let pageState = $state('pdp');
 	let isProduction = $derived(data.PUBLIC_firmly_deployment === 'prod');
+	let isC2PSDKInitialized = $state(false);
 	let finalpdpUrl = $state('');
 	let sessionTransferError = $state(false);
 	let sessionTransferErrorMessage = $state('');
@@ -512,17 +513,16 @@
 		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server);
 		initializeAppVersion(version);
 
-		if (isProduction) {
-			// Initialize Visa SDK for production
-			// The Visa component will handle its own initialization via the use:loadVisaScript action
-		} else {
-			// Initialize MasterCard Unified Solution for other environments
-			startMasterCardUnifiedSolution({
+		if (!isProduction) {
+			// Initialize MasterCard Unified Solution for non-production environments
+			const initResult = await startMasterCardUnifiedSolution({
 				srcDpaId: data.PUBLIC_unified_c2p_dpa_id,
 				presentationName: data.PUBLIC_unified_c2p_dpa_presentation_name,
 				sandbox: data.PUBLIC_unified_c2p_sandbox
 			});
+			isC2PSDKInitialized = initResult?.status === 'success';
 		}
+		// For production, Visa SDK initialization status will be handled by the handleVisaInitialized event
 
 		// Clean _appId from URL to keep it clean for users
 		if (typeof window !== 'undefined' && window.location.search.includes('_appId=')) {
@@ -623,6 +623,13 @@
 		order = event.detail.order;
 		trackUXEvent('order_placed');
 	}
+
+	function handleVisaInitialized(event) {
+		isC2PSDKInitialized = event.detail.status === 'success';
+		if (event.detail.status === 'error') {
+			console.error('Visa SDK initialization failed:', event.detail.error);
+		}
+	}
 </script>
 
 <svelte:head>
@@ -657,6 +664,7 @@
 		PUBLIC_c2p_sdk_url={data.PUBLIC_c2p_sdk_url}
 		PUBLIC_c2p_dpa_id={data.PUBLIC_c2p_dpa_id}
 		PUBLIC_c2p_initiator_id={data.PUBLIC_c2p_initiator_id}
+		on:initialized={handleVisaInitialized}
 	/>
 {/if}
 
@@ -737,6 +745,7 @@
 							{termsOfUse}
 							{isParentIframed}
 							{isProduction}
+							{isC2PSDKInitialized}
 							{partnerDisclaimer}
 							buttonText={partnerButtonText || 'Place Order'}
 							on:back-click={onBackClick}
