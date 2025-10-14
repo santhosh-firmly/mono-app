@@ -1783,7 +1783,11 @@
 											</Checkbox>
 										{/if}
 									</div>
-									<div data-testid="shipping-address-form">
+									<div
+										data-testid="shipping-address-form"
+										class:mt-4={!isC2PAvailable() &&
+											marketingConsent?.ui_slot !== 'UNDER_EMAIL_INPUT'}
+									>
 										<h3 class="py-1 text-sm">Shipping Address</h3>
 										<Address
 											on:focusremoved={() => onSetShippingInfo()}
