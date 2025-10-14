@@ -108,10 +108,15 @@ function disableScroll() {
 	prevBodyPosition = document.body.style.position;
 	prevBodyOverflow = document.body.style.overflow;
 	prevBodyWidth = document.body.style.width;
+
+	// Calculate scrollbar width to prevent layout shift
+	const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+
 	document.body.style.position = 'fixed';
 	document.body.style.top = `-${scrollY}px`;
 	document.body.style.overflow = 'hidden';
 	document.body.style.width = '100%';
+	document.body.style.paddingRight = `${scrollbarWidth}px`;
 	window.scrollTo({
 		top: 0,
 		left: 0,
@@ -129,6 +134,7 @@ function enableScroll() {
 	document.body.style.top = '';
 	document.body.style.overflow = prevBodyOverflow || '';
 	document.body.style.width = prevBodyWidth || '';
+	document.body.style.paddingRight = '';
 	window.scrollTo({
 		top: scrollY,
 		left: 0,
@@ -513,6 +519,7 @@ export async function bootstrap() {
 					dropinBuyNowUrl.toString(),
 					checkoutConfig
 				);
+				disableScroll();
 				window.firmly.dropinIframe.style.display = 'block';
 			} else if (checkoutConfig.mode === 'full-pdp') {
 				console.log('firmly - full pdp mode');
@@ -615,13 +622,21 @@ export async function bootstrap() {
 						if (window.firmly.dropinIframe && window.firmly.removeOnClose) {
 							window.firmly.dropinIframe?.remove();
 						}
+						enableScroll();
 					} else if (data.action === 'firmlyOrderPlaced') {
 						console.log('firmly - order placed successfully');
 						window.firmly?.callbacks?.onOrderPlaced?.(data.order);
 					} else if (data.action === 'firmly::addToCart') {
 						console.log('firmly - add to cart clicked', event);
-						window.firmly.dropinIframe.style.display = 'block';
-						window.firmly.dropinIframe.contentWindow.postMessage(event.data, '*');
+						const iframe = window.firmly.dropin.iframe;
+						if (iframe) {
+							disableScroll();
+							iframe.style.display = 'block';
+							const targetOrigin = new URL(iframe.src).origin;
+							iframe.contentWindow.postMessage(event.data, targetOrigin);
+						} else {
+							console.error('Firmly drop-in iframe not found for addToCart action.');
+						}
 					} else if (data.action === 'firmly::requestJWT') {
 						// Provide JWT to dropin when requested
 						try {
