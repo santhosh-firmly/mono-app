@@ -93,6 +93,49 @@
 
 	$: otpAlternativeTextDisabled = popupStep === BASE_LOGIN_STEPS.PROCESSING_OTP;
 
+	/**
+	 * Determines the OTP reference and device based on network type and available channels
+	 * @param {string} network - The card network (visa, mastercard, discover)
+	 * @param {string} requestedChannelId - The requested validation channel (EMAIL or SMS)
+	 * @param {Object} otpDestination - Object containing emails and phones arrays
+	 * @returns {{reference: string, device: string}} - The OTP reference text and device type
+	 */
+	function getOtpReferenceInfo(network, requestedChannelId, otpDestination) {
+		const hasEmail = otpDestination?.emails?.length > 0;
+		const hasPhone = otpDestination?.phones?.length > 0;
+		const isVisa = network?.toLowerCase() === 'visa';
+
+		// Priority 1: Visa with both email and phone (sent to both simultaneously)
+		// Visa sends OTP to both channels at once, so we must show both
+		if (isVisa && hasEmail && hasPhone) {
+			return {
+				reference: `${otpDestination.emails[0]}, ${otpDestination.phones[0]}`,
+				device: 'Email and Phone'
+			};
+		}
+
+		// Priority 2: User requested specific channel (for Mastercard/Discover)
+		if (requestedChannelId === 'EMAIL' && hasEmail) {
+			return {
+				reference: otpDestination.emails[0],
+				device: 'Email'
+			};
+		}
+
+		if (requestedChannelId === 'SMS' && hasPhone) {
+			return {
+				reference: otpDestination.phones[0],
+				device: 'Phone'
+			};
+		}
+
+		// Priority 3: Fallback to generic message
+		return {
+			reference: '',
+			device: 'Phone or Email'
+		};
+	}
+
 	export async function c2pUnlockStart(email, requestedChannelId = 'EMAIL') {
 		const parentContext = trackUXEvent('c2p_unlock_start', {
 			email: email?.replace(/(.{3}).*(@.*)/, '$1***$2')
@@ -105,29 +148,20 @@
 			const res = await unlockStart(email, requestedChannelId);
 
 			if (res.status === 200 && res.data.otp_destination) {
+				// Store OTP destination data
 				c2pOTPDestination = res.data.otp_destination;
-				otpEmailInfo = otpPhoneInfo = null;
 				network = res.data.network;
 
-				if (c2pOTPDestination?.emails) {
-					otpEmailInfo = c2pOTPDestination.emails[0];
-				}
-				if (c2pOTPDestination?.phones) {
-					otpPhoneInfo = c2pOTPDestination.phones[0];
-				}
+				// Set individual channel info for alternative send options
+				otpEmailInfo = c2pOTPDestination?.emails?.[0] || null;
+				otpPhoneInfo = c2pOTPDestination?.phones?.[0] || null;
 
-				// Set otpReference based on requested channel
-				if (requestedChannelId === 'EMAIL' && c2pOTPDestination?.emails) {
-					otpReference = c2pOTPDestination.emails[0];
-					otpDevice = 'Email';
-				} else if (requestedChannelId === 'SMS' && c2pOTPDestination?.phones) {
-					otpReference = c2pOTPDestination.phones[0];
-					otpDevice = 'Phone';
-				} else {
-					otpReference = '';
-					otpDevice = 'Phone or Email';
-				}
+				// Determine OTP reference and device display using helper function
+				const otpInfo = getOtpReferenceInfo(network, requestedChannelId, c2pOTPDestination);
+				otpReference = otpInfo.reference;
+				otpDevice = otpInfo.device;
 
+				// Update UI state
 				popupStep = BASE_LOGIN_STEPS.WAITING_OTP;
 				showC2pCheckbox = true;
 				isModalOpen = true;
