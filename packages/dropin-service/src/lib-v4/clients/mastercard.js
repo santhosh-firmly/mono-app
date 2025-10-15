@@ -116,6 +116,49 @@ export async function isRecognized() {
 	);
 }
 
+/**
+ * Parses Visa's comma-separated validation channel string into emails and phones
+ * @param {string} maskedValidationChannel - Example: "khe**@mastercard.com,********0998"
+ * @returns {{emails: string[], phones: string[]}}
+ */
+function parseVisaValidationChannels(maskedValidationChannel) {
+	if (!maskedValidationChannel) {
+		return { emails: [], phones: [] };
+	}
+
+	return maskedValidationChannel.split(',').reduce(
+		(channels, part) => {
+			const trimmed = part.trim();
+			if (trimmed.includes('@')) {
+				channels.emails.push(trimmed);
+			} else if (/\d/.test(trimmed)) {
+				channels.phones.push(trimmed);
+			}
+			return channels;
+		},
+		{ emails: [], phones: [] }
+	);
+}
+
+/**
+ * Parses Mastercard/Discover's supportedValidationChannels array into emails and phones
+ * @param {Array} supportedValidationChannels - Array of channel objects with identityType
+ * @returns {{emails: string[], phones: string[]}}
+ */
+function parseSupportedValidationChannels(supportedValidationChannels = []) {
+	return supportedValidationChannels.reduce(
+		(channels, channel) => {
+			if (channel.identityType === 'EMAIL') {
+				channels.emails.push(channel.maskedValidationChannel);
+			} else if (channel.identityType === 'SMS') {
+				channels.phones.push(channel.maskedValidationChannel);
+			}
+			return channels;
+		},
+		{ emails: [], phones: [] }
+	);
+}
+
 export async function unlockStart(email, requestedValidationChannelId = 'EMAIL') {
 	requestedValidationChannelId = requestedValidationChannelId?.toUpperCase();
 
@@ -141,26 +184,26 @@ export async function unlockStart(email, requestedValidationChannelId = 'EMAIL')
 				requestedValidationChannelId
 			});
 
+			const network = validation.network?.toLowerCase();
 			let emails = [];
 			let phones = [];
 
-			if (validation.supportedValidationChannels?.length) {
-				for (const channel of validation.supportedValidationChannels) {
-					if (channel.identityType === 'EMAIL') {
-						emails.push(channel.maskedValidationChannel);
-					}
-					if (channel.identityType === 'SMS') {
-						phones.push(channel.maskedValidationChannel);
-					}
-				}
-			} else {
-				const [emailAddr, phone] = email.split(',');
-				emails.push(emailAddr);
-				phones.push(phone);
+			// Parse validation channels based on network type
+			if (network === 'visa' && validation.maskedValidationChannel) {
+				const channels = parseVisaValidationChannels(validation.maskedValidationChannel);
+				emails = channels.emails;
+				phones = channels.phones;
+			} else if (validation.supportedValidationChannels?.length) {
+				const channels = parseSupportedValidationChannels(
+					validation.supportedValidationChannels
+				);
+				emails = channels.emails;
+				phones = channels.phones;
 			}
 
-			emails = emails.filter((email) => email);
-			phones = phones.filter((phone) => phone);
+			// Filter out any empty values
+			emails = emails.filter(Boolean);
+			phones = phones.filter(Boolean);
 
 			console.warn(
 				`[Mastercard Unified]: OTP channels available: ${emails.length} emails, ${phones.length} phones.`
