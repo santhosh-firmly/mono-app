@@ -136,7 +136,7 @@
 		visible = true;
 	}
 
-	onMount(async () => {
+	onMount(() => {
 		if (document.body.clientHeight > 0) {
 			cartInitialized = false;
 			setVisibleTrue();
@@ -192,12 +192,13 @@
 
 		if (!isProduction) {
 			// Initialize MasterCard Unified Solution for non-production environments
-			const initResult = await startMasterCardUnifiedSolution({
+			startMasterCardUnifiedSolution({
 				srcDpaId: data.PUBLIC_unified_c2p_dpa_id,
 				presentationName: data.PUBLIC_unified_c2p_dpa_presentation_name,
 				sandbox: data.PUBLIC_unified_c2p_sandbox
+			}).then((result) => {
+				isC2PSDKInitialized = result.status === 'success';
 			});
-			isC2PSDKInitialized = initResult?.status === 'success';
 		}
 		// For production, Visa SDK initialization status will be handled by the handleVisaInitialized event
 	});
