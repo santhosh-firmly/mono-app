@@ -36,6 +36,7 @@ export const load = async ({ url, platform }) => {
 	const appId = url.searchParams.get('_appId');
 	const merchantUrl = url.searchParams.get('domain') || url.searchParams.get('url');
 	const merchantDomain = getDomain(merchantUrl);
+	// Allow overriding C2P provider via query param (visa or mastercard)
 	const c2pProvider = url.searchParams.get('c2p_provider');
 
 	const envVars = buildEnvVars(appId, platform.env);

@@ -1,6 +1,8 @@
 export const load = async ({ platform, url }) => {
 	// Extract appId from _appId query parameter
 	const appId = url.searchParams.get('_appId');
+	// Allow overriding C2P provider via query param (visa or mastercard)
+	const c2pProvider = url.searchParams.get('c2p_provider');
 
 	return {
 		appId,
@@ -15,6 +17,7 @@ export const load = async ({ platform, url }) => {
 		PUBLIC_unified_c2p_dpa_id: platform.env.PUBLIC_unified_c2p_dpa_id,
 		PUBLIC_unified_c2p_dpa_presentation_name:
 			platform.env.PUBLIC_unified_c2p_dpa_presentation_name,
-		PUBLIC_unified_c2p_sandbox: Boolean(platform.env.PUBLIC_unified_c2p_sandbox)
+		PUBLIC_unified_c2p_sandbox: Boolean(platform.env.PUBLIC_unified_c2p_sandbox),
+		c2p_provider: c2pProvider
 	};
 };

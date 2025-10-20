@@ -37,6 +37,16 @@
 	let isParentIframed = $state(false);
 	let order = $state(null);
 	let isProduction = $derived(data.PUBLIC_firmly_deployment === 'prod');
+	let c2pProvider = $derived.by(() => {
+		const queryParamProvider = data.c2p_provider?.toLowerCase();
+		if (queryParamProvider === 'visa' || queryParamProvider === 'mastercard') {
+			return queryParamProvider;
+		}
+		return isProduction ? 'visa' : 'mastercard';
+	});
+	let shouldUseMastercard = $derived(c2pProvider === 'mastercard');
+	let shouldUseVisa = $derived(c2pProvider === 'visa');
+
 	let isC2PSDKInitialized = $state(false);
 
 	async function onAddToCart(transferPayload) {
@@ -190,8 +200,8 @@
 		initialize(data.appId || data.PUBLIC_api_id, data.PUBLIC_cf_server);
 		initializeAppVersion(version);
 
-		if (!isProduction) {
-			// Initialize MasterCard Unified Solution for non-production environments
+		if (shouldUseMastercard) {
+			// Initialize MasterCard Unified Solution
 			startMasterCardUnifiedSolution({
 				srcDpaId: data.PUBLIC_unified_c2p_dpa_id,
 				presentationName: data.PUBLIC_unified_c2p_dpa_presentation_name,
@@ -200,7 +210,7 @@
 				isC2PSDKInitialized = result.status === 'success';
 			});
 		}
-		// For production, Visa SDK initialization status will be handled by the handleVisaInitialized event
+		// For Visa, SDK initialization status will be handled by the handleVisaInitialized event
 	});
 
 	function onBackClick() {
@@ -220,7 +230,7 @@
 	}
 </script>
 
-{#if data.PUBLIC_firmly_deployment === 'prod'}
+{#if shouldUseVisa}
 	<Visa
 		PUBLIC_c2p_sdk_url={data.PUBLIC_c2p_sdk_url}
 		PUBLIC_c2p_dpa_id={data.PUBLIC_c2p_dpa_id}
@@ -244,6 +254,7 @@
 				{termsOfUse}
 				{isParentIframed}
 				{isProduction}
+				{shouldUseVisa}
 				{isC2PSDKInitialized}
 				on:back-click={onBackClick}
 				on:orderPlacedEvent={onOrderPlacedEvent}
