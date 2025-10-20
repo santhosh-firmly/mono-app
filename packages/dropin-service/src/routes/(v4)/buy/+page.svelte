@@ -45,6 +45,16 @@
 	let uiMode = $state('fullscreen');
 	let pageState = $state('pdp');
 	let isProduction = $derived(data.PUBLIC_firmly_deployment === 'prod');
+	let c2pProvider = $derived.by(() => {
+		const queryParamProvider = $page.url.searchParams.get('c2p_provider')?.toLowerCase();
+		if (queryParamProvider === 'visa' || queryParamProvider === 'mastercard') {
+			return queryParamProvider;
+		}
+		return isProduction ? 'visa' : 'mastercard';
+	});
+	let shouldUseMastercard = $derived(c2pProvider === 'mastercard');
+	let shouldUseVisa = $derived(c2pProvider === 'visa');
+
 	let isC2PSDKInitialized = $state(false);
 	let finalpdpUrl = $state('');
 	let sessionTransferError = $state(false);
@@ -513,8 +523,8 @@
 		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server);
 		initializeAppVersion(version);
 
-		if (!isProduction) {
-			// Initialize MasterCard Unified Solution for non-production environments
+		if (shouldUseMastercard) {
+			// Initialize MasterCard Unified Solution
 			startMasterCardUnifiedSolution({
 				srcDpaId: data.PUBLIC_unified_c2p_dpa_id,
 				presentationName: data.PUBLIC_unified_c2p_dpa_presentation_name,
@@ -523,7 +533,7 @@
 				isC2PSDKInitialized = initResult.status === 'success';
 			});
 		}
-		// For production, Visa SDK initialization status will be handled by the handleVisaInitialized event
+		// For Visa, SDK initialization status will be handled by the handleVisaInitialized event
 
 		// Clean _appId from URL to keep it clean for users
 		if (typeof window !== 'undefined' && window.location.search.includes('_appId=')) {
@@ -660,7 +670,7 @@
 	<link rel="preconnect" href="https://js.hcaptcha.com" />
 </svelte:head>
 
-{#if data.PUBLIC_firmly_deployment === 'prod'}
+{#if shouldUseVisa}
 	<Visa
 		PUBLIC_c2p_sdk_url={data.PUBLIC_c2p_sdk_url}
 		PUBLIC_c2p_dpa_id={data.PUBLIC_c2p_dpa_id}
@@ -746,6 +756,7 @@
 							{termsOfUse}
 							{isParentIframed}
 							{isProduction}
+							{shouldUseVisa}
 							{isC2PSDKInitialized}
 							{partnerDisclaimer}
 							buttonText={partnerButtonText || 'Place Order'}

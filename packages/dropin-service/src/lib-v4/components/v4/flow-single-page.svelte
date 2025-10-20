@@ -79,6 +79,7 @@
 	export let termsOfUse;
 	export let privacyPolicy;
 	export let isProduction;
+	export let shouldUseVisa = isProduction;
 	export let isC2PSDKInitialized = false;
 	export let partnerDisclaimer = null;
 	export let buttonText = 'Place Order';
@@ -2123,7 +2124,7 @@
 			bind:canCloseModal={canCloseMechantLoginModal}
 			on:login-successful={onMerchantLoginSuccess}
 		/>
-		{#if isProduction}
+		{#if shouldUseVisa}
 			<ClickToPay
 				on:login-c2p-successful={onC2PLoginSuccess}
 				on:authenticate-c2p-successful={handleC2PAuthenticate}
