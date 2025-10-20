@@ -46,7 +46,7 @@
 	let pageState = $state('pdp');
 	let isProduction = $derived(data.PUBLIC_firmly_deployment === 'prod');
 	let c2pProvider = $derived.by(() => {
-		const queryParamProvider = data.c2p_provider?.toLowerCase();
+		const queryParamProvider = $page.url.searchParams.get('c2p_provider')?.toLowerCase();
 		if (queryParamProvider === 'visa' || queryParamProvider === 'mastercard') {
 			return queryParamProvider;
 		}

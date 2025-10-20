@@ -20,6 +20,7 @@
 	import ThankYouPage from '$lib-v4/components/v4/thank-you-page.svelte';
 	import { startMasterCardUnifiedSolution } from '$lib-v4/clients/mastercard.js';
 	import { trackUXEvent } from '$lib-v4/browser/telemetry.js';
+	import { page } from '$app/stores';
 
 	let { data } = $props();
 
@@ -38,7 +39,7 @@
 	let order = $state(null);
 	let isProduction = $derived(data.PUBLIC_firmly_deployment === 'prod');
 	let c2pProvider = $derived.by(() => {
-		const queryParamProvider = data.c2p_provider?.toLowerCase();
+		const queryParamProvider = $page.url.searchParams.get('c2p_provider')?.toLowerCase();
 		if (queryParamProvider === 'visa' || queryParamProvider === 'mastercard') {
 			return queryParamProvider;
 		}

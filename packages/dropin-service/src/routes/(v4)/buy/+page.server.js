@@ -20,8 +20,7 @@ function buildEnvVars(appId, env) {
 		PUBLIC_c2p_initiator_id: env.PUBLIC_c2p_initiator_id,
 		PUBLIC_unified_c2p_dpa_id: env.PUBLIC_unified_c2p_dpa_id,
 		PUBLIC_unified_c2p_dpa_presentation_name: env.PUBLIC_unified_c2p_dpa_presentation_name,
-		PUBLIC_unified_c2p_sandbox: Boolean(env.PUBLIC_unified_c2p_sandbox),
-		c2p_provider: null
+		PUBLIC_unified_c2p_sandbox: Boolean(env.PUBLIC_unified_c2p_sandbox)
 	};
 }
 
@@ -36,11 +35,8 @@ export const load = async ({ url, platform }) => {
 	const appId = url.searchParams.get('_appId');
 	const merchantUrl = url.searchParams.get('domain') || url.searchParams.get('url');
 	const merchantDomain = getDomain(merchantUrl);
-	// Allow overriding C2P provider via query param (visa or mastercard)
-	const c2pProvider = url.searchParams.get('c2p_provider');
 
 	const envVars = buildEnvVars(appId, platform.env);
-	envVars.c2p_provider = c2pProvider;
 
 	if (!merchantDomain) {
 		console.error('Missing merchant domain', { merchantUrl });
