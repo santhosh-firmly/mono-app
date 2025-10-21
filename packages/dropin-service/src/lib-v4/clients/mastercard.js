@@ -344,7 +344,7 @@ export async function checkoutWithCard({
 				}
 
 				return {
-					status: walletResponse.data.code,
+					status: walletResponse.status ?? walletResponse.data?.code,
 					data: walletResponse.data
 				};
 			} catch (error) {
