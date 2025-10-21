@@ -38,3 +38,31 @@ export function postUpdateCart() {
 	const jData = JSON.stringify({ action: 'cartUpdate' });
 	window.parent.postMessage(jData, '*');
 }
+
+export function postCustomerShippingInfo(shippingInfo) {
+	// Validate that we have meaningful data before sending
+	if (!shippingInfo || typeof shippingInfo !== 'object') {
+		console.warn('firmly - invalid shipping info, skipping customer data save');
+		return;
+	}
+
+	// Only send if we have at least email or address information
+	const hasEmail = shippingInfo.email;
+	const hasAddress = shippingInfo.address1 || shippingInfo.postal_code;
+
+	if (!hasEmail && !hasAddress) {
+		console.warn('firmly - no meaningful customer data to save');
+		return;
+	}
+
+	const jData = JSON.stringify({
+		action: 'firmlyCustomerShippingInfo',
+		shippingInfo
+	});
+	window.parent.postMessage(jData, '*');
+}
+
+export function requestCustomerData() {
+	const jData = JSON.stringify({ action: 'firmlyRequestCustomerData' });
+	window.parent.postMessage(jData, '*');
+}

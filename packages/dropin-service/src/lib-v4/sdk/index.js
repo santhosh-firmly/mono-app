@@ -212,7 +212,8 @@ function initWindowFirmly() {
 	window.firmly = window.firmly || {
 		sdk: null,
 		dropin: { iframe: null },
-		customProperties: null
+		customProperties: null,
+		customerData: null
 	};
 }
 
@@ -626,6 +627,26 @@ export async function bootstrap() {
 					} else if (data.action === 'firmlyOrderPlaced') {
 						console.log('firmly - order placed successfully');
 						window.firmly?.callbacks?.onOrderPlaced?.(data.order);
+					} else if (data.action === 'firmlyCustomerShippingInfo') {
+						console.log('firmly - customer shipping info received', data.shippingInfo);
+						// Store customer data in window.firmly
+						if (!window.firmly.customerData) {
+							window.firmly.customerData = {};
+						}
+						window.firmly.customerData.shippingInfo = data.shippingInfo;
+
+						// Call optional callback if provided
+						window.firmly?.callbacks?.onCustomerDataUpdated?.(data.shippingInfo);
+					} else if (data.action === 'firmlyRequestCustomerData') {
+						console.log('firmly - customer data requested from iframe');
+						// Send customer data back to the iframe
+						if (event.source && typeof event.source.postMessage === 'function') {
+							const customerDataResponse = JSON.stringify({
+								action: 'firmlyCustomerDataResponse',
+								customerData: window.firmly?.customerData || null
+							});
+							event.source.postMessage(customerDataResponse, '*');
+						}
 					} else if (data.action === 'firmly::addToCart') {
 						console.log('firmly - add to cart clicked', event);
 						const iframe = window.firmly.dropin.iframe;
