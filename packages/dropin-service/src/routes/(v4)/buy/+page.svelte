@@ -31,7 +31,7 @@
 	import { initializationState } from '$lib-v4/utils/initialization-state.js';
 	import SimpleError from '$lib-v4/components/v4/simple-error.svelte';
 
-	const PDP_MAX_WAIT_TIMEOUT = 2000;
+	const PDP_MAX_WAIT_TIMEOUT = 10000;
 
 	let { data } = $props();
 
@@ -295,6 +295,7 @@
 				if (iframeVisibility !== 'visible') {
 					console.log('firmly - show PDP forced by timeout');
 					iframeVisibility = 'visible';
+					trackUXEvent('pdp_showed_by_timeout');
 				}
 			}, PDP_MAX_WAIT_TIMEOUT);
 
