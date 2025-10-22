@@ -1293,7 +1293,6 @@
 
 	// Customer Data auto-fill section
 	async function processCustomerData(customerData) {
-		// Guard clauses
 		if (!customerData || !customerData.shippingInfo || customerDataProcessed) {
 			return;
 		}
@@ -1307,7 +1306,6 @@
 
 		const shippingInfo = customerData.shippingInfo;
 
-		// Set email if available
 		if (shippingInfo.email && !email) {
 			email = shippingInfo.email;
 		}
@@ -1323,6 +1321,13 @@
 
 				// Submit the shipping info
 				await onSetShippingInfo(shippingInfo);
+
+				// Explicitly update collapsed states after successful auto-fill
+				// This ensures the form collapses to show the pre-filled state
+				if ($cart?.shipping_info && updateCollapsedStates) {
+					updateCollapsedStates();
+					console.log('firmly - auto-fill completed, sections collapsed');
+				}
 			} catch (error) {
 				console.error('firmly - error processing customer data:', error);
 				// Reset flag on error so user can manually enter data

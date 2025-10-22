@@ -11,6 +11,82 @@ import { initializationState, INITIALIZATION_STATES } from '../utils/initializat
 
 let sdkInitialized = false;
 let globalMessageListener = null;
+let customerDataInitialized = false; // Flag to prevent multiple loads
+
+// Customer Data localStorage key
+const CUSTOMER_DATA_STORAGE_KEY = 'firmly_customer_data';
+
+/**
+ * Safely saves customer data to localStorage
+ * @param {Object} customerData - Customer data to persist
+ * @returns {boolean} - Success status
+ */
+function saveCustomerDataToStorage(customerData) {
+	try {
+		const dataToStore = {
+			data: customerData,
+			timestamp: Date.now(),
+			version: 1
+		};
+		localStorage.setItem(CUSTOMER_DATA_STORAGE_KEY, JSON.stringify(dataToStore));
+		return true;
+	} catch (error) {
+		console.warn('firmly - failed to save customer data to localStorage:', error);
+		return false;
+	}
+}
+
+/**
+ * Safely loads customer data from localStorage
+ * @param {number} maxAgeMs - Maximum age in milliseconds (default: 90 days)
+ * @returns {Object|null} - Customer data or null if not found/expired
+ */
+function loadCustomerDataFromStorage(maxAgeMs = 90 * 24 * 60 * 60 * 1000) {
+	if (typeof window === 'undefined' || !window.localStorage) {
+		console.warn('firmly - failed to load customer data from localStorage: localStorage not available');
+		return null;
+	}
+
+	try {
+		const stored = localStorage.getItem(CUSTOMER_DATA_STORAGE_KEY);
+		if (!stored) {
+			return null;
+		}
+
+		const parsed = JSON.parse(stored);
+
+		// Check if data has expired
+		const age = Date.now() - (parsed.timestamp || 0);
+		const ageInDays = Math.floor(age / (24 * 60 * 60 * 1000));
+		if (age > maxAgeMs) {
+			clearCustomerDataFromStorage();
+			return null;
+		}
+
+		return parsed.data || null;
+	} catch (error) {
+		clearCustomerDataFromStorage();
+		return null;
+	}
+}
+
+/**
+ * Clears customer data from localStorage
+ * @returns {boolean} - Success status
+ */
+function clearCustomerDataFromStorage() {
+	if (typeof window === 'undefined' || !window.localStorage) {
+		return false;
+	}
+
+	try {
+		localStorage.removeItem(CUSTOMER_DATA_STORAGE_KEY);
+		return true;
+	} catch (error) {
+		console.warn('firmly - failed to clear customer data from localStorage:', error);
+		return false;
+	}
+}
 
 export async function getApiAccessToken() {
 	if (!window.firmly?.appId || !window.firmly?.apiServer) return null;
@@ -208,8 +284,43 @@ function monitorElements(inputSelectors, action) {
 	targetElements.forEach(action);
 }
 
+/**
+ * Ensures customerData is loaded from localStorage into memory if needed
+ * Uses a flag to prevent redundant loads
+ */
+function ensureCustomerDataLoaded() {
+	// Skip if already loaded
+	if (customerDataInitialized) {
+		return;
+	}
+
+	// Skip if already in memory
+	if (window.firmly?.customerData) {
+		console.log('firmly - ensureCustomerDataLoaded - CustomerData already in memory, skipping load');
+		customerDataInitialized = true;
+		return;
+	}
+
+	// Try to load from localStorage
+	console.log('firmly - ensureCustomerDataLoaded - Checking localStorage for customer data');
+	const persistedCustomerData = loadCustomerDataFromStorage();
+
+	if (persistedCustomerData && window.firmly) {
+		window.firmly.customerData = persistedCustomerData;
+		console.log('firmly - ensureCustomerDataLoaded - Loaded customerData from storage into memory');
+	}
+
+	customerDataInitialized = true;
+}
+
 function initWindowFirmly() {
-	window.firmly = window.firmly || {
+	if (window.firmly) {
+		// If window.firmly already exists, just ensure customerData is loaded
+		ensureCustomerDataLoaded();
+		return;
+	}
+
+	window.firmly = {
 		sdk: null,
 		dropin: { iframe: null },
 		customProperties: null,
@@ -307,6 +418,14 @@ export async function bootstrap() {
 				},
 				getDeviceId: () => {
 					return sdkSessionManager.getDeviceId();
+				}
+			},
+			CustomerData: {
+				clear: () => {
+					if (window.firmly?.customerData) {
+						window.firmly.customerData = null;
+					}
+					return clearCustomerDataFromStorage();
 				}
 			},
 			init: async (config) => {
@@ -628,24 +747,39 @@ export async function bootstrap() {
 						console.log('firmly - order placed successfully');
 						window.firmly?.callbacks?.onOrderPlaced?.(data.order);
 					} else if (data.action === 'firmlyCustomerShippingInfo') {
-						console.log('firmly - customer shipping info received', data.shippingInfo);
+						console.log('firmly - customer shipping info received from iframe', data.shippingInfo);
+
 						// Store customer data in window.firmly
 						if (!window.firmly.customerData) {
 							window.firmly.customerData = {};
 						}
 						window.firmly.customerData.shippingInfo = data.shippingInfo;
+						console.log('firmly - customer shipping info stored in window.firmly.customerData');
+
+						// Persist to localStorage for cross-session usage
+						saveCustomerDataToStorage(window.firmly.customerData);
 
 						// Call optional callback if provided
 						window.firmly?.callbacks?.onCustomerDataUpdated?.(data.shippingInfo);
 					} else if (data.action === 'firmlyRequestCustomerData') {
-						console.log('firmly - customer data requested from iframe');
+						console.log('firmly - iframe is requesting customer data');
+						console.log('firmly - current window.firmly.customerData:', window.firmly?.customerData);
+
+						// Ensure we try to load from localStorage if not in memory
+						initWindowFirmly();
+
 						// Send customer data back to the iframe
 						if (event.source && typeof event.source.postMessage === 'function') {
+							const dataToSend = window.firmly?.customerData || null;
+							console.log('firmly - sending customer data to iframe', dataToSend);
+
 							const customerDataResponse = JSON.stringify({
 								action: 'firmlyCustomerDataResponse',
-								customerData: window.firmly?.customerData || null
+								customerData: dataToSend
 							});
 							event.source.postMessage(customerDataResponse, '*');
+						} else {
+							console.warn('firmly - response failed: event.source not available');
 						}
 					} else if (data.action === 'firmly::addToCart') {
 						console.log('firmly - add to cart clicked', event);
