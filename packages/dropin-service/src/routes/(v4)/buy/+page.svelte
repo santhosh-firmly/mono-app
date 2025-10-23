@@ -763,6 +763,7 @@
 							on:back-click={onBackClick}
 							on:orderPlacedEvent={onOrderPlacedEvent}
 							PUBLIC_DISABLE_HCAPTCHA={data.PUBLIC_DISABLE_HCAPTCHA}
+							PUBLIC_dropin_domain={data.PUBLIC_dropin_domain}
 						/>
 					</div>
 				{/if}

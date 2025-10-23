@@ -1,5 +1,53 @@
 // @ts-nocheck
 
+import { PUBLIC_dropin_domain } from '$lib-v4/env.js';
+
+/**
+ * Gets the allowed target origin for postMessage
+ * @returns {string} Target origin
+ */
+function getTargetOrigin(dropinDomain) {
+	try {
+		console.log('PUBLIC_dropin_domain:', 'background-color: #00ff00;', PUBLIC_dropin_domain);
+		console.log('dropinDomain:', 'background-color: #00ff00;', dropinDomain);
+		if (dropinDomain) {
+			const url = new URL(dropinDomain);
+			return url.origin;
+		}
+	} catch (error) {
+		console.warn('firmly - failed to parse PUBLIC_dropin_domain:', error);
+	}
+	return '*';
+}
+
+/**
+ * Requests storage data from parent SDK
+ * @param {string} key - Storage key to request
+ */
+export function requestStorageData(key, dropinDomain) {
+	const jData = JSON.stringify({
+		action: 'firmlyRequestStorage',
+		key
+	});
+	const targetOrigin = getTargetOrigin(dropinDomain);
+	window.parent.postMessage(jData, targetOrigin);
+}
+
+/**
+ * Sends storage data to parent SDK for persistence
+ * @param {string} key - Storage key
+ * @param {*} data - Data to store
+ */
+export function syncStorageData(key, data, dropinDomain) {
+	const jData = JSON.stringify({
+		action: 'firmlySyncStorage',
+		key,
+		data
+	});
+	const targetOrigin = getTargetOrigin(dropinDomain);
+	window.parent.postMessage(jData, targetOrigin);
+}
+
 export function postCheckoutClosed() {
 	const jData = JSON.stringify({ action: 'firmlyCheckoutClosed' });
 	window.parent.postMessage(jData, '*');
@@ -36,33 +84,5 @@ function postRefresh() {
 
 export function postUpdateCart() {
 	const jData = JSON.stringify({ action: 'cartUpdate' });
-	window.parent.postMessage(jData, '*');
-}
-
-export function postCustomerShippingInfo(shippingInfo) {
-	// Validate that we have meaningful data before sending
-	if (!shippingInfo || typeof shippingInfo !== 'object') {
-		console.warn('firmly - invalid shipping info, skipping customer data save');
-		return;
-	}
-
-	// Only send if we have at least email or address information
-	const hasEmail = shippingInfo.email;
-	const hasAddress = shippingInfo.address1 || shippingInfo.postal_code;
-
-	if (!hasEmail && !hasAddress) {
-		console.warn('firmly - no meaningful customer data to save');
-		return;
-	}
-
-	const jData = JSON.stringify({
-		action: 'firmlyCustomerShippingInfo',
-		shippingInfo
-	});
-	window.parent.postMessage(jData, '*');
-}
-
-export function requestCustomerData() {
-	const jData = JSON.stringify({ action: 'firmlyRequestCustomerData' });
 	window.parent.postMessage(jData, '*');
 }

@@ -18,8 +18,8 @@
 		postOrderPlaced,
 		postQuantityUpdated,
 		postSignIn,
-		postCustomerShippingInfo,
-		requestCustomerData
+		requestStorageData,
+		syncStorageData
 	} from '$lib-v4/browser/cross.js';
 	import LoginButton from './login-button.svelte';
 	import ClickToPayUnified from './view-model/click-to-pay-unified.svelte';
@@ -73,6 +73,7 @@
 	let c2pShowMore = false;
 
 	export let PUBLIC_DISABLE_HCAPTCHA = false;
+	export let PUBLIC_dropin_domain = '';
 
 	// Progress control variables
 	export let shippingInfoInProgress = false;
@@ -242,7 +243,6 @@
 	let cardRequiringCvv = null;
 	let isEmailValidating = false;
 	let c2pSignOutInProgress = false;
-	let customerDataProcessed = false;
 
 	/**
 	 * Selects the most appropriate card from the available options
@@ -438,11 +438,6 @@
 				// Update fields so the user understands what is happening.
 				setShippingInfo?.(savedAddresses[0]);
 				onSetShippingInfo(savedAddresses[0]);
-			}
-
-			// Request customer data from parent window for auto-fill
-			if (!customerDataProcessed && !$cart.shipping_info) {
-				requestCustomerData();
 			}
 		}
 		previousCart = $cart;
@@ -641,9 +636,7 @@
 					// Real update from the server
 					cart.set(result.data);
 					shipping_info_error = '';
-
-					// Send customer shipping info to parent window
-					postCustomerShippingInfo(shippingInfo);
+					syncStorageData('shipping_info', shippingInfo, PUBLIC_dropin_domain);
 				} else {
 					// Restore the original cart state if there's an error
 					cart.set(originalCart);
@@ -660,6 +653,7 @@
 				collapsedStateShippingMethod = false;
 			} finally {
 				shippingInfoInProgress = false;
+				console.log('requestStorageData', requestStorageData('shipping_info', PUBLIC_dropin_domain));
 			}
 		}
 	}
@@ -1291,79 +1285,6 @@
 	}
 	// end of Promo code section
 
-	// Customer Data auto-fill section
-	async function processCustomerData(customerData) {
-		if (!customerData || !customerData.shippingInfo || customerDataProcessed) {
-			return;
-		}
-
-		// Additional validation to prevent processing during ongoing operations
-		if (shippingInfoInProgress || !$cart) {
-			return;
-		}
-
-		console.log('firmly - processing customer data for auto-fill', customerData);
-
-		const shippingInfo = customerData.shippingInfo;
-
-		if (shippingInfo.email && !email) {
-			email = shippingInfo.email;
-		}
-
-		// Only auto-fill if cart doesn't have shipping info yet
-		if (!$cart?.shipping_info) {
-			try {
-				// Mark as processed immediately to prevent double-processing
-				customerDataProcessed = true;
-
-				// Set the form fields
-				setShippingInfo(shippingInfo);
-
-				// Submit the shipping info
-				await onSetShippingInfo(shippingInfo);
-
-				// Explicitly update collapsed states after successful auto-fill
-				// This ensures the form collapses to show the pre-filled state
-				if ($cart?.shipping_info && updateCollapsedStates) {
-					updateCollapsedStates();
-					console.log('firmly - auto-fill completed, sections collapsed');
-				}
-			} catch (error) {
-				console.error('firmly - error processing customer data:', error);
-				// Reset flag on error so user can manually enter data
-				customerDataProcessed = false;
-			}
-		}
-	}
-
-	// Listen for customer data response from parent window
-	let customerDataListenerInitialized = false;
-
-	function initCustomerDataListener() {
-		if (customerDataListenerInitialized || typeof window === 'undefined') {
-			return;
-		}
-
-		bindEvent(window, 'message', (event) => {
-			try {
-				const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-				if (data?.action === 'firmlyCustomerDataResponse' && data?.customerData) {
-					processCustomerData(data.customerData);
-				}
-			} catch (e) {
-				// Ignore parse errors from other postMessage sources
-			}
-		});
-
-		customerDataListenerInitialized = true;
-	}
-
-	// Initialize listener when cart is ready
-	$: if ($cart && !customerDataListenerInitialized) {
-		initCustomerDataListener();
-	}
-	// end of Customer Data section
-	//
 </script>
 
 <div class="@container relative min-h-dvh bg-white">
