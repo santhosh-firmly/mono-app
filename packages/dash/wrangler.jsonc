@@ -55,6 +55,12 @@
 					"database_id": "d269cace-932c-41e0-bf7c-b852db8e83f1"
 				}
 			],
+			"services": [
+				{
+					"binding": "envLoader",
+					"service": "env-loader"
+				}
+			],
 			"vars": {
 				"PUBLIC_AZURE_AD_CLIENT_ID": "194f24d1-f48d-401e-acaa-b0e2900bce67",
 				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
@@ -87,6 +93,12 @@
 					"binding": "reporting",
 					"database_name": "reporting",
 					"database_id": "c873f38b-03af-48b5-90dd-5ea7bba33ef1"
+				}
+			],
+			"services": [
+				{
+					"binding": "envLoader",
+					"service": "env-loader"
 				}
 			],
 			"vars": {
@@ -123,6 +135,12 @@
 					"database_id": "9fe0e79a-dd06-4e65-894c-cf2e15e715e6"
 				}
 			],
+			"services": [
+				{
+					"binding": "envLoader",
+					"service": "env-loader"
+				}
+			],
 			"vars": {
 				"PUBLIC_AZURE_AD_CLIENT_ID": "adc4dd13-b11f-4c32-b853-806b174c9574",
 				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
@@ -149,6 +167,12 @@
 					"binding": "reporting",
 					"database_name": "reporting",
 					"database_id": "9ffc4df7-f27a-44a2-b526-44de76eed733"
+				}
+			],
+			"services": [
+				{
+					"binding": "envLoader",
+					"service": "env-loader"
 				}
 			],
 			"routes": [
@@ -183,6 +207,12 @@
 					"binding": "reporting",
 					"database_name": "reporting",
 					"database_id": "bf2df3ce-3973-4dd4-9fcd-57c11297d57c"
+				}
+			],
+			"services": [
+				{
+					"binding": "envLoader",
+					"service": "env-loader"
 				}
 			],
 			"routes": [

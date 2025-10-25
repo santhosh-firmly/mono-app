@@ -82,6 +82,12 @@
 					"database_name": "firmly-configs",
 					"database_id": "f1e42435-758a-4abf-842d-2303131a96a1"
 				}
+			],
+			"services": [
+				{
+					"binding": "envLoader",
+					"service": "env-loader"
+				}
 			]
 		},
 		"ci": {
@@ -122,6 +128,12 @@
 					"database_name": "firmly-configs",
 					"database_id": "c4b58390-6682-46ab-8c3c-17c3efc8ef88"
 				}
+			],
+			"services": [
+				{
+					"binding": "envLoader",
+					"service": "env-loader"
+				}
 			]
 		},
 		"qa": {
@@ -161,6 +173,12 @@
 					"binding": "firmlyConfigs",
 					"database_name": "firmly-configs",
 					"database_id": "d185f8b4-1755-4640-a4a1-98b63369c033"
+				}
+			],
+			"services": [
+				{
+					"binding": "envLoader",
+					"service": "env-loader"
 				}
 			]
 		},
@@ -206,6 +224,12 @@
 					"database_name": "firmly-configs",
 					"database_id": "253a1370-b5ce-4474-8664-ae243f30802a"
 				}
+			],
+			"services": [
+				{
+					"binding": "envLoader",
+					"service": "env-loader"
+				}
 			]
 		},
 		"prod": {
@@ -249,6 +273,12 @@
 					"binding": "firmlyConfigs",
 					"database_name": "firmly-configs",
 					"database_id": "e6db9dd4-9b04-464f-8d4a-527c256859f3"
+				}
+			],
+			"services": [
+				{
+					"binding": "envLoader",
+					"service": "env-loader"
 				}
 			]
 		}
