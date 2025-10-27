@@ -47,7 +47,10 @@ export class SessionManager {
 
 	setStoredSession(session) {
 		this.currentSession = session;
-		saveToStorage(this.storagePrefix, session);
+		if (this.isBrowser()) {
+			saveToStorage(this.storagePrefix, session);
+		}
+
 	}
 
 	getSessionId() {

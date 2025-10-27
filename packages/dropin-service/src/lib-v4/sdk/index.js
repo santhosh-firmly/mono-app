@@ -670,15 +670,12 @@ export async function bootstrap() {
 						console.log('firmly - storage data requested for key:', data.key);
 						const storageData = loadFromStorage(data.key);
 
-						if (event.source && typeof event.source.postMessage === 'function') {
-							const response = JSON.stringify({
-								action: 'firmlyStorageResponse',
-								key: data.key,
-								data: storageData
-							});
-							event.source.postMessage(response, event.origin);
-							console.log('firmly - sent storage data for key:', data.key);
-						}
+						const response = JSON.stringify({
+							action: 'firmlyStorageResponse',
+							key: data.key,
+							data: storageData
+						});
+						event.source.postMessage(response, event.origin);
 					} else if (data.action === 'firmlySyncStorage') {
 						// Validate origin before accepting storage data
 						if (!isValidDropinOrigin(event.origin)) {
@@ -686,7 +683,6 @@ export async function bootstrap() {
 							return;
 						}
 
-						console.log('firmly - syncing storage data for key:', data.key);
 						saveToStorage(data.key, data.data);
 					} else if (data.action === 'firmly::requestJWT') {
 						// Provide JWT to dropin when requested

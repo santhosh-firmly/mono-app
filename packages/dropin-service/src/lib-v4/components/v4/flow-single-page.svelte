@@ -17,9 +17,7 @@
 	import {
 		postOrderPlaced,
 		postQuantityUpdated,
-		postSignIn,
-		requestStorageData,
-		syncStorageData
+		postSignIn
 	} from '$lib-v4/browser/cross.js';
 	import LoginButton from './login-button.svelte';
 	import ClickToPayUnified from './view-model/click-to-pay-unified.svelte';
@@ -73,7 +71,6 @@
 	let c2pShowMore = false;
 
 	export let PUBLIC_DISABLE_HCAPTCHA = false;
-	export let PUBLIC_dropin_domain = '';
 
 	// Progress control variables
 	export let shippingInfoInProgress = false;
@@ -636,7 +633,6 @@
 					// Real update from the server
 					cart.set(result.data);
 					shipping_info_error = '';
-					syncStorageData('shipping_info', shippingInfo, PUBLIC_dropin_domain);
 				} else {
 					// Restore the original cart state if there's an error
 					cart.set(originalCart);
@@ -653,7 +649,6 @@
 				collapsedStateShippingMethod = false;
 			} finally {
 				shippingInfoInProgress = false;
-				console.log('requestStorageData', requestStorageData('shipping_info', PUBLIC_dropin_domain));
 			}
 		}
 	}
@@ -1284,6 +1279,45 @@
 		}
 	}
 	// end of Promo code section
+
+	// Storage data listener section
+	let storageListenerInitialized = false;
+
+	function initStorageListener() {
+		if (storageListenerInitialized || typeof window === 'undefined') {
+			return;
+		}
+
+		bindEvent(window, 'message', (event) => {
+			try {
+				const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+
+				if (data?.action === 'firmlyStorageResponse') {
+					console.log(
+						'%c[firmly - flow-single-page] 📥 Storage response received:',
+						'background-color: #0088ff; color: #fff',
+						{ key: data.key, data: data.data }
+					);
+
+					// TODO: Process storage data based on key
+					// Example: if (data.key === 'shipping_info') { ... }
+				}
+			} catch (e) {
+				// Ignore parse errors from other postMessage sources
+			}
+		});
+
+		storageListenerInitialized = true;
+		console.log(
+			'firmly - storage listener initialized'
+		);
+	}
+
+	// Initialize listener when cart is ready
+	$: if ($cart && !storageListenerInitialized) {
+		initStorageListener();
+	}
+	// end of Storage data section
 
 </script>
 

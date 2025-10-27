@@ -1,7 +1,7 @@
 // @ts-nocheck
 
 import { platformsToMakeCartHealthCheck } from './api-config';
-import { postUpdateCart } from './cross';
+import { postUpdateCart, requestStorageData, syncStorageData } from './cross';
 import { importJWK, CompactEncrypt } from 'foundation/auth/ext-jose.js';
 import { trackUXEvent, trackAPIEvent, trackError, getSessionTraceId } from './telemetry.js';
 import { sessionManager } from '../utils/session-manager.js';
@@ -10,6 +10,7 @@ import {
 	INITIALIZATION_STATES,
 	isInitializing
 } from '../utils/initialization-state.js';
+import { loadFromStorage, saveToStorage } from '../utils/storage-manager.js';
 
 // Storage key constants
 const BROWSER_ID_KEY = 'FLDID';
@@ -577,6 +578,79 @@ async function getApiAccessToken() {
 	}
 }
 
+/**
+ * Gets API access token with SDK synchronization.
+ * Flow: Request SDK data → Validate → Use or fetch new → Sync back
+ */
+async function getOrSyncApiAccessToken() {
+	if (!window.firmly?.appId || !window.firmly?.apiServer) return null;
+
+	const TIMEOUT_MS = 2000;
+	const EXPIRATION_BUFFER_SEC = 300; // 5 minutes
+
+	const isSessionValid = (session) => {
+		if (!session?.expires) return false;
+		return session.expires > Math.floor(Date.now() / 1000) + EXPIRATION_BUFFER_SEC;
+	};
+
+	try {
+		const sdkData = await Promise.race([
+			new Promise((resolve) => {
+				const handler = (event) => {
+					try {
+						const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+						if (data.action === 'firmlyStorageResponse' && data.key === 'FBS_SDK') {
+							window.removeEventListener('message', handler);
+							resolve(data.data);
+						}
+					} catch (e) {
+						// Ignore parsing errors
+					}
+				};
+				window.addEventListener('message', handler);
+				requestStorageData('FBS_SDK');
+			}),
+			// timeout
+			new Promise((resolve) => setTimeout(() => resolve(null), TIMEOUT_MS))
+		]);
+
+		// Use SDK data if valid
+		if (sdkData && isSessionValid(sdkData)) {
+			sessionManager.setStoredSession(sdkData);
+			return sdkData.access_token;
+		}
+
+		// Track critical events for telemetry
+		if (sdkData) {
+			console.info('SDK Data Expired: SDK Data found but it is expired');
+		} else {
+			console.info('SDK Data Timeout: No SDK data found');
+		}
+
+		const session = await sessionManager.fetchBrowserSession(
+			window.firmly.appId,
+			window.firmly.apiServer,
+			{
+				onDeviceCreated: (sessionData) => {
+					window.firmly.deviceId = sessionData.device_id;
+					trackUXEvent('deviceCreated');
+				}
+			}
+		);
+
+		// Sync new session back to SDK
+		if (session?.access_token) {
+			syncStorageData('FBS_SDK', session);
+			console.info('Session Synced to SDK');
+		}
+
+		return session?.access_token || null;
+	} catch (error) {
+		trackError('getOrSyncApiAccessToken_error', error);
+		return null;
+	}
+}
+
 function getDeviceId() {
 	return sessionManager.getDeviceId();
 }
@@ -606,8 +680,8 @@ export async function initialize(appId, apiServer, domain = null) {
 		console.warn('Payment initialization delayed:', error);
 	});
 
-	// Initialize session in background
-	getApiAccessToken()
+	// Initialize session in background with SDK synchronization
+	getOrSyncApiAccessToken()
 		.then(() => {
 			if (firmly.isNewSessionId) {
 				trackUXEvent('sessionStart');
