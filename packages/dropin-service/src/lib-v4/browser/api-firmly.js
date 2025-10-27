@@ -594,25 +594,33 @@ async function getOrSyncApiAccessToken() {
 	};
 
 	try {
-		const sdkData = await Promise.race([
-			new Promise((resolve) => {
-				const handler = (event) => {
-					try {
-						const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-						if (data.action === 'firmlyStorageResponse' && data.key === 'FBS_SDK') {
-							window.removeEventListener('message', handler);
-							resolve(data.data);
-						}
-					} catch (e) {
-						// Ignore parsing errors
+		const sdkData = await new Promise((resolve) => {
+			const handler = (event) => {
+				// Security: Only accept messages from the parent window.
+				if (event.source !== window.parent) {
+					return;
+				}
+
+				try {
+					const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+					if (data.action === 'firmlyStorageResponse' && data.key === 'FBS_SDK') {
+						clearTimeout(timeoutId);
+						window.removeEventListener('message', handler);
+						resolve(data.data);
 					}
-				};
-				window.addEventListener('message', handler);
-				requestStorageData('FBS_SDK');
-			}),
-			// timeout
-			new Promise((resolve) => setTimeout(() => resolve(null), TIMEOUT_MS))
-		]);
+				} catch (e) {
+					// Ignore parsing errors from other postMessage sources.
+				}
+			};
+
+			const timeoutId = setTimeout(() => {
+				window.removeEventListener('message', handler);
+				resolve(null);
+			}, TIMEOUT_MS);
+
+			window.addEventListener('message', handler);
+			requestStorageData('FBS_SDK');
+		});
 
 		// Use SDK data if valid
 		if (sdkData && isSessionValid(sdkData)) {

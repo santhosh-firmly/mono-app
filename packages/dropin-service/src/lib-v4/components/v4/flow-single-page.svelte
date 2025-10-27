@@ -1289,6 +1289,10 @@
 		}
 
 		bindEvent(window, 'message', (event) => {
+			if (event.source !== window.parent) {
+				return;
+			}
+			
 			try {
 				const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
 
