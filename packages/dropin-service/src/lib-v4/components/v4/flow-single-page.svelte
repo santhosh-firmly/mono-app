@@ -12,9 +12,13 @@
 	import PaymentTabs from './payment-tabs/payment-tabs.svelte';
 	import ShippingMethodSelector from './shipping-method-selector.svelte';
 	import Summary from './summary.svelte';
-	import { isEqual } from '$lib-v4/browser/dash.js';
+	import { isEqual, bindEvent } from '$lib-v4/browser/dash.js';
 	import { writable } from 'svelte/store';
-	import { postOrderPlaced, postQuantityUpdated, postSignIn } from '$lib-v4/browser/cross.js';
+	import {
+		postOrderPlaced,
+		postQuantityUpdated,
+		postSignIn
+	} from '$lib-v4/browser/cross.js';
 	import LoginButton from './login-button.svelte';
 	import ClickToPayUnified from './view-model/click-to-pay-unified.svelte';
 	import ClickToPay from './view-model/click-to-pay.svelte';
@@ -1275,7 +1279,50 @@
 		}
 	}
 	// end of Promo code section
-	//
+
+	// Storage data listener section
+	let storageListenerInitialized = false;
+
+	function initStorageListener() {
+		if (storageListenerInitialized || typeof window === 'undefined') {
+			return;
+		}
+
+		bindEvent(window, 'message', (event) => {
+			if (event.source !== window.parent) {
+				return;
+			}
+			
+			try {
+				const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+
+				if (data?.action === 'firmlyStorageResponse') {
+					console.log(
+						'%c[firmly - flow-single-page] 📥 Storage response received:',
+						'background-color: #0088ff; color: #fff',
+						{ key: data.key, data: data.data }
+					);
+
+					// TODO: Process storage data based on key
+					// Example: if (data.key === 'shipping_info') { ... }
+				}
+			} catch (e) {
+				// Ignore parse errors from other postMessage sources
+			}
+		});
+
+		storageListenerInitialized = true;
+		console.log(
+			'firmly - storage listener initialized'
+		);
+	}
+
+	// Initialize listener when cart is ready
+	$: if ($cart && !storageListenerInitialized) {
+		initStorageListener();
+	}
+	// end of Storage data section
+
 </script>
 
 <div class="@container relative min-h-dvh bg-white">

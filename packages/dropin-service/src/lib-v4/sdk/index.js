@@ -9,6 +9,8 @@ import { convertToFirmlyDomain } from '../utils/domain-utils.js';
 import { sdkSessionManager } from '../utils/session-manager.js';
 import { initializationState, INITIALIZATION_STATES } from '../utils/initialization-state.js';
 
+import { saveToStorage, loadFromStorage, removeFromStorage } from '../utils/storage-manager.js';
+
 let sdkInitialized = false;
 let globalMessageListener = null;
 
@@ -90,6 +92,23 @@ const apiServer = '#F_API_SERVER#';
 const isDropIn = '#F_DROP_IN#' || null;
 const dropInUrl = '#F_DROPIN_URL#';
 const apertureDomain = '#F_APERTURE_DOMAIN#';
+
+/**
+ * Validates if message origin matches the dropin domain
+ * @param {string} origin - Message origin
+ * @returns {boolean}
+ */
+function isValidDropinOrigin(origin) {
+	if (!dropInUrl) return false;
+
+	try {
+		const dropinOrigin = new URL(dropInUrl).origin;
+		return origin === dropinOrigin;
+	} catch (error) {
+		console.warn('firmly - failed to validate dropin origin:', error);
+		return false;
+	}
+}
 
 //#region iFrame AutoCreation for Drop-in Checkout.
 
@@ -209,7 +228,11 @@ function monitorElements(inputSelectors, action) {
 }
 
 function initWindowFirmly() {
-	window.firmly = window.firmly || {
+	if (window.firmly) {
+		return;
+	}
+
+	window.firmly = {
 		sdk: null,
 		dropin: { iframe: null },
 		customProperties: null
@@ -637,6 +660,30 @@ export async function bootstrap() {
 						} else {
 							console.error('Firmly drop-in iframe not found for addToCart action.');
 						}
+					} else if (data.action === 'firmlyRequestStorage') {
+						// Validate origin before responding with storage data
+						if (!isValidDropinOrigin(event.origin)) {
+							console.warn('firmly - rejected storage request from invalid origin:', event.origin);
+							return;
+						}
+
+						console.log('firmly - storage data requested for key:', data.key);
+						const storageData = loadFromStorage(data.key);
+
+						const response = JSON.stringify({
+							action: 'firmlyStorageResponse',
+							key: data.key,
+							data: storageData
+						});
+						event.source.postMessage(response, event.origin);
+					} else if (data.action === 'firmlySyncStorage') {
+						// Validate origin before accepting storage data
+						if (!isValidDropinOrigin(event.origin)) {
+							console.warn('firmly - rejected storage sync from invalid origin:', event.origin);
+							return;
+						}
+
+						saveToStorage(data.key, data.data);
 					} else if (data.action === 'firmly::requestJWT') {
 						// Provide JWT to dropin when requested
 						try {

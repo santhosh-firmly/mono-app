@@ -38,3 +38,33 @@ export function postUpdateCart() {
 	const jData = JSON.stringify({ action: 'cartUpdate' });
 	window.parent.postMessage(jData, '*');
 }
+
+/**
+ * Sends storage data to parent SDK for persistence
+ * @param {string} key - Storage key
+ * @param {*} data - Data to store
+ * @param {string} dropinDomain - Dropin domain for origin validation
+ */
+export function syncStorageData(key, data, dropinDomain) {
+	const jData = JSON.stringify({
+		action: 'firmlySyncStorage',
+		key,
+		data
+	});
+
+	window.parent.postMessage(jData, '*');
+}
+
+/**
+ * Requests storage data from parent SDK
+ * @param {string} key - Storage key to request
+ * @param {string} dropinDomain - Dropin domain for origin validation
+ */
+export function requestStorageData(key, dropinDomain) {
+	const jData = JSON.stringify({
+		action: 'firmlyRequestStorage',
+		key
+	});
+
+	window.parent.postMessage(jData, '*');
+}

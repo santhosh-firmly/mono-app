@@ -3,6 +3,8 @@
  * Handles browser sessions and JWT tokens with minimal complexity
  */
 
+import { saveToStorage, loadFromStorage, removeFromStorage } from './storage-manager.js';
+
 // Session expiration buffer in seconds (5 minutes)
 const SESSION_EXPIRATION_BUFFER_SECONDS = 300;
 
@@ -39,24 +41,16 @@ export class SessionManager {
 	getStoredSession() {
 		if (!this.isBrowser()) return this.currentSession;
 
-		try {
-			const stored = window.localStorage.getItem(this.storagePrefix);
-			return this.currentSession || (stored ? JSON.parse(stored) : null);
-		} catch (error) {
-			return this.currentSession;
-		}
+		const stored = loadFromStorage(this.storagePrefix);
+		return this.currentSession || stored;
 	}
 
 	setStoredSession(session) {
 		this.currentSession = session;
-
 		if (this.isBrowser()) {
-			try {
-				window.localStorage.setItem(this.storagePrefix, JSON.stringify(session));
-			} catch (error) {
-				// Storage error - continue with in-memory session
-			}
+			saveToStorage(this.storagePrefix, session);
 		}
+
 	}
 
 	getSessionId() {
@@ -183,7 +177,7 @@ export class SessionManager {
 	clearSession() {
 		this.currentSession = null;
 		if (this.isBrowser()) {
-			window.localStorage.removeItem(this.storagePrefix);
+			removeFromStorage(this.storagePrefix);
 			window.sessionStorage.removeItem(this.sessionIdPrefix);
 		}
 	}

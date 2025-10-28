@@ -7,7 +7,6 @@ let PUBLIC_c2p_initiator_id = '';
 let PUBLIC_c2p_sdk_url = '';
 let PUBLIC_uc2p_sdk_url = '';
 let PUBLIC_DISABLE_HCAPTCHA = '';
-
 function handleEnv({ platform }) {
 	PUBLIC_firmly_deployment = platform.env.PUBLIC_firmly_deployment;
 	PUBLIC_cf_server = platform.env.PUBLIC_cf_server;
