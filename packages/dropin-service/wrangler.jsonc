@@ -16,7 +16,6 @@
 	},
 	"vars": {
 		"PUBLIC_firmly_deployment": "dev",
-		"PUBLIC_dropin_domain": "https://dropin.firmly.dev",
 		"PUBLIC_aperture_domain": "firmly.in",
 		"PUBLIC_cf_server": "https://api.firmly.tools",
 		"PUBLIC_api_id": "4e015446-be87-4796-93bf-7610bb228fe0",
@@ -61,7 +60,6 @@
 			],
 			"vars": {
 				"PUBLIC_firmly_deployment": "dev",
-				"PUBLIC_dropin_domain": "https://dropin.firmly.dev",
 				"PUBLIC_aperture_domain": "firmly.in",
 				"PUBLIC_cf_server": "https://api.firmly.tools",
 				"PUBLIC_api_id": "4e015446-be87-4796-93bf-7610bb228fe0",
@@ -102,7 +100,6 @@
 			],
 			"vars": {
 				"PUBLIC_firmly_deployment": "ci",
-				"PUBLIC_dropin_domain": "https://dropin.firmlyci.com",
 				"PUBLIC_aperture_domain": "firmly.in",
 				"PUBLIC_cf_server": "https://api.firmlyci.com",
 				"PUBLIC_api_id": "382597c1-e66e-4d5c-9a88-2b245b8eb8cf",
@@ -143,7 +140,6 @@
 			],
 			"vars": {
 				"PUBLIC_firmly_deployment": "qa",
-				"PUBLIC_dropin_domain": "https://dropin.amarood.art",
 				"PUBLIC_aperture_domain": "firmly.in",
 				"PUBLIC_cf_server": "https://api.goiaba.art",
 				"PUBLIC_api_id": "c8aba2bd-d4a1-44dd-9fa5-7f30fecd0cf2",
@@ -188,7 +184,6 @@
 			],
 			"vars": {
 				"PUBLIC_firmly_deployment": "uat",
-				"PUBLIC_dropin_domain": "https://dropin.firmlyuat.com",
 				"PUBLIC_aperture_domain": "firmlyaperture.net",
 				"PUBLIC_cf_server": "https://api.firmly.work",
 				"PUBLIC_api_id": "9de1deb1-5df5-4925-a224-127b6cd6345b",
@@ -233,7 +228,6 @@
 			],
 			"vars": {
 				"PUBLIC_firmly_deployment": "prod",
-				"PUBLIC_dropin_domain": "https://dropin.firmly.live",
 				"PUBLIC_aperture_domain": "firmlyaperture.com",
 				"PUBLIC_cf_server": "https://api.firmly.online",
 				"PUBLIC_api_id": "8eee8b2b-2bb7-41fb-8ac6-d19d82a437e5",
