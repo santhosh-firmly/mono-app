@@ -521,7 +521,7 @@
 		initializationState.start();
 
 		// Initialize the dropin session immediately - don't wait for SDK
-		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server);
+		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server, data.merchantDomain);
 		initializeAppVersion(version);
 
 		if (shouldUseMastercard) {
