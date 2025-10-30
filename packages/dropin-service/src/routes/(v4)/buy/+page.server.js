@@ -56,6 +56,7 @@ export const load = async ({ url, platform }) => {
 
 	return {
 		...envVars,
+		merchantDomain,
 		merchantPresentation,
 		partnerPresentation
 	};
