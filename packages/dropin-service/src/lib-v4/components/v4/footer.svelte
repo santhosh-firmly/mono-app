@@ -82,6 +82,10 @@
 					/Terms of Use/g,
 					`<a class="underline" target="_blank" rel="noopener noreferrer" href="${escapedUrl}">Terms of Use</a>`
 				);
+				htmlText = htmlText.replace(
+					/Terms of Service/g,
+					`<a class="underline" target="_blank" rel="noopener noreferrer" href="${escapedUrl}">Terms of Service</a>`
+				);
 			}
 
 			// Replace Privacy Policy
