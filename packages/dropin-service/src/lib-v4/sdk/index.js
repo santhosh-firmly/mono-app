@@ -92,6 +92,16 @@ const apiServer = '#F_API_SERVER#';
 const dropinOrigin = '#F_DROPIN_ORIGIN#';
 const apertureDomain = '#F_APERTURE_DOMAIN#';
 
+/**
+ * Validates if message origin matches the dropin domain
+ * @param {string} origin - Message origin
+ * @returns {boolean}
+ */
+function isValidDropinOrigin(origin) {
+	if (!dropinOrigin) return false;
+	return origin === dropinOrigin;
+}
+
 //#region Scroll Management for Buy Flow
 
 let scrollY;
@@ -424,6 +434,15 @@ export async function bootstrap() {
 						console.log('firmly - order placed successfully');
 						window.firmly?.callbacks?.onOrderPlaced?.(data.order);
 					} else if (data.action === 'firmlyRequestStorage') {
+						// Validate origin before responding with storage data
+						if (!isValidDropinOrigin(event.origin)) {
+							console.warn(
+								'firmly - rejected storage request from invalid origin:',
+								event.origin
+							);
+							return;
+						}
+
 						console.log('firmly - storage data requested for key:', data.key);
 						const storageData = loadFromStorage(data.key);
 
@@ -434,6 +453,15 @@ export async function bootstrap() {
 						});
 						event.source.postMessage(response, event.origin);
 					} else if (data.action === 'firmlySyncStorage') {
+						// Validate origin before accepting storage data
+						if (!isValidDropinOrigin(event.origin)) {
+							console.warn(
+								'firmly - rejected storage sync from invalid origin:',
+								event.origin
+							);
+							return;
+						}
+
 						saveToStorage(data.key, data.data);
 					} else if (data.action === 'firmly::requestJWT') {
 						// Provide JWT to dropin when requested
