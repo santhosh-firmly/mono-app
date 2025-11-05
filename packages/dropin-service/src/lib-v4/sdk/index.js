@@ -89,8 +89,7 @@ const uuidRegex =
 	/^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/m;
 const appId = '#F_APP_ID#';
 const apiServer = '#F_API_SERVER#';
-const isDropIn = '#F_DROP_IN#' || null;
-const dropInUrl = '#F_DROPIN_URL#';
+const dropinOrigin = '#F_DROPIN_ORIGIN#';
 const apertureDomain = '#F_APERTURE_DOMAIN#';
 
 /**
@@ -99,18 +98,11 @@ const apertureDomain = '#F_APERTURE_DOMAIN#';
  * @returns {boolean}
  */
 function isValidDropinOrigin(origin) {
-	if (!dropInUrl) return false;
-
-	try {
-		const dropinOrigin = new URL(dropInUrl).origin;
-		return origin === dropinOrigin;
-	} catch (error) {
-		console.warn('firmly - failed to validate dropin origin:', error);
-		return false;
-	}
+	if (!dropinOrigin) return false;
+	return origin === dropinOrigin;
 }
 
-//#region iFrame AutoCreation for Drop-in Checkout.
+//#region Scroll Management for Buy Flow
 
 let scrollY;
 let prevBodyPosition;
@@ -162,70 +154,7 @@ function enableScroll() {
 	scrollDisabled = false;
 }
 
-function updateIFrame() {
-	if (isDropIn) {
-		if (!history.state?.firmlyCheckout) {
-			enableScroll();
-			if (window.firmly.dropin.iframe) {
-				window.firmly.dropin.iframe.style.display = 'none';
-			}
-			if (window.firmly.dropin.onClose) {
-				window.firmly.dropin.onClose();
-			}
-		} else {
-			disableScroll();
-			if (window.firmly.dropin.iframe) {
-				// Iframe present, so send to iframe.
-				window.firmly.dropin.iframe.style.display = 'block';
-			}
-		}
-	}
-}
-
-window.onpopstate = () => {
-	// We are keeping the iframe state as part
-	// of the navigation state to allow the
-	// back button to work seamessly for any website
-	// including those who use shallow navigation.
-	updateIFrame();
-};
-
-function openCheckoutWindow() {
-	if (!history.state?.firmlyCheckout) {
-		// Add history action to close the checkout with a back click
-		history.pushState(
-			{
-				firmlyCheckout: true
-			},
-			''
-		);
-		updateIFrame();
-	}
-}
-
-function monitorElements(inputSelectors, action) {
-	const selector = inputSelectors.join(',');
-	const elementWatcher = new MutationObserver((mutationList) => {
-		mutationList.forEach((mutation) => {
-			mutation.addedNodes?.forEach((element) => {
-				if (element.matches?.(selector)) {
-					action(element);
-				}
-
-				const targetElements = element.querySelectorAll?.(selector);
-				targetElements?.forEach(action);
-			});
-			if (mutation.target.matches?.(selector)) {
-				action(mutation.target);
-			}
-		});
-	});
-
-	elementWatcher.observe(document.body, { childList: true, subtree: true, attributes: true });
-
-	const targetElements = document.querySelectorAll(selector);
-	targetElements.forEach(action);
-}
+//#endregion
 
 function initWindowFirmly() {
 	if (window.firmly) {
@@ -234,58 +163,8 @@ function initWindowFirmly() {
 
 	window.firmly = {
 		sdk: null,
-		dropin: { iframe: null },
 		customProperties: null
 	};
-}
-
-function getWindowDropin() {
-	initWindowFirmly();
-	if (window.firmly.dropin) {
-		return window.firmly.dropin;
-	}
-	window.firmly.dropin = { iframe: null };
-	return window.firmly.dropin;
-}
-
-function setupDropinCheckout(dropinUrl) {
-	const dropin = getWindowDropin();
-
-	if (dropinUrl && dropin.iframe == null) {
-		const iframe = document.createElement('iframe');
-		iframe.frameborder = '0';
-		iframe.id = 'firmlydropincheckout';
-		iframe.style =
-			'position:fixed; top:0; left:0; height:100%; width:100%; display:none; z-index:9999999; border: 0';
-
-		const url = new URL(dropinUrl);
-		url.searchParams.set('_appId', appId);
-		iframe.src = url.href;
-
-		iframe.allow = 'payment';
-		dropin.iframe = iframe;
-		document.body.appendChild(iframe);
-	}
-}
-//#endregion
-
-// Cart UI
-let isOpen = false; /* default */
-
-async function defaultCallback() {
-	// function to be a placeholder for callbacks
-}
-
-export function subscribe(action, status, fn, context = window) {
-	bindEvent(context, 'message', (event) => {
-		// TODO: Enable it for security reasons in future
-		// if (event.origin !== origin) {
-		//     return;
-		// }
-		if (event.data.action === `firmly:${action}:${status}`) {
-			fn(event);
-		}
-	});
 }
 
 export async function bootstrap() {
@@ -351,99 +230,6 @@ export async function bootstrap() {
 				initializationState.setState(INITIALIZATION_STATES.DROPIN_READY);
 
 				await initialize(config.appId, config.env.apiServer, config.domain);
-
-				if (config.isDropIn) {
-					setupDropinCheckout(config.dropInUrl);
-				}
-			},
-			CartUI: {
-				openCart: async function () {
-					if (!isOpen) {
-						window.parent.postMessage({ action: 'firmly:openCart:trigger' }, '*');
-						if (!window.firmly.sdk.CartUI.hasAnimation) {
-							window.parent.postMessage({ action: 'firmly:openCart:start' }, '*');
-							window.parent.postMessage({ action: 'firmly:openCart:end' }, '*');
-						}
-					}
-				},
-
-				closeCart: async function () {
-					if (isOpen) {
-						window.parent.postMessage({ action: 'firmly:closeCart:trigger' }, '*');
-						if (!window.firmly.sdk.CartUI.hasAnimation) {
-							window.parent.postMessage({ action: 'firmly:closeCart:start' }, '*');
-							window.parent.postMessage({ action: 'firmly:closeCart:end' }, '*');
-						}
-					}
-				},
-
-				onOpenCart: function (status = 'end', cb = defaultCallback, context) {
-					subscribe(
-						'openCart',
-						status,
-						async () => {
-							if (status === 'trigger') {
-								window.parent.postMessage({ action: 'firmly:openCart:start' }, '*');
-								await cb();
-								window.parent.postMessage({ action: 'firmly:openCart:end' }, '*');
-							} else {
-								await cb();
-							}
-						},
-						context
-					);
-				},
-
-				onCloseCart: function (status = 'end', cb = defaultCallback, context) {
-					subscribe(
-						'closeCart',
-						status,
-						async () => {
-							if (status === 'trigger') {
-								window.parent.postMessage(
-									{ action: 'firmly:closeCart:start' },
-									'*'
-								);
-								await cb();
-								window.parent.postMessage({ action: 'firmly:closeCart:end' }, '*');
-							} else {
-								await cb();
-							}
-						},
-						context
-					);
-				},
-
-				async toggleCart() {
-					isOpen ? await this.closeCart() : await this.openCart();
-					return isOpen;
-				}
-			},
-			CheckoutUI: {
-				hookUp(inputSelectors, getStoreInfo = null) {
-					monitorElements(inputSelectors, (el) => {
-						el.onclick = (e) => {
-							e.stopImmediatePropagation();
-							console.log('add to cart clicked:', el.href, e);
-							openCheckoutWindow();
-							let storeInfo = null;
-							if (getStoreInfo) {
-								storeInfo = getStoreInfo(el.href);
-							}
-							const jData = JSON.stringify({
-								action: 'addToCart',
-								storeInfo: storeInfo,
-								transfer: { handle: 'url:' + el.href }
-							});
-							console.log('sending jData:', jData);
-							window.firmly.dropin.iframe.contentWindow.postMessage(jData, '*');
-							return false;
-						};
-					});
-				},
-				open() {
-					openCheckoutWindow();
-				}
 			}
 		};
 
@@ -503,8 +289,8 @@ export async function bootstrap() {
 				return iframe;
 			}
 
-			const dropinBuyNowUrl = new URL(dropInUrl);
-			dropinBuyNowUrl.pathname = '/buy';
+			// Use dropin origin for buyNow URL
+			const dropinBuyNowUrl = new URL('/buy', dropinOrigin);
 			dropinBuyNowUrl.searchParams.set('_appId', appId);
 
 			if (checkoutConfig.pdp_url) {
@@ -592,8 +378,6 @@ export async function bootstrap() {
 		// Create new global message listener
 		globalMessageListener = async (event) => {
 			if (event.data.action === 'firmly::executeSessionTransfer') {
-				window.firmly.sdk.CartUI.openCart();
-
 				if (event.data.transferPayload) {
 					const storeId = event.data.merchant.store_id;
 					// We exclude the merchant from `CartHive.get` call, as we will transfer the session below
@@ -649,21 +433,13 @@ export async function bootstrap() {
 					} else if (data.action === 'firmlyOrderPlaced') {
 						console.log('firmly - order placed successfully');
 						window.firmly?.callbacks?.onOrderPlaced?.(data.order);
-					} else if (data.action === 'firmly::addToCart') {
-						console.log('firmly - add to cart clicked', event);
-						const iframe = window.firmly.dropin.iframe;
-						if (iframe) {
-							disableScroll();
-							iframe.style.display = 'block';
-							const targetOrigin = new URL(iframe.src).origin;
-							iframe.contentWindow.postMessage(event.data, targetOrigin);
-						} else {
-							console.error('Firmly drop-in iframe not found for addToCart action.');
-						}
 					} else if (data.action === 'firmlyRequestStorage') {
 						// Validate origin before responding with storage data
 						if (!isValidDropinOrigin(event.origin)) {
-							console.warn('firmly - rejected storage request from invalid origin:', event.origin);
+							console.warn(
+								'firmly - rejected storage request from invalid origin:',
+								event.origin
+							);
 							return;
 						}
 
@@ -679,7 +455,10 @@ export async function bootstrap() {
 					} else if (data.action === 'firmlySyncStorage') {
 						// Validate origin before accepting storage data
 						if (!isValidDropinOrigin(event.origin)) {
-							console.warn('firmly - rejected storage sync from invalid origin:', event.origin);
+							console.warn(
+								'firmly - rejected storage sync from invalid origin:',
+								event.origin
+							);
 							return;
 						}
 
@@ -710,13 +489,6 @@ export async function bootstrap() {
 		// Bind the global message listener
 		bindEvent(window, 'message', globalMessageListener);
 
-		window.firmly.sdk.CartUI.onOpenCart('end', function () {
-			isOpen = true;
-		});
-		window.firmly.sdk.CartUI.onCloseCart('end', function () {
-			isOpen = false;
-		});
-
 		if (uuidRegex.test(appId)) {
 			// Initialize SDK session management for auto-initialization (non-blocking)
 			initializeSDKSession(appId, apiServer).catch((error) => {
@@ -727,9 +499,7 @@ export async function bootstrap() {
 			// If the condition does not match, the client must call init explicitely
 			const initPromise = window.firmly.sdk.init({
 				env: { apiServer },
-				appId,
-				isDropIn,
-				dropInUrl
+				appId
 			});
 
 			initPromise

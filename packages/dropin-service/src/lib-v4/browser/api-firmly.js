@@ -602,7 +602,8 @@ async function getOrSyncApiAccessToken() {
 				}
 
 				try {
-					const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+					const data =
+						typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
 					if (data.action === 'firmlyStorageResponse' && data.key === 'FBS_SDK') {
 						clearTimeout(timeoutId);
 						window.removeEventListener('message', handler);
@@ -758,13 +759,6 @@ function initParentUTM(parentInfo) {
 			setSessionParentUTM(Object.fromEntries(phrefUrl.searchParams.entries()));
 		}
 	}
-}
-
-export async function initializeParentInfo(parentInfo) {
-	const firmly = window.firmly;
-	firmly.parentInfo = parentInfo;
-	initParentUTM(parentInfo);
-	trackUXEvent('viewPage');
 }
 
 //#endregion
@@ -1195,13 +1189,13 @@ async function completeCreditCardOrder(domain, ccInfo) {
 
 // New function for wallet complete orders
 async function completeWalletOrder(domain, walletData) {
-    const headers = await getHeaders();
-    const res = await browserFetch(getCCUrl(`wallet-complete-order`), {
-        ...headers,
-        method: 'POST',
-        body: JSON.stringify(walletData)
-    });
-    return res;
+	const headers = await getHeaders();
+	const res = await browserFetch(getCCUrl(`wallet-complete-order`), {
+		...headers,
+		method: 'POST',
+		body: JSON.stringify(walletData)
+	});
+	return res;
 }
 
 async function encryptCCInfoAsJWE(ccInfo) {

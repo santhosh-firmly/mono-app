@@ -10,11 +10,6 @@ export function postOrderPlaced(url, session, order) {
 	window.parent.postMessage(jData, '*');
 }
 
-export function postGetParentInfo() {
-	const jData = JSON.stringify({ action: 'getParentInfo' });
-	window.parent.postMessage(jData, '*');
-}
-
 function postGetDynamoInfo() {
 	window.parent.postMessage({ action: 'firmly::getDynamoInfo' }, '*');
 }

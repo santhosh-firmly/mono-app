@@ -32,11 +32,9 @@ function getAPIServer(hostname) {
 export async function GET({ request, platform }) {
 	const url = new URL(request.url);
 	const appId = url.searchParams.get('appId');
-	const isDropIn = url.searchParams.get('isDropIn');
-	const dropinUrl = new URL(request.url);
-	dropinUrl.pathname = '/single-page';
-	dropinUrl.search = '';
-	dropinUrl.searchParams.set('_appId', appId);
+
+	// Get the dropin origin from the SDK request URL
+	const dropinOrigin = url.origin;
 
 	if (!appId || !uuidRegex.test(appId)) {
 		return json(
@@ -53,8 +51,7 @@ export async function GET({ request, platform }) {
 		sdkSrc
 			.replaceAll('#F_APP_ID#', appId)
 			.replaceAll('#F_API_SERVER#', getAPIServer(url.hostname))
-			.replaceAll('#F_DROP_IN#', isDropIn)
-			.replaceAll('#F_DROPIN_URL#', dropinUrl.href)
+			.replaceAll('#F_DROPIN_ORIGIN#', dropinOrigin)
 			.replaceAll('#F_APERTURE_DOMAIN#', platform.env.PUBLIC_aperture_domain),
 		{
 			headers: {
