@@ -54,7 +54,7 @@ sCartPayment.subscribe((value) => {
 	cartPaymentData = value;
 });
 
-export const sCartStoreInfo = writable({});
+const sCartStoreInfo = writable({});
 let storeId = '';
 sCartStoreInfo.subscribe((value) => {
 	storeId = value.store_id;
@@ -156,11 +156,8 @@ async function completeCreditCardPayment(paymentInfo) {
 	const ccInfo = getCCInfo(paymentInfo);
 	const domain = storeId; // Get domain from store context
 	// Direct complete-order with JWE encryption
-	const res = await window.firmly.completeCreditCardOrder(
-		domain,
-		ccInfo
-	);
-	
+	const res = await window.firmly.completeCreditCardOrder(domain, ccInfo);
+
 	if (res.status == 200) {
 		sCartPayment.set(res.data);
 	} else {
@@ -218,8 +215,6 @@ function getCCInfo(paymentInfo) {
 	};
 	return ccInfo;
 }
-
-
 
 //#endregion
 
@@ -295,30 +290,30 @@ async function completeC2PPayment(cardId, rememberMe = false, cvv = null, additi
 
 	resetApiError();
 	sApiProgressInfo.set(ProgressC2PTokenize);
-	
+
 	const domain = storeId; // Get domain from store context
 	// Prepare wallet data for complete-order
 	const walletData = {
 		wallet: 'visa', // or 'paze' depending on provider
-		credit_card_id: String(cardId),
+		credit_card_id: String(cardId)
 	};
 
 	const c2pAccessToken = sessionStorage.getItem('FWC2P');
 	if (c2pAccessToken) {
 		walletData.access_token = c2pAccessToken;
 	}
-	
+
 	if (cvv) {
 		walletData.verification_value = await window.firmly.paymentRsaEncrypt(cvv);
 	}
-	
+
 	if (additionalData.jws) {
 		walletData.jws = additionalData.jws;
 	}
-	
+
 	// Use new wallet-complete-order endpoint
 	const res = await window.firmly.completeWalletOrder(domain, walletData);
-	
+
 	if (!res) {
 		// Consumer closed Visa popup without completing the flow.
 		sApiProgressInfo.set(ProgressEmpty);
@@ -333,7 +328,6 @@ async function completeC2PPayment(cardId, rememberMe = false, cvv = null, additi
 	sApiProgressInfo.set(ProgressEmpty);
 	return res.status == 200 ? res.data : null;
 }
-
 
 async function c2pVisaAuthenticate(authenticationMethod) {
 	if (isMock) {
