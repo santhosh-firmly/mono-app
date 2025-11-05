@@ -14,11 +14,7 @@
 	import Summary from './summary.svelte';
 	import { isEqual, bindEvent } from '$lib-v4/browser/dash.js';
 	import { writable } from 'svelte/store';
-	import {
-		postOrderPlaced,
-		postQuantityUpdated,
-		postSignIn
-	} from '$lib-v4/browser/cross.js';
+	import { postOrderPlaced, postQuantityUpdated, postSignIn } from '$lib-v4/browser/cross.js';
 	import LoginButton from './login-button.svelte';
 	import ClickToPayUnified from './view-model/click-to-pay-unified.svelte';
 	import ClickToPay from './view-model/click-to-pay.svelte';
@@ -103,7 +99,7 @@
 		// Add merchant terms if present
 		if (termsOfUse && privacyPolicy) {
 			terms.push({
-				text: 'By selecting "Place Order", I agree to the merchant´s Terms of Use and Privacy Policy.',
+				text: 'By tapping "Buy Now", you agree to the seller`s Terms of Service, and Privacy Policy',
 				links: {
 					termsOfUse: termsOfUse,
 					privacyPolicy: privacyPolicy
@@ -1292,7 +1288,7 @@
 			if (event.source !== window.parent) {
 				return;
 			}
-			
+
 			try {
 				const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
 
@@ -1312,9 +1308,7 @@
 		});
 
 		storageListenerInitialized = true;
-		console.log(
-			'firmly - storage listener initialized'
-		);
+		console.log('firmly - storage listener initialized');
 	}
 
 	// Initialize listener when cart is ready
@@ -1322,7 +1316,6 @@
 		initStorageListener();
 	}
 	// end of Storage data section
-
 </script>
 
 <div class="@container relative min-h-dvh bg-white">
