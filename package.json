@@ -30,7 +30,7 @@
 		"@firmly/eslint-config": "^0.4.0",
 		"husky": "^9.1.7",
 		"lerna": "^8.1.2",
-		"knip": "^5.50.1",
+		"knip": "^5.68.0",
 		"eslint": "^9.18.0",
 		"prettier": "^3.4.2",
 		"wrangler": "^4.9.1"

@@ -15,13 +15,17 @@ const globalConfig = {
 };
 
 export default {
+	eslint: {
+		config: []
+	},
 	workspaces: {
 		...globalConfig.workspaces,
 		'packages/dropin-service': {
 			...globalConfig.workspaces['packages/*'],
 			ignore: [
 				'./src/lib-v4/sdk/*',
-				'./src/lib/services/*' // Temporary when migrating to v5
+				'./src/lib/services/*', // Temporary when migrating to v5
+				'**/eslint.config.js'
 			]
 		},
 		'packages/dash': {
