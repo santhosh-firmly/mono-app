@@ -3,78 +3,68 @@
 	import { goto } from '$app/navigation';
 	import { sessionsStore } from '$lib/stores/sessions.svelte.js';
 	import SessionPlayer from '$lib/components/session-player.svelte';
+	import Button from '$lib/components/button.svelte';
 
 	let sessionData = $state(null);
 	let loading = $state(true);
 
 	$effect(() => {
-		const sessionId = $page.params.id;
-
-		sessionsStore.fetchSessionById(sessionId).then((data) => {
+		sessionsStore.fetchSessionById($page.params.id).then((data) => {
 			sessionData = data;
 			loading = false;
 		});
 	});
 
 	function formatDate(timestamp) {
-		return new Date(timestamp).toLocaleString();
+		return new Intl.DateTimeFormat('en-US', {
+			month: 'short',
+			day: 'numeric',
+			year: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit'
+		}).format(new Date(timestamp));
 	}
 
-	function goBack() {
-		goto('/');
+	function formatDuration(ms) {
+		const seconds = Math.floor(ms / 1000);
+		const minutes = Math.floor(seconds / 60);
+		const remainingSeconds = seconds % 60;
+		return `${minutes}m ${remainingSeconds}s`;
 	}
 </script>
 
-<div class="container mx-auto px-4 py-8">
-	<button
-		onclick={goBack}
-		class="mb-4 px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition-colors"
-	>
-		← Back to Sessions
-	</button>
-
+<div class="py-16">
 	{#if loading}
-		<div class="flex justify-center items-center py-12">
-			<p class="text-gray-500">Loading session...</p>
+		<div class="py-24 text-center">
+			<div
+				class="border-foreground inline-block h-6 w-6 animate-spin rounded-full border-2 border-t-transparent"
+			></div>
 		</div>
 	{:else if sessionsStore.error}
-		<div class="bg-red-50 border border-red-200 rounded-lg p-4">
-			<p class="text-red-600">Error: {sessionsStore.error}</p>
+		<div class="py-12 text-center">
+			<p class="text-muted text-sm">{sessionsStore.error}</p>
+			<Button variant="link" onclick={() => goto('/')} class="mt-4">Go back</Button>
 		</div>
 	{:else if sessionData}
-		<div class="bg-white rounded-lg shadow-lg p-6 mb-6">
-			<h1 class="text-2xl font-bold mb-4">Session Replay</h1>
-
-			<div class="grid grid-cols-2 gap-4 mb-6 text-sm">
-				<div>
-					<p class="text-gray-600">
-						<span class="font-medium">URL:</span>
-						{sessionData.metadata.url}
-					</p>
-					<p class="text-gray-600">
-						<span class="font-medium">Date:</span>
-						{formatDate(sessionData.metadata.timestamp)}
-					</p>
-				</div>
-				<div>
-					<p class="text-gray-600">
-						<span class="font-medium">Events:</span>
-						{sessionData.metadata.eventCount}
-					</p>
-					<p class="text-gray-600">
-						<span class="font-medium">Duration:</span>
-						{Math.floor(sessionData.metadata.duration / 1000)}s
-					</p>
-				</div>
+		<header class="mb-12">
+			<Button variant="ghost" onclick={() => goto('/')} class="mb-3 inline-block"
+				>← Back</Button
+			>
+			<h1 class="mb-2 font-serif text-2xl">{sessionData.metadata.url}</h1>
+			<div class="text-muted text-xs">
+				{sessionData.metadata.eventCount} events · {formatDuration(
+					sessionData.metadata.duration
+				)} · {formatDate(sessionData.metadata.timestamp)}
 			</div>
+		</header>
 
-			<div class="border rounded-lg p-4 bg-gray-50">
-				<SessionPlayer events={sessionData.events} metadata={sessionData.metadata} />
-			</div>
+		<div class="border-border border bg-white p-4">
+			<SessionPlayer events={sessionData.events} metadata={sessionData.metadata} />
 		</div>
 	{:else}
-		<div class="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
-			<p class="text-gray-500">Session not found</p>
+		<div class="py-24 text-center">
+			<p class="text-muted mb-4 text-sm">Session not found</p>
+			<Button variant="link" onclick={() => goto('/')}>Go back</Button>
 		</div>
 	{/if}
 </div>
