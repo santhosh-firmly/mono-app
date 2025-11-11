@@ -8,8 +8,10 @@ export default defineConfig((ctx) => {
 
 	const isBuild = ctx.command === 'build';
 	const isPreview = ctx.isPreview === true;
+	const isStorybook =
+		process.env.npm_lifecycle_script?.includes('storybook') || process.env.STORYBOOK === 'true';
 
-	if (!isBuild && !isPreview) {
+	if (!isBuild && !isPreview && !isStorybook) {
 		plugins.push(
 			cloudflare({
 				configPath: './wrangler.jsonc'
