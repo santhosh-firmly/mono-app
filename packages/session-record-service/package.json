@@ -1,0 +1,41 @@
+{
+	"name": "session-record-service",
+	"private": true,
+	"version": "0.29.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "npm run prepare && vite build",
+		"preview": "vite preview",
+		"preview:cloudflare": "wrangler dev --env dev",
+		"prepare": "svelte-kit sync || echo ''",
+		"format-code": "eslint . --fix",
+		"format-code:check": "eslint . --fix=false",
+		"deploy-dev": "npm run build && wrangler deploy --env dev",
+		"deploy-ci": "npm run build && wrangler deploy --env ci",
+		"deploy-qa": "npm run build && wrangler deploy --env qa",
+		"deploy-uat": "npm run build && wrangler deploy --env uat",
+		"deploy-prod": "npm run build && wrangler deploy --env prod"
+	},
+	"devDependencies": {
+		"@cloudflare/vite-plugin": "^0.1.17",
+		"@firmly/eslint-config": "^0.29.0",
+		"@sveltejs/adapter-cloudflare": "^6.0.1",
+		"@sveltejs/kit": "^2.16.0",
+		"@sveltejs/vite-plugin-svelte": "^5.0.0",
+		"@tailwindcss/vite": "^4.1.17",
+		"eslint": "*",
+		"prettier": "*",
+		"svelte": "^5.27.0",
+		"tailwindcss": "^4.0.0",
+		"vite": "^6.0.0",
+		"wrangler": "*"
+	},
+	"dependencies": {
+		"bits-ui": "^2.14.2",
+		"clsx": "^2.1.1",
+		"rrweb": "^2.0.0-alpha.17",
+		"rrweb-player": "^2.0.0-alpha.17"
+	},
+	"prettier": "@firmly/eslint-config/prettier"
+}
