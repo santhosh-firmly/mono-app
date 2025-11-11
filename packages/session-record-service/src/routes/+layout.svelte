@@ -4,5 +4,5 @@
 </script>
 
 <div class="mx-auto max-w-4xl">
-	{@render children?.()}
+	{@render children()}
 </div>

@@ -7,6 +7,7 @@
 	let searchQuery = $state('');
 
 	$effect(() => {
+		// Fetch sessions when component mounts or when navigating back
 		sessionsStore.fetchSessions();
 	});
 
@@ -73,17 +74,17 @@
 	{:else}
 		<div class="space-y-px">
 			{#each filteredSessions() as session (session.sessionId)}
-				<Button
-					class="hover:bg-hover w-full px-4 py-4 text-left"
-					onclick={() => goto(`/player/${session.sessionId}`)}
+				<a
+					href="/player/{session.sessionId}"
+					class="hover:bg-hover block w-full px-4 py-4 text-left transition-colors"
 				>
-					<h2 class="mb-1 font-serif text-base">{session.url}</h2>
+					<h2 class="text-foreground mb-1 font-serif text-base">{session.url}</h2>
 					<div class="text-muted text-xs">
 						{session.eventCount} events · {formatDuration(session.duration)} · {formatDate(
 							session.timestamp
 						)}
 					</div>
-				</Button>
+				</a>
 			{/each}
 		</div>
 	{/if}
