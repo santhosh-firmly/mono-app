@@ -1,0 +1,16 @@
+{
+	"name": "session-record-service",
+	"compatibility_date": "2024-02-19",
+	"r2_buckets": [
+		{
+			"binding": "SESSION_RECORDINGS",
+			"bucket_name": "session-recordings-local"
+		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "SESSION_METADATA",
+			"id": "local_session_metadata"
+		}
+	]
+}

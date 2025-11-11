@@ -11,11 +11,7 @@
 		"prepare": "svelte-kit sync || echo ''",
 		"format-code": "eslint . --fix",
 		"format-code:check": "eslint . --fix=false",
-		"deploy-dev": "npm run build && wrangler deploy --env dev",
-		"deploy-ci": "npm run build && wrangler deploy --env ci",
-		"deploy-qa": "npm run build && wrangler deploy --env qa",
-		"deploy-uat": "npm run build && wrangler deploy --env uat",
-		"deploy-prod": "npm run build && wrangler deploy --env prod"
+		"deploy-dev": "npm run build && wrangler deploy --env dev"
 	},
 	"devDependencies": {
 		"@cloudflare/vite-plugin": "^0.1.17",
