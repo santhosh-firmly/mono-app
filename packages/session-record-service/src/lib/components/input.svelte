@@ -15,8 +15,8 @@
 	{type}
 	{placeholder}
 	class={cn(
-		'w-full px-4 py-3 text-sm bg-white border-0 border-b border-border',
-		'focus:border-foreground focus:outline-none transition-colors',
+		'border-border w-full rounded-full border bg-white px-4 py-3 text-sm',
+		'focus:border-foreground transition-colors focus:outline-none',
 		className
 	)}
 	{...rest}

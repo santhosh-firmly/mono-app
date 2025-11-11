@@ -2,10 +2,10 @@
 	import { goto } from '$app/navigation';
 	import Pagination from './pagination.svelte';
 	import Input from './input.svelte';
-	import Button from './button.svelte';
+	import SessionListItem from './session-list-item.svelte';
+	import Skeleton from './skeleton.svelte';
 	import { cn } from '$lib/utils/cn.js';
-
-	const DEFAULT_ITEMS_PER_PAGE = 7;
+	import { DEFAULT_ITEMS_PER_PAGE, PAGINATION_THRESHOLD } from '$lib/constants/pagination.js';
 
 	let {
 		sessions = [],
@@ -13,8 +13,10 @@
 		error = null,
 		searchable = true,
 		emptyMessage = 'No sessions yet',
-		emptyAction = null,
 		itemsPerPage = DEFAULT_ITEMS_PER_PAGE,
+		onDelete = null,
+		itemContent,
+		emptyState,
 		class: className,
 		...rest
 	} = $props();
@@ -38,27 +40,7 @@
 	const endIndex = $derived(startIndex + itemsPerPage);
 	const currentSessions = $derived(filteredSessions().slice(startIndex, endIndex));
 
-	function formatDate(timestamp) {
-		const date = new Date(timestamp);
-		return new Intl.DateTimeFormat('en-US', {
-			month: 'short',
-			day: 'numeric',
-			year: 'numeric',
-			hour: 'numeric',
-			minute: 'numeric'
-		}).format(date);
-	}
-
-	function formatDuration(ms) {
-		const seconds = Math.floor(ms / 1000);
-		const minutes = Math.floor(seconds / 60);
-		const remainingSeconds = seconds % 60;
-
-		if (minutes === 0) return `${remainingSeconds}s`;
-		return `${minutes}m ${remainingSeconds}s`;
-	}
-
-	function handleSessionClick(sessionId) {
+	function handlePlay(sessionId) {
 		goto(`/player/${sessionId}`);
 	}
 </script>
@@ -71,10 +53,16 @@
 	{/if}
 
 	{#if loading}
-		<div class="flex flex-1 items-center justify-center py-24">
-			<div
-				class="border-foreground inline-block h-6 w-6 animate-spin rounded-full border-2 border-t-transparent"
-			></div>
+		<div class="flex-1 space-y-2">
+			{#each Array(5) as _, i (i)}
+				<div class="hover:bg-hover rounded-xl px-4 py-4 transition-colors">
+					<div class="mb-2 flex items-start justify-between gap-4">
+						<Skeleton class="h-5 flex-1" />
+						<Skeleton class="h-4 w-4" />
+					</div>
+					<Skeleton class="h-4 w-2/3" />
+				</div>
+			{/each}
 		</div>
 	{:else if error}
 		<div class="flex flex-1 items-center justify-center py-12">
@@ -84,37 +72,27 @@
 		<div class="flex flex-1 items-center justify-center py-24 text-center">
 			{#if searchQuery}
 				<p class="text-muted text-sm">No sessions found matching "{searchQuery}"</p>
+			{:else if emptyState}
+				{@render emptyState()}
 			{:else}
-				<div>
-					<p class="text-muted mb-4 text-sm">{emptyMessage}</p>
-					{#if emptyAction}
-						<Button variant="link" onclick={emptyAction.onClick}>
-							{emptyAction.label}
-						</Button>
-					{/if}
-				</div>
+				<p class="text-muted text-sm">{emptyMessage}</p>
 			{/if}
 		</div>
 	{:else}
 		<div class="flex flex-1 flex-col">
-			<div class="flex-1 space-y-px">
+			<div class="flex-1 space-y-1">
 				{#each currentSessions as session (session.sessionId)}
-					<button
-						type="button"
-						onclick={() => handleSessionClick(session.sessionId)}
-						class="hover:bg-hover block w-full px-4 py-4 text-left transition-colors"
-					>
-						<h2 class="text-foreground mb-1 font-serif text-base">{session.url}</h2>
-						<div class="text-muted text-xs">
-							{session.eventCount} events · {formatDuration(session.duration)} · {formatDate(
-								session.timestamp
-							)}
-						</div>
-					</button>
+					{#if itemContent}
+						<SessionListItem {session} onPlay={handlePlay} {onDelete}>
+							{@render itemContent(session)}
+						</SessionListItem>
+					{:else}
+						<SessionListItem {session} onPlay={handlePlay} {onDelete} />
+					{/if}
 				{/each}
 			</div>
 
-			{#if totalItems > DEFAULT_ITEMS_PER_PAGE}
+			{#if totalItems > PAGINATION_THRESHOLD}
 				<div class="border-border mt-6 flex items-center justify-between border-t pt-4">
 					<div class="text-muted text-xs">
 						Showing {startIndex + 1}–{Math.min(endIndex, totalItems)} of {totalItems}

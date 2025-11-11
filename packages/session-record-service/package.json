@@ -41,6 +41,7 @@
 	"dependencies": {
 		"bits-ui": "^2.14.2",
 		"clsx": "^2.1.1",
+		"phosphor-svelte": "^3.0.1",
 		"rrweb": "^2.0.0-alpha.17",
 		"tailwind-merge": "^2.5.2"
 	},

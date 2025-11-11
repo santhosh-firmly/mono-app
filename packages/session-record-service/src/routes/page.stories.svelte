@@ -10,6 +10,10 @@
 			duration: Math.floor(Math.random() * 300000) + 30000,
 			timestamp: Date.now() - i * 3600000
 		}));
+
+	function handleDelete(sessionId) {
+		alert(`Delete session: ${sessionId}`);
+	}
 </script>
 
 <Meta
@@ -32,6 +36,7 @@
 
 		<SessionList
 			sessions={generateMockSessions(25)}
+			onDelete={handleDelete}
 			emptyAction={{
 				label: 'Try the example page',
 				onClick: () => alert('Navigate to /example')
@@ -79,13 +84,13 @@
 	</div>
 </Story>
 
-<Story name="Few Items">
+<Story name="Few Items (5)">
 	<div class="py-16">
 		<header class="mb-12 text-center">
 			<h1 class="mb-2 font-serif text-2xl">Session Recordings</h1>
 			<p class="text-muted text-sm">View and replay recorded user sessions</p>
 		</header>
 
-		<SessionList sessions={generateMockSessions(5)} />
+		<SessionList sessions={generateMockSessions(5)} onDelete={handleDelete} />
 	</div>
 </Story>

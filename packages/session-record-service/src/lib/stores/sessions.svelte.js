@@ -1,6 +1,6 @@
 class SessionsStore {
 	sessions = $state([]);
-	loading = $state(false);
+	loading = $state(true);
 	error = $state(null);
 
 	async fetchSessions() {
