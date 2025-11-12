@@ -1,5 +1,5 @@
 {
-	"name": "session-record-service",
+	"name": "var-service",
 	"private": true,
 	"version": "0.29.0",
 	"type": "module",
@@ -13,7 +13,7 @@
 		"format-code:check": "eslint . --fix=false",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
-		"deploy-dev": "npm run build && wrangler deploy --env dev"
+		"deploy-dev": "npm run build && wrangler deploy"
 	},
 	"devDependencies": {
 		"@chromatic-com/storybook": "^3.2.5",
