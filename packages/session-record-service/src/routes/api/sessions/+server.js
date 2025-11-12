@@ -1,57 +1,13 @@
 import { json } from '@sveltejs/kit';
-import {
-	saveSessionToR2,
-	appendEventsToR2,
-	getSessionFromR2,
-	getSessionMetadata,
-	createSessionMetadata,
-	updateSessionMetadata,
-	addToSessionList,
-	updateInSessionList,
-	listSessionMetadata,
-	calculateSessionMetadata
-} from '$lib/utils/storage.js';
+import { CloudflareSessionRepository } from '$lib/server/adapters/cloudflare-session-repository.js';
+import { SaveSessionUseCase } from '$lib/server/usecases/save-session.js';
+import { ListSessionsUseCase } from '$lib/server/usecases/list-sessions.js';
 
 const CORS_HEADERS = {
 	'Access-Control-Allow-Origin': '*',
 	'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
 	'Access-Control-Allow-Headers': 'Content-Type'
 };
-
-async function createNewSession(platform, sessionId, events) {
-	const metadataFields = calculateSessionMetadata(events);
-
-	const metadata = {
-		sessionId,
-		...metadataFields,
-		createdAt: new Date().toISOString()
-	};
-
-	await saveSessionToR2(platform, sessionId, events);
-	await createSessionMetadata(platform, metadata);
-	await addToSessionList(platform, metadata);
-
-	return { sessionId, message: 'Session created successfully' };
-}
-
-async function appendToSession(platform, sessionId, events) {
-	const { totalEventCount, allEvents } = await appendEventsToR2(platform, sessionId, events);
-	const updatedFields = calculateSessionMetadata(allEvents);
-
-	const updates = {
-		duration: updatedFields.duration,
-		eventCount: totalEventCount,
-		url: updatedFields.url,
-		updatedAt: new Date().toISOString()
-	};
-
-	await Promise.all([
-		updateSessionMetadata(platform, sessionId, updates),
-		updateInSessionList(platform, sessionId, updates)
-	]);
-
-	return { sessionId, message: 'Session updated successfully' };
-}
 
 export async function POST({ request, platform }) {
 	const { sessionId, events } = await request.json();
@@ -65,12 +21,9 @@ export async function POST({ request, platform }) {
 	}
 
 	try {
-		const existingMetadata = await getSessionMetadata(platform, sessionId);
-		const isNewSession = !existingMetadata;
-
-		const result = isNewSession
-			? await createNewSession(platform, sessionId, events)
-			: await appendToSession(platform, sessionId, events);
+		const repository = new CloudflareSessionRepository(platform);
+		const useCase = new SaveSessionUseCase(repository);
+		const result = await useCase.execute(sessionId, events);
 
 		return json(result, { headers: CORS_HEADERS });
 	} catch (error) {
@@ -87,8 +40,11 @@ export async function GET({ platform, url }) {
 	const offset = parseInt(url.searchParams.get('offset') || '0');
 
 	try {
-		const sessions = await listSessionMetadata(platform, limit, offset);
-		return json({ sessions, count: sessions.length }, { headers: CORS_HEADERS });
+		const repository = new CloudflareSessionRepository(platform);
+		const useCase = new ListSessionsUseCase(repository);
+		const result = await useCase.execute(limit, offset);
+
+		return json(result, { headers: CORS_HEADERS });
 	} catch (error) {
 		console.error('Session list error:', error);
 		return json({ error: 'Failed to fetch sessions' }, { status: 500, headers: CORS_HEADERS });
