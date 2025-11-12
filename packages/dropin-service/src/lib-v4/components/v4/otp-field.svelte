@@ -205,10 +205,11 @@
 				id="otp{index}"
 				bind:this={otpInput[index]}
 				{disabled}
-				class="border-1 shadow-md {error
+				class="rrweb-block border-1 shadow-md {error
 					? 'border-red-600'
 					: 'border-gray-300'} h-11 w-10 rounded-lg text-center disabled:bg-gray-100"
 				type="text"
+				data-sensitive
 				autocomplete="one-time-code"
 				tabindex="-1"
 				inputmode="numeric"

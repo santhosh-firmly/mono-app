@@ -20,7 +20,8 @@ function buildEnvVars(appId, env) {
 		PUBLIC_c2p_initiator_id: env.PUBLIC_c2p_initiator_id,
 		PUBLIC_unified_c2p_dpa_id: env.PUBLIC_unified_c2p_dpa_id,
 		PUBLIC_unified_c2p_dpa_presentation_name: env.PUBLIC_unified_c2p_dpa_presentation_name,
-		PUBLIC_unified_c2p_sandbox: Boolean(env.PUBLIC_unified_c2p_sandbox)
+		PUBLIC_unified_c2p_sandbox: Boolean(env.PUBLIC_unified_c2p_sandbox),
+		PUBLIC_SESSION_RECORD_URL: env.PUBLIC_SESSION_RECORD_URL
 	};
 }
 

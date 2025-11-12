@@ -197,6 +197,7 @@
 				<input
 					data-testid="email-input-base-login"
 					type="text"
+					data-sensitive
 					class="h-[46px] w-full rounded-lg border border-[#e0e0e0] text-sm shadow-[0_2px_6px_0px_rgba(136,136,136,0.25)] {emailError
 						? 'border-fy-alert border-1'
 						: ''} "

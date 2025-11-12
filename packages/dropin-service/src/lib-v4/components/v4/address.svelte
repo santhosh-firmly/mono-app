@@ -481,6 +481,7 @@
 				class="placeholder:text-fy-on-primary-subtle w-full rounded-t-lg border-0 disabled:bg-gray-100"
 				class:error={first_name_error || last_name_error}
 				data-testid="name"
+				data-sensitive
 				placeholder={namePlaceHolder || 'Name'}
 				autocomplete="{addressType} name"
 				type="text"
@@ -502,6 +503,7 @@
 					state_error ||
 					postal_code_error}
 				data-testid="address1"
+				data-sensitive
 				bind:this={address1El}
 				bind:value={address1}
 				on:input={onAddress1Input}
@@ -558,6 +560,7 @@
 				class:error={address2_error}
 				bind:value={address2}
 				data-testid="address2"
+				data-sensitive
 				placeholder="Address line 2"
 				autocomplete="{addressType} address-line2"
 				type="text"
@@ -570,6 +573,7 @@
 				bind:value={city}
 				class:error={city_error}
 				data-testid="city"
+				data-sensitive
 				placeholder="City"
 				autocomplete="{addressType} address-level2"
 				type="text"
@@ -582,6 +586,7 @@
 				bind:value={postal_code}
 				class:error={postal_code_error}
 				data-testid="postalCode"
+				data-sensitive
 				placeholder="ZIP"
 				autocomplete="{addressType} postal-code"
 				type="text"
@@ -601,6 +606,7 @@
 				bind:value={state_or_province}
 				class:error={state_error}
 				data-testid="state"
+				data-sensitive
 				placeholder="State"
 				autocomplete="{addressType} address-level1"
 				type="text"
@@ -613,6 +619,7 @@
 					{disabled}
 					class="placeholder:text-fy-on-primary-subtle w-full rounded-b-lg border-0 pl-10 disabled:bg-gray-100"
 					data-testid="phone"
+					data-sensitive
 					class:error={phone_error}
 					bind:value={phone}
 					autocomplete="{addressType} tel"

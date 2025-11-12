@@ -250,11 +250,12 @@
 						<div class="flex flex-col gap-2">
 							<span class="text-fy-alert text-xs"> Please confirm your CVV </span>
 							<input
-								class="border-fy-on-primary-subtle placeholder:text-fy-on-primary-subtle w-full rounded border p-2 disabled:bg-gray-100"
+								class="border-fy-on-primary-subtle placeholder:text-fy-on-primary-subtle rrweb-block w-full rounded border p-2 disabled:bg-gray-100"
 								class:error
 								{disabled}
 								bind:value={cvvConfirmationValue}
 								data-testid="cvvConfirmationValue"
+								data-sensitive
 								placeholder="CVV"
 								autocomplete="cc-csc"
 								maxlength="4"
@@ -329,12 +330,13 @@
 			<div class="relative col-span-2 flex w-full flex-row justify-between rounded-t-lg">
 				<div class="flex w-full">
 					<input
-						class="placeholder:text-fy-on-primary-subtle w-full rounded-t-lg border-0 disabled:bg-gray-100"
+						class="placeholder:text-fy-on-primary-subtle rrweb-block w-full rounded-t-lg border-0 disabled:bg-gray-100"
 						class:error
 						{disabled}
 						bind:value={number}
 						bind:this={numberInputElement}
 						data-testid="card-number"
+						data-sensitive
 						placeholder="1234 1234 1234 1234"
 						autocomplete="cc-number"
 						inputmode="numeric"
@@ -357,13 +359,14 @@
 			</div>
 			<div class="relative flex w-full flex-col justify-center rounded-bl-lg">
 				<input
-					class="placeholder:text-fy-on-primary-subtle w-full rounded-bl-lg border-0 disabled:bg-gray-100"
+					class="placeholder:text-fy-on-primary-subtle rrweb-block w-full rounded-bl-lg border-0 disabled:bg-gray-100"
 					class:error
 					{disabled}
 					bind:value={expiryDate}
 					bind:this={expiryInputElement}
 					on:beforeinput={handleExpiryInput}
 					data-testid="expiry"
+					data-sensitive
 					placeholder="MM / YY"
 					autocomplete="cc-exp"
 					type="text"
@@ -372,11 +375,12 @@
 			<div class="relative flex w-full flex-row justify-center rounded-br-lg">
 				<div class="flex w-full">
 					<input
-						class="border-fy-on-primary-subtle placeholder:text-fy-on-primary-subtle w-full rounded-br-lg border-0 disabled:bg-gray-100"
+						class="border-fy-on-primary-subtle placeholder:text-fy-on-primary-subtle rrweb-block w-full rounded-br-lg border-0 disabled:bg-gray-100"
 						class:error
 						{disabled}
 						bind:value={verification_value}
 						data-testid="verification_value"
+						data-sensitive
 						placeholder="CVV"
 						autocomplete="cc-csc"
 						maxlength="4"
