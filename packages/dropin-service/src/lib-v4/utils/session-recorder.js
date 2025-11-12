@@ -3,6 +3,11 @@ import { record } from 'rrweb';
 let events = [];
 let stopRecording = null;
 let intervalId = null;
+let currentSessionId = null;
+
+function generateSessionId() {
+	return `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+}
 
 /**
  * Start recording user sessions with enhanced PII protection
@@ -31,6 +36,9 @@ export function startRecording(serviceUrl, options = {}) {
 	}
 
 	events = [];
+	currentSessionId = generateSessionId();
+
+	console.log('Starting recording with sessionId:', currentSessionId);
 
 	try {
 		stopRecording = record({
@@ -80,7 +88,10 @@ export function startRecording(serviceUrl, options = {}) {
 				fetch(`${serviceUrl}/api/sessions`, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ events: eventsToSend })
+					body: JSON.stringify({
+						sessionId: currentSessionId,
+						events: eventsToSend
+					})
 				}).catch((err) => {
 					console.error('Failed to send recording events:', err);
 					// Don't throw - recording failures shouldn't break the app
@@ -111,13 +122,18 @@ export function startRecording(serviceUrl, options = {}) {
 			fetch(`${serviceUrl}/api/sessions`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ events })
+				body: JSON.stringify({
+					sessionId: currentSessionId,
+					events
+				})
 			}).catch((err) => {
 				console.error('Failed to send final recording events:', err);
 			});
 
 			events = [];
 		}
+
+		currentSessionId = null;
 
 		console.log('Session recording stopped');
 	};

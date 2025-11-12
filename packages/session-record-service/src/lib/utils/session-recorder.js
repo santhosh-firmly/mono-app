@@ -3,6 +3,11 @@ import { record } from 'rrweb';
 let events = [];
 let stopRecording = null;
 let intervalId = null;
+let currentSessionId = null;
+
+function generateSessionId() {
+	return `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+}
 
 export function startRecording(serviceUrl) {
 	if (stopRecording) {
@@ -11,6 +16,9 @@ export function startRecording(serviceUrl) {
 	}
 
 	events = [];
+	currentSessionId = generateSessionId();
+
+	console.log('Starting recording with sessionId:', currentSessionId);
 
 	stopRecording = record({
 		emit(event) {
@@ -30,7 +38,10 @@ export function startRecording(serviceUrl) {
 			fetch(`${serviceUrl}/api/sessions`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ events: eventsToSend })
+				body: JSON.stringify({
+					sessionId: currentSessionId,
+					events: eventsToSend
+				})
 			}).catch((err) => {
 				console.error('Failed to send recording events:', err);
 			});
@@ -52,13 +63,18 @@ export function startRecording(serviceUrl) {
 			fetch(`${serviceUrl}/api/sessions`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ events })
+				body: JSON.stringify({
+					sessionId: currentSessionId,
+					events
+				})
 			}).catch((err) => {
 				console.error('Failed to send final recording events:', err);
 			});
 
 			events = [];
 		}
+
+		currentSessionId = null;
 	};
 }
 
