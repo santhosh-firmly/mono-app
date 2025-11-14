@@ -709,6 +709,7 @@
 							<Header
 								merchantInfo={partnerPresentation}
 								doNotExpand={true}
+								usePoweredBy={pageState === 'pdp'}
 								on:back-click={onBackClick}
 							/>
 						</div>

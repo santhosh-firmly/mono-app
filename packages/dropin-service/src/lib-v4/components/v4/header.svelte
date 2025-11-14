@@ -2,6 +2,7 @@
 	// @ts-nocheck
 
 	import BackButton from './back-button.svelte';
+	import PoweredByFirmly from './powered-by-firmly.svelte';
 	import { fade, slide } from 'svelte/transition';
 	import { cubicInOut } from 'svelte/easing';
 	import { formatCurrency } from '../../utils.js';
@@ -44,6 +45,8 @@
 	 */
 	export let skeleton = false;
 
+	export let usePoweredBy = false;
+
 	let headerOffset;
 
 	export function toggleExpanded(ev) {
@@ -72,37 +75,42 @@
 		<div class="flex w-1/2 items-center @md:w-full">
 			<BackButton {...merchantInfo} showBackButton={!expanded} {skeleton} on:back-click />
 			<div
-				class="relative flex h-full w-full flex-row items-center gap-2 transition duration-300"
+				class="relative flex w-full flex-col items-start justify-center py-2 transition duration-300"
 				class:-translate-x-6={expanded}
 			>
-				{#if skeleton}
-					<div
-						class="bg-fy-on-primary-subtle2 inline h-8 w-8 shrink-0 animate-pulse rounded-full duration-300 group-hover:-translate-x-1 group-hover:animate-none"
-					></div>
-					<div
-						class="bg-fy-on-primary-subtle2 inline h-8 w-32 shrink animate-pulse rounded-lg leading-[normal] transition duration-300 group-hover:-translate-x-1 group-hover:animate-none"
-					></div>
-				{:else if merchantInfo.largeLogo}
-					<img
-						class="inline h-4 transition duration-300 group-hover:-translate-x-1 {$isPrimaryDark
-							? 'grayscale invert'
-							: ''}"
-						src={merchantInfo.largeLogo}
-						alt="{merchantInfo.displayName} logo"
-					/>
-				{:else}
-					{#if merchantInfo.smallLogo}
+				<div class="flex flex-row items-center gap-2">
+					{#if skeleton}
+						<div
+							class="bg-fy-on-primary-subtle2 inline h-8 w-8 shrink-0 animate-pulse rounded-full duration-300 group-hover:-translate-x-1 group-hover:animate-none"
+						></div>
+						<div
+							class="bg-fy-on-primary-subtle2 inline h-8 w-32 shrink animate-pulse rounded-lg leading-[normal] transition duration-300 group-hover:-translate-x-1 group-hover:animate-none"
+						></div>
+					{:else if merchantInfo.largeLogo}
 						<img
-							class="inline h-8 rounded-full transition duration-300 group-hover:-translate-x-1"
-							src={merchantInfo.smallLogo}
+							class="inline h-4 transition duration-300 group-hover:-translate-x-1 {$isPrimaryDark
+								? 'grayscale invert'
+								: ''}"
+							src={merchantInfo.largeLogo}
 							alt="{merchantInfo.displayName} logo"
 						/>
+					{:else}
+						{#if merchantInfo.smallLogo}
+							<img
+								class="inline h-8 rounded-full transition duration-300 group-hover:-translate-x-1"
+								src={merchantInfo.smallLogo}
+								alt="{merchantInfo.displayName} logo"
+							/>
+						{/if}
+						<span
+							class="inline overflow-hidden align-middle leading-[normal] text-ellipsis whitespace-nowrap uppercase transition duration-300 group-hover:-translate-x-1"
+						>
+							{merchantInfo.displayName || merchantName}
+						</span>
 					{/if}
-					<span
-						class="inline overflow-hidden align-middle leading-[normal] text-ellipsis whitespace-nowrap uppercase transition duration-300 group-hover:-translate-x-1"
-					>
-						{merchantInfo.displayName || merchantName}
-					</span>
+				</div>
+				{#if !skeleton && usePoweredBy}
+					<PoweredByFirmly />
 				{/if}
 			</div>
 		</div>
