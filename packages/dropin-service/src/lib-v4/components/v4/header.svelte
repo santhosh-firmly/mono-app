@@ -45,6 +45,8 @@
 	 */
 	export let skeleton = false;
 
+	export let usePoweredBy = false;
+
 	let headerOffset;
 
 	export function toggleExpanded(ev) {
@@ -107,7 +109,7 @@
 						</span>
 					{/if}
 				</div>
-				{#if !skeleton}
+				{#if !skeleton && usePoweredBy}
 					<PoweredByFirmly />
 				{/if}
 			</div>

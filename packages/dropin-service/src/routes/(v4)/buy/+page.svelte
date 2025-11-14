@@ -30,8 +30,6 @@
 	import Visa from '$lib-v4/clients/visa.svelte';
 	import { initializationState } from '$lib-v4/utils/initialization-state.js';
 	import SimpleError from '$lib-v4/components/v4/simple-error.svelte';
-	import FooterLinks from '$lib-v4/components/v4/footer-links.svelte';
-	import TermsLinks from '$lib-v4/components/v4/terms-links.svelte';
 
 	const PDP_MAX_WAIT_TIMEOUT = 10000;
 
@@ -707,13 +705,11 @@
 
 				{#if multipleVariants && !skipPdp}
 					<div class="flex h-full w-full flex-col">
-						<div class="bg-black py-2 text-center text-sm text-white @md:hidden">
-							<TermsLinks></TermsLinks>
-						</div>
 						<div class="z-10 shadow-(--fy-surface-box-shadow)">
 							<Header
 								merchantInfo={partnerPresentation}
 								doNotExpand={true}
+								usePoweredBy={pageState === 'pdp'}
 								on:back-click={onBackClick}
 							/>
 						</div>
