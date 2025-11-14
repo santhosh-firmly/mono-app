@@ -44,6 +44,7 @@
 	let ecsUrl = $state('');
 	let uiMode = $state('fullscreen');
 	let pageState = $state('pdp');
+	let iframeElement = $state(null); // Track iframe element for removal/restoration
 	let isProduction = $derived(data.PUBLIC_firmly_deployment === 'prod');
 	let c2pProvider = $derived.by(() => {
 		const queryParamProvider = $page.url.searchParams.get('c2p_provider')?.toLowerCase();
@@ -200,6 +201,12 @@
 			showCheckout = true;
 			pageState = 'checkout';
 
+			// Remove iframe from DOM when moving to checkout
+			if (multipleVariants && iframeElement) {
+				console.log('firmly - removing iframe from DOM during checkout transition');
+				iframeElement = null;
+			}
+
 			// Check if window.firmly and required functions exist
 			if (!window.firmly || typeof window.firmly.cartSessionTransfer !== 'function') {
 				console.error('window.firmly or cartSessionTransfer not available');
@@ -298,6 +305,9 @@
 					trackUXEvent('pdp_showed_by_timeout');
 				}
 			}, PDP_MAX_WAIT_TIMEOUT);
+
+			// Initialize iframe element state to render the iframe
+			iframeElement = true;
 
 			// Listen for the message from the ECS Service
 			const messageHandler = (e) => {
@@ -601,9 +611,12 @@
 		}
 	});
 
-	function reloadIframe() {
+	function restoreIframe() {
 		// Reset iframe visibility to show skeleton
 		iframeVisibility = 'hidden';
+
+		// Restore iframe element - this will trigger a reload as the iframe is re-mounted
+		iframeElement = true;
 
 		// Force iframe reload by updating the src with a cache-busting parameter
 		const currentUrl = new URL(ecsUrl);
@@ -623,7 +636,7 @@
 		if (multipleVariants) {
 			pageState = 'pdp';
 			showCheckout = false;
-			reloadIframe();
+			restoreIframe();
 			return;
 		}
 
@@ -716,13 +729,15 @@
 						{#if iframeVisibility === 'hidden'}
 							<PdpSkeleton />
 						{/if}
-						<iframe
-							title="Product Details"
-							id="firmly-pdp-frame"
-							class="grow"
-							style={`height: ${iframeHeight}px; visibility: ${showCheckout ? 'hidden' : iframeVisibility}`}
-							src={ecsUrl}
-						></iframe>
+						{#if iframeElement !== null}
+							<iframe
+								title="Product Details"
+								id="firmly-pdp-frame"
+								class="grow"
+								style={`height: ${iframeHeight}px; visibility: ${showCheckout ? 'hidden' : iframeVisibility}`}
+								src={ecsUrl}
+							></iframe>
+						{/if}
 					</div>
 				{/if}
 
