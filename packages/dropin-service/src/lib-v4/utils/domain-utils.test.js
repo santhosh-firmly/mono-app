@@ -56,7 +56,7 @@ describe('updateUrlWithFirmlyDomain', () => {
 
 	it('should work with different base domains', () => {
 		const url = new URL('https://store.myshopify.com/cart');
-		updateUrlWithFirmlyDomain(url, 'firmlyaperture.net');
-		expect(url.hostname).toBe('store.firmlyaperture.net');
+		const result = updateUrlWithFirmlyDomain(url, 'firmlyaperture.net');
+		expect(result.hostname).toBe('store.firmlyaperture.net');
 	});
 });
