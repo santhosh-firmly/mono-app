@@ -32,6 +32,7 @@
 	import SimpleError from '$lib-v4/components/v4/simple-error.svelte';
 
 	const PDP_MAX_WAIT_TIMEOUT = 10000;
+	const PDP_RESTORE_TIMEOUT = 10000; // Timeout for showing PDP after restore
 
 	let { data } = $props();
 
@@ -44,7 +45,7 @@
 	let ecsUrl = $state('');
 	let uiMode = $state('fullscreen');
 	let pageState = $state('pdp');
-	let iframeElement = $state(null); // Track iframe element for removal/restoration
+	let iframeElement = $state(false); // Controls whether iframe should be rendered in DOM
 	let isProduction = $derived(data.PUBLIC_firmly_deployment === 'prod');
 	let c2pProvider = $derived.by(() => {
 		const queryParamProvider = $page.url.searchParams.get('c2p_provider')?.toLowerCase();
@@ -204,7 +205,7 @@
 			// Remove iframe from DOM when moving to checkout
 			if (multipleVariants && iframeElement) {
 				console.log('firmly - removing iframe from DOM during checkout transition');
-				iframeElement = null;
+				iframeElement = false;
 			}
 
 			// Check if window.firmly and required functions exist
@@ -633,7 +634,7 @@
 				iframeVisibility = 'visible';
 				trackUXEvent('pdp_showed_by_timeout_on_restore');
 			}
-		}, PDP_MAX_WAIT_TIMEOUT);
+		}, PDP_RESTORE_TIMEOUT);
 	}
 
 	function onBackClick() {
@@ -741,7 +742,7 @@
 						{#if iframeVisibility === 'hidden'}
 							<PdpSkeleton />
 						{/if}
-						{#if iframeElement !== null}
+						{#if iframeElement}
 							<iframe
 								title="Product Details"
 								id="firmly-pdp-frame"
