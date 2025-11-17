@@ -612,8 +612,11 @@
 	});
 
 	function restoreIframe() {
-		// Reset iframe visibility to show skeleton
+		console.log('firmly - restoreIframe - resetting iframe state');
+
+		// Reset all iframe-related state to initial values (like first time)
 		iframeVisibility = 'hidden';
+		iframeHeight = 0; // Reset height so adjustSize message will work again
 
 		// Restore iframe element - this will trigger a reload as the iframe is re-mounted
 		iframeElement = true;
@@ -622,6 +625,15 @@
 		const currentUrl = new URL(ecsUrl);
 		currentUrl.searchParams.set('_reload', Date.now().toString());
 		ecsUrl = currentUrl.toString();
+
+		// Re-enable timeout to force show PDP if needed (like first time)
+		setTimeout(() => {
+			if (iframeVisibility !== 'visible') {
+				console.log('firmly - show PDP forced by timeout on restore');
+				iframeVisibility = 'visible';
+				trackUXEvent('pdp_showed_by_timeout_on_restore');
+			}
+		}, PDP_MAX_WAIT_TIMEOUT);
 	}
 
 	function onBackClick() {
@@ -716,7 +728,7 @@
 					</div>
 				{/if} -->
 
-				{#if multipleVariants && !skipPdp}
+				{#if multipleVariants && !skipPdp && !showCheckout}
 					<div class="flex h-full w-full flex-col">
 						<div class="z-10 shadow-(--fy-surface-box-shadow)">
 							<Header
@@ -734,7 +746,7 @@
 								title="Product Details"
 								id="firmly-pdp-frame"
 								class="grow"
-								style={`height: ${iframeHeight}px; visibility: ${showCheckout ? 'hidden' : iframeVisibility}`}
+								style={`height: ${iframeHeight}px; visibility: ${iframeVisibility}`}
 								src={ecsUrl}
 							></iframe>
 						{/if}
