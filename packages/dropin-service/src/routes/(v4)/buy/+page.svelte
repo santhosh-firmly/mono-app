@@ -32,6 +32,7 @@
 	import SimpleError from '$lib-v4/components/v4/simple-error.svelte';
 
 	const PDP_MAX_WAIT_TIMEOUT = 10000;
+	const PDP_RESTORE_TIMEOUT = 10000; // Timeout for showing PDP after restore
 
 	let { data } = $props();
 
@@ -44,6 +45,7 @@
 	let ecsUrl = $state('');
 	let uiMode = $state('fullscreen');
 	let pageState = $state('pdp');
+	let iframeElement = $state(false); // Controls whether iframe should be rendered in DOM
 	let isProduction = $derived(data.PUBLIC_firmly_deployment === 'prod');
 	let c2pProvider = $derived.by(() => {
 		const queryParamProvider = $page.url.searchParams.get('c2p_provider')?.toLowerCase();
@@ -200,6 +202,12 @@
 			showCheckout = true;
 			pageState = 'checkout';
 
+			// Remove iframe from DOM when moving to checkout
+			if (multipleVariants && iframeElement) {
+				console.log('firmly - removing iframe from DOM during checkout transition');
+				iframeElement = false;
+			}
+
 			// Check if window.firmly and required functions exist
 			if (!window.firmly || typeof window.firmly.cartSessionTransfer !== 'function') {
 				console.error('window.firmly or cartSessionTransfer not available');
@@ -298,6 +306,9 @@
 					trackUXEvent('pdp_showed_by_timeout');
 				}
 			}, PDP_MAX_WAIT_TIMEOUT);
+
+			// Initialize iframe element state to render the iframe
+			iframeElement = true;
 
 			// Listen for the message from the ECS Service
 			const messageHandler = (e) => {
@@ -601,14 +612,29 @@
 		}
 	});
 
-	function reloadIframe() {
-		// Reset iframe visibility to show skeleton
+	function restoreIframe() {
+		console.log('firmly - restoreIframe - resetting iframe state');
+
+		// Reset all iframe-related state to initial values (like first time)
 		iframeVisibility = 'hidden';
+		iframeHeight = 0; // Reset height so adjustSize message will work again
+
+		// Restore iframe element - this will trigger a reload as the iframe is re-mounted
+		iframeElement = true;
 
 		// Force iframe reload by updating the src with a cache-busting parameter
 		const currentUrl = new URL(ecsUrl);
 		currentUrl.searchParams.set('_reload', Date.now().toString());
 		ecsUrl = currentUrl.toString();
+
+		// Re-enable timeout to force show PDP if needed (like first time)
+		setTimeout(() => {
+			if (iframeVisibility !== 'visible') {
+				console.log('firmly - show PDP forced by timeout on restore');
+				iframeVisibility = 'visible';
+				trackUXEvent('pdp_showed_by_timeout_on_restore');
+			}
+		}, PDP_RESTORE_TIMEOUT);
 	}
 
 	function onBackClick() {
@@ -623,7 +649,7 @@
 		if (multipleVariants) {
 			pageState = 'pdp';
 			showCheckout = false;
-			reloadIframe();
+			restoreIframe();
 			return;
 		}
 
@@ -703,7 +729,7 @@
 					</div>
 				{/if} -->
 
-				{#if multipleVariants && !skipPdp}
+				{#if multipleVariants && !skipPdp && !showCheckout}
 					<div class="flex h-full w-full flex-col">
 						<div class="z-10 shadow-(--fy-surface-box-shadow)">
 							<Header
@@ -716,13 +742,15 @@
 						{#if iframeVisibility === 'hidden'}
 							<PdpSkeleton />
 						{/if}
-						<iframe
-							title="Product Details"
-							id="firmly-pdp-frame"
-							class="grow"
-							style={`height: ${iframeHeight}px; visibility: ${showCheckout ? 'hidden' : iframeVisibility}`}
-							src={ecsUrl}
-						></iframe>
+						{#if iframeElement}
+							<iframe
+								title="Product Details"
+								id="firmly-pdp-frame"
+								class="grow"
+								style={`height: ${iframeHeight}px; visibility: ${iframeVisibility}`}
+								src={ecsUrl}
+							></iframe>
+						{/if}
 					</div>
 				{/if}
 
