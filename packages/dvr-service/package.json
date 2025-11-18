@@ -10,9 +10,9 @@
 		"test": "vitest"
 	},
 	"devDependencies": {
-		"@cloudflare/vitest-pool-workers": "^0.8.19",
+		"@cloudflare/vitest-pool-workers": "^0.10.8",
 		"@firmly/eslint-config": "^0.29.0",
-		"vitest": "~3.2.0",
+		"vitest": "^3.2.0",
 		"wrangler": "*"
 	}
 }
