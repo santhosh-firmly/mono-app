@@ -1,16 +1,14 @@
-import { DVR_SERVICE_URL } from '../config.js';
-
 class SessionsStore {
 	sessions = $state([]);
 	loading = $state(true);
 	error = $state(null);
 
-	async fetchSessions() {
+	async fetchSessions(dvrServiceUrl) {
 		this.loading = true;
 		this.error = null;
 
 		try {
-			const response = await fetch(`${DVR_SERVICE_URL}/api/sessions`);
+			const response = await fetch(`${dvrServiceUrl}/api/sessions`);
 			const data = await response.json();
 			this.sessions = data.sessions || [];
 		} catch (err) {
@@ -20,12 +18,12 @@ class SessionsStore {
 		}
 	}
 
-	async fetchSessionById(sessionId) {
+	async fetchSessionById(dvrServiceUrl, sessionId) {
 		this.loading = true;
 		this.error = null;
 
 		try {
-			const response = await fetch(`${DVR_SERVICE_URL}/api/sessions/${sessionId}`);
+			const response = await fetch(`${dvrServiceUrl}/api/sessions/${sessionId}`);
 			if (!response.ok) {
 				throw new Error('Session not found');
 			}

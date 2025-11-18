@@ -9,7 +9,7 @@ export class SessionBufferAdapter {
 		const response = await this.#fetch(sessionId, '/append', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ events })
+			body: JSON.stringify({ sessionId, events })
 		});
 
 		return response.json();
@@ -17,7 +17,9 @@ export class SessionBufferAdapter {
 
 	async finalize(sessionId) {
 		const response = await this.#fetch(sessionId, '/finalize', {
-			method: 'POST'
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ sessionId })
 		});
 
 		return response.json();

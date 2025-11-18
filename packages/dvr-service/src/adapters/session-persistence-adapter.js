@@ -13,27 +13,24 @@ export class SessionPersistenceAdapter extends ISessionRepository {
 		this.#metadata = platform.env.METADATA;
 	}
 
-	async writeEvents(sessionId, chunkId, events) {
-		const key = `${sessionId}/chunk-${chunkId}.json`;
+	async writeEvents(sessionId, events) {
+		const key = `${sessionId}.json`;
 		await this.#recordings.put(key, JSON.stringify(events));
 		return events.length;
 	}
 
 	async getEvents(sessionId) {
-		const { objects } = await this.#recordings.list({ prefix: `${sessionId}/chunk-` });
-
-		if (objects.length === 0) {
+		const key = `${sessionId}.json`;
+		const data = await this.#recordings.get(key);
+		if (!data) {
 			return null;
 		}
-
-		const chunks = await Promise.all(objects.map((obj) => this.#loadChunk(obj.key)));
-
-		return chunks.flat();
+		return JSON.parse(await data.text());
 	}
 
-	async createSession(metadata) {
-		await this.#createMetadata(metadata);
-		await this.#addToList(metadata);
+	async createMetadata(sessionId, metadata) {
+		await this.#metadata.put(sessionId, JSON.stringify(metadata));
+		await this.#addToList(sessionId, metadata);
 	}
 
 	async getMetadata(sessionId) {
@@ -46,14 +43,10 @@ export class SessionPersistenceAdapter extends ISessionRepository {
 		return sessionList.slice(offset, offset + limit);
 	}
 
-	async #createMetadata(metadata) {
-		await this.#metadata.put(metadata.sessionId, JSON.stringify(metadata));
-	}
-
-	async #addToList(metadata) {
+	async #addToList(sessionId, metadata) {
 		const sessionList = await this.#getSessionList();
 
-		if (sessionList.some((s) => s.sessionId === metadata.sessionId)) {
+		if (sessionList.some((s) => s?.sessionId === sessionId)) {
 			return;
 		}
 
@@ -66,14 +59,10 @@ export class SessionPersistenceAdapter extends ISessionRepository {
 		await this.#saveSessionList(sessionList);
 	}
 
-	async #loadChunk(key) {
-		const data = await this.#recordings.get(key);
-		return JSON.parse(await data.text());
-	}
-
 	async #getSessionList() {
 		const data = await this.#metadata.get(SESSION_LIST_KEY);
-		return data ? JSON.parse(data) : [];
+		const list = data ? JSON.parse(data) : [];
+		return list.filter((item) => item && typeof item === 'object' && item.sessionId);
 	}
 
 	async #saveSessionList(sessionList) {

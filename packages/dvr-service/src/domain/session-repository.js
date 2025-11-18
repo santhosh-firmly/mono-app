@@ -17,7 +17,7 @@
  */
 
 export class ISessionRepository {
-	async writeEvents(sessionId, chunkId, events) {
+	async writeEvents(sessionId, events) {
 		throw new Error('Method not implemented');
 	}
 
@@ -25,7 +25,7 @@ export class ISessionRepository {
 		throw new Error('Method not implemented');
 	}
 
-	async createSession(metadata) {
+	async createMetadata(sessionId, metadata) {
 		throw new Error('Method not implemented');
 	}
 

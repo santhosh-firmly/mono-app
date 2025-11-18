@@ -27,26 +27,20 @@ export class SaveSessionUseCase {
 			await this.#bufferAdapter.appendEvents(sessionId, events);
 		}
 
-		const finalizeResponse = await this.#bufferAdapter.finalize(sessionId);
+		const { sessionData } = await this.#bufferAdapter.finalize(sessionId);
 
-		if (!finalizeResponse.sessionData) {
+		if (!sessionData) {
 			throw new Error('No session data returned from buffer');
 		}
 
-		const { events: allEvents, metadata } = finalizeResponse.sessionData;
-
-		await this.#persistSession(sessionId, allEvents, metadata);
+		await this.#persistenceAdapter.writeEvents(sessionId, sessionData.events);
+		await this.#persistenceAdapter.createMetadata(sessionId, sessionData.metadata);
 
 		return {
 			sessionId,
 			success: true,
 			finalized: true,
-			eventCount: metadata.eventCount
+			eventCount: sessionData.metadata.eventCount
 		};
-	}
-
-	async #persistSession(sessionId, events, metadata) {
-		await this.#persistenceAdapter.writeEvents(sessionId, Date.now(), events);
-		await this.#persistenceAdapter.createSession(metadata);
 	}
 }

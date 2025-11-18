@@ -3,6 +3,8 @@
 	import Input from '$lib/components/input.svelte';
 	import Button from '$lib/components/button.svelte';
 
+	let { data } = $props();
+
 	let todos = $state([
 		{ id: 1, text: 'Record a session', completed: false },
 		{ id: 2, text: 'Add some todos', completed: false },
@@ -36,7 +38,7 @@
 			stopFn = null;
 			recording = false;
 		} else {
-			stopFn = startRecording(window.location.origin);
+			stopFn = startRecording(data.dvrServiceUrl);
 			recording = true;
 		}
 	}

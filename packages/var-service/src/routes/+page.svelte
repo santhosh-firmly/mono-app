@@ -4,27 +4,11 @@
 	import Button from '$lib/components/button.svelte';
 	import { goto } from '$app/navigation';
 
+	let { data } = $props();
+
 	$effect(() => {
-		sessionsStore.fetchSessions();
+		sessionsStore.fetchSessions(data.dvrServiceUrl);
 	});
-
-	async function handleDelete(sessionId) {
-		if (!confirm('Are you sure you want to delete this session recording?')) {
-			return;
-		}
-
-		try {
-			const response = await fetch(`/api/sessions/${sessionId}`, {
-				method: 'DELETE'
-			});
-
-			if (response.ok) {
-				await sessionsStore.fetchSessions();
-			}
-		} catch (err) {
-			console.error('Failed to delete session:', err);
-		}
-	}
 
 	function goToExample() {
 		goto('/example');
@@ -41,7 +25,7 @@
 		sessions={sessionsStore.sessions}
 		loading={sessionsStore.loading}
 		error={sessionsStore.error}
-		onDelete={handleDelete}
+		onDelete={() => {}}
 	>
 		{#snippet emptyState()}
 			<div>

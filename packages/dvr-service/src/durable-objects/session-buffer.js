@@ -9,6 +9,7 @@ export class SessionBuffer {
 		this.lastTimestamp = null;
 		this.url = null;
 		this.inactivityTimer = null;
+		this.sessionId = null;
 	}
 
 	async fetch(request) {
@@ -19,15 +20,16 @@ export class SessionBuffer {
 		}
 
 		if (url.pathname === '/finalize' && request.method === 'POST') {
-			return this.finalize();
+			return this.finalize(request);
 		}
 
 		return new Response('Not found', { status: 404 });
 	}
 
 	async append(request) {
-		const { events } = await request.json();
+		const { sessionId, events } = await request.json();
 
+		this.sessionId = sessionId;
 		this.#updateTimestamps(events);
 		this.#extractUrl(events);
 		this.events.push(...events);
@@ -40,7 +42,12 @@ export class SessionBuffer {
 		});
 	}
 
-	async finalize() {
+	async finalize(request = null) {
+		if (request) {
+			const { sessionId } = await request.json();
+			this.sessionId = sessionId;
+		}
+
 		this.#clearInactivityTimer();
 
 		const sessionData = {
@@ -78,7 +85,7 @@ export class SessionBuffer {
 
 	#buildMetadata() {
 		return {
-			sessionId: this.state.id.toString(),
+			sessionId: this.sessionId,
 			timestamp: this.firstTimestamp || Date.now(),
 			duration: this.#calculateDuration(),
 			eventCount: this.events.length,
@@ -89,9 +96,7 @@ export class SessionBuffer {
 	}
 
 	#calculateDuration() {
-		return this.lastTimestamp && this.firstTimestamp
-			? this.lastTimestamp - this.firstTimestamp
-			: 0;
+		return this.lastTimestamp && this.firstTimestamp ? this.lastTimestamp - this.firstTimestamp : 0;
 	}
 
 	#resetInactivityTimer() {
@@ -120,5 +125,6 @@ export class SessionBuffer {
 		this.firstTimestamp = null;
 		this.lastTimestamp = null;
 		this.url = null;
+		this.sessionId = null;
 	}
 }
