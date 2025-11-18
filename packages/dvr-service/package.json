@@ -1,0 +1,18 @@
+{
+	"name": "dvr-service",
+	"version": "0.29.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"deploy-dev": "wrangler deploy",
+		"dev": "wrangler dev",
+		"start": "wrangler dev",
+		"test": "vitest"
+	},
+	"devDependencies": {
+		"@cloudflare/vitest-pool-workers": "^0.8.19",
+		"@firmly/eslint-config": "^0.29.0",
+		"vitest": "~3.2.0",
+		"wrangler": "*"
+	}
+}
