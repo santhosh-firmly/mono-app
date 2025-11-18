@@ -13,7 +13,8 @@
 		"format-code:check": "eslint . --fix=false",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
-		"deploy-dev": "npm run build && wrangler deploy"
+		"deploy-do": "wrangler deploy --config wrangler-do.jsonc",
+		"deploy-dev": "npm run build && npm run deploy-do && wrangler deploy"
 	},
 	"devDependencies": {
 		"@chromatic-com/storybook": "^3.2.5",

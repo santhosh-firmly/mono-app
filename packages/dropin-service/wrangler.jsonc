@@ -64,7 +64,7 @@
 				"PUBLIC_aperture_domain": "firmly.in",
 				"PUBLIC_cf_server": "https://api.firmly.tools",
 				"PUBLIC_api_id": "4e015446-be87-4796-93bf-7610bb228fe0",
-				"PUBLIC_SESSION_RECORD_URL": "https://var-service.firmly-dev.workers.dev",
+				"PUBLIC_SESSION_RECORD_URL": "https://var.firmly-dev.workers.dev",
 				"PUBLIC_DISABLE_HCAPTCHA": "false",
 				"PUBLIC_uc2p_sdk_url": "https://sandbox.secure.checkout.visa.com/checkout-widget/resources/js/integration/v2/sdk.js?dpaId=I8U21OZVATGCWWL44QML21VYApxq34kiZJnVeUSzriVONtv7Y&locale=en_US&cardBrands=visa,mastercard",
 				"PUBLIC_use_c2p_api": "false",

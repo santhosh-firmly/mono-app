@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import { CloudflareSessionRepository } from '$lib/server/adapters/cloudflare-session-repository.js';
+import { SessionPersistenceAdapter } from '$lib/server/adapters/session-persistence-adapter.js';
 import { GetSessionUseCase } from '$lib/server/usecases/get-session.js';
 
 const CORS_HEADERS = {
@@ -12,8 +12,8 @@ export async function GET({ params, platform }) {
 	const { id } = params;
 
 	try {
-		const repository = new CloudflareSessionRepository(platform);
-		const useCase = new GetSessionUseCase(repository);
+		const persistenceAdapter = new SessionPersistenceAdapter(platform);
+		const useCase = new GetSessionUseCase(persistenceAdapter);
 		const result = await useCase.execute(id);
 
 		return json(result, { headers: CORS_HEADERS });

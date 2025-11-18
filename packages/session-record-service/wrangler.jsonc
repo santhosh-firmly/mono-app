@@ -18,5 +18,14 @@
 			"binding": "METADATA",
 			"id": "fcb5a7205a60465da3953d58c28901a4"
 		}
-	]
+	],
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "SESSION_RECORDER",
+				"class_name": "SessionBuffer",
+				"script_name": "session-recorder-do"
+			}
+		]
+	}
 }

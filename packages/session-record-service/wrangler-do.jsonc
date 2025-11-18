@@ -1,0 +1,20 @@
+{
+	"name": "session-recorder-do",
+	"main": "durable-object.js",
+	"compatibility_date": "2024-09-23",
+	"compatibility_flags": ["nodejs_compat"],
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "SESSION_RECORDER",
+				"class_name": "SessionBuffer"
+			}
+		]
+	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_classes": ["SessionBuffer"]
+		}
+	]
+}

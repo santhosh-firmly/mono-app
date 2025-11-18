@@ -1,64 +1,52 @@
-import { calculateSessionMetadata } from '../utils/session-helpers.js';
-
 export class SaveSessionUseCase {
-	/**
-	 * @param {import('../domain/session-repository.js').ISessionRepository} repository
-	 */
-	constructor(repository) {
-		this.repository = repository;
+	#persistenceAdapter;
+	#bufferAdapter;
+
+	constructor(persistenceAdapter, bufferAdapter) {
+		this.#persistenceAdapter = persistenceAdapter;
+		this.#bufferAdapter = bufferAdapter;
 	}
 
-	/**
-	 * @param {string} sessionId
-	 * @param {import('../domain/session-repository.js').SessionEvent[]} events
-	 * @returns {Promise<{sessionId: string, message: string}>}
-	 */
-	async execute(sessionId, events) {
-		const existingMetadata = await this.repository.getMetadata(sessionId);
-		const isNewSession = !existingMetadata;
-
-		if (isNewSession) {
-			return await this._createSession(sessionId, events);
-		} else {
-			return await this._appendToSession(sessionId, events);
+	async execute(sessionId, events, finalize = false) {
+		if (finalize) {
+			return this.#finalizeSession(sessionId, events);
 		}
+
+		const bufferResponse = await this.#bufferAdapter.appendEvents(sessionId, events);
+
+		return {
+			sessionId,
+			success: true,
+			buffered: bufferResponse.buffered,
+			eventCount: bufferResponse.eventCount
+		};
 	}
 
-	async _createSession(sessionId, events) {
-		const metadataFields = calculateSessionMetadata(events);
+	async #finalizeSession(sessionId, events) {
+		if (events.length > 0) {
+			await this.#bufferAdapter.appendEvents(sessionId, events);
+		}
 
-		const metadata = {
+		const finalizeResponse = await this.#bufferAdapter.finalize(sessionId);
+
+		if (!finalizeResponse.sessionData) {
+			throw new Error('No session data returned from buffer');
+		}
+
+		const { events: allEvents, metadata } = finalizeResponse.sessionData;
+
+		await this.#persistSession(sessionId, allEvents, metadata);
+
+		return {
 			sessionId,
-			...metadataFields,
-			createdAt: new Date().toISOString()
+			success: true,
+			finalized: true,
+			eventCount: metadata.eventCount
 		};
-
-		await this.repository.saveEvents(sessionId, events);
-		await this.repository.createMetadata(metadata);
-		await this.repository.addToList(metadata);
-
-		return { sessionId, message: 'Session created successfully' };
 	}
 
-	async _appendToSession(sessionId, events) {
-		const { totalEventCount, allEvents } = await this.repository.appendEvents(
-			sessionId,
-			events
-		);
-		const updatedFields = calculateSessionMetadata(allEvents);
-
-		const updates = {
-			duration: updatedFields.duration,
-			eventCount: totalEventCount,
-			url: updatedFields.url,
-			updatedAt: new Date().toISOString()
-		};
-
-		await Promise.all([
-			this.repository.updateMetadata(sessionId, updates),
-			this.repository.updateInList(sessionId, updates)
-		]);
-
-		return { sessionId, message: 'Session updated successfully' };
+	async #persistSession(sessionId, events, metadata) {
+		await this.#persistenceAdapter.writeEvents(sessionId, Date.now(), events);
+		await this.#persistenceAdapter.createSession(metadata);
 	}
 }

@@ -48,7 +48,7 @@ export function startRecording(serviceUrl) {
 		}
 	}, 10000);
 
-	return () => {
+	const stopFn = async () => {
 		if (intervalId) {
 			clearInterval(intervalId);
 			intervalId = null;
@@ -60,22 +60,46 @@ export function startRecording(serviceUrl) {
 		}
 
 		if (events.length > 0) {
-			fetch(`${serviceUrl}/api/sessions`, {
+			await fetch(`${serviceUrl}/api/sessions`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					sessionId: currentSessionId,
-					events
+					events,
+					finalize: true
 				})
 			}).catch((err) => {
 				console.error('Failed to send final recording events:', err);
 			});
 
 			events = [];
+		} else {
+			await fetch(`${serviceUrl}/api/sessions`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					sessionId: currentSessionId,
+					events: [],
+					finalize: true
+				})
+			}).catch((err) => {
+				console.error('Failed to finalize session:', err);
+			});
 		}
 
 		currentSessionId = null;
 	};
+
+	if (typeof window !== 'undefined') {
+		window.addEventListener('beforeunload', stopFn);
+		window.addEventListener('visibilitychange', () => {
+			if (document.visibilityState === 'hidden') {
+				stopFn();
+			}
+		});
+	}
+
+	return stopFn;
 }
 
 export function isRecording() {

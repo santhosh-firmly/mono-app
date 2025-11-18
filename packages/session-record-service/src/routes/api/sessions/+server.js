@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
-import { CloudflareSessionRepository } from '$lib/server/adapters/cloudflare-session-repository.js';
+import { SessionPersistenceAdapter } from '$lib/server/adapters/session-persistence-adapter.js';
+import { SessionBufferAdapter } from '$lib/server/adapters/session-buffer-adapter.js';
 import { SaveSessionUseCase } from '$lib/server/usecases/save-session.js';
 import { ListSessionsUseCase } from '$lib/server/usecases/list-sessions.js';
 
@@ -10,20 +11,25 @@ const CORS_HEADERS = {
 };
 
 export async function POST({ request, platform }) {
-	const { sessionId, events } = await request.json();
+	const { sessionId, events, finalize } = await request.json();
 
 	if (!sessionId) {
 		return json({ error: 'sessionId is required' }, { status: 400 });
 	}
 
-	if (!events || !Array.isArray(events) || events.length === 0) {
+	if (!finalize && (!events || !Array.isArray(events) || events.length === 0)) {
 		return json({ error: 'Invalid events data' }, { status: 400 });
 	}
 
+	if (finalize && (!events || !Array.isArray(events))) {
+		return json({ error: 'events must be an array' }, { status: 400 });
+	}
+
 	try {
-		const repository = new CloudflareSessionRepository(platform);
-		const useCase = new SaveSessionUseCase(repository);
-		const result = await useCase.execute(sessionId, events);
+		const persistenceAdapter = new SessionPersistenceAdapter(platform);
+		const bufferAdapter = new SessionBufferAdapter(platform.env.SESSION_RECORDER);
+		const useCase = new SaveSessionUseCase(persistenceAdapter, bufferAdapter);
+		const result = await useCase.execute(sessionId, events, finalize);
 
 		return json(result, { headers: CORS_HEADERS });
 	} catch (error) {
@@ -40,8 +46,8 @@ export async function GET({ platform, url }) {
 	const offset = parseInt(url.searchParams.get('offset') || '0');
 
 	try {
-		const repository = new CloudflareSessionRepository(platform);
-		const useCase = new ListSessionsUseCase(repository);
+		const persistenceAdapter = new SessionPersistenceAdapter(platform);
+		const useCase = new ListSessionsUseCase(persistenceAdapter);
 		const result = await useCase.execute(limit, offset);
 
 		return json(result, { headers: CORS_HEADERS });
