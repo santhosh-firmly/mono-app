@@ -3,7 +3,7 @@ import { calculateSessionMetadata } from '../utils/session-helpers.js';
 import { InvalidRequestError, MissingParameterError } from '../errors/index.js';
 import { withErrorHandling } from '../middleware/error-handler.js';
 
-const INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000;
+const INACTIVITY_TIMEOUT_MS = 1 * 60 * 1000;
 
 export class SessionBuffer {
 	constructor(state, env) {
@@ -13,7 +13,6 @@ export class SessionBuffer {
 		this.firstTimestamp = null;
 		this.lastTimestamp = null;
 		this.url = null;
-		this.inactivityTimer = null;
 		this.sessionId = null;
 	}
 
@@ -122,16 +121,16 @@ export class SessionBuffer {
 	#resetInactivityTimer() {
 		this.#clearInactivityTimer();
 
-		this.inactivityTimer = setTimeout(() => {
-			this.#handleInactivityTimeout();
-		}, INACTIVITY_TIMEOUT_MS);
+		const alarmTime = Date.now() + INACTIVITY_TIMEOUT_MS;
+		this.state.storage.setAlarm(alarmTime);
 	}
 
 	#clearInactivityTimer() {
-		if (this.inactivityTimer) {
-			clearTimeout(this.inactivityTimer);
-			this.inactivityTimer = null;
-		}
+		this.state.storage.deleteAlarm();
+	}
+
+	async alarm() {
+		await this.#handleInactivityTimeout();
 	}
 
 	#cleanup() {
