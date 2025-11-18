@@ -1,3 +1,5 @@
+import { SessionNotFoundError } from '../errors/index.js';
+
 export class GetSessionUseCase {
 	constructor(repository) {
 		this.repository = repository;
@@ -7,7 +9,7 @@ export class GetSessionUseCase {
 		const events = await this.repository.getEvents(sessionId);
 
 		if (!events) {
-			throw new Error('Session not found');
+			throw new SessionNotFoundError(sessionId);
 		}
 
 		const metadata = await this.repository.getMetadata(sessionId);

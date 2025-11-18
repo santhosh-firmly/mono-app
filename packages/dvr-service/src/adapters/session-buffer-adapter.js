@@ -1,3 +1,5 @@
+import { DurableObjectError } from '../errors/index.js';
+
 export class SessionBufferAdapter {
 	#namespace;
 
@@ -12,6 +14,13 @@ export class SessionBufferAdapter {
 			body: JSON.stringify({ sessionId, events })
 		});
 
+		if (!response.ok) {
+			const errorData = await response.json().catch(() => ({}));
+			throw new DurableObjectError(
+				errorData.error || `Failed to append events: ${response.status}`
+			);
+		}
+
 		return response.json();
 	}
 
@@ -21,6 +30,13 @@ export class SessionBufferAdapter {
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ sessionId })
 		});
+
+		if (!response.ok) {
+			const errorData = await response.json().catch(() => ({}));
+			throw new DurableObjectError(
+				errorData.error || `Failed to finalize session: ${response.status}`
+			);
+		}
 
 		return response.json();
 	}

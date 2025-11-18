@@ -1,4 +1,5 @@
 import { ISessionRepository } from '../domain/session-repository.js';
+import { StorageError } from '../errors/index.js';
 
 const SESSION_LIST_KEY = 'session_list';
 const MAX_SESSIONS_IN_LIST = 1000;
@@ -9,8 +10,12 @@ export class SessionPersistenceAdapter extends ISessionRepository {
 
 	constructor(platform) {
 		super();
-		this.#recordings = platform.env.RECORDINGS;
-		this.#metadata = platform.env.METADATA;
+		this.#recordings = platform.RECORDINGS || platform.env?.RECORDINGS;
+		this.#metadata = platform.METADATA || platform.env?.METADATA;
+
+		if (!this.#recordings || !this.#metadata) {
+			throw new StorageError('RECORDINGS and METADATA bindings are required');
+		}
 	}
 
 	async writeEvents(sessionId, events) {
@@ -44,28 +49,44 @@ export class SessionPersistenceAdapter extends ISessionRepository {
 	}
 
 	async #addToList(sessionId, metadata) {
-		const sessionList = await this.#getSessionList();
+		try {
+			const sessionList = await this.#getSessionList();
 
-		if (sessionList.some((s) => s?.sessionId === sessionId)) {
-			return;
+			if (sessionList.some((s) => s?.sessionId === sessionId)) {
+				return;
+			}
+
+			sessionList.unshift(metadata);
+
+			if (sessionList.length > MAX_SESSIONS_IN_LIST) {
+				sessionList.pop();
+			}
+
+			await this.#saveSessionList(sessionList);
+		} catch (error) {
+			// Background operation - log but don't throw
+			console.error('SessionPersistenceAdapter.#addToList error:', error);
 		}
-
-		sessionList.unshift(metadata);
-
-		if (sessionList.length > MAX_SESSIONS_IN_LIST) {
-			sessionList.pop();
-		}
-
-		await this.#saveSessionList(sessionList);
 	}
 
 	async #getSessionList() {
-		const data = await this.#metadata.get(SESSION_LIST_KEY);
-		const list = data ? JSON.parse(data) : [];
-		return list.filter((item) => item && typeof item === 'object' && item.sessionId);
+		try {
+			const data = await this.#metadata.get(SESSION_LIST_KEY);
+			const list = data ? JSON.parse(data) : [];
+			return list.filter((item) => item && typeof item === 'object' && item.sessionId);
+		} catch (error) {
+			// Background operation - log and return empty array
+			console.error('SessionPersistenceAdapter.#getSessionList error:', error);
+			return [];
+		}
 	}
 
 	async #saveSessionList(sessionList) {
-		await this.#metadata.put(SESSION_LIST_KEY, JSON.stringify(sessionList));
+		try {
+			await this.#metadata.put(SESSION_LIST_KEY, JSON.stringify(sessionList));
+		} catch (error) {
+			// Background operation - log but don't throw
+			console.error('SessionPersistenceAdapter.#saveSessionList error:', error);
+		}
 	}
 }

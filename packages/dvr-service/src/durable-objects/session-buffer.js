@@ -1,3 +1,8 @@
+import { SessionPersistenceAdapter } from '../adapters/session-persistence-adapter.js';
+import { calculateSessionMetadata } from '../utils/session-helpers.js';
+import { InvalidRequestError, MissingParameterError } from '../errors/index.js';
+import { withErrorHandling } from '../middleware/error-handler.js';
+
 const INACTIVITY_TIMEOUT_MS = 5 * 60 * 1000;
 
 export class SessionBuffer {
@@ -12,26 +17,33 @@ export class SessionBuffer {
 		this.sessionId = null;
 	}
 
-	async fetch(request) {
+	fetch = withErrorHandling(async (request) => {
 		const url = new URL(request.url);
 
 		if (url.pathname === '/append' && request.method === 'POST') {
-			return this.append(request);
+			return this.#append(request);
 		}
 
 		if (url.pathname === '/finalize' && request.method === 'POST') {
-			return this.finalize(request);
+			return this.#finalize(request);
 		}
 
 		return new Response('Not found', { status: 404 });
-	}
+	});
 
-	async append(request) {
+	async #append(request) {
 		const { sessionId, events } = await request.json();
+
+		if (!sessionId) {
+			throw new MissingParameterError('sessionId');
+		}
+
+		if (!events || !Array.isArray(events)) {
+			throw new InvalidRequestError('events must be an array');
+		}
 
 		this.sessionId = sessionId;
 		this.#updateTimestamps(events);
-		this.#extractUrl(events);
 		this.events.push(...events);
 		this.#resetInactivityTimer();
 
@@ -42,7 +54,7 @@ export class SessionBuffer {
 		});
 	}
 
-	async finalize(request = null) {
+	async #finalize(request = null) {
 		if (request) {
 			const { sessionId } = await request.json();
 			this.sessionId = sessionId;
@@ -50,9 +62,16 @@ export class SessionBuffer {
 
 		this.#clearInactivityTimer();
 
+		const metadata = calculateSessionMetadata(this.events);
+
 		const sessionData = {
 			events: this.events,
-			metadata: this.#buildMetadata()
+			metadata: {
+				...metadata,
+				sessionId: this.sessionId,
+				createdAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString()
+			}
 		};
 
 		this.#cleanup();
@@ -74,29 +93,30 @@ export class SessionBuffer {
 		}
 	}
 
-	#extractUrl(events) {
-		if (this.url) return;
+	async #handleInactivityTimeout() {
+		try {
+			console.log(`Session ${this.sessionId || this.state.id} timed out after inactivity`);
 
-		const metaEvent = events.find((e) => e.type === 4 && e.data?.href);
-		if (metaEvent) {
-			this.url = metaEvent.data.href;
+			const persistenceAdapter = new SessionPersistenceAdapter({
+				RECORDINGS: this.env.RECORDINGS,
+				METADATA: this.env.METADATA
+			});
+
+			const metadata = calculateSessionMetadata(this.events);
+
+			await persistenceAdapter.writeEvents(this.sessionId, this.events);
+			await persistenceAdapter.createMetadata(this.sessionId, {
+				...metadata,
+				sessionId: this.sessionId,
+				createdAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString()
+			});
+
+			this.#cleanup();
+		} catch (error) {
+			// Background operation - log but don't throw
+			console.error('SessionBuffer inactivity timeout error:', error);
 		}
-	}
-
-	#buildMetadata() {
-		return {
-			sessionId: this.sessionId,
-			timestamp: this.firstTimestamp || Date.now(),
-			duration: this.#calculateDuration(),
-			eventCount: this.events.length,
-			url: this.url || 'Unknown',
-			createdAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString()
-		};
-	}
-
-	#calculateDuration() {
-		return this.lastTimestamp && this.firstTimestamp ? this.lastTimestamp - this.firstTimestamp : 0;
 	}
 
 	#resetInactivityTimer() {
@@ -105,11 +125,6 @@ export class SessionBuffer {
 		this.inactivityTimer = setTimeout(() => {
 			this.#handleInactivityTimeout();
 		}, INACTIVITY_TIMEOUT_MS);
-	}
-
-	async #handleInactivityTimeout() {
-		console.log(`Session ${this.state.id} timed out after inactivity`);
-		await this.finalize();
 	}
 
 	#clearInactivityTimer() {

@@ -1,3 +1,5 @@
+import { InternalError } from '../errors/index.js';
+
 export class SaveSessionUseCase {
 	#persistenceAdapter;
 	#bufferAdapter;
@@ -30,7 +32,7 @@ export class SaveSessionUseCase {
 		const { sessionData } = await this.#bufferAdapter.finalize(sessionId);
 
 		if (!sessionData) {
-			throw new Error('No session data returned from buffer');
+			throw new InternalError('No session data returned from buffer');
 		}
 
 		await this.#persistenceAdapter.writeEvents(sessionId, sessionData.events);
