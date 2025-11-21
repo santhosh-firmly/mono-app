@@ -1,5 +1,5 @@
 <script>
-	import { startRecording } from '$lib/utils/session-recorder.js';
+	import { SessionRecorder } from '@firmly/session-recorder';
 	import Input from '$lib/components/input.svelte';
 	import Button from '$lib/components/button.svelte';
 
@@ -13,7 +13,7 @@
 
 	let newTodoText = $state('');
 	let recording = $state(false);
-	let stopFn = $state(null);
+	let recorder = $state(null);
 	let nextId = $state(4);
 
 	function addTodo() {
@@ -32,15 +32,23 @@
 		todos = todos.filter((t) => t.id !== id);
 	}
 
-	function handleToggleRecording() {
-		if (recording && stopFn) {
-			stopFn();
-			stopFn = null;
+	async function handleToggleRecording() {
+		if (recording && recorder) {
+			await recorder.stop();
+			recorder = null;
 			recording = false;
-		} else {
-			stopFn = startRecording(data.dvrServiceUrl);
-			recording = true;
+			return;
 		}
+
+		// Create new recorder with privacy-first settings (IMPORTANT: this was missing in old implementation!)
+		recorder = new SessionRecorder({
+			serviceUrl: data.dvrServiceUrl,
+			enabled: true,
+			maskAllInputs: true,
+			batchInterval: 10000
+		});
+		recorder.start();
+		recording = true;
 	}
 </script>
 

@@ -39,6 +39,7 @@
 		"wrangler": "*"
 	},
 	"dependencies": {
+		"@firmly/session-recorder": "^1.0.0",
 		"bits-ui": "^2.14.2",
 		"clsx": "^2.1.1",
 		"phosphor-svelte": "^3.0.1",
