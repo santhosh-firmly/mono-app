@@ -285,7 +285,11 @@
 	}
 </script>
 
-<Modal bind:isModalOpen on:modalClosed>
+<Modal bind:isModalOpen on:modalClosed={() => {
+	trackUXEvent('c2p_modal_dismissed', {
+		modalStep: popupStep
+	});
+}}>
 	<BaseLogin
 		loginProviderName="Click to Pay"
 		subtitle=""

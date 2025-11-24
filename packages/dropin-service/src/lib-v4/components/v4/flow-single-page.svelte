@@ -32,7 +32,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import Header from './header.svelte';
 	import classNames from 'classnames';
-	import { trackUXEvent } from '../../browser/telemetry.js';
+	import { trackUXEvent, createTraceContext } from '../../browser/telemetry.js';
 	import { signOut } from '$lib-v4/clients/mastercard.js';
 	import MastercardC2pLogo from '../common/svg/mastercard-c2p-logo.svelte';
 
@@ -443,6 +443,10 @@
 	let savedCreditCards = [];
 	let savedAddresses = [];
 
+	// Telemetry tracking flags to avoid duplicate events
+	let lastTrackedEmail = null;
+	let lastTrackedShippingKey = null;
+
 	let focusOnPhone;
 
 	/**
@@ -614,11 +618,10 @@
 				const optimisticCart = { ...$cart, shipping_info: { ...shippingInfo } };
 				cart.set(optimisticCart);
 
-				// Make the actual API call with telemetry tracking
-				const parentContext = trackUXEvent('shipping_info_update', {
-					country: shippingInfo.country,
-					postal: maskPostalCode(shippingInfo.postal)
-				});
+				// Create trace context BEFORE API call for distributed tracing
+				const parentContext = createTraceContext();
+
+				// Make the actual API call with parentContext
 				const result = await window.firmly.cartUpdateShippingInfo(
 					shippingInfo,
 					undefined,
@@ -629,6 +632,28 @@
 					// Real update from the server
 					cart.set(result.data);
 					shipping_info_error = '';
+
+					// Track shipping address only after successful API response
+					// Create a unique key with all relevant fields to detect any changes
+					const shippingKey = JSON.stringify({
+						first_name: shippingInfo.first_name,
+						last_name: shippingInfo.last_name,
+						address1: shippingInfo.address1,
+						address2: shippingInfo.address2,
+						city: shippingInfo.city,
+						state_or_province: shippingInfo.state_or_province,
+						postal: shippingInfo.postal,
+						country: shippingInfo.country,
+						phone: shippingInfo.phone
+					});
+
+					if (shippingKey !== lastTrackedShippingKey) {
+						trackUXEvent('shipping_address_added', {
+							country: shippingInfo.country,
+							postal: maskPostalCode(shippingInfo.postal)
+						}, parentContext);
+						lastTrackedShippingKey = shippingKey;
+					}
 				} else {
 					// Restore the original cart state if there's an error
 					cart.set(originalCart);
@@ -688,6 +713,14 @@
 		try {
 			const isEmailValid = await validateEmail();
 			if (isEmailValid) {
+				// Track email entered only when it's actually being used in the flow
+				if (email !== lastTrackedEmail) {
+					trackUXEvent('email_entered', {
+						email: maskEmail(email)
+					});
+					lastTrackedEmail = email;
+				}
+
 				if (
 					$cart.session?.requires_login &&
 					!$cart.session?.is_logged_in &&

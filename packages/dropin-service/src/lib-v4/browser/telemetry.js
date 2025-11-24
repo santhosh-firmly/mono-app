@@ -60,7 +60,7 @@ function initializeSessionTracing() {
 	}
 }
 
-function createTraceContext(traceId = null, parentId = undefined) {
+export function createTraceContext(traceId = null, parentId = undefined) {
 	initializeSessionTracing();
 
 	const spanId = generateRandomId(CONFIG.SPAN_ID_BYTES);
