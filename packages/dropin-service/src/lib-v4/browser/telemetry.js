@@ -34,36 +34,99 @@ function generateRandomId(byteLength) {
 	return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
-function initializeSessionTracing() {
-	if (!sessionTracing.initialized) {
-		sessionTracing.traceId = generateRandomId(CONFIG.TRACE_ID_BYTES);
-		sessionTracing.rootSpanId = generateRandomId(CONFIG.SPAN_ID_BYTES);
-		sessionTracing.startTime = Date.now();
-		sessionTracing.initialized = true;
-
-		// Send session_start event as the root span
-		const rootTraceContext = {
-			'trace.trace_id': sessionTracing.traceId,
-			'trace.span_id': sessionTracing.rootSpanId,
-			'trace.parent_id': null,
-			'trace.sampled': true
+/**
+ * Get external params from URL if available
+ * This allows distributed tracing and ID sync across SDK (top-level) and dropin (iframe)
+ * @returns {{ traceId: string|null, parentSpanId: string|null, browserId: string|null, deviceId: string|null }}
+ */
+function getExternalTraceParams() {
+	if (typeof window === 'undefined') {
+		return { traceId: null, parentSpanId: null, browserId: null, deviceId: null };
+	}
+	try {
+		const urlParams = new URLSearchParams(window.location.search);
+		return {
+			traceId: urlParams.get('_traceId'),
+			parentSpanId: urlParams.get('_parentSpanId'),
+			browserId: urlParams.get('_browserId'),
+			deviceId: urlParams.get('_deviceId')
 		};
-
-		createEvent(
-			'session_start',
-			EVENT_TYPES.UX,
-			{
-				url: window.location.href
-			},
-			rootTraceContext
-		);
+	} catch {
+		return { traceId: null, parentSpanId: null, browserId: null, deviceId: null };
 	}
 }
 
-function createTraceContext(traceId = null, parentId = undefined) {
+// Cache external params to avoid repeated URL parsing
+let cachedExternalParams = null;
+function getCachedExternalParams() {
+	if (!cachedExternalParams) {
+		cachedExternalParams = getExternalTraceParams();
+	}
+	return cachedExternalParams;
+}
+
+function initializeSessionTracing() {
+	if (!sessionTracing.initialized) {
+		// Check for external trace params from URL (passed by SDK to dropin)
+		const { traceId: externalTraceId, parentSpanId: externalParentSpanId } =
+			getExternalTraceParams();
+
+		if (externalTraceId) {
+			// Use external traceId to maintain distributed tracing
+			sessionTracing.traceId = externalTraceId;
+			sessionTracing.rootSpanId = generateRandomId(CONFIG.SPAN_ID_BYTES);
+			sessionTracing.startTime = Date.now();
+			sessionTracing.initialized = true;
+
+			// Send session_start as child of SDK's affiliate_buy_button_click span
+			// Use externalParentSpanId if provided, otherwise link via same trace_id
+			const rootTraceContext = {
+				'trace.trace_id': sessionTracing.traceId,
+				'trace.span_id': sessionTracing.rootSpanId,
+				'trace.parent_id': externalParentSpanId || null,
+				'trace.sampled': true
+			};
+
+			createEvent(
+				'session_start',
+				EVENT_TYPES.UX,
+				{
+					url: window.location.href,
+					external_trace: true
+				},
+				rootTraceContext
+			);
+		} else {
+			// Original behavior - generate new traceId
+			sessionTracing.traceId = generateRandomId(CONFIG.TRACE_ID_BYTES);
+			sessionTracing.rootSpanId = generateRandomId(CONFIG.SPAN_ID_BYTES);
+			sessionTracing.startTime = Date.now();
+			sessionTracing.initialized = true;
+
+			// Send session_start event as the root span
+			const rootTraceContext = {
+				'trace.trace_id': sessionTracing.traceId,
+				'trace.span_id': sessionTracing.rootSpanId,
+				'trace.parent_id': null,
+				'trace.sampled': true
+			};
+
+			createEvent(
+				'session_start',
+				EVENT_TYPES.UX,
+				{
+					url: window.location.href
+				},
+				rootTraceContext
+			);
+		}
+	}
+}
+
+export function createTraceContext(traceId = null, parentId = undefined, spanId = null) {
 	initializeSessionTracing();
 
-	const spanId = generateRandomId(CONFIG.SPAN_ID_BYTES);
+	const currentSpanId = spanId || generateRandomId(CONFIG.SPAN_ID_BYTES);
 	const currentTraceId = traceId || sessionTracing.traceId;
 
 	let currentParentId;
@@ -75,7 +138,7 @@ function createTraceContext(traceId = null, parentId = undefined) {
 
 	return {
 		'trace.trace_id': currentTraceId,
-		'trace.span_id': spanId,
+		'trace.span_id': currentSpanId,
 		'trace.parent_id': currentParentId,
 		'trace.sampled': true
 	};
@@ -83,9 +146,12 @@ function createTraceContext(traceId = null, parentId = undefined) {
 
 function getBaseProperties() {
 	const firmly = window.firmly || {};
+	const externalParams = getCachedExternalParams();
+
+	// Use external IDs from SDK if available, fallback to local IDs
 	const properties = {
-		browser_id: firmly.browserId,
-		device_id: firmly.deviceId,
+		browser_id: externalParams.browserId || firmly.browserId,
+		device_id: externalParams.deviceId || firmly.deviceId,
 		session_id: firmly.sessionId,
 		app_name: firmly.appName,
 		app_version: firmly.appVersion,
@@ -189,7 +255,7 @@ function createEvent(name, eventType, data = {}, traceContext = null) {
 			name,
 			kind: 'client',
 			route: data.url,
-			'service.name': baseProperties.app_name,
+			'service.name': baseProperties.app_name || 'dropin-service',
 			duration_ms: data.duration_ms,
 			'response.status': data.status,
 			device_id: baseProperties.device_id,
@@ -226,6 +292,27 @@ function createEvent(name, eventType, data = {}, traceContext = null) {
 export function getSessionTraceId() {
 	initializeSessionTracing();
 	return sessionTracing.traceId;
+}
+
+/**
+ * Set an external trace ID for distributed tracing
+ * Use this when the trace was started by another system (e.g., mono-cte)
+ * This makes the next event a root span (parent_id: null)
+ * @param {string} traceId - The external trace ID to use
+ */
+function setExternalTraceId(traceId) {
+	if (traceId && !sessionTracing.initialized) {
+		sessionTracing.traceId = traceId;
+		// Set rootSpanId to null so the first event becomes the root span
+		sessionTracing.rootSpanId = null;
+		sessionTracing.startTime = Date.now();
+		sessionTracing.initialized = true;
+		// Don't send session_start here - the caller will send their own root event
+	} else if (traceId && sessionTracing.initialized) {
+		// If already initialized, just update the traceId
+		// This allows late-arriving trace IDs to still be used
+		sessionTracing.traceId = traceId;
+	}
 }
 
 /**
@@ -335,6 +422,39 @@ export async function trackPerformance(func, apiName, additionalData, trackEvent
 function flush() {
 	clearTimeout(telemetryState.timeout);
 	flushQueue();
+}
+
+/**
+ * Track an affiliate buy button click with distributed tracing support
+ * This is a high-level function that handles external trace context from affiliate systems
+ * @param {Object} eventData - Event data (store_info, affiliate_url)
+ * @param {Object} externalContext - External trace context from affiliate system
+ * @param {string} externalContext.trace_id - External trace ID
+ * @param {string} externalContext.parent_span_id - External parent span ID (becomes this event's span_id)
+ * @returns {{ traceId: string, parentSpanId: string }} IDs to pass to dropin iframe
+ */
+export function trackAffiliateClick(eventData = {}, externalContext = {}) {
+	const { trace_id, parent_span_id } = externalContext;
+
+	// Configure external trace if provided
+	if (trace_id) {
+		setExternalTraceId(trace_id);
+	}
+
+	// Create trace context with specific spanId if provided by affiliate system
+	let traceContext = null;
+	if (parent_span_id) {
+		traceContext = createTraceContext(trace_id, null, parent_span_id);
+	}
+
+	// Track the event
+	const result = trackUXEvent('affiliate_buy_button_click', eventData, traceContext);
+
+	// Return IDs for passing to dropin iframe
+	return {
+		traceId: trace_id || getSessionTraceId(),
+		parentSpanId: parent_span_id || result?.spanId
+	};
 }
 
 function handleWindowClose() {

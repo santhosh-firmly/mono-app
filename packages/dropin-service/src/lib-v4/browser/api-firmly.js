@@ -693,7 +693,7 @@ export async function initialize(appId, apiServer, domain = null) {
 	getOrSyncApiAccessToken()
 		.then(() => {
 			if (firmly.isNewSessionId) {
-				trackUXEvent('sessionStart');
+				trackUXEvent('dropin_initialized');
 			}
 			initializationState.complete();
 		})

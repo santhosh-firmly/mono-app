@@ -17,6 +17,7 @@
 	import C2pLogo from '$lib-v4/components/common/c2p-logo.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { restoreCursorPosition } from '$lib-v4/utils/cursor-position.js';
+	import { trackUXEvent } from '$lib-v4/browser/telemetry.js';
 
 	const dispatch = createEventDispatcher();
 
@@ -89,6 +90,9 @@
 
 	let error = '';
 
+	// Telemetry tracking flag to avoid duplicate events
+	let lastTrackedCardNumber = null;
+
 	export let getBillingInfo;
 
 	// Remove non digit values from CVV
@@ -133,6 +137,13 @@
 				} else {
 					error = '';
 					await onCreditCardUpdated(result);
+					// Only track if card number changed since last tracking
+					if (number !== lastTrackedCardNumber) {
+						trackUXEvent('card_added', {
+							cardType: getCardTypeByValue(number)?.type || 'unknown'
+						});
+						lastTrackedCardNumber = number;
+					}
 				}
 
 				return isBillingCorrect;
