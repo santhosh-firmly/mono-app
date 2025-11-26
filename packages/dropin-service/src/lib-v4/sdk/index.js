@@ -10,6 +10,7 @@ import { sdkSessionManager } from '../utils/session-manager.js';
 import { initializationState, INITIALIZATION_STATES } from '../utils/initialization-state.js';
 
 import { saveToStorage, loadFromStorage, removeFromStorage } from '../utils/storage-manager.js';
+import { trackAffiliateClick } from '../browser/telemetry.js';
 
 let sdkInitialized = false;
 let globalMessageListener = null;
@@ -320,6 +321,30 @@ export async function bootstrap() {
 				window.firmly.customProperties = checkoutConfig.custom_properties;
 			}
 
+			// Pass traceId to dropin for distributed tracing
+			// Priority: 1) checkoutConfig.trace_id (from mono-cte), 2) window.firmly.traceId (from postMessage handler)
+			const traceIdToUse = checkoutConfig.trace_id || window.firmly.traceId;
+			if (traceIdToUse) {
+				dropinBuyNowUrl.searchParams.set('_traceId', traceIdToUse);
+				// Also save to window.firmly for consistency
+				window.firmly.traceId = traceIdToUse;
+			}
+
+			// Pass parentSpanId so dropin's session_start can be a child of affiliate_buy_button_click
+			// Priority: 1) checkoutConfig.parent_span_id (from mono-cte), 2) window.firmly.parentSpanId (from postMessage handler)
+			const parentSpanIdToUse = checkoutConfig.parent_span_id || window.firmly.parentSpanId;
+			if (parentSpanIdToUse) {
+				dropinBuyNowUrl.searchParams.set('_parentSpanId', parentSpanIdToUse);
+			}
+
+			// Pass browserId and deviceId so dropin uses the same IDs as SDK for telemetry
+			if (window.firmly.browserId) {
+				dropinBuyNowUrl.searchParams.set('_browserId', window.firmly.browserId);
+			}
+			if (window.firmly.deviceId) {
+				dropinBuyNowUrl.searchParams.set('_deviceId', window.firmly.deviceId);
+			}
+
 			window.firmly.removeOnClose = checkoutConfig.remove_on_close || false;
 
 			if (checkoutConfig.mode === 'minimal-pdp') {
@@ -479,6 +504,36 @@ export async function bootstrap() {
 						} catch (error) {
 							console.warn('JWT provision failed:', error);
 						}
+					} else if (data.action === 'firmly::affiliateBuyButtonClick') {
+						// Handle affiliate buy button click from mono-cte
+						// Ensure telemetry is configured before tracking
+						if (!window.firmly.telemetryServer && apiServer) {
+							window.firmly.telemetryServer = `${apiServer}/api/v1/telemetry`;
+						}
+						if (!window.firmly.appId && appId) {
+							window.firmly.appId = appId;
+						}
+						if (!window.firmly.sessionId) {
+							const { sessionId } = sdkSessionManager.initializeSessionId();
+							window.firmly.sessionId = sessionId;
+						}
+
+						// Track affiliate click and get IDs for dropin
+						const { traceId, parentSpanId } = trackAffiliateClick(
+							{
+								store_info: data.storeInfo,
+								affiliate_url: data.affiliate_url
+							},
+							{
+								trace_id: data.trace_id,
+								parent_span_id: data.parent_span_id
+							}
+						);
+
+						// Save IDs for passing to dropin iframe
+						window.firmly.traceId = traceId;
+						window.firmly.parentSpanId = parentSpanId;
+						return;
 					}
 				} catch (e) {
 					//ignored

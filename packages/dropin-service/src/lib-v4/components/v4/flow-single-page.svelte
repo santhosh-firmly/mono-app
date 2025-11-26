@@ -35,6 +35,7 @@
 	import { trackUXEvent, createTraceContext } from '../../browser/telemetry.js';
 	import { signOut } from '$lib-v4/clients/mastercard.js';
 	import MastercardC2pLogo from '../common/svg/mastercard-c2p-logo.svelte';
+	import stableStringify from 'json-stable-stringify';
 
 	const dispatch = createEventDispatcher();
 	/**
@@ -628,32 +629,32 @@
 					parentContext
 				);
 
+				// Create a unique key with all relevant fields to detect any changes
+				// Normalize address2 to empty string to avoid undefined vs '' inconsistency
+				const shippingKey = stableStringify({
+					first_name: shippingInfo.first_name,
+					last_name: shippingInfo.last_name,
+					address1: shippingInfo.address1,
+					address2: shippingInfo.address2 ?? '',
+					city: shippingInfo.city,
+					state_or_province: shippingInfo.state_or_province,
+					postal: shippingInfo.postal,
+					country: shippingInfo.country,
+					phone: shippingInfo.phone
+				});
+
+				if (shippingKey !== lastTrackedShippingKey) {
+					trackUXEvent('shipping_address_added', {
+						country: shippingInfo.country,
+						postal: maskPostalCode(shippingInfo.postal)
+					}, parentContext);
+					lastTrackedShippingKey = shippingKey;
+				}
 				if (result.status === 200) {
 					// Real update from the server
 					cart.set(result.data);
 					shipping_info_error = '';
 
-					// Track shipping address only after successful API response
-					// Create a unique key with all relevant fields to detect any changes
-					const shippingKey = JSON.stringify({
-						first_name: shippingInfo.first_name,
-						last_name: shippingInfo.last_name,
-						address1: shippingInfo.address1,
-						address2: shippingInfo.address2,
-						city: shippingInfo.city,
-						state_or_province: shippingInfo.state_or_province,
-						postal: shippingInfo.postal,
-						country: shippingInfo.country,
-						phone: shippingInfo.phone
-					});
-
-					if (shippingKey !== lastTrackedShippingKey) {
-						trackUXEvent('shipping_address_added', {
-							country: shippingInfo.country,
-							postal: maskPostalCode(shippingInfo.postal)
-						}, parentContext);
-						lastTrackedShippingKey = shippingKey;
-					}
 				} else {
 					// Restore the original cart state if there's an error
 					cart.set(originalCart);
