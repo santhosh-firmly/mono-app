@@ -300,7 +300,7 @@ export function getSessionTraceId() {
  * This makes the next event a root span (parent_id: null)
  * @param {string} traceId - The external trace ID to use
  */
-export function setExternalTraceId(traceId) {
+function setExternalTraceId(traceId) {
 	if (traceId && !sessionTracing.initialized) {
 		sessionTracing.traceId = traceId;
 		// Set rootSpanId to null so the first event becomes the root span

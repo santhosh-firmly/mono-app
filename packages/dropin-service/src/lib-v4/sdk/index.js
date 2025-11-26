@@ -12,6 +12,7 @@ import { initializationState, INITIALIZATION_STATES } from '../utils/initializat
 import { saveToStorage, loadFromStorage, removeFromStorage } from '../utils/storage-manager.js';
 import { trackAffiliateClick } from '../browser/telemetry.js';
 
+
 let sdkInitialized = false;
 let globalMessageListener = null;
 
