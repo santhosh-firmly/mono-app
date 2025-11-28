@@ -28,11 +28,11 @@
 	},
 	"devDependencies": {
 		"@firmly/eslint-config": "^0.4.0",
-		"husky": "^9.1.7",
-		"lerna": "^8.1.2",
-		"knip": "^5.68.0",
 		"eslint": "^9.18.0",
-		"prettier": "^3.4.2",
+		"husky": "^9.1.7",
+		"knip": "^5.68.0",
+		"lerna": "^8.1.2",
+		"prettier": "^3.6.2",
 		"wrangler": "^4.9.1"
 	},
 	"prettier": "@firmly/eslint-config/prettier",

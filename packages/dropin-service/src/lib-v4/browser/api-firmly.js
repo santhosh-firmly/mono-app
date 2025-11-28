@@ -100,11 +100,12 @@ function createOrResetCartHealtCheckTimer(platform, domain, minutes = 15) {
 }
 
 function getBrowserId() {
-	const value = localStorage.getItem(BROWSER_ID_KEY);
-	if (value) {
-		return value;
+	let value = localStorage.getItem(BROWSER_ID_KEY);
+	if (!value) {
+		value = getRandomId();
+		localStorage.setItem(BROWSER_ID_KEY, value);
 	}
-	return getRandomId();
+	return value;
 }
 
 function setBrowserId(value) {
@@ -626,6 +627,10 @@ async function getOrSyncApiAccessToken() {
 		// Use SDK data if valid
 		if (sdkData && isSessionValid(sdkData)) {
 			sessionManager.setStoredSession(sdkData);
+			// Set device_id from SDK data for telemetry
+			if (sdkData.device_id) {
+				window.firmly.deviceId = sdkData.device_id;
+			}
 			return sdkData.access_token;
 		}
 
@@ -1440,7 +1445,7 @@ if (typeof window !== 'undefined') {
 	}
 
 	firmly.browserId = initBrowserId();
-	firmly.deviceId = getDeviceId() || getRandomId();
+	firmly.deviceId = getDeviceId();
 	firmly.sessionId = initSessionId();
 
 	// Payment functions
