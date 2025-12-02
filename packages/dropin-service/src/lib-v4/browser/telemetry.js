@@ -65,6 +65,43 @@ function getCachedExternalParams() {
 	return cachedExternalParams;
 }
 
+/**
+ * Ensures telemetry configuration is initialized
+ * Idempotent - safe to call multiple times
+ * @param {Object} options - Configuration options
+ * @param {string} options.apiServer - API server URL
+ * @param {string} options.appId - Application ID
+ * @param {Object} options.sessionManager - Session manager instance with initializeSessionId method
+ * @returns {boolean} true if telemetry is properly configured
+ */
+export function ensureTelemetryConfig(options = {}) {
+	if (typeof window === 'undefined') return false;
+
+	if (!window.firmly) {
+		window.firmly = {};
+	}
+
+	const { apiServer, appId, sessionManager } = options;
+
+	// Configure telemetryServer
+	if (!window.firmly.telemetryServer && apiServer) {
+		window.firmly.telemetryServer = `${apiServer}/api/v1/telemetry`;
+	}
+
+	// Configure appId
+	if (!window.firmly.appId && appId) {
+		window.firmly.appId = appId;
+	}
+
+	// Initialize sessionId if sessionManager was provided
+	if (!window.firmly.sessionId && sessionManager) {
+		const { sessionId } = sessionManager.initializeSessionId();
+		window.firmly.sessionId = sessionId;
+	}
+
+	return !!(window.firmly.telemetryServer && window.firmly.appId);
+}
+
 function initializeSessionTracing() {
 	if (!sessionTracing.initialized) {
 		// Check for external trace params from URL (passed by SDK to dropin)
@@ -253,24 +290,30 @@ function createEvent(name, eventType, data = {}, traceContext = null) {
 
 		const event = {
 			name,
+			event_type: eventType,
 			kind: 'client',
 			route: data.url,
 			'service.name': baseProperties.app_name || 'dropin-service',
 			duration_ms: data.duration_ms,
 			'response.status': data.status,
-			device_id: baseProperties.device_id,
+			device_id: baseProperties.device_id || '',
 			error: data.error_description || (data.success === false ? 'Request failed' : null),
 			...baseProperties,
 			...trace,
 			...data
 		};
 
-		// Remove undefined fields
-		Object.keys(event).forEach((key) => {
-			if (event[key] === undefined) {
+		// Ensure essential fields have defaults
+		if (!event.app_name) event.app_name = 'dropin-service';
+		if (!event.app_version) event.app_version = '1.0.0';
+		if (!event['service.name']) event['service.name'] = 'dropin-service';
+
+		// Remove undefined and null fields (except trace.parent_id which can be null for root spans)
+		for (const key of Object.keys(event)) {
+			if (event[key] === undefined || (event[key] === null && key !== 'trace.parent_id')) {
 				delete event[key];
 			}
-		});
+		}
 
 		enqueueEvent(event);
 
@@ -295,27 +338,6 @@ export function getSessionTraceId() {
 }
 
 /**
- * Set an external trace ID for distributed tracing
- * Use this when the trace was started by another system (e.g., mono-cte)
- * This makes the next event a root span (parent_id: null)
- * @param {string} traceId - The external trace ID to use
- */
-function setExternalTraceId(traceId) {
-	if (traceId && !sessionTracing.initialized) {
-		sessionTracing.traceId = traceId;
-		// Set rootSpanId to null so the first event becomes the root span
-		sessionTracing.rootSpanId = null;
-		sessionTracing.startTime = Date.now();
-		sessionTracing.initialized = true;
-		// Don't send session_start here - the caller will send their own root event
-	} else if (traceId && sessionTracing.initialized) {
-		// If already initialized, just update the traceId
-		// This allows late-arriving trace IDs to still be used
-		sessionTracing.traceId = traceId;
-	}
-}
-
-/**
  * Get session duration in milliseconds if session has started
  * @returns {number|null} Session duration in ms or null if not started
  */
@@ -324,6 +346,36 @@ function getSessionDuration() {
 		return Date.now() - sessionTracing.startTime;
 	}
 	return null;
+}
+
+/**
+ * Track affiliate button click with distributed tracing support
+ * This event is the ROOT span of the trace - dropin events will be children of it
+ * @param {object} eventData - Event data (store_info, affiliate_url, etc.)
+ * @param {object} externalContext - External trace context with trace_id and parent_span_id from mono-cte
+ * @returns {object} IDs to pass to dropin iframe
+ */
+export function trackAffiliateClick(eventData = {}, externalContext = {}) {
+	const { trace_id, parent_span_id } = externalContext;
+
+	// affiliate_buy_button_click is the ROOT span
+	// Use parent_span_id from mono-cte as this event's span_id
+	// so that dropin events can be children of this span
+	const traceContext = {
+		'trace.trace_id': trace_id,
+		'trace.span_id': parent_span_id,
+		'trace.parent_id': null, // ROOT - no parent
+		'trace.sampled': true
+	};
+
+	// Send the event
+	trackUXEvent('affiliate_buy_button_click', eventData, traceContext);
+
+	// Return IDs for dropin - parentSpanId is this event's span_id
+	return {
+		traceId: trace_id,
+		parentSpanId: parent_span_id
+	};
 }
 
 /**
@@ -413,7 +465,7 @@ export async function trackPerformance(func, apiName, additionalData, trackEvent
 				'response.status': response?.status || (error ? 'error' : 'success'),
 				success: !error,
 				error: error?.message,
-				...(additionalData ? additionalData : {})
+				...(additionalData || {})
 			});
 		}
 	}
@@ -422,39 +474,6 @@ export async function trackPerformance(func, apiName, additionalData, trackEvent
 function flush() {
 	clearTimeout(telemetryState.timeout);
 	flushQueue();
-}
-
-/**
- * Track an affiliate buy button click with distributed tracing support
- * This is a high-level function that handles external trace context from affiliate systems
- * @param {Object} eventData - Event data (store_info, affiliate_url)
- * @param {Object} externalContext - External trace context from affiliate system
- * @param {string} externalContext.trace_id - External trace ID
- * @param {string} externalContext.parent_span_id - External parent span ID (becomes this event's span_id)
- * @returns {{ traceId: string, parentSpanId: string }} IDs to pass to dropin iframe
- */
-export function trackAffiliateClick(eventData = {}, externalContext = {}) {
-	const { trace_id, parent_span_id } = externalContext;
-
-	// Configure external trace if provided
-	if (trace_id) {
-		setExternalTraceId(trace_id);
-	}
-
-	// Create trace context with specific spanId if provided by affiliate system
-	let traceContext = null;
-	if (parent_span_id) {
-		traceContext = createTraceContext(trace_id, null, parent_span_id);
-	}
-
-	// Track the event
-	const result = trackUXEvent('affiliate_buy_button_click', eventData, traceContext);
-
-	// Return IDs for passing to dropin iframe
-	return {
-		traceId: trace_id || getSessionTraceId(),
-		parentSpanId: parent_span_id || result?.spanId
-	};
 }
 
 function handleWindowClose() {
