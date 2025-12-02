@@ -26,11 +26,13 @@ The project uses path aliases: `$lib` (src/lib), `$lib-v4` (src/lib-v4), and `$d
 ## Common Commands
 
 ### Installation
+
 ```bash
 npm install
 ```
 
 ### Development
+
 ```bash
 # Start dev server for a specific package
 npm run dev --workspace dropin-service
@@ -41,6 +43,7 @@ npm run storybook --workspace dropin-service
 ```
 
 ### Testing
+
 ```bash
 # Run all tests across packages
 npm test
@@ -53,6 +56,7 @@ npm run test:unit --workspace dropin-service
 ```
 
 ### Building
+
 ```bash
 # Build all packages
 npm run build
@@ -69,12 +73,15 @@ npm run build-prod
 ```
 
 ### SDK Building (dropin-service only)
+
 The dropin-service includes a custom SDK build step that bundles `src/lib-v4/sdk/index.js` into `dist/sdk/js` using esbuild:
+
 ```bash
 npm run build-sdk --workspace dropin-service
 ```
 
 ### Code Quality
+
 ```bash
 # Format and lint all code
 npm run format-code
@@ -87,6 +94,7 @@ npm run depcheck
 ```
 
 ### Deployment
+
 ```bash
 # Deploy to specific environment (dropin-service/dash)
 npm run deploy-dev
@@ -97,6 +105,7 @@ npm run deploy-prod
 ```
 
 ### Version Management
+
 ```bash
 # Update versions across all packages
 npm run update-version
@@ -108,7 +117,9 @@ npm run update-version-no-hooks
 ## Development Guidelines
 
 ### Svelte 5 Runes
+
 This codebase uses Svelte 5 with runes:
+
 - `$state` - Reactive state declaration
 - `$derived` - Computed derived values
 - `$effect` - Side effects and lifecycle management
@@ -116,28 +127,36 @@ This codebase uses Svelte 5 with runes:
 - `$bindable` - Two-way bindable props
 
 ### State Management
+
 Use classes for complex state management (state machines):
+
 ```javascript
 // counter.svelte.js
 class Counter {
-  count = $state(0);
-  increment() { this.count++; }
+	count = $state(0);
+	increment() {
+		this.count++;
+	}
 }
 export const counter = new Counter();
 ```
 
 ### Internationalization
+
 Uses Paraglide.js for i18n:
+
 - Messages are defined in `messages/en.json`
 - Import with `import * as m from '$lib/paraglide/messages.js'`
 - Use in templates: `{m('welcome_message')}`
 
 ### Component Naming
+
 - File names: lowercase-with-hyphens (e.g., `auth-form.svelte`)
 - Imports/usage: PascalCase
 - Variables/functions: camelCase
 
 ### Styling
+
 - Uses Tailwind CSS (v4 for dropin-service, v3 for dash)
 - dropin-service uses `@tailwindcss/vite` plugin
 - Leverage Svelte's built-in transitions and animations
@@ -145,16 +164,18 @@ Uses Paraglide.js for i18n:
 ## Testing
 
 The dropin-service uses Vitest with two separate workspaces:
+
 - **client workspace**: Tests Svelte components using jsdom environment
-  - Files: `src/**/*.svelte.{test,spec}.{js,ts}`
-  - Excludes: `src/lib/server/**`
+    - Files: `src/**/*.svelte.{test,spec}.{js,ts}`
+    - Excludes: `src/lib/server/**`
 - **server workspace**: Tests server-side code in Node environment
-  - Files: `src/**/*.{test,spec}.{js,ts}`
-  - Excludes: `src/**/*.svelte.{test,spec}.{js,ts}`
+    - Files: `src/**/*.{test,spec}.{js,ts}`
+    - Excludes: `src/**/*.svelte.{test,spec}.{js,ts}`
 
 ## Pre-commit Hooks
 
 Husky enforces the following checks before each commit:
+
 1. Check for outdated dependencies (`npm run outdated`)
 2. Check for unused/unlisted dependencies (`npm run depcheck`)
 3. Format code in changed packages (`lerna run format-code --since origin/main`)
@@ -165,6 +186,7 @@ Husky enforces the following checks before each commit:
 ## Cloudflare Deployment
 
 Both applications use `@sveltejs/adapter-cloudflare` and are deployed to Cloudflare Workers:
+
 - Development preview: `npm run preview:cloudflare --workspace dropin-service`
 - Uses Wrangler CLI for deployments
 - Environment-specific configurations via `--env` flag
@@ -183,12 +205,14 @@ Both applications use `@sveltejs/adapter-cloudflare` and are deployed to Cloudfl
 ## SvelteKit Patterns
 
 ### Routing
+
 - File-based routing in `src/routes/`
 - Dynamic routes use `[slug]` syntax
 - Load functions for server-side data fetching
 - Error handling with `+error.svelte` pages
 
 ### Forms and Actions
+
 - Server-side form handling with SvelteKit form actions
 - Client-side validation using Svelte's reactive declarations
 - Progressive enhancement for JavaScript-optional submissions
