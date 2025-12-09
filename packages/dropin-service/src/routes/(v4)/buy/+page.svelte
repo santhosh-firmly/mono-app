@@ -540,9 +540,7 @@
 		// Start session recording if URL is configured
 		if (data.PUBLIC_SESSION_RECORD_URL) {
 			sessionRecorder = new SessionRecorder({
-				serviceUrl: data.PUBLIC_SESSION_RECORD_URL,
-				enabled: true,
-				batchInterval: 10000 // Send events every 10 seconds
+				serviceUrl: data.PUBLIC_SESSION_RECORD_URL
 			});
 			sessionRecorder.start();
 		}

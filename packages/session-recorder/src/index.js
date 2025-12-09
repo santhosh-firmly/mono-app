@@ -17,13 +17,3 @@ export {
 	DEFAULT_SAMPLING,
 	mergeConfig
 } from './config.js';
-export { BatchManager } from './batching.js';
-export {
-	generateSessionId,
-	calculateEventSize,
-	checkBrowserSupport,
-	safeCallback,
-	throttle,
-	isBrowser,
-	debugLog
-} from './utils.js';
