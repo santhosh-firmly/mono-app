@@ -40,12 +40,11 @@
 			return;
 		}
 
-		// Create new recorder with privacy-first settings (IMPORTANT: this was missing in old implementation!)
+		// Create new recorder - uses privacy-first defaults from package
 		recorder = new SessionRecorder({
 			serviceUrl: data.dvrServiceUrl,
-			enabled: true,
-			maskAllInputs: true,
-			batchInterval: 10000
+			enabled: true
+			// Uses defaults: maskAllInputs: true, inlineStylesheet: true, etc.
 		});
 		recorder.start();
 		recording = true;

@@ -55,6 +55,7 @@ export class SessionRecorder {
 		this.stopRecording = null;
 		this.batchManager = null;
 		this.isRecording = false;
+		this.hasSeenFullSnapshot = false;
 
 		// Browser event handlers
 		this.visibilityChangeHandler = null;
@@ -81,6 +82,10 @@ export class SessionRecorder {
 
 		// Generate session ID
 		this.sessionId = generateSessionId();
+		this.hasSeenFullSnapshot = false;
+		// Set isRecording BEFORE calling record() so events emitted during initialization are captured
+		this.isRecording = true;
+
 		debugLog('Starting recording', { sessionId: this.sessionId });
 
 		// Initialize batch manager
@@ -94,8 +99,20 @@ export class SessionRecorder {
 
 		// Start rrweb recording
 		try {
+			debugLog('Calling rrweb.record with config', {
+				checkoutEveryNth: this.config.checkoutEveryNth,
+				maskAllInputs: this.config.maskAllInputs,
+				inlineStylesheet: this.config.inlineStylesheet
+			});
+
 			this.stopRecording = record({
-				emit: (event) => this._handleEvent(event),
+				emit: (event) => {
+					try {
+						this._handleEvent(event);
+					} catch (error) {
+						console.error('Error in emit handler:', error);
+					}
+				},
 				checkoutEveryNth: this.config.checkoutEveryNth,
 				checkoutEveryNms: this.config.checkoutEveryNms,
 				maskAllInputs: this.config.maskAllInputs,
@@ -110,13 +127,14 @@ export class SessionRecorder {
 				errorHandler: this.config.errorHandler
 			});
 
+			debugLog('rrweb.record completed');
+
 			// Start batch manager
 			this.batchManager.start();
 
 			// Setup browser close handlers
 			this._setupBrowserCloseHandlers();
 
-			this.isRecording = true;
 			debugLog('Recording started successfully');
 
 			return this.sessionId;
@@ -176,7 +194,31 @@ export class SessionRecorder {
 			return;
 		}
 
+		// Log ALL events for debugging
+		debugLog('Received rrweb event', {
+			type: event.type,
+			timestamp: event.timestamp,
+			hasData: !!event.data
+		});
+
 		this.batchManager.addEvent(event);
+
+		// Immediately flush after receiving the first full snapshot
+		// Type 2 = Full snapshot (contains DOM + CSS)
+		// This ensures the initial snapshot is sent immediately before any incremental changes
+		if (event.type === 2 && !this.hasSeenFullSnapshot) {
+			this.hasSeenFullSnapshot = true;
+			debugLog('Flushing initial full snapshot immediately', {
+				eventType: event.type,
+				eventCount: this.batchManager.getEventCount()
+			});
+			// Small delay to ensure Meta event (type 4) is also captured
+			setTimeout(() => {
+				if (this.batchManager) {
+					this.batchManager.flush('initial_snapshot');
+				}
+			}, 100);
+		}
 	}
 
 	/**
@@ -218,8 +260,8 @@ export class SessionRecorder {
 			return;
 		}
 
-		// Split events into chunks that fit under 30KB payload limit
-		const MAX_CHUNK_SIZE = 30 * 1024; // 30KB (under 64KB sendBeacon limit)
+		// Split events into chunks that fit under 120KB payload limit (Cloudflare Workers limit is 128KB)
+		const MAX_CHUNK_SIZE = 120 * 1024; // 120KB (safe margin under 128KB Cloudflare limit)
 		const chunks = this._splitEventsByPayloadSize(events, MAX_CHUNK_SIZE, finalize);
 
 		// Send each chunk
@@ -244,8 +286,8 @@ export class SessionRecorder {
 
 		let payloadSize = payload.length;
 
-		// Safety check: Don't send payloads over 60KB (under 64KB sendBeacon limit)
-		if (payloadSize > 60000) {
+		// Safety check: Don't send payloads over 125KB (Cloudflare Workers limit is 128KB)
+		if (payloadSize > 125 * 1024) {
 			console.error('Payload too large, skipping send', {
 				payloadSize,
 				eventCount: events.length
@@ -260,8 +302,8 @@ export class SessionRecorder {
 		// Send the batch
 		const url = `${this.serviceUrl}/api/sessions`;
 
-		// For final batch, use sendBeacon if available and size permits
-		if (finalize) {
+		// For final batch, use sendBeacon if available and size permits (sendBeacon limit is 64KB)
+		if (finalize && payloadSize <= 60 * 1024) {
 			await this._sendWithBeacon(url, payload, payloadSize);
 		} else {
 			await this._sendWithFetch(url, payload);
@@ -321,8 +363,8 @@ export class SessionRecorder {
 		const payloadSize = payload.length;
 		const BEACON_LIMIT = 64 * 1024; // 64KB
 
-		// Safety check: Don't send payloads over 60KB
-		if (payloadSize > 60000) {
+		// Safety check: Don't send payloads over 60KB (safe margin under 64KB sendBeacon limit)
+		if (payloadSize > 60 * 1024) {
 			console.error('Payload too large for sendBeacon, data may be lost', {
 				payloadSize,
 				eventCount: events.length
@@ -413,8 +455,8 @@ export class SessionRecorder {
 			return;
 		}
 
-		// Split events into chunks that fit under 30KB payload limit
-		const MAX_CHUNK_SIZE = 30 * 1024; // 30KB (under 64KB sendBeacon limit)
+		// Split events into chunks that fit under 120KB payload limit
+		const MAX_CHUNK_SIZE = 120 * 1024; // 120KB (safe margin under 128KB Cloudflare limit)
 		const chunks = this._splitEventsByPayloadSize(events, MAX_CHUNK_SIZE, true);
 
 		// Send all chunks except the last with finalize: false
@@ -445,8 +487,8 @@ export class SessionRecorder {
 			return;
 		}
 
-		// Split events into chunks that fit under 30KB payload limit
-		const MAX_CHUNK_SIZE = 30 * 1024; // 30KB (under 64KB sendBeacon limit)
+		// Split events into chunks that fit under 60KB sendBeacon limit
+		const MAX_CHUNK_SIZE = 60 * 1024; // 60KB (safe margin under 64KB sendBeacon limit)
 		const chunks = this._splitEventsByPayloadSize(events, MAX_CHUNK_SIZE, true);
 
 		// Send all chunks except the last with finalize: false
@@ -467,35 +509,38 @@ export class SessionRecorder {
 	 * @private
 	 */
 	_splitEventsByPayloadSize(events, maxSize, finalize) {
+		// If empty, return empty array (handled by caller for finalize)
+		if (events.length === 0) {
+			return [];
+		}
+
 		const chunks = [];
 		let currentChunk = [];
-		let currentPayloadSize = JSON.stringify({
-			sessionId: this.sessionId,
-			events: currentChunk,
-			...(finalize && { finalize: true })
-		}).length;
 
 		for (const event of events) {
 			const testChunk = [...currentChunk, event];
+			// Calculate size WITHOUT finalize flag (only last chunk will have it)
 			const testPayload = JSON.stringify({
 				sessionId: this.sessionId,
-				events: testChunk,
-				...(finalize && { finalize: true })
+				events: testChunk
 			});
 
 			if (testPayload.length > maxSize && currentChunk.length > 0) {
+				// Current chunk is full, save it and start new chunk
 				chunks.push(currentChunk);
 				currentChunk = [event];
 			} else {
+				// Add event to current chunk
 				currentChunk = testChunk;
 			}
 		}
 
+		// Add final chunk
 		if (currentChunk.length > 0) {
 			chunks.push(currentChunk);
 		}
 
-		return chunks;
+		return chunks.length > 0 ? chunks : [];
 	}
 
 	/**

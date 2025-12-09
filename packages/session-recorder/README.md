@@ -5,11 +5,11 @@ Production-ready, GDPR-compliant session recorder for Firmly applications based 
 ## Features
 
 ### 🚀 Hybrid Batching Strategy
-- **Time-based**: Flush every 5 seconds (configurable)
-- **Size-based**: Flush at 40KB payload to stay under Cloudflare Workers 128KB request limit
-- **Event-based**: Flush at 100 events to prevent memory bloat and large final payloads
+- **Time-based**: Flush every 10 seconds (configurable)
+- **Size-based**: Flush at 100KB payload to allow full snapshots while staying under Cloudflare Workers 128KB request limit
+- **Event-based**: Flush at 200 events to allow full snapshots with interactions
 - Flushes on **whichever condition is met first**
-- **Smart chunking**: Large batches split into 30KB chunks (under 64KB sendBeacon limit)
+- **Smart chunking**: Large batches split into 120KB chunks for fetch, 60KB for sendBeacon
 
 ### 🔒 Privacy & GDPR Compliance
 - **Privacy-first defaults**: All inputs masked by default
@@ -66,9 +66,9 @@ const recorder = new SessionRecorder({
   enabled: true,                 // Enable/disable recording
 
   // Batching configuration
-  batchInterval: 5000,           // 5 seconds (more frequent = smaller final batches)
-  maxBatchSize: 40960,           // 40KB payload (under Cloudflare Workers 128KB limit)
-  maxEvents: 100,                // Max events before flush (prevents large final payloads)
+  batchInterval: 10000,          // 10 seconds (balance frequency with payload size)
+  maxBatchSize: 102400,          // 100KB payload (allows full snapshots, under Cloudflare Workers 128KB limit)
+  maxEvents: 200,                // Max events before flush (allows full snapshot + interactions)
   
   // Callbacks
   onError: (error) => {
@@ -309,8 +309,8 @@ This package is optimized for Cloudflare Workers and Durable Objects deployment:
 
 ### Request Limits (Cloudflare Workers)
 - **Max request body**: 128KB
-- **Our limit**: 40KB per batch (conservative margin)
-- **Chunking**: Large batches split into 30KB chunks
+- **Our limit**: 100KB per batch (allows full snapshots with safe margin)
+- **Chunking**: Large batches split into 120KB chunks for fetch, 60KB for sendBeacon
 
 ### Durable Objects Limits
 - **Max write size**: 128KB per operation
@@ -333,15 +333,15 @@ The recorder sends events to the backend in this format:
 ```javascript
 // Chunk 1 (intermediate)
 POST /api/sessions
-{ "sessionId": "...", "events": [/* 30KB */], "finalize": false }
+{ "sessionId": "...", "events": [/* 120KB */], "finalize": false }
 
 // Chunk 2 (intermediate)  
 POST /api/sessions
-{ "sessionId": "...", "events": [/* 30KB */], "finalize": false }
+{ "sessionId": "...", "events": [/* 120KB */], "finalize": false }
 
 // Chunk 3 (final)
 POST /api/sessions
-{ "sessionId": "...", "events": [/* 20KB */], "finalize": true }
+{ "sessionId": "...", "events": [/* 80KB */], "finalize": true }
 ```
 
 The backend should:
@@ -389,8 +389,8 @@ This package is designed with GDPR compliance in mind:
 
 ### High memory usage
 
-1. Reduce `maxEvents` (default: 250)
-2. Reduce `maxBatchSize` (default: 60KB)
+1. Reduce `maxEvents` (default: 200)
+2. Reduce `maxBatchSize` (default: 100KB)
 3. Reduce `batchInterval` to flush more frequently
 
 ### sendBeacon failures
