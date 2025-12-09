@@ -598,9 +598,7 @@ export async function bootstrap() {
 
 						// Special handling for affiliate click - save IDs for dropin
 						if (event_name === 'affiliate_buy_button_click') {
-							const { traceId, parentSpanId } = trackAffiliateClick(
-								event_data
-							);
+							trackAffiliateClick(event_data);
 						} else {
 							// Generic event
 							trackUXEvent(event_name, event_data);
