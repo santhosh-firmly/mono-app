@@ -25,6 +25,12 @@ let sessionTracing = {
 	sessionEnded: false
 };
 
+let sdkRootSpan = {
+	traceId: null,
+	spanId: null,
+	initialized: false
+};
+
 function generateRandomId(byteLength) {
 	const crypto = window.crypto || window.msCrypto;
 	const bytes = crypto?.getRandomValues
@@ -338,6 +344,53 @@ export function getSessionTraceId() {
 }
 
 /**
+ * Track sdk_loaded as the ROOT span of all traces
+ * Called once during SDK bootstrap
+ * @param {object} eventData - Event data with URL properties (hostname, path, query_params, fragment, browser_id, session_id)
+ * @returns {object} IDs for subsequent events
+ */
+export function trackSdkLoaded(eventData = {}) {
+	if (sdkRootSpan.initialized) {
+		return {
+			traceId: sdkRootSpan.traceId,
+			spanId: sdkRootSpan.spanId
+		};
+	}
+
+	sdkRootSpan.traceId = generateRandomId(CONFIG.TRACE_ID_BYTES);
+	sdkRootSpan.spanId = generateRandomId(CONFIG.SPAN_ID_BYTES);
+	sdkRootSpan.initialized = true;
+
+	const traceContext = {
+		'trace.trace_id': sdkRootSpan.traceId,
+		'trace.span_id': sdkRootSpan.spanId,
+		'trace.parent_id': null, // ROOT span - no parent
+		'trace.sampled': true
+	};
+
+	createEvent('sdk_loaded', EVENT_TYPES.UX, { ...eventData, duration_ms: 0 }, traceContext);
+
+	return {
+		traceId: sdkRootSpan.traceId,
+		spanId: sdkRootSpan.spanId
+	};
+}
+
+/**
+ * Get the SDK root span context for child events
+ * @returns {object|null} SDK root span IDs or null if not initialized
+ */
+export function getSdkRootSpan() {
+	if (!sdkRootSpan.initialized) {
+		return null;
+	}
+	return {
+		traceId: sdkRootSpan.traceId,
+		spanId: sdkRootSpan.spanId
+	};
+}
+
+/**
  * Get session duration in milliseconds if session has started
  * @returns {number|null} Session duration in ms or null if not started
  */
@@ -350,21 +403,30 @@ function getSessionDuration() {
 
 /**
  * Track affiliate button click with distributed tracing support
- * This event is the ROOT span of the trace - dropin events will be children of it
+ * This event is a child of sdk_loaded - dropin events will be children of this span
  * @param {object} eventData - Event data (store_info, affiliate_url, etc.)
- * @param {object} externalContext - External trace context with trace_id and parent_span_id from mono-cte
+ * @param {object} externalContext - External trace context (ignored - we use sdk_loaded context)
  * @returns {object} IDs to pass to dropin iframe
  */
-export function trackAffiliateClick(eventData = {}, externalContext = {}) {
-	const { trace_id, parent_span_id } = externalContext;
+export function trackAffiliateClick(eventData = {}) {
+	// Get SDK root span as parent - this is the source of truth for trace context
+	const sdkRoot = getSdkRootSpan();
 
-	// affiliate_buy_button_click is the ROOT span
-	// Use parent_span_id from mono-cte as this event's span_id
-	// so that dropin events can be children of this span
+	if (!sdkRoot) {
+		console.warn('trackAffiliateClick called before sdk_loaded - trace context may be incomplete');
+	}
+
+	// Always use SDK's trace_id (ignore mono-cte's trace_id)
+	const traceId = sdkRoot?.traceId || generateRandomId(CONFIG.TRACE_ID_BYTES);
+
+	// Always generate a new span_id for this event (ignore mono-cte's parent_span_id)
+	const spanId = generateRandomId(CONFIG.SPAN_ID_BYTES);
+
+	// affiliate_buy_button_click is child of sdk_loaded
 	const traceContext = {
-		'trace.trace_id': trace_id,
-		'trace.span_id': parent_span_id,
-		'trace.parent_id': null, // ROOT - no parent
+		'trace.trace_id': traceId,
+		'trace.span_id': spanId,
+		'trace.parent_id': sdkRoot?.spanId || null, // Parent is sdk_loaded
 		'trace.sampled': true
 	};
 
@@ -373,8 +435,8 @@ export function trackAffiliateClick(eventData = {}, externalContext = {}) {
 
 	// Return IDs for dropin - parentSpanId is this event's span_id
 	return {
-		traceId: trace_id,
-		parentSpanId: parent_span_id
+		traceId: traceId,
+		parentSpanId: spanId
 	};
 }
 

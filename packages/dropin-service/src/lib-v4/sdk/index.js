@@ -10,11 +10,88 @@ import { sdkSessionManager } from '../utils/session-manager.js';
 import { initializationState, INITIALIZATION_STATES } from '../utils/initialization-state.js';
 
 import { saveToStorage, loadFromStorage, removeFromStorage } from '../utils/storage-manager.js';
-import { trackUXEvent, trackAffiliateClick, ensureTelemetryConfig } from '../browser/telemetry.js';
+import {
+	trackUXEvent,
+	trackAffiliateClick,
+	trackSdkLoaded,
+	getSdkRootSpan,
+	ensureTelemetryConfig
+} from '../browser/telemetry.js';
 
 
 let sdkInitialized = false;
 let globalMessageListener = null;
+
+const BROWSER_ID_KEY = 'FLDID';
+
+/**
+ * Initialize browser ID early for telemetry
+ * Uses the same logic as initBrowserId in api-firmly.js
+ */
+function initializeBrowserId() {
+	if (typeof window === 'undefined') return null;
+
+	try {
+		let browserId = localStorage.getItem(BROWSER_ID_KEY);
+		if (!browserId) {
+			// Generate browser ID matching api-firmly.js format: 'B' + 10 random digits joined
+			const array = new Uint8Array(10);
+			(window.crypto || window.msCrypto).getRandomValues(array);
+			browserId = 'B' + Array.from(array).join('');
+			localStorage.setItem(BROWSER_ID_KEY, browserId);
+		}
+		if (window.firmly) {
+			window.firmly.browserId = browserId;
+		}
+		return browserId;
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * Initialize telemetry and fire sdk_loaded event
+ * This sets up the ROOT span for distributed tracing
+ */
+function initializeTelemetry() {
+	// Initialize browser ID early (before telemetry)
+	initializeBrowserId();
+
+	// Initialize telemetry configuration
+	ensureTelemetryConfig({
+		apiServer,
+		appId,
+		sessionManager: sdkSessionManager
+	});
+
+	// Build sdk_loaded event data
+	const queryParams = Object.fromEntries(new URLSearchParams(window.location.search));
+	const fragment = window.location.hash?.replace('#', '') || null;
+
+	const sdkLoadedData = {
+		hostname: window.location.hostname,
+		path: window.location.pathname,
+		browser_id: window.firmly.browserId,
+		session_id: window.firmly.sessionId
+	};
+
+	// Only include query_params if not empty
+	if (Object.keys(queryParams).length > 0) {
+		sdkLoadedData.query_params = queryParams;
+	}
+
+	// Only include fragment if not empty
+	if (fragment) {
+		sdkLoadedData.fragment = fragment;
+	}
+
+	// Fire sdk_loaded as ROOT span
+	const sdkLoadedContext = trackSdkLoaded(sdkLoadedData);
+
+	// Store trace context for subsequent events
+	window.firmly.sdkTraceId = sdkLoadedContext.traceId;
+	window.firmly.sdkSpanId = sdkLoadedContext.spanId;
+}
 
 export async function getApiAccessToken() {
 	if (!window.firmly?.appId || !window.firmly?.apiServer) return null;
@@ -179,6 +256,7 @@ export async function bootstrap() {
 	initializationState.setState(INITIALIZATION_STATES.SDK_READY);
 
 	initWindowFirmly();
+	initializeTelemetry();
 
 	if (!window.firmly.sdk) {
 		window.firmly.sdk = {
@@ -331,9 +409,11 @@ export async function bootstrap() {
 			}
 
 			// Pass traceId and parentSpanId to dropin for distributed tracing
-			// These can come from checkoutConfig (passed by mono-cte) or from window.firmly (set by telemetry handler)
-			const traceId = checkoutConfig.trace_id || window.firmly.traceId;
-			const parentSpanId = checkoutConfig.parent_span_id || window.firmly.parentSpanId;
+			// Get trace context directly from sdk_loaded (already initialized in bootstrap)
+			const sdkRoot = getSdkRootSpan();
+			const traceId = sdkRoot?.traceId;
+			const parentSpanId = sdkRoot?.spanId;
+
 			if (traceId) {
 				dropinBuyNowUrl.searchParams.set('_traceId', traceId);
 			}
@@ -518,14 +598,7 @@ export async function bootstrap() {
 
 						// Special handling for affiliate click - save IDs for dropin
 						if (event_name === 'affiliate_buy_button_click') {
-							const { traceId, parentSpanId } = trackAffiliateClick(
-								event_data,
-								{ trace_id, parent_span_id }
-							);
-
-							// Save IDs for passing to dropin iframe
-							window.firmly.traceId = traceId;
-							window.firmly.parentSpanId = parentSpanId;
+							trackAffiliateClick(event_data);
 						} else {
 							// Generic event
 							trackUXEvent(event_name, event_data);
