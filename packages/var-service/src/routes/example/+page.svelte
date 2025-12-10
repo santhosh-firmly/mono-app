@@ -109,17 +109,41 @@
 		{/if}
 	</div>
 
-	<div class="border-border text-muted mt-12 space-y-1 border-t pt-8 text-xs">
-		<p><strong>How to test:</strong></p>
-		<p>1. Click "Record" to start recording</p>
-		<p>2. Add, complete, and delete tasks</p>
-		<p>3. Click "Stop" when done</p>
-		<p>
-			4. Return to <Button
-				variant="link"
-				onclick={() => (window.location.href = '/')}
-				class="inline">dashboard</Button
-			> to view replay
-		</p>
+	<div class="border-border text-muted mt-12 space-y-4 border-t pt-8 text-xs">
+		<div>
+			<p><strong>Masking Examples:</strong></p>
+			<div class="mt-2 space-y-2">
+				<div>
+					<p class="text-xs font-medium">
+						record-mask (text masking): <span
+							class="record-mask inline-block border px-2 py-1 text-xs"
+							>Sensitive information here</span
+						>
+					</p>
+				</div>
+				<div>
+					<p class="text-xs font-medium">
+						record-block (element hiding): <span
+							class="record-block inline-block border px-2 py-1 text-xs"
+							>This will be hidden</span
+						>
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<div>
+			<p><strong>How to test:</strong></p>
+			<p>1. Click "Record" to start recording</p>
+			<p>2. Add, complete, and delete tasks</p>
+			<p>3. Click "Stop" when done</p>
+			<p>
+				4. Return to <Button
+					variant="link"
+					onclick={() => (window.location.href = '/')}
+					class="inline">dashboard</Button
+				> to view replay
+			</p>
+		</div>
 	</div>
 </div>

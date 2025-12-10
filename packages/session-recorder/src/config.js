@@ -40,8 +40,8 @@ export const DEFAULT_CONFIG = {
 	// Privacy (GDPR compliant)
 	maskAllInputs: true,
 	maskInputOptions: DEFAULT_MASK_INPUT_OPTIONS,
-	blockClass: 'rr-block',
-	ignoreClass: 'rr-ignore',
+	blockClass: 'record-block',
+	maskTextClass: 'record-mask',
 
 	// rrweb options
 	checkoutEveryNth: 100, // Full snapshot every 100 events
@@ -68,6 +68,7 @@ export function mergeConfig(userConfig = {}) {
 			mouseInteraction: userConfig.sampling?.mouseInteraction
 				? { ...DEFAULT_SAMPLING.mouseInteraction, ...userConfig.sampling.mouseInteraction }
 				: DEFAULT_SAMPLING.mouseInteraction
-		}
+		},
+		maskTextClass: userConfig.maskTextClass || DEFAULT_CONFIG.maskTextClass
 	};
 }

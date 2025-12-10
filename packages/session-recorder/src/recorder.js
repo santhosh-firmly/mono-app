@@ -53,7 +53,7 @@ export class SessionRecorder {
 			maskAllInputs: this.config.maskAllInputs,
 			maskInputOptions: this.config.maskInputOptions,
 			blockClass: this.config.blockClass,
-			ignoreClass: this.config.ignoreClass,
+			maskTextClass: this.config.maskTextClass,
 			inlineStylesheet: this.config.inlineStylesheet,
 			sampling: this.config.sampling
 		});
