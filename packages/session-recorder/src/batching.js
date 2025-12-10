@@ -35,25 +35,20 @@ export class BatchManager {
 	}
 
 	addEvent(event) {
-		// Calculate payload size if we add this event
-		const testPayload = JSON.stringify({
-			sessionId: this.sessionId,
-			events: [...this.events, event]
-		});
+		this.events.push(event);
 
-		// Flush if adding this event would exceed limits
+		const testPayload = JSON.stringify({ sessionId: this.sessionId, events: this.events });
+
 		if (
-			this.events.length + 1 >= this.config.maxEvents ||
+			this.events.length >= this.config.maxEvents ||
 			testPayload.length >= this.config.maxBatchSize
 		) {
-			debugLog('Flushing batch (prevent overflow)', {
+			debugLog('Flushing batch (limit reached)', {
 				eventCount: this.events.length,
 				payloadSize: testPayload.length
 			});
-			this.flush('overflow');
+			this.flush('limit');
 		}
-
-		this.events.push(event);
 	}
 
 	flush(reason = 'manual') {
@@ -73,19 +68,10 @@ export class BatchManager {
 	}
 
 	getStats() {
-		const payloadSize = JSON.stringify({
-			sessionId: this.sessionId,
-			events: this.events
-		}).length;
-
 		return {
 			eventCount: this.events.length,
-			payloadSize,
+			payloadSize: JSON.stringify({ sessionId: this.sessionId, events: this.events }).length,
 			timeSinceLastFlush: Date.now() - this.lastFlushTime
 		};
-	}
-
-	getEventCount() {
-		return this.events.length;
 	}
 }

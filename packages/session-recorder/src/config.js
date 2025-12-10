@@ -34,8 +34,8 @@ export const DEFAULT_CONFIG = {
 
 	// Batching strategy
 	batchInterval: 10000, // 10 seconds
-	maxBatchSize: 100 * 1024, // 100KB (allows full snapshots, under 128KB Cloudflare limit)
-	maxEvents: 200, // Max events before flush
+	maxBatchSize: 500 * 1024, // 500KB - better chunk size for POST requests
+	maxEvents: 500, // Max events before flush
 
 	// Privacy (GDPR compliant)
 	maskAllInputs: true,

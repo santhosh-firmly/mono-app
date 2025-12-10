@@ -46,11 +46,6 @@ export class SessionRecorder {
 			emit: (event) => {
 				if (this.isRecording && this.batchManager) {
 					this.batchManager.addEvent(event);
-
-					// Immediately flush after full snapshot to ensure CSS is sent
-					if (event.type === 2) {
-						setTimeout(() => this.batchManager?.flush('snapshot'), 100);
-					}
 				}
 			},
 			checkoutEveryNth: this.config.checkoutEveryNth,
@@ -100,18 +95,6 @@ export class SessionRecorder {
 			...(finalize && { finalize: true })
 		});
 
-		const payloadSize = payload.length;
-		const MAX_SIZE = 120 * 1024; // 120KB (safe under 128KB Cloudflare limit)
-
-		if (payloadSize > MAX_SIZE) {
-			console.error(`Payload too large: ${payloadSize} bytes`);
-			safeCallback(
-				this.config.onError,
-				new Error(`Payload size ${payloadSize} exceeds limit`)
-			);
-			return;
-		}
-
 		try {
 			await fetch(`${this.serviceUrl}/api/sessions`, {
 				method: 'POST',
@@ -120,8 +103,8 @@ export class SessionRecorder {
 				keepalive: finalize
 			});
 
-			safeCallback(this.config.onBatchSent, this.sessionId, events.length, payloadSize);
-			debugLog('Batch sent', { eventCount: events.length, size: payloadSize, finalize });
+			safeCallback(this.config.onBatchSent, this.sessionId, events.length, payload.length);
+			debugLog('Batch sent', { eventCount: events.length, size: payload.length, finalize });
 		} catch (error) {
 			console.error('Failed to send batch:', error);
 			safeCallback(this.config.onError, error);
@@ -130,25 +113,59 @@ export class SessionRecorder {
 
 	async _sendFinalBatch() {
 		const events = this.batchManager?.flush('final') || [];
-
-		// Always send finalize request (even if no events)
 		await this._sendBatch(events, true);
 	}
 
 	_sendFinalBatchSync() {
 		const events = this.batchManager?.flush('final') || [];
-		const payload = JSON.stringify({
-			sessionId: this.sessionId,
-			events,
-			finalize: true
-		});
+		if (!navigator.sendBeacon) return;
 
-		// Use sendBeacon for synchronous delivery on page unload
-		if (navigator.sendBeacon && payload.length < 60 * 1024) {
+		const BEACON_LIMIT = 64 * 1024;
+		const chunks = this._splitIntoChunks(events, BEACON_LIMIT);
+
+		chunks.forEach((chunk, index) => {
+			const isLast = index === chunks.length - 1;
+			const payload = JSON.stringify({
+				sessionId: this.sessionId,
+				events: chunk,
+				...(isLast && { finalize: true })
+			});
+
 			const blob = new Blob([payload], { type: 'application/json' });
 			navigator.sendBeacon(`${this.serviceUrl}/api/sessions`, blob);
-			debugLog('Final batch sent via sendBeacon', { eventCount: events.length });
+		});
+
+		debugLog('Final batches sent via sendBeacon', {
+			chunks: chunks.length,
+			totalEvents: events.length
+		});
+	}
+
+	_splitIntoChunks(events, maxSize) {
+		if (events.length === 0) return [];
+
+		const chunks = [];
+		let currentChunk = [];
+
+		for (const event of events) {
+			const testPayload = JSON.stringify({
+				sessionId: this.sessionId,
+				events: [...currentChunk, event]
+			});
+
+			if (testPayload.length >= maxSize && currentChunk.length > 0) {
+				chunks.push(currentChunk);
+				currentChunk = [event];
+			} else {
+				currentChunk.push(event);
+			}
 		}
+
+		if (currentChunk.length > 0) {
+			chunks.push(currentChunk);
+		}
+
+		return chunks;
 	}
 
 	_setupPageUnloadHandler() {

@@ -2,9 +2,9 @@
 
 Lightweight, GDPR-compliant session recorder based on [rrweb](https://github.com/rrweb-io/rrweb).
 
-**Simple**: ~180 lines of core code  
+**Simple**: Minimal core code, focused on essentials  
 **Privacy-First**: All inputs masked by default  
-**Smart Batching**: Automatic batching (time/size/count)
+**Smart Batching**: Automatic batching with intelligent chunking
 
 ## Installation
 
@@ -34,8 +34,8 @@ const recorder = new SessionRecorder({
   
   // Batching (defaults shown)
   batchInterval: 10000,    // Flush every 10 seconds
-  maxBatchSize: 102400,    // Max 100KB per batch (Cloudflare Workers limit: 128KB)
-  maxEvents: 200,          // Max 200 events per batch
+  maxBatchSize: 512000,    // Max 500KB per batch
+  maxEvents: 500,          // Max 500 events per batch
   
   // Privacy (defaults: all inputs masked)
   maskAllInputs: true,
@@ -86,12 +86,21 @@ Returns `{ isRecording, sessionId, batchStats }`.
 
 ## How It Works
 
+### Batching Strategy
 Events are flushed when **any** condition is met:
 - **Time**: 10 seconds elapsed
-- **Size**: 100KB reached
-- **Count**: 200 events accumulated
+- **Size**: 500KB reached
+- **Count**: 500 events accumulated
 
-Full snapshots (with CSS) are flushed immediately for accurate replay.
+### Page Unload Handling
+When the user closes the tab or navigates away:
+- All pending events are flushed immediately
+- Events are automatically split into multiple chunks (each < 64KB)
+- Each chunk is sent via `sendBeacon` for reliable delivery
+- Only the last chunk is marked with `finalize: true`
+- **No data loss** even with large accumulated buffers
+
+The recorder listens to both `visibilitychange` and `pagehide` events to catch all scenarios where the page might be closed.
 
 ## Payload Format
 
@@ -99,7 +108,7 @@ Full snapshots (with CSS) are flushed immediately for accurate replay.
 {
   "sessionId": "session_1234567890_abc",
   "events": [...],
-  "finalize": true  // Only on last batch
+  "finalize": true  // Only on last batch/chunk
 }
 ```
 
