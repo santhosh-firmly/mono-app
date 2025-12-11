@@ -18,7 +18,6 @@ import {
 	ensureTelemetryConfig
 } from '../browser/telemetry.js';
 
-
 let sdkInitialized = false;
 let globalMessageListener = null;
 
@@ -381,9 +380,6 @@ export async function bootstrap() {
 			}
 			if (checkoutConfig.ui_mode) {
 				dropinBuyNowUrl.searchParams.set('ui_mode', checkoutConfig.ui_mode);
-			}
-			if (checkoutConfig.ui_mode) {
-				dropinBuyNowUrl.searchParams.set('brwsr_id', checkoutConfig.ui_mode);
 			}
 			if (checkoutConfig.force_pdp && checkoutConfig.skip_pdp) {
 				console.warn(
