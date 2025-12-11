@@ -76,13 +76,13 @@
 									{disabled}
 								/>
 							</span>
-							<span class="record-mask pl-1">
+							<span class="sensitive-data pl-1">
 								{getInfoDisplay(headerDisplay, address)}
 							</span>
 						</span>
 						<div class="flex">
 							<span
-								class="record-mask text-fy-on-primary-subtle pl-6 text-sm font-normal"
+								class="sensitive-data text-fy-on-primary-subtle pl-6 text-sm font-normal"
 							>
 								{getShippingAddress(address)}
 								{#if address?.phone}

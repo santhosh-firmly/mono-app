@@ -209,13 +209,13 @@
 					<span class="text-fy-on-primary-subtle text-start text-sm font-normal">
 						Email
 					</span>
-					<span class="record-mask text-end text-sm font-medium break-words">
+					<span class="sensitive-data text-end text-sm font-medium break-words">
 						{shippingInfo.email}
 					</span>
 					<span class="text-fy-on-primary-subtle text-start text-sm font-normal">
 						Shipping to
 					</span>
-					<span class="record-mask -primary text-end text-sm font-medium">
+					<span class="sensitive-data -primary text-end text-sm font-medium">
 						{shippingInfo.name} · {shippingInfo.address} · {shippingInfo.phone}
 					</span>
 					<span class="text-fy-on-primary-subtle text-start text-sm font-normal">

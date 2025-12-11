@@ -250,7 +250,7 @@
 						<div class="flex flex-col gap-2">
 							<span class="text-fy-alert text-xs"> Please confirm your CVV </span>
 							<input
-								class="border-fy-on-primary-subtle placeholder:text-fy-on-primary-subtle rrweb-block w-full rounded border p-2 disabled:bg-gray-100"
+								class="border-fy-on-primary-subtle placeholder:text-fy-on-primary-subtle sensitive-data w-full rounded border p-2 disabled:bg-gray-100"
 								class:error
 								{disabled}
 								bind:value={cvvConfirmationValue}
@@ -260,7 +260,6 @@
 								autocomplete="cc-csc"
 								maxlength="4"
 								inputmode="numeric"
-								type="text"
 							/>
 						</div>
 					{/if}
@@ -330,7 +329,7 @@
 			<div class="relative col-span-2 flex w-full flex-row justify-between rounded-t-lg">
 				<div class="flex w-full">
 					<input
-						class="placeholder:text-fy-on-primary-subtle rrweb-block w-full rounded-t-lg border-0 disabled:bg-gray-100"
+						class="placeholder:text-fy-on-primary-subtle sensitive-data w-full rounded-t-lg border-0 disabled:bg-gray-100"
 						class:error
 						{disabled}
 						bind:value={number}
@@ -340,7 +339,6 @@
 						placeholder="1234 1234 1234 1234"
 						autocomplete="cc-number"
 						inputmode="numeric"
-						type="text"
 					/>
 				</div>
 				<div
@@ -359,7 +357,7 @@
 			</div>
 			<div class="relative flex w-full flex-col justify-center rounded-bl-lg">
 				<input
-					class="placeholder:text-fy-on-primary-subtle rrweb-block w-full rounded-bl-lg border-0 disabled:bg-gray-100"
+					class="placeholder:text-fy-on-primary-subtle sensitive-data w-full rounded-bl-lg border-0 disabled:bg-gray-100"
 					class:error
 					{disabled}
 					bind:value={expiryDate}
@@ -369,13 +367,13 @@
 					data-sensitive
 					placeholder="MM / YY"
 					autocomplete="cc-exp"
-					type="text"
+					inputmode="numeric"
 				/>
 			</div>
 			<div class="relative flex w-full flex-row justify-center rounded-br-lg">
 				<div class="flex w-full">
 					<input
-						class="border-fy-on-primary-subtle placeholder:text-fy-on-primary-subtle rrweb-block w-full rounded-br-lg border-0 disabled:bg-gray-100"
+						class="border-fy-on-primary-subtle placeholder:text-fy-on-primary-subtle sensitive-data w-full rounded-br-lg border-0 disabled:bg-gray-100"
 						class:error
 						{disabled}
 						bind:value={verification_value}
@@ -385,7 +383,6 @@
 						autocomplete="cc-csc"
 						maxlength="4"
 						inputmode="numeric"
-						type="text"
 					/>
 				</div>
 				<div class="absolute top-0 right-0 z-10 mr-3 flex h-full flex-col justify-center">

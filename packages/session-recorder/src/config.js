@@ -40,8 +40,8 @@ export const DEFAULT_CONFIG = {
 	// Privacy (GDPR compliant)
 	maskAllInputs: true,
 	maskInputOptions: DEFAULT_MASK_INPUT_OPTIONS,
-	blockClass: 'record-block',
-	maskTextClass: 'record-mask',
+	blockClass: 'sensitive-data',
+	maskTextClass: 'sensitive-data',
 
 	// rrweb options
 	checkoutEveryNth: 100, // Full snapshot every 100 events

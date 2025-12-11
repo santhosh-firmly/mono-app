@@ -115,16 +115,16 @@
 			<div class="mt-2 space-y-2">
 				<div>
 					<p class="text-xs font-medium">
-						record-mask (text masking): <span
-							class="record-mask inline-block border px-2 py-1 text-xs"
+						sensitive-data (text masking): <span
+							class="sensitive-data inline-block border px-2 py-1 text-xs"
 							>Sensitive information here</span
 						>
 					</p>
 				</div>
 				<div>
 					<p class="text-xs font-medium">
-						record-block (element hiding): <span
-							class="record-block inline-block border px-2 py-1 text-xs"
+						sensitive-data (element hiding): <span
+							class="sensitive-data inline-block border px-2 py-1 text-xs"
 							>This will be hidden</span
 						>
 					</p>

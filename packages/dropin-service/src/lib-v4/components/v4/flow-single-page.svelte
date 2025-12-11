@@ -1642,12 +1642,12 @@
 									>
 										{#if $cart.shipping_info}
 											<div class="w-full">
-												<span class="record-mask text-sm font-bold"
+												<span class="sensitive-data-mask text-sm font-bold"
 													>{email}</span
 												>
 												<hr />
 												<span
-													class="record-mask text-sm"
+													class="sensitive-data-mask text-sm"
 													data-testid="collapsed-shipping-address"
 												>
 													{$cart.shipping_info?.first_name}
@@ -1984,7 +1984,7 @@
 												number="**** {selectedCard?.last_four}"
 												type={selectedCard.card_type}
 												customArtUrl={selectedCard?.art}
-												class="record-mask"
+												class="sensitive-data"
 											/>
 										</div>
 										<button
