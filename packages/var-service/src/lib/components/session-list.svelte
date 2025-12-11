@@ -54,6 +54,7 @@
 
 	{#if loading}
 		<div class="flex-1 space-y-2">
+			<!-- eslint-disable-next-line no-unused-vars -->
 			{#each Array(5) as _, i (i)}
 				<div class="hover:bg-hover rounded-xl px-4 py-4 transition-colors">
 					<div class="mb-2 flex items-start justify-between gap-4">

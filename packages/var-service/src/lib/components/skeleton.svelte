@@ -4,14 +4,12 @@
 	let { class: className, ...rest } = $props();
 </script>
 
-<div
-	class={cn('bg-muted/20 animate-pulse rounded', className)}
-	{...rest}
-></div>
+<div class={cn('bg-muted/20 animate-pulse rounded', className)} {...rest}></div>
 
 <style>
 	@keyframes pulse {
-		0%, 100% {
+		0%,
+		100% {
 			opacity: 1;
 		}
 		50% {

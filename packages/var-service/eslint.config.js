@@ -1,3 +1,6 @@
-import firmly from '@firmly/eslint-config';
+import createConfig from '@firmly/eslint-config';
+import svelteConfig from './svelte.config.js';
 
-export default [...firmly];
+export default createConfig({
+	svelteConfig
+});

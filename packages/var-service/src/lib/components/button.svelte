@@ -1,7 +1,14 @@
 <script>
 	import { cn } from '$lib/utils/cn.js';
 
-	let { children, variant = 'default', class: className, onclick, type = 'button', ...rest } = $props();
+	let {
+		children,
+		variant = 'default',
+		class: className,
+		onclick,
+		type = 'button',
+		...rest
+	} = $props();
 
 	const variants = {
 		default: 'text-foreground hover:text-foreground',

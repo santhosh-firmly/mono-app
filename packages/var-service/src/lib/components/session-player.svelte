@@ -3,7 +3,7 @@
 	import { Replayer } from 'rrweb';
 	import Button from './button.svelte';
 
-	let { events, metadata } = $props();
+	let { events } = $props();
 
 	let container;
 	let replayer;

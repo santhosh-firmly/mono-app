@@ -35,6 +35,7 @@ export default {
 				...globalConfig.workspaces['packages/*'].paths,
 				'$lib/*': ['./src/lib/*']
 			},
+			ignoreDependencies: ['@firmly/eslint-config', 'autoprefixer'],
 			ignore: [
 				'./$types',
 				'./src/lib/components/ui/**', // Disable validation for shadcn export way.
