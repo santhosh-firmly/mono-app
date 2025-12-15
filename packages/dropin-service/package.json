@@ -52,6 +52,7 @@
 		"wrangler": "*"
 	},
 	"dependencies": {
+		"@firmly/session-recorder": "^1.0.0",
 		"@inlang/paraglide-sveltekit": "^0.15.5",
 		"@lottiefiles/svelte-lottie-player": "^0.3.1",
 		"@storybook/jest": "^0.2.3",

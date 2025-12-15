@@ -30,6 +30,7 @@
 	import Visa from '$lib-v4/clients/visa.svelte';
 	import { initializationState } from '$lib-v4/utils/initialization-state.js';
 	import SimpleError from '$lib-v4/components/v4/simple-error.svelte';
+	import { SessionRecorder } from '@firmly/session-recorder';
 
 	const PDP_MAX_WAIT_TIMEOUT = 10000;
 	const PDP_RESTORE_TIMEOUT = 10000; // Timeout for showing PDP after restore
@@ -130,6 +131,7 @@
 	let termsOfUse = $state();
 	let isParentIframed = $state(false);
 	let order = $state(null);
+	let sessionRecorder = null;
 
 	async function addToCart(variantId, quantity, domain, flushCart = false) {
 		// Remove any existing cart so the skeleton and the collapsed states take action.
@@ -535,6 +537,14 @@
 		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server, data.merchantDomain);
 		initializeAppVersion(version);
 
+		// Start session recording if URL is configured
+		if (data.PUBLIC_SESSION_RECORD_URL) {
+			sessionRecorder = new SessionRecorder({
+				serviceUrl: data.PUBLIC_SESSION_RECORD_URL
+			});
+			sessionRecorder.start();
+		}
+
 		if (shouldUseMastercard) {
 			// Initialize MasterCard Unified Solution
 			startMasterCardUnifiedSolution({
@@ -598,6 +608,15 @@
 
 	// Cleanup event listeners on component destroy
 	onDestroy(() => {
+		// Stop session recording
+		if (sessionRecorder) {
+			try {
+				sessionRecorder.stop();
+			} catch (error) {
+				console.error('Error stopping session recording:', error);
+			}
+		}
+
 		if (eventListeners?.length > 0) {
 			eventListeners.forEach((cleanup) => {
 				try {

@@ -18,7 +18,6 @@ import {
 	ensureTelemetryConfig
 } from '../browser/telemetry.js';
 
-
 let sdkInitialized = false;
 let globalMessageListener = null;
 

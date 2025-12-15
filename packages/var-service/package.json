@@ -1,0 +1,50 @@
+{
+	"name": "var-service",
+	"private": true,
+	"version": "0.29.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "npm run prepare && vite build",
+		"preview": "vite preview",
+		"preview:cloudflare": "wrangler dev --env dev",
+		"prepare": "svelte-kit sync || echo ''",
+		"format-code": "eslint . --fix",
+		"format-code:check": "eslint . --fix=false",
+		"storybook": "storybook dev -p 6006",
+		"build-storybook": "storybook build",
+		"deploy-dev": "npm run build && wrangler deploy"
+	},
+	"devDependencies": {
+		"@chromatic-com/storybook": "^3.2.5",
+		"@cloudflare/vite-plugin": "^0.1.17",
+		"@firmly/eslint-config": "^0.33.0",
+		"@storybook/addon-essentials": "^8.6.4",
+		"@storybook/addon-interactions": "^8.6.4",
+		"@storybook/addon-postcss": "^2.0.0",
+		"@storybook/addon-svelte-csf": "^5.0.0-next.27",
+		"@storybook/svelte": "^8.6.4",
+		"@storybook/sveltekit": "^8.6.4",
+		"@storybook/test": "^8.6.4",
+		"@sveltejs/adapter-cloudflare": "^6.0.1",
+		"@sveltejs/kit": "^2.16.0",
+		"@sveltejs/vite-plugin-svelte": "^5.0.0",
+		"@tailwindcss/vite": "^4.1.17",
+		"eslint": "*",
+		"prettier": "*",
+		"storybook": "^8.6.4",
+		"svelte": "^5.27.0",
+		"tailwindcss": "^4.0.0",
+		"vite": "^6.0.0",
+		"wrangler": "*"
+	},
+	"dependencies": {
+		"@firmly/session-recorder": "^1.0.0",
+		"bits-ui": "^2.14.2",
+		"clsx": "^2.1.1",
+		"phosphor-svelte": "^3.0.1",
+		"rrweb": "^2.0.0-alpha.17",
+		"tailwind-merge": "^2.5.2"
+	},
+	"prettier": "@firmly/eslint-config/prettier"
+}

@@ -45,6 +45,9 @@ export default function createConfig({ svelteConfig, ignores = [] }) {
 				parserOptions: {
 					svelteConfig
 				}
+			},
+			rules: {
+				'svelte/no-navigation-without-resolve': 'off'
 			}
 		}
 	];

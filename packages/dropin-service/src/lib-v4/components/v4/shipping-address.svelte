@@ -76,16 +76,22 @@
 									{disabled}
 								/>
 							</span>
-							<span class="pl-1">
+							<span class="sensitive-data pl-1">
 								{getInfoDisplay(headerDisplay, address)}
 							</span>
 						</span>
 						<div class="flex">
-							<span class="text-fy-on-primary-subtle pl-6 text-sm font-normal">
+							<span
+								class="sensitive-data text-fy-on-primary-subtle pl-6 text-sm font-normal"
+							>
 								{getShippingAddress(address)}
 								{#if address?.phone}
-									<span class="text-fy-on-primary-subtle text-sm font-bold"> · </span>
-									<span class="text-fy-on-primary-subtle text-sm font-normal whitespace-nowrap">
+									<span class="text-fy-on-primary-subtle text-sm font-bold">
+										·
+									</span>
+									<span
+										class="text-fy-on-primary-subtle text-sm font-normal whitespace-nowrap"
+									>
 										{address.phone}
 									</span>
 								{/if}
@@ -119,7 +125,9 @@
 				>
 					<label>
 						<span class="block font-bold">
-							<div class="bg-fy-on-primary-subtle my-2 h-3 w-1/2 animate-pulse rounded"></div>
+							<div
+								class="bg-fy-on-primary-subtle my-2 h-3 w-1/2 animate-pulse rounded"
+							></div>
 						</span>
 
 						<div class="grow">
@@ -132,7 +140,9 @@
 										type="radio"
 										checked={false}
 									/>
-									<div class="bg-fy-on-primary-subtle my-2 h-3 w-full animate-pulse rounded"></div>
+									<div
+										class="bg-fy-on-primary-subtle my-2 h-3 w-full animate-pulse rounded"
+									></div>
 								</div>
 							</span>
 						</div>

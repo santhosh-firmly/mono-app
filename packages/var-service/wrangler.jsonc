@@ -1,0 +1,13 @@
+{
+	"name": "var",
+	"compatibility_date": "2024-09-23",
+	"main": ".svelte-kit/cloudflare/_worker.js",
+	"compatibility_flags": ["nodejs_compat"],
+	"assets": {
+		"directory": "./.svelte-kit/cloudflare",
+		"binding": "ASSETS"
+	},
+	"vars": {
+		"DVR_SERVICE_URL": "https://dvr.firmly-dev.workers.dev"
+	}
+}

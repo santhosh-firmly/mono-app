@@ -35,11 +35,24 @@ export default {
 				...globalConfig.workspaces['packages/*'].paths,
 				'$lib/*': ['./src/lib/*']
 			},
+			ignoreDependencies: ['@firmly/eslint-config', 'autoprefixer'],
 			ignore: [
 				'./$types',
 				'./src/lib/components/ui/**', // Disable validation for shadcn export way.
 				'*.config.js'
 			]
+		},
+		'packages/var-service': {
+			...globalConfig.workspaces['packages/*'],
+			paths: {
+				...globalConfig.workspaces['packages/*'].paths,
+				'$lib/*': ['./src/lib/*']
+			},
+			ignoreDependencies: ['@storybook/test'],
+			ignore: ['./$types', '*.config.js']
+		},
+		'packages/session-recorder': {
+			ignoreDependencies: ['jsdom']
 		},
 		'packages/eslint-config': {
 			// Used as plugin by prettier, tailwind

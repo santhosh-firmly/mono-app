@@ -1,0 +1,32 @@
+{
+	"name": "@firmly/session-recorder",
+	"version": "1.0.0",
+	"description": "Production-ready, GDPR-compliant session recorder for Firmly applications",
+	"type": "module",
+	"main": "src/index.js",
+	"exports": {
+		".": "./src/index.js"
+	},
+	"scripts": {
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:coverage": "vitest run --coverage"
+	},
+	"keywords": [
+		"session-recording",
+		"rrweb",
+		"replay",
+		"monitoring",
+		"gdpr"
+	],
+	"author": "Firmly",
+	"license": "UNLICENSED",
+	"private": true,
+	"dependencies": {
+		"rrweb": "^2.0.0-alpha.18"
+	},
+	"devDependencies": {
+		"@vitest/coverage-v8": "^3.2.4",
+		"vitest": "^3.2.4"
+	}
+}

@@ -8,7 +8,8 @@
 	let { merchant } = $props();
 
 	let isEditable = $state(false);
-	let configValue = $state(JSON.stringify(merchant, null, 2));
+
+	let configValue = $state.raw(JSON.stringify(merchant, null, 2));
 
 	function applyJsonChanges() {
 		if (isEditable) {

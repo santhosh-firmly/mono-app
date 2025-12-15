@@ -654,7 +654,6 @@
 					// Real update from the server
 					cart.set(result.data);
 					shipping_info_error = '';
-
 				} else {
 					// Restore the original cart state if there's an error
 					cart.set(originalCart);
@@ -1643,10 +1642,12 @@
 									>
 										{#if $cart.shipping_info}
 											<div class="w-full">
-												<span class="text-sm font-bold">{email}</span>
+												<span class="sensitive-data-mask text-sm font-bold"
+													>{email}</span
+												>
 												<hr />
 												<span
-													class="text-sm"
+													class="sensitive-data-mask text-sm"
 													data-testid="collapsed-shipping-address"
 												>
 													{$cart.shipping_info?.first_name}
@@ -1983,6 +1984,7 @@
 												number="**** {selectedCard?.last_four}"
 												type={selectedCard.card_type}
 												customArtUrl={selectedCard?.art}
+												class="sensitive-data"
 											/>
 										</div>
 										<button
