@@ -407,6 +407,9 @@ export async function bootstrap() {
 				dropinBuyNowUrl.searchParams.set('_deviceId', window.firmly.deviceId);
 			}
 
+			// Pass parent page URL so dropin can use it for telemetry (e.g., USA Today article URL)
+			dropinBuyNowUrl.searchParams.set('_parentUrl', window.location.href);
+
 			// Pass traceId and parentSpanId to dropin for distributed tracing
 			// Get trace context directly from sdk_loaded (already initialized in bootstrap)
 			const sdkRoot = getSdkRootSpan();
@@ -588,7 +591,8 @@ export async function bootstrap() {
 							sessionManager: sdkSessionManager
 						});
 
-						const { event_name, event_data = {}, trace_id, parent_span_id } = data;
+						const { event_name, event_data = {} } = data;
+						// Note: url is now added automatically in getBaseProperties()
 
 						if (!event_name) {
 							console.warn('firmly::telemetryEventSDK requires event_name');
