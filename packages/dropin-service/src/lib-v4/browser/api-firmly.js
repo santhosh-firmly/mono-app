@@ -330,7 +330,7 @@ async function browserFetch(url, options = defaultOptions, parentContext = null)
 	}
 
 	const apiEventData = {
-		url: url,
+		api_url: url,
 		method: options.method || 'GET',
 		status: res.status,
 		duration_ms: duration,

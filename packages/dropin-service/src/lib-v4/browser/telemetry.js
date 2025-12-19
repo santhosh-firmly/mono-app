@@ -43,11 +43,11 @@ function generateRandomId(byteLength) {
 /**
  * Get external params from URL if available
  * This allows distributed tracing and ID sync across SDK (top-level) and dropin (iframe)
- * @returns {{ traceId: string|null, parentSpanId: string|null, browserId: string|null, deviceId: string|null }}
+ * @returns {{ traceId: string|null, parentSpanId: string|null, browserId: string|null, deviceId: string|null, parentUrl: string|null }}
  */
 function getExternalTraceParams() {
 	if (typeof window === 'undefined') {
-		return { traceId: null, parentSpanId: null, browserId: null, deviceId: null };
+		return { traceId: null, parentSpanId: null, browserId: null, deviceId: null, parentUrl: null };
 	}
 	try {
 		const urlParams = new URLSearchParams(window.location.search);
@@ -55,10 +55,11 @@ function getExternalTraceParams() {
 			traceId: urlParams.get('_traceId'),
 			parentSpanId: urlParams.get('_parentSpanId'),
 			browserId: urlParams.get('_browserId'),
-			deviceId: urlParams.get('_deviceId')
+			deviceId: urlParams.get('_deviceId'),
+			parentUrl: urlParams.get('_parentUrl')
 		};
 	} catch {
-		return { traceId: null, parentSpanId: null, browserId: null, deviceId: null };
+		return { traceId: null, parentSpanId: null, browserId: null, deviceId: null, parentUrl: null };
 	}
 }
 
@@ -210,6 +211,13 @@ function getBaseProperties() {
 		properties.edge_pathname = firmly.parentInfo.pathname;
 		properties.edge_href = firmly.parentInfo.href;
 		properties.edge_referrer = firmly.parentInfo.referrer;
+	} else if (externalParams.parentUrl) {
+		// Running in dropin iframe - use parent page URL (e.g., USA Today article)
+		properties.url = externalParams.parentUrl;
+		properties.dropin_url = window.location.href;
+	} else {
+		// SDK running directly on page - use current URL
+		properties.url = window.location.href;
 	}
 
 	return properties;
@@ -298,7 +306,7 @@ function createEvent(name, eventType, data = {}, traceContext = null) {
 			name,
 			event_type: eventType,
 			kind: 'client',
-			route: data.url,
+			route: data.api_url || data.url,
 			'service.name': baseProperties.app_name || 'dropin-service',
 			duration_ms: data.duration_ms,
 			'response.status': data.status,
