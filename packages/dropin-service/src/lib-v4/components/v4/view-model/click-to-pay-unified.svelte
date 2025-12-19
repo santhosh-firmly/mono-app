@@ -237,7 +237,8 @@
 			additionalData: {
 				value: cart.total.value,
 				currency: cart.total.currency
-			}
+			},
+			cardBrand: selectedCard.provider
 		});
 
 		if (tokenizeResponse.status !== 200) {
@@ -285,11 +286,14 @@
 	}
 </script>
 
-<Modal bind:isModalOpen on:modalClosed={() => {
-	trackUXEvent('c2p_modal_dismissed', {
-		modalStep: popupStep
-	});
-}}>
+<Modal
+	bind:isModalOpen
+	on:modalClosed={() => {
+		trackUXEvent('c2p_modal_dismissed', {
+			modalStep: popupStep
+		});
+	}}
+>
 	<BaseLogin
 		loginProviderName="Click to Pay"
 		subtitle=""

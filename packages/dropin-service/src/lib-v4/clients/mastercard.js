@@ -275,7 +275,8 @@ export async function checkoutWithCard({
 	windowRef = window,
 	rememberMe = false,
 	cvv,
-	additionalData = {}
+	additionalData = {},
+	cardBrand = 'mastercard'
 } = {}) {
 	return await trackPerformance(
 		async () => {
@@ -285,14 +286,6 @@ export async function checkoutWithCard({
 				let withCardResponse = previuslyWithCardResponse;
 
 				if (!cvv || !withCardResponse) {
-					// Get card information to determine the brand
-					const maskedCards = await window.mcCheckoutService.getCards();
-					const selectedCard = maskedCards.find(
-						(card) => card.srcDigitalCardId === cardId
-					);
-					const cardBrand =
-						selectedCard?.paymentCardDescriptor?.toLowerCase() || 'mastercard';
-
 					// Determine dynamicDataType based on card brand
 					// For Amex and Discover: use DYNAMIC_CARD_SECURITY_CODE
 					// For Visa and Mastercard: use NONE
