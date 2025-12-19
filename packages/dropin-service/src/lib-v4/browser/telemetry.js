@@ -5,6 +5,8 @@
  * - Session trace_id available via getSessionTraceId() for external systems
  */
 
+import { getAbandonmentSummary } from './field-interaction-tracker.js';
+
 const EVENT_TYPES = {
 	API: 'api',
 	UX: 'ux',
@@ -472,6 +474,12 @@ export function trackUXEvent(name, data = {}, traceContext = null) {
 				session_duration_ms: sessionDuration
 			};
 		}
+
+		// Add field abandonment summary to session_end
+		data = {
+			...data,
+			abandonment_summary: getAbandonmentSummary()
+		};
 	}
 
 	return createEvent(name, EVENT_TYPES.UX, data, traceContext);

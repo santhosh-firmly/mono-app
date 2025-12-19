@@ -33,6 +33,7 @@
 	import Header from './header.svelte';
 	import classNames from 'classnames';
 	import { trackUXEvent, createTraceContext } from '../../browser/telemetry.js';
+	import { onFieldFocus, onFieldBlur, onFieldCompleted } from '../../browser/field-interaction-tracker.js';
 	import { signOut } from '$lib-v4/clients/mastercard.js';
 	import MastercardC2pLogo from '../common/svg/mastercard-c2p-logo.svelte';
 	import stableStringify from 'json-stable-stringify';
@@ -713,6 +714,9 @@
 		try {
 			const isEmailValid = await validateEmail();
 			if (isEmailValid) {
+				// Track email field completion for abandonment analysis
+				onFieldCompleted('email', email);
+
 				// Track email entered only when it's actually being used in the flow
 				if (email !== lastTrackedEmail) {
 					trackUXEvent('email_entered', {
@@ -1737,7 +1741,9 @@
 													class:error={email_error}
 													bind:this={emailField}
 													bind:value={email}
+													on:focus={() => onFieldFocus('email')}
 													on:blur={() => {
+														onFieldBlur('email', email, !!email_error);
 														if (!isEmailValidating) {
 															validateAndSubmitContactInfo();
 														}
