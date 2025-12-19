@@ -289,10 +289,9 @@ export async function checkoutWithCard({
 					// Determine dynamicDataType based on card brand
 					// For Amex and Discover: use DYNAMIC_CARD_SECURITY_CODE
 					// For Visa and Mastercard: use NONE
-					let dynamicDataType = 'NONE';
-					if (cardBrand === 'amex' || cardBrand === 'discover') {
-						dynamicDataType = 'DYNAMIC_CARD_SECURITY_CODE';
-					}
+					const dynamicDataType = ['amex', 'discover'].includes(cardBrand)
+						? 'DYNAMIC_CARD_SECURITY_CODE'
+						: 'NONE';
 
 					iframe = document.createElement('iframe');
 					iframe.style.position = 'fixed';
