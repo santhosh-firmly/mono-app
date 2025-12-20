@@ -78,7 +78,7 @@ export async function startMasterCardUnifiedSolution({
 						consumerEmailAddressRequested: true,
 						consumerPhoneNumberRequested: true,
 						confirmPayment: false,
-						paymentOptions: [{ dynamicDataType: 'NONE' }]
+						paymentOptions: [{ dynamicDataType: 'NONE' }] // Always NONE in init
 					},
 					checkoutExperience: 'PAYMENT_SETTINGS',
 					dpaData: { dpaName: presentationName, applicationType: 'WEB_BROWSER' },
@@ -275,7 +275,8 @@ export async function checkoutWithCard({
 	windowRef = window,
 	rememberMe = false,
 	cvv,
-	additionalData = {}
+	additionalData = {},
+	cardBrand = 'mastercard'
 } = {}) {
 	return await trackPerformance(
 		async () => {
@@ -285,6 +286,13 @@ export async function checkoutWithCard({
 				let withCardResponse = previuslyWithCardResponse;
 
 				if (!cvv || !withCardResponse) {
+					// Determine dynamicDataType based on card brand
+					// For Amex and Discover: use DYNAMIC_CARD_SECURITY_CODE
+					// For Visa and Mastercard: use NONE
+					const dynamicDataType = ['amex', 'discover'].includes(cardBrand)
+						? 'DYNAMIC_CARD_SECURITY_CODE'
+						: 'NONE';
+
 					iframe = document.createElement('iframe');
 					iframe.style.position = 'fixed';
 					iframe.style.top = '0';
@@ -300,7 +308,10 @@ export async function checkoutWithCard({
 					withCardResponse = await window.mcCheckoutService.checkoutWithCard({
 						srcDigitalCardId: cardId,
 						windowRef: iframe.contentWindow,
-						rememberMe
+						rememberMe,
+						dpaTransactionOptions: {
+							paymentOptions: [{ dynamicDataType }]
+						}
 					});
 
 					// Optionally, remove the iframe after checkout completes
