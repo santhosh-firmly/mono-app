@@ -49,7 +49,13 @@ function generateRandomId(byteLength) {
  */
 function getExternalTraceParams() {
 	if (typeof window === 'undefined') {
-		return { traceId: null, parentSpanId: null, browserId: null, deviceId: null, parentUrl: null };
+		return {
+			traceId: null,
+			parentSpanId: null,
+			browserId: null,
+			deviceId: null,
+			parentUrl: null
+		};
 	}
 	try {
 		const urlParams = new URLSearchParams(window.location.search);
@@ -61,7 +67,13 @@ function getExternalTraceParams() {
 			parentUrl: urlParams.get('_parentUrl')
 		};
 	} catch {
-		return { traceId: null, parentSpanId: null, browserId: null, deviceId: null, parentUrl: null };
+		return {
+			traceId: null,
+			parentSpanId: null,
+			browserId: null,
+			deviceId: null,
+			parentUrl: null
+		};
 	}
 }
 
@@ -423,7 +435,9 @@ export function trackAffiliateClick(eventData = {}) {
 	const sdkRoot = getSdkRootSpan();
 
 	if (!sdkRoot) {
-		console.warn('trackAffiliateClick called before sdk_loaded - trace context may be incomplete');
+		console.warn(
+			'trackAffiliateClick called before sdk_loaded - trace context may be incomplete'
+		);
 	}
 
 	// Always use SDK's trace_id (ignore mono-cte's trace_id)
@@ -475,10 +489,9 @@ export function trackUXEvent(name, data = {}, traceContext = null) {
 			};
 		}
 
-		// Add field abandonment summary to session_end
 		data = {
 			...data,
-			abandonment_summary: getAbandonmentSummary()
+			...getAbandonmentSummary()
 		};
 	}
 

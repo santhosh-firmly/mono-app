@@ -10,7 +10,11 @@
 	} from '$lib-v4/browser/schema.js';
 	import AddressAutocomplete from './address-autocomplete.svelte';
 	import { restoreCursorPosition } from '$lib-v4/utils/cursor-position.js';
-	import { onFieldFocus, onFieldBlur, onFieldCompleted } from '$lib-v4/browser/field-interaction-tracker.js';
+	import {
+		onFieldFocus,
+		onFieldBlur,
+		onFieldCompleted
+	} from '$lib-v4/browser/field-interaction-tracker.js';
 	let currentCountry = Countries[0];
 
 	/**
@@ -411,14 +415,14 @@
 			}
 
 			// Track field completions for abandonment analysis
-			onFieldCompleted(getFieldName('full_name'), `${first_name} ${last_name}`);
-			onFieldCompleted(getFieldName('address1'), address1);
-			onFieldCompleted(getFieldName('address2'), address2);
-			onFieldCompleted(getFieldName('city'), city);
-			onFieldCompleted(getFieldName('state'), state_or_province);
-			onFieldCompleted(getFieldName('postal_code'), postal_code);
+			onFieldCompleted(getFieldName('full_name'));
+			onFieldCompleted(getFieldName('address1'));
+			onFieldCompleted(getFieldName('address2'));
+			onFieldCompleted(getFieldName('city'));
+			onFieldCompleted(getFieldName('state'));
+			onFieldCompleted(getFieldName('postal_code'));
 			if (hasPhone) {
-				onFieldCompleted(getFieldName('phone'), phone);
+				onFieldCompleted(getFieldName('phone'));
 			}
 
 			if (submit) {
@@ -518,7 +522,8 @@
 				bind:value={fullName}
 				on:input={onFullNameInput}
 				on:focus={() => handleFieldFocus('full_name')}
-				on:blur={() => handleFieldBlur('full_name', fullName, first_name_error || last_name_error)}
+				on:blur={() =>
+					handleFieldBlur('full_name', fullName, first_name_error || last_name_error)}
 				class="placeholder:text-fy-on-primary-subtle w-full rounded-t-lg border-0 disabled:bg-gray-100"
 				class:error={first_name_error || last_name_error}
 				data-testid="name"

@@ -18,7 +18,11 @@
 	import { createEventDispatcher } from 'svelte';
 	import { restoreCursorPosition } from '$lib-v4/utils/cursor-position.js';
 	import { trackUXEvent } from '$lib-v4/browser/telemetry.js';
-	import { onFieldFocus, onFieldBlur, onFieldCompleted } from '$lib-v4/browser/field-interaction-tracker.js';
+	import {
+		onFieldFocus,
+		onFieldBlur,
+		onFieldCompleted
+	} from '$lib-v4/browser/field-interaction-tracker.js';
 
 	const dispatch = createEventDispatcher();
 
@@ -140,9 +144,9 @@
 					await onCreditCardUpdated(result);
 
 					// Track credit card field completions for abandonment analysis
-					onFieldCompleted('card_number', number);
-					onFieldCompleted('card_expiry', expiryDate);
-					onFieldCompleted('card_cvv', selectedCardOption !== NEW_CARD_OPTION ? cvvConfirmationValue : verification_value);
+					onFieldCompleted('card_number');
+					onFieldCompleted('card_expiry');
+					onFieldCompleted('card_cvv');
 
 					// Only track if card number changed since last tracking
 					if (number !== lastTrackedCardNumber) {
@@ -261,6 +265,9 @@
 								class:error
 								{disabled}
 								bind:value={cvvConfirmationValue}
+								on:focus={() => onFieldFocus('card_cvv')}
+								on:blur={() =>
+									onFieldBlur('card_cvv', cvvConfirmationValue, !!error)}
 								data-testid="cvvConfirmationValue"
 								data-sensitive
 								placeholder="CVV"

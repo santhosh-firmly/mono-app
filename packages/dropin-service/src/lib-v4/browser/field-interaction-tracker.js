@@ -1,10 +1,7 @@
 /**
  * Field Interaction Tracker
- * Tracks field-level interactions for abandonment analysis.
- *
- * This module tracks field interactions in memory and provides a comprehensive
- * abandonment summary via `getAbandonmentSummary()` for the session_end event.
- * No real-time events are fired - all data is collected at session end for accuracy.
+ * Tracks field interactions for abandonment analysis.
+ * All data is collected in memory and reported at session end.
  */
 
 /**
@@ -115,8 +112,7 @@ function initFieldState(fieldName) {
 			focusStartTime: null,
 			totalTimeMs: 0,
 			focusCount: 0,
-			hadValidationErrors: false,
-			finalValueLength: 0
+			hadValidationErrors: false
 		};
 	}
 	return fieldState[fieldName];
@@ -154,31 +150,20 @@ export function onFieldBlur(fieldName, currentValue, hadValidationError = false)
 
 	if (!config || !state.focusStartTime) return;
 
-	// Calculate time spent on this focus session
-	const timeSpentMs = Date.now() - state.focusStartTime;
-	state.totalTimeMs += timeSpentMs;
+	state.totalTimeMs += Date.now() - state.focusStartTime;
 	state.focusStartTime = null;
 
-	// Update validation error state
 	if (hadValidationError) {
 		state.hadValidationErrors = true;
 	}
 
-	// Check completion status
-	const valueLength = typeof currentValue === 'string' ? currentValue.length : 0;
-	state.finalValueLength = valueLength;
-
 	const isComplete = config.isComplete(currentValue);
 	state.completed = isComplete;
 
-	// Determine abandonment type (only for required fields)
 	if (!isComplete && !config.optional) {
 		state.abandoned = true;
-		if (valueLength === 0) {
-			state.abandonmentType = 'focused_empty';
-		} else {
-			state.abandonmentType = 'incomplete';
-		}
+		const valueLength = typeof currentValue === 'string' ? currentValue.length : 0;
+		state.abandonmentType = valueLength === 0 ? 'focused_empty' : 'incomplete';
 	} else {
 		state.abandoned = false;
 		state.abandonmentType = null;
@@ -189,16 +174,13 @@ export function onFieldBlur(fieldName, currentValue, hadValidationError = false)
  * Called when a field is successfully validated/completed
  * Clears any abandonment state for the field
  * @param {string} fieldName - The field identifier
- * @param {string} currentValue - The current field value (optional, for length tracking)
  */
-export function onFieldCompleted(fieldName, currentValue = '') {
+export function onFieldCompleted(fieldName) {
 	const state = initFieldState(fieldName);
 	const config = FIELD_CONFIG[fieldName];
 
 	if (!config) return;
 
-	const valueLength = typeof currentValue === 'string' ? currentValue.length : 0;
-	state.finalValueLength = valueLength;
 	state.completed = true;
 	state.abandoned = false;
 	state.abandonmentType = null;
@@ -244,90 +226,85 @@ export function onPayPalAbandoned() {
 }
 
 /**
- * Gets comprehensive abandonment summary for session_end event
- * @returns {object} Summary of all field interactions and abandonment data
+ * Gets abandonment metrics for session_end event
+ * @returns {object} Flat abandonment metrics for analytics
  */
 export function getAbandonmentSummary() {
 	const sectionsStarted = new Set();
 	const sectionsCompleted = new Set();
-	const fields = {};
+	const sectionAbandonedCounts = {
+		contact: 0,
+		shipping_address: 0,
+		billing_address: 0,
+		credit_card: 0,
+		paypal: 0
+	};
 
 	let totalInteracted = 0;
 	let totalCompleted = 0;
 	let totalAbandoned = 0;
-	let furthestSection = null;
+	let furthestSectionIndex = 0;
 
 	for (const [fieldName, config] of Object.entries(FIELD_CONFIG)) {
 		const state = fieldState[fieldName];
 
-		if (state && state.interacted) {
+		if (state?.interacted) {
 			totalInteracted++;
 			sectionsStarted.add(config.group);
 
-			// Track furthest section
-			const sectionIdx = SECTION_ORDER.indexOf(config.group);
-			const currentFurthestIdx = furthestSection ? SECTION_ORDER.indexOf(furthestSection) : -1;
-			if (sectionIdx > currentFurthestIdx) {
-				furthestSection = config.group;
+			const sectionIdx = SECTION_ORDER.indexOf(config.group) + 1;
+			if (sectionIdx > furthestSectionIndex) {
+				furthestSectionIndex = sectionIdx;
 			}
 
-			if (state.completed) {
-				totalCompleted++;
-			}
-
+			if (state.completed) totalCompleted++;
 			if (state.abandoned) {
 				totalAbandoned++;
+				sectionAbandonedCounts[config.group]++;
 			}
-
-			fields[fieldName] = {
-				interacted: state.interacted,
-				completed: state.completed,
-				abandoned: state.abandoned,
-				abandonment_type: state.abandonmentType,
-				total_time_ms: state.totalTimeMs,
-				focus_count: state.focusCount,
-				had_validation_errors: state.hadValidationErrors,
-				final_value_length: state.finalValueLength
-			};
 		}
 	}
 
-	// Determine which sections are fully completed
-	// A section is complete when all required fields in it are completed
 	for (const section of sectionsStarted) {
-		const sectionFields = Object.entries(FIELD_CONFIG).filter(
-			([, config]) => config.group === section && !config.optional
-		);
+		const allCompleted = Object.entries(FIELD_CONFIG)
+			.filter(([, config]) => config.group === section && !config.optional)
+			.every(([fieldName]) => fieldState[fieldName]?.completed);
 
-		const allCompleted = sectionFields.every(([fieldName]) => {
-			const state = fieldState[fieldName];
-			return state && state.completed;
-		});
-
-		if (allCompleted && sectionFields.length > 0) {
+		if (allCompleted) {
 			sectionsCompleted.add(section);
 		}
 	}
 
 	return {
-		sections_started: Array.from(sectionsStarted),
-		sections_completed: Array.from(sectionsCompleted),
-		fields,
-		total_fields_interacted: totalInteracted,
-		total_fields_completed: totalCompleted,
-		total_fields_abandoned: totalAbandoned,
-		furthest_section_reached: furthestSection
+		fields_interacted: totalInteracted,
+		fields_completed: totalCompleted,
+		fields_abandoned: totalAbandoned,
+		completion_rate:
+			totalInteracted > 0 ? Math.round((totalCompleted / totalInteracted) * 100) : 0,
+		furthest_section: furthestSectionIndex,
+		reached_contact: sectionsStarted.has('contact') ? 1 : 0,
+		reached_shipping: sectionsStarted.has('shipping_address') ? 1 : 0,
+		reached_billing: sectionsStarted.has('billing_address') ? 1 : 0,
+		reached_payment: sectionsStarted.has('credit_card') ? 1 : 0,
+		reached_paypal: sectionsStarted.has('paypal') ? 1 : 0,
+		completed_contact: sectionsCompleted.has('contact') ? 1 : 0,
+		completed_shipping: sectionsCompleted.has('shipping_address') ? 1 : 0,
+		completed_billing: sectionsCompleted.has('billing_address') ? 1 : 0,
+		completed_payment: sectionsCompleted.has('credit_card') ? 1 : 0,
+		completed_paypal: sectionsCompleted.has('paypal') ? 1 : 0,
+		abandoned_at_contact: sectionAbandonedCounts.contact,
+		abandoned_at_shipping: sectionAbandonedCounts.shipping_address,
+		abandoned_at_billing: sectionAbandonedCounts.billing_address,
+		abandoned_at_payment: sectionAbandonedCounts.credit_card,
+		abandoned_at_paypal: sectionAbandonedCounts.paypal
 	};
 }
 
 /**
- * Resets all field state (useful for testing or new sessions)
+ * Resets all field state (useful for testing)
  */
 export function resetFieldState() {
 	fieldState = {};
 }
 
-/**
- * Export FIELD_CONFIG for testing purposes
- */
 export { FIELD_CONFIG };
