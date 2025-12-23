@@ -1,6 +1,7 @@
 <script>
 	import House from 'lucide-svelte/icons/house';
 	import Store from 'lucide-svelte/icons/store';
+	import ClipboardList from 'lucide-svelte/icons/clipboard-list';
 	import PanelLeft from 'lucide-svelte/icons/panel-left';
 
 	import { Button } from '$lib/components/ui/button/index.js';
@@ -20,6 +21,11 @@
 			icon: Store,
 			label: 'Merchants',
 			href: '/merchants'
+		},
+		{
+			icon: ClipboardList,
+			label: 'Orders',
+			href: '/orders'
 		}
 	];
 </script>

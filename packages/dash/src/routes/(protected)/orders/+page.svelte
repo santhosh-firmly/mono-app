@@ -1,12 +1,13 @@
 <script>
-	// Import only what's used
-	import File from 'lucide-svelte/icons/file';
-	import ListFilter from 'lucide-svelte/icons/list-filter';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import Search from 'lucide-svelte/icons/search';
+	import ChevronLeft from 'lucide-svelte/icons/chevron-left';
+	import ChevronRight from 'lucide-svelte/icons/chevron-right';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
 	import * as Table from '$lib/components/ui/table/index.js';
-	import * as Tabs from '$lib/components/ui/tabs/index.js';
+	import { Input } from '$lib/components/ui/input/index.js';
 	import { formatCurrency } from '$lib/currency.js';
 	import OrderDetails from '$lib/components/custom/order-details.svelte';
 
@@ -14,108 +15,131 @@
 	export let data;
 
 	let orders = [];
+	let searchQuery = '';
 
 	$: {
-		orders = data?.orders?.results?.map((o) => ({
-			...o,
-			order_info: JSON.parse(o.order_info)
-		}));
+		orders = data?.orders?.results || [];
+		searchQuery = data?.search || '';
+	}
 
-		// if (orders?.length && !selectedOrderIndex) {
-		// 	selectedOrderIndex = 0;
-		// }
+	$: pagination = data?.pagination || { page: 1, totalPages: 1, totalOrders: 0 };
+
+	function handleSearch(event) {
+		if (event.key === 'Enter') {
+			const params = new URLSearchParams($page.url.searchParams);
+			if (searchQuery) {
+				params.set('search', searchQuery);
+			} else {
+				params.delete('search');
+			}
+			params.set('page', '1');
+			goto(`/orders?${params.toString()}`);
+		}
+	}
+
+	function goToPage(pageNum) {
+		const params = new URLSearchParams($page.url.searchParams);
+		params.set('page', pageNum.toString());
+		goto(`/orders?${params.toString()}`);
 	}
 </script>
 
 <main class="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3">
 	<div class="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
-		<Tabs.Root value="week">
-			<div class="flex items-center">
-				<Tabs.List>
-					<Tabs.Trigger value="week">Week</Tabs.Trigger>
-					<Tabs.Trigger value="month">Month</Tabs.Trigger>
-					<Tabs.Trigger value="year">Year</Tabs.Trigger>
-				</Tabs.List>
-				<div class="ml-auto flex items-center gap-2">
-					<DropdownMenu.Root>
-						<DropdownMenu.Trigger asChild let:builder>
-							<Button
-								variant="outline"
-								size="sm"
-								class="h-7 gap-1 text-sm"
-								builders={[builder]}
-							>
-								<ListFilter class="h-3.5 w-3.5" />
-								<span class="sr-only sm:not-sr-only">Filter</span>
-							</Button>
-						</DropdownMenu.Trigger>
-						<DropdownMenu.Content align="end">
-							<DropdownMenu.Label>Filter by</DropdownMenu.Label>
-							<DropdownMenu.Separator />
-							<DropdownMenu.CheckboxItem checked>Fulfilled</DropdownMenu.CheckboxItem>
-							<DropdownMenu.CheckboxItem>Declined</DropdownMenu.CheckboxItem>
-							<DropdownMenu.CheckboxItem>Refunded</DropdownMenu.CheckboxItem>
-						</DropdownMenu.Content>
-					</DropdownMenu.Root>
-					<Button size="sm" variant="outline" class="h-7 gap-1 text-sm">
-						<File class="h-3.5 w-3.5" />
-						<span class="sr-only sm:not-sr-only">Export</span>
-					</Button>
-				</div>
-			</div>
-			<Tabs.Content value="week">
-				<Card.Root>
-					<Card.Header class="px-7">
+		<Card.Root>
+			<Card.Header class="px-7">
+				<div class="flex items-center justify-between">
+					<div>
 						<Card.Title>Orders</Card.Title>
 						<Card.Description>Recent orders from your store.</Card.Description>
-					</Card.Header>
-					<Card.Content>
-						<Table.Root>
-							<Table.Header>
-								<Table.Row>
-									<Table.Head>Merchant</Table.Head>
-									<Table.Head class="hidden sm:table-cell">Order ID</Table.Head>
-									<Table.Head class="hidden md:table-cell">Date</Table.Head>
-									<Table.Head class="text-right">Amount</Table.Head>
-								</Table.Row>
-							</Table.Header>
-							<Table.Body>
-								{#each orders as order, index (order.id || index)}
-									<Table.Row
-										class={selectedOrderIndex === index ? 'bg-accent' : ''}
-										on:click={() => {
-											selectedOrderIndex = index;
-										}}
-									>
-										<Table.Cell>
-											<div class="font-medium">
-												{order.display_name || order.shop_id}
-											</div>
-											<div
-												class="hidden text-sm text-muted-foreground md:inline"
-											>
-												{order.shop_id}
-											</div>
-										</Table.Cell>
-										<Table.Cell class="hidden sm:table-cell"
-											>{order.platform_order_number}</Table.Cell
-										>
-										<Table.Cell class="hidden md:table-cell"
-											>{order.created_dt}</Table.Cell
-										>
-										<Table.Cell class="text-right"
-											>{formatCurrency(order.order_total)}</Table.Cell
-										>
-									</Table.Row>
-								{/each}
-							</Table.Body>
-						</Table.Root>
-					</Card.Content>
-				</Card.Root>
-			</Tabs.Content>
-		</Tabs.Root>
+					</div>
+					<div class="relative">
+						<Search class="absolute left-2.5 top-2 h-4 w-4 text-muted-foreground" />
+						<Input
+							type="search"
+							placeholder="Search orders..."
+							class="h-8 w-[150px] pl-8 sm:w-[250px]"
+							bind:value={searchQuery}
+							on:keydown={handleSearch}
+						/>
+					</div>
+				</div>
+			</Card.Header>
+			<Card.Content>
+				<Table.Root>
+					<Table.Header>
+						<Table.Row>
+							<Table.Head>Merchant</Table.Head>
+							<Table.Head class="hidden sm:table-cell">Order ID</Table.Head>
+							<Table.Head class="hidden md:table-cell">Date</Table.Head>
+							<Table.Head class="text-right">Amount</Table.Head>
+						</Table.Row>
+					</Table.Header>
+					<Table.Body>
+						{#each orders as order, index (order.id || index)}
+							<Table.Row
+								class="cursor-pointer hover:bg-muted/50 {selectedOrderIndex === index ? 'bg-accent' : ''}"
+								on:click={() => {
+									selectedOrderIndex = index;
+								}}
+							>
+								<Table.Cell>
+									<div class="font-medium">
+										{order.merchant_display_name || order.shop_id}
+									</div>
+									<div class="hidden text-sm text-muted-foreground md:inline">
+										{order.shop_id}
+									</div>
+								</Table.Cell>
+								<Table.Cell class="hidden sm:table-cell"
+									>{order.platform_order_number}</Table.Cell
+								>
+								<Table.Cell class="hidden md:table-cell"
+									>{order.created_dt}</Table.Cell
+								>
+								<Table.Cell class="text-right"
+									>{formatCurrency(order.order_total)}</Table.Cell
+								>
+							</Table.Row>
+						{/each}
+					</Table.Body>
+				</Table.Root>
+			</Card.Content>
+			<Card.Footer class="flex items-center justify-between border-t px-6 py-4">
+				<div class="text-sm text-muted-foreground">
+					Showing {(pagination.page - 1) * pagination.limit + 1}-{Math.min(pagination.page * pagination.limit, pagination.totalOrders)} of {pagination.totalOrders} orders
+				</div>
+				<div class="flex items-center gap-2">
+					<Button
+						variant="outline"
+						size="sm"
+						class="h-8 w-8 p-0"
+						disabled={pagination.page <= 1}
+						on:click={() => goToPage(pagination.page - 1)}
+					>
+						<ChevronLeft class="h-4 w-4" />
+						<span class="sr-only">Previous page</span>
+					</Button>
+					<div class="text-sm">
+						Page {pagination.page} of {pagination.totalPages}
+					</div>
+					<Button
+						variant="outline"
+						size="sm"
+						class="h-8 w-8 p-0"
+						disabled={pagination.page >= pagination.totalPages}
+						on:click={() => goToPage(pagination.page + 1)}
+					>
+						<ChevronRight class="h-4 w-4" />
+						<span class="sr-only">Next page</span>
+					</Button>
+				</div>
+			</Card.Footer>
+		</Card.Root>
 	</div>
 	<div>
-		<OrderDetails order={orders[selectedOrderIndex]} />
+		{#if orders[selectedOrderIndex]}
+			<OrderDetails order={orders[selectedOrderIndex]} />
+		{/if}
 	</div>
 </main>
