@@ -9,6 +9,7 @@
 	import * as Table from '$lib/components/ui/table/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { formatCurrency } from '$lib/currency.js';
+	import { formatDate } from 'date-fns';
 	import OrderDetails from '$lib/components/custom/order-details.svelte';
 
 	let selectedOrderIndex = 0;
@@ -95,7 +96,7 @@
 									>{order.platform_order_number}</Table.Cell
 								>
 								<Table.Cell class="hidden md:table-cell"
-									>{order.created_dt}</Table.Cell
+									>{order.created_dt ? formatDate(order.created_dt, 'MMM dd, yyyy') : ''}</Table.Cell
 								>
 								<Table.Cell class="text-right"
 									>{formatCurrency(order.order_total)}</Table.Cell
