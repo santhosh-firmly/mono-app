@@ -8,8 +8,24 @@ import {
 	onPayPalAbandoned,
 	getAbandonmentSummary,
 	resetFieldState,
+	createFieldInteractionTracker,
 	FIELD_CONFIG
 } from './field-interaction-tracker.js';
+
+const formatExpiry = (date) =>
+	`${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getFullYear() % 100).padStart(2, '0')}`;
+
+const getFutureExpiry = (monthsAhead = 1) => {
+	const date = new Date();
+	date.setMonth(date.getMonth() + monthsAhead);
+	return formatExpiry(date);
+};
+
+const getPastExpiry = (monthsBehind = 1) => {
+	const date = new Date();
+	date.setMonth(date.getMonth() - monthsBehind);
+	return formatExpiry(date);
+};
 
 describe('Field Interaction Tracker', () => {
 	beforeEach(() => {
@@ -320,6 +336,19 @@ describe('Field Interaction Tracker', () => {
 		});
 	});
 
+	describe('createFieldInteractionTracker', () => {
+		it('should create isolated tracker instances', () => {
+			const trackerA = createFieldInteractionTracker();
+			const trackerB = createFieldInteractionTracker();
+
+			trackerA.onFieldFocus('email');
+			trackerA.onFieldCompleted('email');
+
+			expect(trackerA.getAbandonmentSummary().fields_interacted).toBe(1);
+			expect(trackerB.getAbandonmentSummary().fields_interacted).toBe(0);
+		});
+	});
+
 	describe('FIELD_CONFIG', () => {
 		it('should have all expected field groups', () => {
 			const groups = new Set(Object.values(FIELD_CONFIG).map((c) => c.group));
@@ -335,7 +364,8 @@ describe('Field Interaction Tracker', () => {
 			const emailConfig = FIELD_CONFIG.email;
 
 			expect(emailConfig.isComplete('test@example.com')).toBe(true);
-			expect(emailConfig.isComplete('a@b.c')).toBe(true);
+			expect(emailConfig.isComplete('user@example.co')).toBe(true);
+			expect(emailConfig.isComplete('a@b.c')).toBe(false);
 			expect(emailConfig.isComplete('test')).toBeFalsy();
 			expect(emailConfig.isComplete('')).toBeFalsy();
 			expect(emailConfig.isComplete(null)).toBeFalsy();
@@ -352,9 +382,14 @@ describe('Field Interaction Tracker', () => {
 
 		it('should validate card expiry correctly', () => {
 			const expiryConfig = FIELD_CONFIG.card_expiry;
+			const futureExpiry = getFutureExpiry();
+			const futureExpiryWithSlash = `${futureExpiry.slice(0, 2)}/${futureExpiry.slice(2)}`;
+			const pastExpiry = getPastExpiry();
 
-			expect(expiryConfig.isComplete('12/25')).toBe(true);
-			expect(expiryConfig.isComplete('1225')).toBe(true);
+			expect(expiryConfig.isComplete(futureExpiryWithSlash)).toBe(true);
+			expect(expiryConfig.isComplete(futureExpiry)).toBe(true);
+			expect(expiryConfig.isComplete('13/25')).toBe(false);
+			expect(expiryConfig.isComplete(pastExpiry)).toBe(false);
 			expect(expiryConfig.isComplete('12/2')).toBeFalsy();
 			expect(expiryConfig.isComplete('')).toBeFalsy();
 		});

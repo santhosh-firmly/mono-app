@@ -4,13 +4,39 @@
  * All data is collected in memory and reported at session end.
  */
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+const digitsOnly = (value) => (typeof value === 'string' ? value.replace(/\D/g, '') : '');
+
+const isValidEmail = (value) => {
+	if (typeof value !== 'string') return false;
+	const trimmed = value.trim();
+	if (!trimmed) return false;
+	return EMAIL_REGEX.test(trimmed);
+};
+
+const isValidCardExpiry = (value) => {
+	const digits = digitsOnly(value);
+	if (digits.length !== 4) return false;
+	const month = Number.parseInt(digits.slice(0, 2), 10);
+	const year = Number.parseInt(digits.slice(2), 10);
+	if (Number.isNaN(month) || Number.isNaN(year)) return false;
+	if (month < 1 || month > 12) return false;
+	const now = new Date();
+	const currentYear = now.getFullYear() % 100;
+	const currentMonth = now.getMonth() + 1;
+	if (year < currentYear) return false;
+	if (year === currentYear && month < currentMonth) return false;
+	return true;
+};
+
 /**
  * Field configuration with completion validation functions
  * Each field has a group and an isComplete function to determine if the field value is valid
  */
 const FIELD_CONFIG = {
 	// Contact
-	email: { group: 'contact', isComplete: (v) => v && v.includes('@') && v.length >= 5 },
+	email: { group: 'contact', isComplete: (v) => isValidEmail(v) },
 
 	// Shipping Address
 	shipping_full_name: {
@@ -36,11 +62,11 @@ const FIELD_CONFIG = {
 	},
 	shipping_postal_code: {
 		group: 'shipping_address',
-		isComplete: (v) => v && v.replace(/\D/g, '').length >= 5
+		isComplete: (v) => digitsOnly(v).length >= 5
 	},
 	shipping_phone: {
 		group: 'shipping_address',
-		isComplete: (v) => v && v.replace(/\D/g, '').length >= 10
+		isComplete: (v) => digitsOnly(v).length >= 10
 	},
 
 	// Billing Address
@@ -67,21 +93,21 @@ const FIELD_CONFIG = {
 	},
 	billing_postal_code: {
 		group: 'billing_address',
-		isComplete: (v) => v && v.replace(/\D/g, '').length >= 5
+		isComplete: (v) => digitsOnly(v).length >= 5
 	},
 
 	// Credit Card
 	card_number: {
 		group: 'credit_card',
-		isComplete: (v) => v && v.replace(/\D/g, '').length >= 15
+		isComplete: (v) => digitsOnly(v).length >= 15
 	},
 	card_expiry: {
 		group: 'credit_card',
-		isComplete: (v) => v && v.replace(/\D/g, '').length === 4
+		isComplete: (v) => isValidCardExpiry(v)
 	},
 	card_cvv: {
 		group: 'credit_card',
-		isComplete: (v) => v && v.replace(/\D/g, '').length >= 3
+		isComplete: (v) => digitsOnly(v).length >= 3
 	},
 
 	// PayPal
@@ -94,217 +120,203 @@ const FIELD_CONFIG = {
 // Section order for determining furthest section reached
 const SECTION_ORDER = ['contact', 'shipping_address', 'billing_address', 'credit_card', 'paypal'];
 
-// In-memory state for the session
-let fieldState = {};
+const DEFAULT_SECTION_FIELDS = buildSectionFieldMap(FIELD_CONFIG);
 
-/**
- * Initialize or get field state
- * @param {string} fieldName - The field identifier
- * @returns {object} The field state object
- */
-function initFieldState(fieldName) {
-	if (!fieldState[fieldName]) {
-		fieldState[fieldName] = {
-			interacted: false,
-			completed: false,
-			abandoned: false,
-			abandonmentType: null,
-			focusStartTime: null,
-			totalTimeMs: 0,
-			focusCount: 0,
-			hadValidationErrors: false
-		};
-	}
-	return fieldState[fieldName];
-}
-
-/**
- * Called when a field receives focus
- * Tracks interaction state in memory (no event fired)
- * @param {string} fieldName - The field identifier (e.g., 'email', 'shipping_address1')
- */
-export function onFieldFocus(fieldName) {
-	const state = initFieldState(fieldName);
-	const config = FIELD_CONFIG[fieldName];
-
-	if (!config) {
-		console.warn(`[FieldTracker] Unknown field: ${fieldName}`);
-		return;
+export class FieldInteractionTracker {
+	constructor(fieldConfig, sectionOrder, sectionFields) {
+		this.fieldConfig = fieldConfig;
+		this.sectionOrder = sectionOrder;
+		this.sectionFields = sectionFields;
+		this.fieldState = {};
 	}
 
-	state.focusStartTime = Date.now();
-	state.focusCount++;
-	state.interacted = true;
-}
-
-/**
- * Called when a field loses focus
- * Tracks time spent and abandonment state in memory (no event fired)
- * @param {string} fieldName - The field identifier
- * @param {string} currentValue - The current field value
- * @param {boolean} hadValidationError - Whether validation failed on this blur
- */
-export function onFieldBlur(fieldName, currentValue, hadValidationError = false) {
-	const state = initFieldState(fieldName);
-	const config = FIELD_CONFIG[fieldName];
-
-	if (!config || !state.focusStartTime) return;
-
-	state.totalTimeMs += Date.now() - state.focusStartTime;
-	state.focusStartTime = null;
-
-	if (hadValidationError) {
-		state.hadValidationErrors = true;
+	initFieldState(fieldName) {
+		if (!this.fieldState[fieldName]) {
+			this.fieldState[fieldName] = {
+				interacted: false,
+				completed: false,
+				abandoned: false,
+				abandonmentType: null,
+				focusStartTime: null,
+				totalTimeMs: 0,
+				focusCount: 0,
+				hadValidationErrors: false
+			};
+		}
+		return this.fieldState[fieldName];
 	}
 
-	const isComplete = config.isComplete(currentValue);
-	state.completed = isComplete;
+	onFieldFocus(fieldName) {
+		const config = this.fieldConfig[fieldName];
+		if (!config) {
+			console.warn(`[FieldTracker] Unknown field: ${fieldName}`);
+			return;
+		}
+		const state = this.initFieldState(fieldName);
+		state.focusStartTime = Date.now();
+		state.focusCount++;
+		state.interacted = true;
+	}
 
-	if (!isComplete && !config.optional) {
-		state.abandoned = true;
-		const valueLength = typeof currentValue === 'string' ? currentValue.length : 0;
-		state.abandonmentType = valueLength === 0 ? 'focused_empty' : 'incomplete';
-	} else {
+	onFieldBlur(fieldName, currentValue, hadValidationError = false) {
+		const config = this.fieldConfig[fieldName];
+		const state = this.fieldState[fieldName];
+		if (!config || !state?.focusStartTime) {
+			return;
+		}
+		state.totalTimeMs += Date.now() - state.focusStartTime;
+		state.focusStartTime = null;
+		if (hadValidationError) {
+			state.hadValidationErrors = true;
+		}
+		const isComplete = Boolean(config.isComplete(currentValue));
+		state.completed = isComplete;
+		if (!isComplete && !config.optional) {
+			state.abandoned = true;
+			const valueLength = typeof currentValue === 'string' ? currentValue.length : 0;
+			state.abandonmentType = valueLength === 0 ? 'focused_empty' : 'incomplete';
+		} else {
+			state.abandoned = false;
+			state.abandonmentType = null;
+		}
+	}
+
+	onFieldCompleted(fieldName) {
+		const config = this.fieldConfig[fieldName];
+		if (!config) {
+			return;
+		}
+		const state = this.initFieldState(fieldName);
+		state.completed = true;
 		state.abandoned = false;
 		state.abandonmentType = null;
 	}
-}
 
-/**
- * Called when a field is successfully validated/completed
- * Clears any abandonment state for the field
- * @param {string} fieldName - The field identifier
- */
-export function onFieldCompleted(fieldName) {
-	const state = initFieldState(fieldName);
-	const config = FIELD_CONFIG[fieldName];
-
-	if (!config) return;
-
-	state.completed = true;
-	state.abandoned = false;
-	state.abandonmentType = null;
-}
-
-/**
- * Called when PayPal flow is initiated
- * Tracks interaction state in memory (no event fired)
- */
-export function onPayPalStarted() {
-	const state = initFieldState('paypal_button');
-	state.interacted = true;
-	state.focusStartTime = Date.now();
-	state.focusCount++;
-}
-
-/**
- * Called when PayPal flow completes successfully
- */
-export function onPayPalCompleted() {
-	const state = initFieldState('paypal_button');
-	state.completed = true;
-	state.abandoned = false;
-	if (state.focusStartTime) {
-		state.totalTimeMs += Date.now() - state.focusStartTime;
-		state.focusStartTime = null;
+	onPayPalStarted() {
+		this.onFieldFocus('paypal_button');
 	}
-}
 
-/**
- * Called when PayPal flow is cancelled or fails
- */
-export function onPayPalAbandoned() {
-	const state = initFieldState('paypal_button');
-	if (state.interacted && !state.completed) {
-		state.abandoned = true;
-		state.abandonmentType = 'incomplete';
+	onPayPalCompleted() {
+		const state = this.initFieldState('paypal_button');
+		state.completed = true;
+		state.abandoned = false;
+		state.abandonmentType = null;
 		if (state.focusStartTime) {
 			state.totalTimeMs += Date.now() - state.focusStartTime;
 			state.focusStartTime = null;
 		}
 	}
-}
 
-/**
- * Gets abandonment metrics for session_end event
- * @returns {object} Flat abandonment metrics for analytics
- */
-export function getAbandonmentSummary() {
-	const sectionsStarted = new Set();
-	const sectionsCompleted = new Set();
-	const sectionAbandonedCounts = {
-		contact: 0,
-		shipping_address: 0,
-		billing_address: 0,
-		credit_card: 0,
-		paypal: 0
-	};
-
-	let totalInteracted = 0;
-	let totalCompleted = 0;
-	let totalAbandoned = 0;
-	let furthestSectionIndex = 0;
-
-	for (const [fieldName, config] of Object.entries(FIELD_CONFIG)) {
-		const state = fieldState[fieldName];
-
-		if (state?.interacted) {
-			totalInteracted++;
-			sectionsStarted.add(config.group);
-
-			const sectionIdx = SECTION_ORDER.indexOf(config.group) + 1;
-			if (sectionIdx > furthestSectionIndex) {
-				furthestSectionIndex = sectionIdx;
-			}
-
-			if (state.completed) totalCompleted++;
-			if (state.abandoned) {
-				totalAbandoned++;
-				sectionAbandonedCounts[config.group]++;
+	onPayPalAbandoned() {
+		const state = this.initFieldState('paypal_button');
+		if (state.interacted && !state.completed) {
+			state.abandoned = true;
+			state.abandonmentType = 'incomplete';
+			if (state.focusStartTime) {
+				state.totalTimeMs += Date.now() - state.focusStartTime;
+				state.focusStartTime = null;
 			}
 		}
 	}
 
-	for (const section of sectionsStarted) {
-		const allCompleted = Object.entries(FIELD_CONFIG)
-			.filter(([, config]) => config.group === section && !config.optional)
-			.every(([fieldName]) => fieldState[fieldName]?.completed);
-
-		if (allCompleted) {
-			sectionsCompleted.add(section);
+	getAbandonmentSummary() {
+		const sectionsStarted = new Set();
+		const sectionsCompleted = new Set();
+		const sectionAbandonedCounts = this.sectionOrder.reduce((acc, section) => {
+			acc[section] = 0;
+			return acc;
+		}, {});
+		let totalInteracted = 0;
+		let totalCompleted = 0;
+		let totalAbandoned = 0;
+		let furthestSectionIndex = 0;
+		for (const [fieldName, config] of Object.entries(this.fieldConfig)) {
+			const state = this.fieldState[fieldName];
+			if (state?.interacted) {
+				totalInteracted++;
+				sectionsStarted.add(config.group);
+				const sectionIdx = this.sectionOrder.indexOf(config.group) + 1;
+				if (sectionIdx > furthestSectionIndex) {
+					furthestSectionIndex = sectionIdx;
+				}
+				if (state.completed) totalCompleted++;
+				if (state.abandoned) {
+					totalAbandoned++;
+					if (sectionAbandonedCounts[config.group] === undefined) {
+						sectionAbandonedCounts[config.group] = 0;
+					}
+					sectionAbandonedCounts[config.group]++;
+				}
+			}
 		}
+		for (const section of sectionsStarted) {
+			const fields = this.sectionFields[section] ?? [];
+			const allCompleted = fields
+				.filter((field) => !field.optional)
+				.every((field) => this.fieldState[field.name]?.completed);
+			if (allCompleted && fields.length) {
+				sectionsCompleted.add(section);
+			}
+		}
+		return {
+			fields_interacted: totalInteracted,
+			fields_completed: totalCompleted,
+			fields_abandoned: totalAbandoned,
+			completion_rate:
+				totalInteracted > 0 ? Math.round((totalCompleted / totalInteracted) * 100) : 0,
+			furthest_section: furthestSectionIndex,
+			reached_contact: sectionsStarted.has('contact') ? 1 : 0,
+			reached_shipping: sectionsStarted.has('shipping_address') ? 1 : 0,
+			reached_billing: sectionsStarted.has('billing_address') ? 1 : 0,
+			reached_payment: sectionsStarted.has('credit_card') ? 1 : 0,
+			reached_paypal: sectionsStarted.has('paypal') ? 1 : 0,
+			completed_contact: sectionsCompleted.has('contact') ? 1 : 0,
+			completed_shipping: sectionsCompleted.has('shipping_address') ? 1 : 0,
+			completed_billing: sectionsCompleted.has('billing_address') ? 1 : 0,
+			completed_payment: sectionsCompleted.has('credit_card') ? 1 : 0,
+			completed_paypal: sectionsCompleted.has('paypal') ? 1 : 0,
+			abandoned_at_contact: sectionAbandonedCounts.contact ?? 0,
+			abandoned_at_shipping: sectionAbandonedCounts.shipping_address ?? 0,
+			abandoned_at_billing: sectionAbandonedCounts.billing_address ?? 0,
+			abandoned_at_payment: sectionAbandonedCounts.credit_card ?? 0,
+			abandoned_at_paypal: sectionAbandonedCounts.paypal ?? 0
+		};
 	}
 
-	return {
-		fields_interacted: totalInteracted,
-		fields_completed: totalCompleted,
-		fields_abandoned: totalAbandoned,
-		completion_rate:
-			totalInteracted > 0 ? Math.round((totalCompleted / totalInteracted) * 100) : 0,
-		furthest_section: furthestSectionIndex,
-		reached_contact: sectionsStarted.has('contact') ? 1 : 0,
-		reached_shipping: sectionsStarted.has('shipping_address') ? 1 : 0,
-		reached_billing: sectionsStarted.has('billing_address') ? 1 : 0,
-		reached_payment: sectionsStarted.has('credit_card') ? 1 : 0,
-		reached_paypal: sectionsStarted.has('paypal') ? 1 : 0,
-		completed_contact: sectionsCompleted.has('contact') ? 1 : 0,
-		completed_shipping: sectionsCompleted.has('shipping_address') ? 1 : 0,
-		completed_billing: sectionsCompleted.has('billing_address') ? 1 : 0,
-		completed_payment: sectionsCompleted.has('credit_card') ? 1 : 0,
-		completed_paypal: sectionsCompleted.has('paypal') ? 1 : 0,
-		abandoned_at_contact: sectionAbandonedCounts.contact,
-		abandoned_at_shipping: sectionAbandonedCounts.shipping_address,
-		abandoned_at_billing: sectionAbandonedCounts.billing_address,
-		abandoned_at_payment: sectionAbandonedCounts.credit_card,
-		abandoned_at_paypal: sectionAbandonedCounts.paypal
-	};
+	reset() {
+		this.fieldState = {};
+	}
 }
 
-/**
- * Resets all field state (useful for testing)
- */
-export function resetFieldState() {
-	fieldState = {};
+function buildSectionFieldMap(fieldConfig) {
+	return Object.entries(fieldConfig).reduce((acc, [fieldName, config]) => {
+		if (!acc[config.group]) {
+			acc[config.group] = [];
+		}
+		acc[config.group].push({ name: fieldName, optional: Boolean(config.optional) });
+		return acc;
+	}, {});
 }
+
+export function createFieldInteractionTracker(
+	fieldConfig = FIELD_CONFIG,
+	sectionOrder = SECTION_ORDER
+) {
+	const sectionFields =
+		fieldConfig === FIELD_CONFIG ? DEFAULT_SECTION_FIELDS : buildSectionFieldMap(fieldConfig);
+	return new FieldInteractionTracker(fieldConfig, sectionOrder, sectionFields);
+}
+
+const defaultTracker = createFieldInteractionTracker();
+
+export const onFieldFocus = (fieldName) => defaultTracker.onFieldFocus(fieldName);
+export const onFieldBlur = (fieldName, currentValue, hadValidationError = false) =>
+	defaultTracker.onFieldBlur(fieldName, currentValue, hadValidationError);
+export const onFieldCompleted = (fieldName) => defaultTracker.onFieldCompleted(fieldName);
+export const onPayPalStarted = () => defaultTracker.onPayPalStarted();
+export const onPayPalCompleted = () => defaultTracker.onPayPalCompleted();
+export const onPayPalAbandoned = () => defaultTracker.onPayPalAbandoned();
+export const getAbandonmentSummary = () => defaultTracker.getAbandonmentSummary();
+export const resetFieldState = () => defaultTracker.reset();
 
 export { FIELD_CONFIG };
