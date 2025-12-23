@@ -16,6 +16,7 @@
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { formatCurrency } from '$lib/currency.js';
+	import { displayFromHash, getProductImage } from '$lib/order-utils.js';
 	import { formatDate } from 'date-fns';
 	import CopyToClipboard from '$lib/components/custom/copy-to-clipboard.svelte';
 
@@ -31,16 +32,6 @@
 	$: if (order) {
 		faviconError = false;
 		imageErrors = new Set();
-	}
-
-	function displayFromHash(hashedValue) {
-		if (!hashedValue) return 'N/A';
-		return hashedValue.replace(/-.*?-/, ' *** ').replace(/-.*?@/, '***@');
-	}
-
-	function getProductImage(item) {
-		// Check for image in different possible locations
-		return item.image?.url;
 	}
 
 	function navigateToOrder(orderId) {
