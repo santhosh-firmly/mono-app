@@ -81,7 +81,7 @@
 				<CopyToClipboard value={order?.platform_order_number} />
 			</div>
 			<span class="text-xs text-muted-foreground">
-				{formatDate(order?.created_dt, 'MMM dd, yyyy')}
+				{order?.created_dt ? formatDate(order.created_dt, 'MMM dd, yyyy') : ''}
 			</span>
 		</div>
 	</div>

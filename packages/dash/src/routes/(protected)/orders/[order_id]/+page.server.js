@@ -16,9 +16,16 @@ export async function load({ params, platform }) {
 	}
 
 	// Parse the order_info JSON
+	let orderInfo;
+	try {
+		orderInfo = JSON.parse(orderResult.order_info);
+	} catch {
+		throw error(500, 'Failed to parse order data');
+	}
+
 	const order = {
 		...orderResult,
-		order_info: JSON.parse(orderResult.order_info)
+		order_info: orderInfo
 	};
 
 	// Fetch related orders from the same shop for navigation

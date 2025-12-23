@@ -31,20 +31,33 @@ export async function load({ platform, url }) {
 	// Build a map of store_id to display_name
 	const merchantMap = new Map();
 	for (const row of merchantsResult.results) {
-		const info = JSON.parse(row.info);
-		if (info.store_id) {
-			merchantMap.set(info.store_id, info.display_name || info.store_id);
+		try {
+			const info = JSON.parse(row.info);
+			if (info.store_id) {
+				merchantMap.set(info.store_id, info.display_name || info.store_id);
+			}
+		} catch {
+			// Skip malformed merchant data
 		}
 	}
 
 	// Parse order_info JSON and add merchant display_name
 	const orders = {
 		...ordersResult,
-		results: ordersResult.results.map((order) => ({
-			...order,
-			order_info: JSON.parse(order.order_info),
-			merchant_display_name: merchantMap.get(order.shop_id) || order.shop_id
-		}))
+		results: ordersResult.results
+			.map((order) => {
+				try {
+					return {
+						...order,
+						order_info: JSON.parse(order.order_info),
+						merchant_display_name: merchantMap.get(order.shop_id) || order.shop_id
+					};
+				} catch {
+					// Skip orders with malformed JSON
+					return null;
+				}
+			})
+			.filter(Boolean)
 	};
 
 	const totalOrders = countResult?.total || 0;
