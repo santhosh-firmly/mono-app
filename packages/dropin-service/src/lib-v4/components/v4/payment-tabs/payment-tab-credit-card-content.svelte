@@ -18,6 +18,11 @@
 	import { createEventDispatcher } from 'svelte';
 	import { restoreCursorPosition } from '$lib-v4/utils/cursor-position.js';
 	import { trackUXEvent } from '$lib-v4/browser/telemetry.js';
+	import {
+		onFieldFocus,
+		onFieldBlur,
+		onFieldCompleted
+	} from '$lib-v4/browser/field-interaction-tracker.js';
 
 	const dispatch = createEventDispatcher();
 
@@ -137,6 +142,12 @@
 				} else {
 					error = '';
 					await onCreditCardUpdated(result);
+
+					// Track credit card field completions for abandonment analysis
+					onFieldCompleted('card_number');
+					onFieldCompleted('card_expiry');
+					onFieldCompleted('card_cvv');
+
 					// Only track if card number changed since last tracking
 					if (number !== lastTrackedCardNumber) {
 						trackUXEvent('card_added', {
@@ -254,6 +265,9 @@
 								class:error
 								{disabled}
 								bind:value={cvvConfirmationValue}
+								on:focus={() => onFieldFocus('card_cvv')}
+								on:blur={() =>
+									onFieldBlur('card_cvv', cvvConfirmationValue, !!error)}
 								data-testid="cvvConfirmationValue"
 								data-sensitive
 								placeholder="CVV"
@@ -334,6 +348,8 @@
 						{disabled}
 						bind:value={number}
 						bind:this={numberInputElement}
+						on:focus={() => onFieldFocus('card_number')}
+						on:blur={() => onFieldBlur('card_number', number, !!error)}
 						data-testid="card-number"
 						data-sensitive
 						placeholder="1234 1234 1234 1234"
@@ -363,6 +379,8 @@
 					bind:value={expiryDate}
 					bind:this={expiryInputElement}
 					on:beforeinput={handleExpiryInput}
+					on:focus={() => onFieldFocus('card_expiry')}
+					on:blur={() => onFieldBlur('card_expiry', expiryDate, !!error)}
 					data-testid="expiry"
 					data-sensitive
 					placeholder="MM / YY"
@@ -377,6 +395,8 @@
 						class:error
 						{disabled}
 						bind:value={verification_value}
+						on:focus={() => onFieldFocus('card_cvv')}
+						on:blur={() => onFieldBlur('card_cvv', verification_value, !!error)}
 						data-testid="verification_value"
 						data-sensitive
 						placeholder="CVV"

@@ -43,6 +43,7 @@
 	// @ts-nocheck
 	import { paypalApprove, paypalStart, sIsApiMock } from '$lib-v4/browser/api-manager.js';
 	import { trackUXEvent } from '$lib-v4/browser/telemetry.js';
+	import { onPayPalStarted, onPayPalCompleted, onPayPalAbandoned } from '$lib-v4/browser/field-interaction-tracker.js';
 	import { onMount } from 'svelte';
 
 	export let merchantId = null;
@@ -60,9 +61,11 @@
 	let buttonInstance = null;
 
 	async function internalStart() {
+		onPayPalStarted();
 		trackUXEvent('ClickPaypal');
 		if ($sIsApiMock) {
 			paypalApprove();
+			onPayPalCompleted();
 			if (onPaypalHandler) {
 				onPaypalHandler();
 			}
@@ -90,6 +93,7 @@
 	}
 
 	async function onApprove(data) {
+		onPayPalCompleted();
 		paypalPayerId = data.payerID;
 		const ret = await paypalApprove({ payer_id: paypalPayerId, paypal_token: data.orderID });
 		if (ret) {
@@ -100,10 +104,12 @@
 	}
 
 	async function onCancel() {
+		onPayPalAbandoned();
 		console.log('paypal onCancel');
 	}
 
 	async function onError(err) {
+		onPayPalAbandoned();
 		console.log('paypal onError:', err);
 	}
 

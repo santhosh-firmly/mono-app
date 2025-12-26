@@ -10,7 +10,39 @@
 	} from '$lib-v4/browser/schema.js';
 	import AddressAutocomplete from './address-autocomplete.svelte';
 	import { restoreCursorPosition } from '$lib-v4/utils/cursor-position.js';
+	import {
+		onFieldFocus,
+		onFieldBlur,
+		onFieldCompleted
+	} from '$lib-v4/browser/field-interaction-tracker.js';
 	let currentCountry = Countries[0];
+
+	/**
+	 * Helper to get prefixed field name based on address type
+	 * @param {string} field - The base field name
+	 * @returns {string} The prefixed field name (e.g., 'shipping_full_name' or 'billing_full_name')
+	 */
+	function getFieldName(field) {
+		return `${addressType}_${field}`;
+	}
+
+	/**
+	 * Track field focus for abandonment analysis
+	 * @param {string} field - The base field name
+	 */
+	function handleFieldFocus(field) {
+		onFieldFocus(getFieldName(field));
+	}
+
+	/**
+	 * Track field blur for abandonment analysis
+	 * @param {string} field - The base field name
+	 * @param {string} value - The current field value
+	 * @param {boolean} hasError - Whether the field has a validation error
+	 */
+	function handleFieldBlur(field, value, hasError) {
+		onFieldBlur(getFieldName(field), value, hasError);
+	}
 
 	/**
 	 * First Name
@@ -382,6 +414,17 @@
 				phone_error = false;
 			}
 
+			// Track field completions for abandonment analysis
+			onFieldCompleted(getFieldName('full_name'));
+			onFieldCompleted(getFieldName('address1'));
+			onFieldCompleted(getFieldName('address2'));
+			onFieldCompleted(getFieldName('city'));
+			onFieldCompleted(getFieldName('state'));
+			onFieldCompleted(getFieldName('postal_code'));
+			if (hasPhone) {
+				onFieldCompleted(getFieldName('phone'));
+			}
+
 			if (submit) {
 				dispatch('focusremoved', result);
 			}
@@ -478,6 +521,9 @@
 				{disabled}
 				bind:value={fullName}
 				on:input={onFullNameInput}
+				on:focus={() => handleFieldFocus('full_name')}
+				on:blur={() =>
+					handleFieldBlur('full_name', fullName, first_name_error || last_name_error)}
 				class="placeholder:text-fy-on-primary-subtle w-full rounded-t-lg border-0 disabled:bg-gray-100"
 				class:error={first_name_error || last_name_error}
 				data-testid="name"
@@ -508,6 +554,8 @@
 				bind:value={address1}
 				on:input={onAddress1Input}
 				on:keydown={onAddressKeyDown}
+				on:focus={() => handleFieldFocus('address1')}
+				on:blur={() => handleFieldBlur('address1', address1, !!address1_error)}
 				placeholder="Address"
 				autocomplete={allowBrowserAutoFill ? `${addressType} address-line1` : 'disabled'}
 				type="text"
@@ -559,6 +607,8 @@
 				class="placeholder:text-fy-on-primary-subtle w-full border-0 disabled:bg-gray-100"
 				class:error={address2_error}
 				bind:value={address2}
+				on:focus={() => handleFieldFocus('address2')}
+				on:blur={() => handleFieldBlur('address2', address2, !!address2_error)}
 				data-testid="address2"
 				data-sensitive
 				placeholder="Address line 2"
@@ -571,6 +621,8 @@
 				{disabled}
 				class="placeholder:text-fy-on-primary-subtle w-full border-0 disabled:bg-gray-100"
 				bind:value={city}
+				on:focus={() => handleFieldFocus('city')}
+				on:blur={() => handleFieldBlur('city', city, !!city_error)}
 				class:error={city_error}
 				data-testid="city"
 				data-sensitive
@@ -584,6 +636,8 @@
 				{disabled}
 				class="border-fy-on-primary-subtle placeholder:text-fy-on-primary-subtle w-full border-0 disabled:bg-gray-100"
 				bind:value={postal_code}
+				on:focus={() => handleFieldFocus('postal_code')}
+				on:blur={() => handleFieldBlur('postal_code', postal_code, !!postal_code_error)}
 				class:error={postal_code_error}
 				data-testid="postalCode"
 				data-sensitive
@@ -604,6 +658,8 @@
 					? 'placeholder:text-fy-on-primary-subtle col-span-2 w-full rounded-b-lg border-0 disabled:bg-gray-100'
 					: 'placeholder:text-fy-on-primary-subtle col-span-2 w-full border-0 disabled:bg-gray-100'}
 				bind:value={state_or_province}
+				on:focus={() => handleFieldFocus('state')}
+				on:blur={() => handleFieldBlur('state', state_or_province, !!state_error)}
 				class:error={state_error}
 				data-testid="state"
 				data-sensitive
@@ -622,6 +678,8 @@
 					data-sensitive
 					class:error={phone_error}
 					bind:value={phone}
+					on:focus={() => handleFieldFocus('phone')}
+					on:blur={() => handleFieldBlur('phone', phone, !!phone_error)}
 					autocomplete="{addressType} tel"
 					placeholder="(555) 555-0123"
 					type="text"

@@ -33,6 +33,11 @@
 	import Header from './header.svelte';
 	import classNames from 'classnames';
 	import { trackUXEvent, createTraceContext } from '../../browser/telemetry.js';
+	import {
+		onFieldFocus,
+		onFieldBlur,
+		onFieldCompleted
+	} from '../../browser/field-interaction-tracker.js';
 	import { signOut } from '$lib-v4/clients/mastercard.js';
 	import MastercardC2pLogo from '../common/svg/mastercard-c2p-logo.svelte';
 	import stableStringify from 'json-stable-stringify';
@@ -644,10 +649,14 @@
 				});
 
 				if (shippingKey !== lastTrackedShippingKey) {
-					trackUXEvent('shipping_address_added', {
-						country: shippingInfo.country,
-						postal: maskPostalCode(shippingInfo.postal)
-					}, parentContext);
+					trackUXEvent(
+						'shipping_address_added',
+						{
+							country: shippingInfo.country,
+							postal: maskPostalCode(shippingInfo.postal)
+						},
+						parentContext
+					);
 					lastTrackedShippingKey = shippingKey;
 				}
 				if (result.status === 200) {
@@ -713,6 +722,9 @@
 		try {
 			const isEmailValid = await validateEmail();
 			if (isEmailValid) {
+				// Track email field completion for abandonment analysis
+				onFieldCompleted('email');
+
 				// Track email entered only when it's actually being used in the flow
 				if (email !== lastTrackedEmail) {
 					trackUXEvent('email_entered', {
@@ -1669,6 +1681,10 @@
 												data-testid="change-shipping-button"
 												on:click={() => {
 													trackUXEvent('shipping_address_change_clicked');
+													trackUXEvent('summary_section_clicked', {
+														section: 'shipping_address',
+														action: 'expand'
+													});
 													collapsedStateShipping = false;
 													if (savedAddresses.length === 1) {
 														selectedShippingAddress =
@@ -1737,7 +1753,9 @@
 													class:error={email_error}
 													bind:this={emailField}
 													bind:value={email}
+													on:focus={() => onFieldFocus('email')}
 													on:blur={() => {
+														onFieldBlur('email', email, !!email_error);
 														if (!isEmailValidating) {
 															validateAndSubmitContactInfo();
 														}
@@ -1920,6 +1938,10 @@
 												data-testid="change-shipping-method-button"
 												on:click={() => {
 													trackUXEvent('shipping_method_change_clicked');
+													trackUXEvent('summary_section_clicked', {
+														section: 'shipping_method',
+														action: 'expand'
+													});
 													collapsedStateShippingMethod = false;
 												}}
 											>
@@ -1992,6 +2014,10 @@
 											class="ml-5 rounded-full px-1 text-sm text-blue-500"
 											on:click={() => {
 												trackUXEvent('payment_method_change_clicked');
+												trackUXEvent('summary_section_clicked', {
+													section: 'payment',
+													action: 'expand'
+												});
 												collapsedStatePayment = false;
 											}}
 										>
