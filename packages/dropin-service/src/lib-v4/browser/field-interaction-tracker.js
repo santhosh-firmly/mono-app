@@ -314,4 +314,9 @@ export const onPayPalCompleted = () => defaultTracker.onPayPalCompleted();
 export const onPayPalAbandoned = () => defaultTracker.onPayPalAbandoned();
 export const getAbandonmentSummary = () => defaultTracker.getAbandonmentSummary();
 
+export const onFieldFocus = (fieldName) => defaultTracker.onFieldFocus(fieldName);
+export const onFieldBlur = (fieldName, currentValue, hadValidationError = false) =>
+	defaultTracker.onFieldBlur(fieldName, currentValue, hadValidationError);
+export const onFieldCompleted = (fieldName) => defaultTracker.onFieldCompleted(fieldName);
+
 export { FIELD_CONFIG };
