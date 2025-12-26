@@ -122,7 +122,7 @@ const SECTION_ORDER = ['contact', 'shipping_address', 'billing_address', 'credit
 
 const DEFAULT_SECTION_FIELDS = buildSectionFieldMap(FIELD_CONFIG);
 
-export class FieldInteractionTracker {
+class FieldInteractionTracker {
 	constructor(fieldConfig, sectionOrder, sectionFields) {
 		this.fieldConfig = fieldConfig;
 		this.sectionOrder = sectionOrder;
@@ -313,5 +313,10 @@ export const onPayPalStarted = () => defaultTracker.onPayPalStarted();
 export const onPayPalCompleted = () => defaultTracker.onPayPalCompleted();
 export const onPayPalAbandoned = () => defaultTracker.onPayPalAbandoned();
 export const getAbandonmentSummary = () => defaultTracker.getAbandonmentSummary();
+
+export const onFieldFocus = (fieldName) => defaultTracker.onFieldFocus(fieldName);
+export const onFieldBlur = (fieldName, currentValue, hadValidationError = false) =>
+	defaultTracker.onFieldBlur(fieldName, currentValue, hadValidationError);
+export const onFieldCompleted = (fieldName) => defaultTracker.onFieldCompleted(fieldName);
 
 export { FIELD_CONFIG };
