@@ -309,14 +309,9 @@ export function createFieldInteractionTracker(
 
 const defaultTracker = createFieldInteractionTracker();
 
-export const onFieldFocus = (fieldName) => defaultTracker.onFieldFocus(fieldName);
-export const onFieldBlur = (fieldName, currentValue, hadValidationError = false) =>
-	defaultTracker.onFieldBlur(fieldName, currentValue, hadValidationError);
-export const onFieldCompleted = (fieldName) => defaultTracker.onFieldCompleted(fieldName);
 export const onPayPalStarted = () => defaultTracker.onPayPalStarted();
 export const onPayPalCompleted = () => defaultTracker.onPayPalCompleted();
 export const onPayPalAbandoned = () => defaultTracker.onPayPalAbandoned();
 export const getAbandonmentSummary = () => defaultTracker.getAbandonmentSummary();
-export const resetFieldState = () => defaultTracker.reset();
 
 export { FIELD_CONFIG };

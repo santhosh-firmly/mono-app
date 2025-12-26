@@ -1,13 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
-	onFieldFocus,
-	onFieldBlur,
-	onFieldCompleted,
 	onPayPalStarted,
 	onPayPalCompleted,
 	onPayPalAbandoned,
 	getAbandonmentSummary,
-	resetFieldState,
 	createFieldInteractionTracker,
 	FIELD_CONFIG
 } from './field-interaction-tracker.js';
@@ -28,41 +24,41 @@ const getPastExpiry = (monthsBehind = 1) => {
 };
 
 describe('Field Interaction Tracker', () => {
-	beforeEach(() => {
-		resetFieldState();
-	});
-
 	describe('onFieldFocus', () => {
 		it('should mark field as interacted on focus', () => {
-			onFieldFocus('email');
+			const tracker = createFieldInteractionTracker();
+			tracker.onFieldFocus('email');
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 			expect(summary.fields_interacted).toBe(1);
 		});
 
 		it('should increment focus count on each focus', () => {
-			onFieldFocus('email');
-			onFieldBlur('email', '', false);
-			onFieldFocus('email');
-			onFieldBlur('email', '', false);
-			onFieldFocus('email');
+			const tracker = createFieldInteractionTracker();
+			tracker.onFieldFocus('email');
+			tracker.onFieldBlur('email', '', false);
+			tracker.onFieldFocus('email');
+			tracker.onFieldBlur('email', '', false);
+			tracker.onFieldFocus('email');
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 			expect(summary.fields_interacted).toBe(1);
 		});
 
 		it('should track different fields separately', () => {
-			onFieldFocus('email');
-			onFieldFocus('shipping_full_name');
+			const tracker = createFieldInteractionTracker();
+			tracker.onFieldFocus('email');
+			tracker.onFieldFocus('shipping_full_name');
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 			expect(summary.fields_interacted).toBe(2);
 		});
 
 		it('should warn for unknown fields', () => {
+			const tracker = createFieldInteractionTracker();
 			const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-			onFieldFocus('unknown_field');
+			tracker.onFieldFocus('unknown_field');
 
 			expect(consoleSpy).toHaveBeenCalledWith('[FieldTracker] Unknown field: unknown_field');
 
@@ -72,133 +68,147 @@ describe('Field Interaction Tracker', () => {
 
 	describe('onFieldBlur', () => {
 		it('should mark field as abandoned when left empty', () => {
-			onFieldFocus('email');
-			onFieldBlur('email', '', false);
+			const tracker = createFieldInteractionTracker();
+			tracker.onFieldFocus('email');
+			tracker.onFieldBlur('email', '', false);
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 			expect(summary.fields_abandoned).toBe(1);
 		});
 
 		it('should mark field as abandoned when incomplete', () => {
-			onFieldFocus('email');
-			onFieldBlur('email', 'test', false); // Missing @ symbol
+			const tracker = createFieldInteractionTracker();
+			tracker.onFieldFocus('email');
+			tracker.onFieldBlur('email', 'test', false); // Missing @ symbol
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 			expect(summary.fields_abandoned).toBe(1);
 		});
 
 		it('should not mark field as abandoned when complete', () => {
-			onFieldFocus('email');
-			onFieldBlur('email', 'test@example.com', false);
+			const tracker = createFieldInteractionTracker();
+			tracker.onFieldFocus('email');
+			tracker.onFieldBlur('email', 'test@example.com', false);
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 			expect(summary.fields_abandoned).toBe(0);
 			expect(summary.fields_completed).toBe(1);
 		});
 
 		it('should track validation error state', () => {
-			onFieldFocus('email');
-			onFieldBlur('email', 'invalid', true);
+			const tracker = createFieldInteractionTracker();
+			tracker.onFieldFocus('email');
+			tracker.onFieldBlur('email', 'invalid', true);
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 			expect(summary.fields_interacted).toBe(1);
 		});
 
 		it('should not mark optional field as abandoned when empty', () => {
-			onFieldFocus('shipping_address2');
-			onFieldBlur('shipping_address2', '', false);
+			const tracker = createFieldInteractionTracker();
+			tracker.onFieldFocus('shipping_address2');
+			tracker.onFieldBlur('shipping_address2', '', false);
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 			expect(summary.fields_abandoned).toBe(0);
 		});
 
 		it('should accumulate time across multiple focus/blur cycles', () => {
+			const tracker = createFieldInteractionTracker();
 			// First focus/blur
-			onFieldFocus('email');
-			onFieldBlur('email', '', false);
+			tracker.onFieldFocus('email');
+			tracker.onFieldBlur('email', '', false);
 
 			// Second focus/blur
-			onFieldFocus('email');
-			onFieldBlur('email', '', false);
+			tracker.onFieldFocus('email');
+			tracker.onFieldBlur('email', '', false);
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 			expect(summary.fields_interacted).toBe(1);
 		});
 	});
 
 	describe('onFieldCompleted', () => {
 		it('should mark field as completed', () => {
-			onFieldFocus('email');
-			onFieldBlur('email', 'test', false); // Initially incomplete
-			onFieldCompleted('email');
+			const tracker = createFieldInteractionTracker();
+			tracker.onFieldFocus('email');
+			tracker.onFieldBlur('email', 'test', false); // Initially incomplete
+			tracker.onFieldCompleted('email');
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 			expect(summary.fields_completed).toBe(1);
 			expect(summary.fields_abandoned).toBe(0);
 		});
 
 		it('should clear abandonment state when completed', () => {
-			onFieldFocus('email');
-			onFieldBlur('email', '', false); // Abandoned
+			const tracker = createFieldInteractionTracker();
+			tracker.onFieldFocus('email');
+			tracker.onFieldBlur('email', '', false); // Abandoned
 
-			const summaryBefore = getAbandonmentSummary();
+			const summaryBefore = tracker.getAbandonmentSummary();
 			expect(summaryBefore.fields_abandoned).toBe(1);
 
-			onFieldCompleted('email');
+			tracker.onFieldCompleted('email');
 
-			const summaryAfter = getAbandonmentSummary();
+			const summaryAfter = tracker.getAbandonmentSummary();
 			expect(summaryAfter.fields_abandoned).toBe(0);
 		});
 	});
 
 	describe('PayPal tracking', () => {
 		it('should track PayPal flow start', () => {
-			onPayPalStarted();
+			const tracker = createFieldInteractionTracker();
+			tracker.onPayPalStarted();
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 			expect(summary.fields_interacted).toBe(1);
 			expect(summary.reached_paypal).toBe(1);
 		});
 
 		it('should increment focus count on multiple PayPal starts', () => {
-			onPayPalStarted();
-			onPayPalAbandoned();
-			onPayPalStarted();
+			const tracker = createFieldInteractionTracker();
+			tracker.onPayPalStarted();
+			tracker.onPayPalAbandoned();
+			tracker.onPayPalStarted();
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 			expect(summary.fields_interacted).toBe(1);
 		});
 
 		it('should track PayPal completion', () => {
-			onPayPalStarted();
-			onPayPalCompleted();
+			const tracker = createFieldInteractionTracker();
+			tracker.onPayPalStarted();
+			tracker.onPayPalCompleted();
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 			expect(summary.fields_completed).toBe(1);
 			expect(summary.completed_paypal).toBe(1);
 		});
 
 		it('should track PayPal abandonment on cancel', () => {
-			onPayPalStarted();
-			onPayPalAbandoned();
+			const tracker = createFieldInteractionTracker();
+			tracker.onPayPalStarted();
+			tracker.onPayPalAbandoned();
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 			expect(summary.fields_abandoned).toBe(1);
 		});
 
 		it('should not mark as abandoned if already completed', () => {
-			onPayPalStarted();
-			onPayPalCompleted();
-			onPayPalAbandoned();
+			const tracker = createFieldInteractionTracker();
+			tracker.onPayPalStarted();
+			tracker.onPayPalCompleted();
+			tracker.onPayPalAbandoned();
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 			expect(summary.fields_abandoned).toBe(0);
 		});
 	});
 
 	describe('getAbandonmentSummary', () => {
 		it('should return empty summary when no interactions', () => {
-			const summary = getAbandonmentSummary();
+			const tracker = createFieldInteractionTracker();
+			const summary = tracker.getAbandonmentSummary();
 
 			expect(summary.fields_interacted).toBe(0);
 			expect(summary.fields_completed).toBe(0);
@@ -207,10 +217,11 @@ describe('Field Interaction Tracker', () => {
 		});
 
 		it('should track sections started', () => {
-			onFieldFocus('email');
-			onFieldFocus('shipping_full_name');
+			const tracker = createFieldInteractionTracker();
+			tracker.onFieldFocus('email');
+			tracker.onFieldFocus('shipping_full_name');
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 
 			expect(summary.reached_contact).toBe(1);
 			expect(summary.reached_shipping).toBe(1);
@@ -218,44 +229,48 @@ describe('Field Interaction Tracker', () => {
 		});
 
 		it('should track sections completed when all required fields completed', () => {
+			const tracker = createFieldInteractionTracker();
 			// Complete email section
-			onFieldFocus('email');
-			onFieldCompleted('email');
+			tracker.onFieldFocus('email');
+			tracker.onFieldCompleted('email');
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 
 			expect(summary.completed_contact).toBe(1);
 		});
 
 		it('should not mark section as completed if required fields missing', () => {
+			const tracker = createFieldInteractionTracker();
 			// Only complete one shipping field
-			onFieldFocus('shipping_full_name');
-			onFieldCompleted('shipping_full_name');
+			tracker.onFieldFocus('shipping_full_name');
+			tracker.onFieldCompleted('shipping_full_name');
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 
 			expect(summary.reached_shipping).toBe(1);
 			expect(summary.completed_shipping).toBe(0);
 		});
 
 		it('should track furthest section reached', () => {
-			onFieldFocus('email');
-			onFieldFocus('shipping_full_name');
-			onFieldFocus('card_number');
+			const tracker = createFieldInteractionTracker();
+			tracker.onFieldFocus('email');
+			tracker.onFieldFocus('shipping_full_name');
+			tracker.onFieldFocus('card_number');
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 
 			expect(summary.furthest_section).toBe(4);
 		});
 
 		it('should count abandoned fields correctly', () => {
-			onFieldFocus('email');
-			onFieldBlur('email', '', false); // Abandoned
+			const tracker = createFieldInteractionTracker();
+			tracker.onFieldFocus('email');
+			tracker.onFieldBlur('email', '', false); // Abandoned
 
-			onFieldFocus('shipping_full_name');
-			onFieldCompleted('shipping_full_name'); // Completed
+			tracker.onFieldFocus('shipping_full_name');
+			tracker.onFieldCompleted('shipping_full_name'); // Completed
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 
 			expect(summary.fields_interacted).toBe(2);
 			expect(summary.fields_completed).toBe(1);
@@ -265,12 +280,13 @@ describe('Field Interaction Tracker', () => {
 		});
 
 		it('should calculate completion rate correctly', () => {
-			onFieldFocus('email');
-			onFieldBlur('email', 'test@example.com', false);
-			onFieldFocus('shipping_full_name');
-			onFieldBlur('shipping_full_name', '', false);
+			const tracker = createFieldInteractionTracker();
+			tracker.onFieldFocus('email');
+			tracker.onFieldBlur('email', 'test@example.com', false);
+			tracker.onFieldFocus('shipping_full_name');
+			tracker.onFieldBlur('shipping_full_name', '', false);
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 
 			expect(summary.fields_interacted).toBe(2);
 			expect(summary.fields_completed).toBe(1);
@@ -280,21 +296,22 @@ describe('Field Interaction Tracker', () => {
 		});
 
 		it('should track section-specific abandonment counts', () => {
+			const tracker = createFieldInteractionTracker();
 			// Abandon contact
-			onFieldFocus('email');
-			onFieldBlur('email', '', false);
+			tracker.onFieldFocus('email');
+			tracker.onFieldBlur('email', '', false);
 
 			// Abandon multiple shipping fields
-			onFieldFocus('shipping_full_name');
-			onFieldBlur('shipping_full_name', '', false);
-			onFieldFocus('shipping_address1');
-			onFieldBlur('shipping_address1', '', false);
+			tracker.onFieldFocus('shipping_full_name');
+			tracker.onFieldBlur('shipping_full_name', '', false);
+			tracker.onFieldFocus('shipping_address1');
+			tracker.onFieldBlur('shipping_address1', '', false);
 
 			// Abandon payment
-			onFieldFocus('card_number');
-			onFieldBlur('card_number', '', false);
+			tracker.onFieldFocus('card_number');
+			tracker.onFieldBlur('card_number', '', false);
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 
 			expect(summary.abandoned_at_contact).toBe(1);
 			expect(summary.abandoned_at_shipping).toBe(2);
@@ -304,35 +321,14 @@ describe('Field Interaction Tracker', () => {
 		});
 
 		it('should track PayPal abandonment separately', () => {
-			onPayPalStarted();
-			onPayPalAbandoned();
+			const tracker = createFieldInteractionTracker();
+			tracker.onPayPalStarted();
+			tracker.onPayPalAbandoned();
 
-			const summary = getAbandonmentSummary();
+			const summary = tracker.getAbandonmentSummary();
 
 			expect(summary.abandoned_at_paypal).toBe(1);
 			expect(summary.abandoned_at_payment).toBe(0);
-		});
-	});
-
-	describe('resetFieldState', () => {
-		it('should clear all field state', () => {
-			onFieldFocus('email');
-			onFieldFocus('shipping_full_name');
-
-			resetFieldState();
-
-			const summary = getAbandonmentSummary();
-			expect(summary.fields_interacted).toBe(0);
-		});
-
-		it('should allow tracking new interactions after reset', () => {
-			onFieldFocus('email');
-			resetFieldState();
-
-			onFieldFocus('email');
-
-			const summary = getAbandonmentSummary();
-			expect(summary.fields_interacted).toBe(1);
 		});
 	});
 
