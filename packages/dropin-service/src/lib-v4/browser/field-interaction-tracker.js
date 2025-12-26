@@ -122,7 +122,7 @@ const SECTION_ORDER = ['contact', 'shipping_address', 'billing_address', 'credit
 
 const DEFAULT_SECTION_FIELDS = buildSectionFieldMap(FIELD_CONFIG);
 
-export class FieldInteractionTracker {
+class FieldInteractionTracker {
 	constructor(fieldConfig, sectionOrder, sectionFields) {
 		this.fieldConfig = fieldConfig;
 		this.sectionOrder = sectionOrder;
