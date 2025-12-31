@@ -7,6 +7,7 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import * as Table from '$lib/components/ui/table/index.js';
+	import * as Select from '$lib/components/ui/select/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { formatCurrency } from '$lib/currency.js';
 	import { formatDate } from 'date-fns';
@@ -17,13 +18,23 @@
 
 	let orders = [];
 	let searchQuery = '';
+	let selectedPartner = undefined;
 
 	$: {
 		orders = data?.orders?.results || [];
 		searchQuery = data?.search || '';
+		selectedPartner = data?.partner
+			? { value: data.partner, label: getPartnerLabel(data.partner) }
+			: undefined;
 	}
 
 	$: pagination = data?.pagination || { page: 1, totalPages: 1, totalOrders: 0 };
+	$: partners = data?.partners || [];
+
+	function getPartnerLabel(partnerId) {
+		const partner = partners.find((p) => p.id === partnerId);
+		return partner ? partner.name : partnerId;
+	}
 
 	function handleSearch(event) {
 		if (event.key === 'Enter') {
@@ -36,6 +47,17 @@
 			params.set('page', '1');
 			goto(`/orders?${params.toString()}`);
 		}
+	}
+
+	function handlePartnerChange(selected) {
+		const params = new URLSearchParams($page.url.searchParams);
+		if (selected?.value) {
+			params.set('partner', selected.value);
+		} else {
+			params.delete('partner');
+		}
+		params.set('page', '1');
+		goto(`/orders?${params.toString()}`);
 	}
 
 	function goToPage(pageNum) {
@@ -54,15 +76,28 @@
 						<Card.Title>Orders</Card.Title>
 						<Card.Description>Recent orders from your store.</Card.Description>
 					</div>
-					<div class="relative">
-						<Search class="absolute left-2.5 top-2 h-4 w-4 text-muted-foreground" />
-						<Input
-							type="search"
-							placeholder="Search orders..."
-							class="h-8 w-[150px] pl-8 sm:w-[250px]"
-							bind:value={searchQuery}
-							on:keydown={handleSearch}
-						/>
+					<div class="flex items-center gap-2">
+						<Select.Root selected={selectedPartner} onSelectedChange={handlePartnerChange}>
+							<Select.Trigger class="h-8 w-[150px]">
+								<Select.Value placeholder="All Partners" />
+							</Select.Trigger>
+							<Select.Content>
+								<Select.Item value="">All Partners</Select.Item>
+								{#each partners as partner (partner.id)}
+									<Select.Item value={partner.id}>{partner.name}</Select.Item>
+								{/each}
+							</Select.Content>
+						</Select.Root>
+						<div class="relative">
+							<Search class="absolute left-2.5 top-2 h-4 w-4 text-muted-foreground" />
+							<Input
+								type="search"
+								placeholder="Search orders..."
+								class="h-8 w-[150px] pl-8 sm:w-[250px]"
+								bind:value={searchQuery}
+								on:keydown={handleSearch}
+							/>
+						</div>
 					</div>
 				</div>
 			</Card.Header>
@@ -71,6 +106,7 @@
 					<Table.Header>
 						<Table.Row>
 							<Table.Head>Merchant</Table.Head>
+							<Table.Head class="hidden lg:table-cell">Partner</Table.Head>
 							<Table.Head class="hidden sm:table-cell">Order ID</Table.Head>
 							<Table.Head class="hidden md:table-cell">Date</Table.Head>
 							<Table.Head class="text-right">Amount</Table.Head>
@@ -90,6 +126,11 @@
 									</div>
 									<div class="hidden text-sm text-muted-foreground md:inline">
 										{order.shop_id}
+									</div>
+								</Table.Cell>
+								<Table.Cell class="hidden lg:table-cell">
+									<div class="font-medium">
+										{order.partner_display_name || order.app_id || '-'}
 									</div>
 								</Table.Cell>
 								<Table.Cell class="hidden sm:table-cell"

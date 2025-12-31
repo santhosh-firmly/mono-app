@@ -6,6 +6,7 @@
 	import MapPin from 'lucide-svelte/icons/map-pin';
 	import Mail from 'lucide-svelte/icons/mail';
 	import Phone from 'lucide-svelte/icons/phone';
+	import Building2 from 'lucide-svelte/icons/building-2';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
@@ -63,6 +64,13 @@
 				{order?.status || 'Completed'}
 			</Badge>
 		</div>
+		{#if order?.partner_display_name}
+			<div class="flex items-center gap-2 mt-3 pt-3 border-t">
+				<Building2 class="h-4 w-4 text-muted-foreground" />
+				<span class="text-sm text-muted-foreground">Partner:</span>
+				<span class="text-sm font-medium">{order.partner_display_name}</span>
+			</div>
+		{/if}
 	</Card.Header>
 
 	<!-- Order Info -->
