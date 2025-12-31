@@ -23,33 +23,6 @@ export async function load({ params, platform }) {
 		throw error(500, 'Failed to parse order data');
 	}
 
-<<<<<<< Updated upstream
-=======
-	// Build merchant map
-	const merchantMap = new Map();
-	for (const row of merchantsResult.results) {
-		try {
-			const info = JSON.parse(row.info);
-			if (info.store_id) {
-				merchantMap.set(info.store_id, info.display_name || info.store_id);
-			}
-		} catch {
-			// Skip malformed data
-		}
-	}
-
-	// Build partner map
-	const partnerMap = new Map();
-	for (const row of partnersResult.results) {
-		try {
-			const info = JSON.parse(row.info);
-			partnerMap.set(row.key, info.subject || row.key);
-		} catch {
-			partnerMap.set(row.key, row.key);
-		}
-	}
-
->>>>>>> Stashed changes
 	const order = {
 		...orderResult,
 		order_info: orderInfo

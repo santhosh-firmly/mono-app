@@ -41,27 +41,7 @@ export async function load({ platform, url }) {
 		}
 	}
 
-<<<<<<< Updated upstream
 	// Parse order_info JSON and add merchant display_name
-=======
-	// Build a map of app_id to partner name and list of partners
-	const partnerMap = new Map();
-	const partners = [];
-	for (const row of partnersResult.results) {
-		try {
-			const info = JSON.parse(row.info);
-			const partnerName = info.subject || row.key;
-			partnerMap.set(row.key, partnerName);
-			partners.push({ id: row.key, name: partnerName });
-		} catch {
-			// Skip malformed partner data
-			partnerMap.set(row.key, row.key);
-			partners.push({ id: row.key, name: row.key });
-		}
-	}
-
-	// Parse order_info JSON and add merchant/partner display names
->>>>>>> Stashed changes
 	const orders = {
 		...ordersResult,
 		results: ordersResult.results
