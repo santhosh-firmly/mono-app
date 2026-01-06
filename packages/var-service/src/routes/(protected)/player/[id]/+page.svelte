@@ -33,16 +33,18 @@
 				<p class="text-muted text-sm">Loading...</p>
 			</div>
 		{:else if sessionData}
-			<header class="mb-12">
-				<Button variant="ghost" onclick={() => goto('/')} class="mb-3 inline-block"
-					>← Back</Button
-				>
-				<h1 class="mb-2 font-serif text-2xl">{sessionData.metadata.url}</h1>
-				<SessionDetails session={sessionData.metadata} />
-			</header>
+			<div class="mx-auto px-4" style="max-width: 680px;">
+				<header class="mb-12">
+					<Button variant="ghost" onclick={() => goto('/')} class="mb-3 inline-block"
+						>← Back</Button
+					>
+					<h1 class="mb-2 font-serif text-2xl">{sessionData.metadata.url}</h1>
+					<SessionDetails session={sessionData.metadata} />
+				</header>
+			</div>
 
-			<div class="border-border border bg-white p-4">
-				<SessionPlayer events={sessionData.events} metadata={sessionData.metadata} />
+			<div class="flex justify-center">
+				<SessionPlayer events={sessionData.events} />
 			</div>
 		{:else}
 			<div class="py-24 text-center">
