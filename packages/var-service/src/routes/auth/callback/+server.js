@@ -28,7 +28,7 @@ export async function GET({ url, cookies, platform }) {
 
 		cookies.set(platform.env.FIRMLY_AUTH_COOKIE, userDetails.id_token, {
 			path: '/',
-			maxAge: userDetails.expires_in,
+			maxAge: 60 * 60 * 8, // 8 hours
 			httpOnly: true,
 			secure: true,
 			sameSite: 'lax'
@@ -38,5 +38,9 @@ export async function GET({ url, cookies, platform }) {
 	}
 
 	// Unable to Authenticate.
+	const errorData = await response.json();
+	const errorMessage =
+		errorData.error_description || errorData.error || 'Unknown authentication error';
+	console.error('Authentication failed:', errorMessage);
 	throw redirect(302, '/auth/sign-in?error=auth_failed');
 }
