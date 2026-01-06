@@ -1,6 +1,5 @@
 <script>
 	let { azureAdClientId, azureAdRedirectUrl, azureAdTenantId, error } = $props();
-</script>
 
 	let altSignInWithMS = $state('Sign In with Microsoft');
 
@@ -23,7 +22,7 @@
 			<h1 class="text-3xl font-semibold tracking-tight">Welcome to Firmly VAR</h1>
 			<p class="text-muted-foreground text-base">Log in to continue</p>
 			{#if error}
-				<p class="text-red-500 text-sm">Authentication failed. Please try again.</p>
+				<p class="text-sm text-red-500">Authentication failed. Please try again.</p>
 			{/if}
 		</div>
 		<div class="grid gap-8">
