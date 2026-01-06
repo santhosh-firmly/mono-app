@@ -33,7 +33,8 @@ export async function handle({ event, resolve }) {
 		).authInfo;
 
 		return resolve(event);
-	} catch {
+	} catch (error) {
+		console.error('Authentication error in handle hook:', error);
 		return redirect(302, '/auth/sign-in');
 	}
 }

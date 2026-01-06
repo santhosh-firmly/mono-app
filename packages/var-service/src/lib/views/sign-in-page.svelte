@@ -1,7 +1,7 @@
 <script>
-	let { azureAdClientId, azureAdRedirectUrl, azureAdTenantId, error } = $props();
+	let { azureAdClientId, azureAdRedirectUrl, azureAdTenantId, oauthState, error } = $props();
 
-	let altSignInWithMS = $state('Sign In with Microsoft');
+	let signInButtonText = $state('Sign In with Microsoft');
 
 	let MSUrl = $derived.by(() => {
 		const url = new URL(
@@ -11,6 +11,7 @@
 		url.searchParams.set('scope', 'openid profile email');
 		url.searchParams.set('response_type', 'code');
 		url.searchParams.set('redirect_uri', azureAdRedirectUrl);
+		url.searchParams.set('state', oauthState);
 
 		return url;
 	});
@@ -30,12 +31,12 @@
 				<img
 					class="mx-auto dark:hidden"
 					src="/ms-symbollockup_signin_light.svg"
-					alt={altSignInWithMS}
+					alt={signInButtonText}
 				/>
 				<img
 					class="mx-auto hidden dark:block"
 					src="/ms-symbollockup_signin_dark.svg"
-					alt={altSignInWithMS}
+					alt={signInButtonText}
 				/>
 			</a>
 		</div>
