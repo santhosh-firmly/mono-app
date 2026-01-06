@@ -8,4 +8,5 @@
 	azureAdClientId={data.azureAdClientId}
 	azureAdTenantId={data.azureAdTenantId}
 	azureAdRedirectUrl={data.azureAdRedirectUrl}
+	error={data.error}
 />
