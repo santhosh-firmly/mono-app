@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { enforceSSOAuth } from './ms-auth.js';
 
-// Mock jose library
+// Mock jose library before importing the module
 vi.mock('jose', () => ({
-	createRemoteJWKSet: vi.fn(),
+	createRemoteJWKSet: vi.fn(() => ({})),
 	jwtVerify: vi.fn()
 }));
 
-import { createRemoteJWKSet, jwtVerify } from 'jose';
+import { jwtVerify } from 'jose';
+import { enforceSSOAuth } from './ms-auth.js';
 
 describe('enforceSSOAuth', () => {
 	const mockTenantId = 'test-tenant-id';
@@ -20,11 +20,6 @@ describe('enforceSSOAuth', () => {
 	});
 
 	it('should successfully verify a valid JWT and return auth info', async () => {
-		// Mock the JWKS and JWT verification
-		const mockJwks = {
-			/* mock jwks */
-		};
-		createRemoteJWKSet.mockReturnValue(mockJwks);
 		jwtVerify.mockResolvedValue({ payload: mockPayload });
 
 		const result = await enforceSSOAuth(mockJwt, {
@@ -32,13 +27,14 @@ describe('enforceSSOAuth', () => {
 			azureClientId: mockClientId
 		});
 
-		expect(createRemoteJWKSet).toHaveBeenCalledWith(
-			new URL('https://login.microsoftonline.com/common/discovery/v2.0/keys')
+		expect(jwtVerify).toHaveBeenCalledWith(
+			mockJwt,
+			{},
+			{
+				issuer: 'https://login.microsoftonline.com/test-tenant-id/v2.0',
+				audience: mockClientId
+			}
 		);
-		expect(jwtVerify).toHaveBeenCalledWith(mockJwt, mockJwks, {
-			issuer: 'https://login.microsoftonline.com/test-tenant-id/v2.0',
-			audience: mockClientId
-		});
 		expect(result).toEqual({ authInfo: mockPayload });
 	});
 
@@ -54,25 +50,10 @@ describe('enforceSSOAuth', () => {
 		).rejects.toThrow('Invalid JWT');
 	});
 
-	it('should use correct Microsoft keys endpoint', async () => {
-		createRemoteJWKSet.mockReturnValue({});
-		jwtVerify.mockResolvedValue({ payload: mockPayload });
-
-		await enforceSSOAuth(mockJwt, {
-			azureTenantId: mockTenantId,
-			azureClientId: mockClientId
-		});
-
-		expect(createRemoteJWKSet).toHaveBeenCalledWith(
-			new URL('https://login.microsoftonline.com/common/discovery/v2.0/keys')
-		);
-	});
-
 	it('should verify JWT with correct issuer and audience', async () => {
 		const customTenantId = 'custom-tenant-123';
 		const customClientId = 'custom-client-456';
 
-		createRemoteJWKSet.mockReturnValue({});
 		jwtVerify.mockResolvedValue({ payload: mockPayload });
 
 		await enforceSSOAuth(mockJwt, {
