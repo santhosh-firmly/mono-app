@@ -11,7 +11,8 @@
 		onTogglePlay,
 		onSeek,
 		onChangeSpeed,
-		onToggleSkipInactive
+		onToggleSkipInactive,
+		onToggleFullscreen
 	} = $props();
 
 	function handleSeek(e) {
@@ -37,10 +38,11 @@
 	</span>
 
 	<div class="relative flex-1">
-		<div class="bg-border relative h-1 overflow-hidden">
+		<div class="progress-track">
+			<div class="progress-fill" style="width: {(currentTime / duration) * 100}%"></div>
 			{#each inactivePeriods as period, i (i)}
 				<div
-					class="bg-muted/30 absolute h-full"
+					class="inactive-period"
 					style="left: {(period.start / duration) * 100}%; width: {((period.end -
 						period.start) /
 						duration) *
@@ -53,7 +55,7 @@
 			value={currentTime}
 			max={duration}
 			oninput={handleSeek}
-			class="absolute inset-0 h-full w-full cursor-pointer appearance-none bg-transparent"
+			class="progress-input"
 		/>
 	</div>
 
@@ -92,37 +94,82 @@
 			Skip idle
 		</Button>
 	</div>
+
+	<div class="border-border border-l pl-3">
+		<Button onclick={onToggleFullscreen} class="px-2">Fullscreen</Button>
+	</div>
 </div>
 
 <style>
-	input[type='range']::-webkit-slider-thumb {
+	.progress-track {
+		position: relative;
+		height: 6px;
+		background: var(--color-hover);
+		border: 1px solid var(--color-border);
+		overflow: visible;
+		display: flex;
+		align-items: center;
+	}
+
+	.progress-fill {
+		position: absolute;
+		top: 0;
+		left: 0;
+		height: 100%;
+		background: var(--color-foreground);
+		pointer-events: none;
+		transition: width 100ms linear;
+	}
+
+	.inactive-period {
+		position: absolute;
+		top: 0;
+		height: 100%;
+		background: var(--color-muted);
+		opacity: 0.2;
+		pointer-events: none;
+	}
+
+	.progress-input {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		left: 0;
+		height: 100%;
+		width: 100%;
+		cursor: pointer;
+		appearance: none;
+		background: transparent;
+		margin: 0;
+	}
+
+	.progress-input::-webkit-slider-thumb {
 		appearance: none;
 		width: 12px;
 		height: 12px;
 		background: var(--color-foreground);
 		border-radius: 50%;
 		cursor: pointer;
-		position: relative;
+		margin-top: -4px;
 		z-index: 10;
 	}
 
-	input[type='range']::-moz-range-thumb {
+	.progress-input::-moz-range-thumb {
 		width: 12px;
 		height: 12px;
 		background: var(--color-foreground);
 		border-radius: 50%;
 		border: none;
 		cursor: pointer;
-		position: relative;
 		z-index: 10;
 	}
 
-	input[type='range']::-webkit-slider-runnable-track {
+	.progress-input::-webkit-slider-runnable-track {
 		background: transparent;
 		height: 100%;
 	}
 
-	input[type='range']::-moz-range-track {
+	.progress-input::-moz-range-track {
 		background: transparent;
 		height: 100%;
 	}
