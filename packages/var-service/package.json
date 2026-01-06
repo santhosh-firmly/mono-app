@@ -13,7 +13,7 @@
 		"format-code:check": "eslint . --fix=false",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
-		"deploy-dev": "npm run build && wrangler deploy"
+		"deploy-dev": "npm run build && wrangler deploy --env dev"
 	},
 	"devDependencies": {
 		"@chromatic-com/storybook": "^3.2.5",
@@ -42,6 +42,7 @@
 		"@firmly/session-recorder": "^0.37.0",
 		"bits-ui": "^2.14.2",
 		"clsx": "^2.1.1",
+		"jose": "^5.10.0",
 		"phosphor-svelte": "^3.0.1",
 		"rrweb": "^2.0.0-alpha.17",
 		"tailwind-merge": "^2.5.2"
