@@ -14,6 +14,10 @@ export async function handle({ event, resolve }) {
 
 	const jwt = event.cookies.get(platform.env.FIRMLY_AUTH_COOKIE);
 
+	if (!jwt) {
+		return redirect(302, '/auth/sign-in');
+	}
+
 	try {
 		event.locals.authInfo = (
 			await enforceSSOAuth(jwt, {

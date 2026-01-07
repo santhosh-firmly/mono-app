@@ -45,7 +45,7 @@
 	}
 </script>
 
-<div class={cn('mx-auto flex min-h-[500px] w-full max-w-[680px] flex-col', className)} {...rest}>
+<div class={cn('mx-auto flex min-h-125 w-full max-w-170 flex-col', className)} {...rest}>
 	{#if searchable}
 		<div class="mb-8">
 			<Input bind:value={searchQuery} placeholder="Search sessions..." />
