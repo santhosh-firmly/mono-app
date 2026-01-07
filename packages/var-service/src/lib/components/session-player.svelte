@@ -1,198 +1,291 @@
 <script>
 	import { onMount } from 'svelte';
-	import { Replayer } from 'rrweb';
-	import Button from './button.svelte';
+	import rrwebPlayer from 'rrweb-player';
+	import 'rrweb-player/dist/style.css';
+	import PlayerControls from './player-controls.svelte';
 
 	let { events } = $props();
 
-	let container;
-	let replayer;
+	let playerContainer;
+	let player;
 	let playing = $state(false);
 	let currentTime = $state(0);
 	let duration = $state(0);
 	let speed = $state(1);
+	let skipInactive = $state(false);
+	let inactivePeriods = $state([]);
+	let sessionPlayerWrapper;
 
 	onMount(() => {
 		if (!events || events.length === 0) return;
 
+		// Calculate duration from events
 		const firstEvent = events[0];
 		const lastEvent = events[events.length - 1];
 		duration = lastEvent.timestamp - firstEvent.timestamp;
 
-		replayer = new Replayer(events, {
-			root: container,
-			speed: 1,
-			skipInactive: false,
-			showWarning: false,
-			showDebug: false,
-			mouseTail: true,
-			pauseAnimation: true
-		});
-
-		const wrapper = container.querySelector('.replayer-wrapper');
-
-		const updateScale = () => {
-			if (!wrapper || !container) return;
-			const iframe = wrapper.querySelector('iframe');
-			if (!iframe) return;
-
-			const recordedWidth = parseInt(iframe.getAttribute('width'));
-			const recordedHeight = parseInt(iframe.getAttribute('height'));
-			const containerWidth = container.clientWidth;
-
-			const scale = containerWidth / recordedWidth;
-			const scaledHeight = recordedHeight * scale;
-
-			// Make wrapper position relative so children can be absolutely positioned
-			wrapper.style.position = 'relative';
-			wrapper.style.transform = `scale(${scale})`;
-			wrapper.style.transformOrigin = 'top left';
-			wrapper.style.width = `${recordedWidth}px`;
-			wrapper.style.height = `${recordedHeight}px`;
-
-			// Position all children absolutely to overlay them
-			const children = wrapper.children;
-			for (let i = 0; i < children.length; i++) {
-				children[i].style.position = 'absolute';
-				children[i].style.top = '0';
-				children[i].style.left = '0';
+		// Calculate inactive periods (periods with no events > 1 second)
+		const periods = [];
+		for (let i = 0; i < events.length - 1; i++) {
+			const gap = events[i + 1].timestamp - events[i].timestamp;
+			if (gap > 1000) {
+				periods.push({
+					start: events[i].timestamp - firstEvent.timestamp,
+					end: events[i + 1].timestamp - firstEvent.timestamp
+				});
 			}
-
-			// Ensure mouse cursor and trail are visible and properly positioned
-			const mouseCursor = wrapper.querySelector('.replayer-mouse');
-			const mouseCanvas = wrapper.querySelector('.replayer-mouse-tail');
-			if (mouseCursor) {
-				mouseCursor.style.display = 'block';
-				mouseCursor.style.pointerEvents = 'none';
-			}
-			if (mouseCanvas) {
-				mouseCanvas.style.display = 'block';
-				mouseCanvas.style.pointerEvents = 'none';
-			}
-
-			container.style.height = `${scaledHeight}px`;
-		};
-
-		if (wrapper) {
-			setTimeout(updateScale, 100);
-			window.addEventListener('resize', updateScale);
 		}
+		inactivePeriods = periods;
 
-		replayer.on('finish', () => {
-			playing = false;
-			currentTime = duration;
+		// Initialize rrweb-player without controller
+		player = new rrwebPlayer({
+			target: playerContainer,
+			props: {
+				events,
+				autoPlay: false,
+				speed: 1,
+				speedOption: [0.5, 1, 2, 4],
+				showController: false,
+				skipInactive: false,
+				mouseTail: true,
+				UNSAFE_replayCanvas: false
+			}
 		});
 
-		const updateInterval = setInterval(() => {
-			if (playing && replayer) {
-				// getCurrentTime() returns time in milliseconds from the start
-				const time = replayer.getCurrentTime();
-				currentTime = Math.max(0, Math.min(time, duration));
+		// Listen to player events
+		player.addEventListener('ui-update-current-time', (event) => {
+			currentTime = event.payload;
+		});
+
+		player.addEventListener('ui-update-player-state', (event) => {
+			playing = event.payload === 'playing';
+		});
+
+		const handleFullscreenChange = () => {
+			if (player && !document.fullscreenElement) {
+				setTimeout(() => player.triggerResize(), 100);
 			}
-		}, 100);
+		};
+		document.addEventListener('fullscreenchange', handleFullscreenChange);
 
 		return () => {
-			clearInterval(updateInterval);
-			window.removeEventListener('resize', updateScale);
-			if (replayer) replayer.destroy();
+			if (player) {
+				try {
+					player.getReplayer()?.destroy();
+				} catch (e) {
+					console.error('Error destroying player:', e);
+				}
+			}
+			document.removeEventListener('fullscreenchange', handleFullscreenChange);
 		};
 	});
 
 	function togglePlay() {
-		if (!replayer) return;
-
-		if (playing) {
-			replayer.pause();
-			playing = false;
-		} else {
-			if (currentTime >= duration) {
-				currentTime = 0;
-				replayer.play(0);
-			} else {
-				replayer.play(currentTime);
-			}
-			playing = true;
-		}
+		if (!player) return;
+		player.toggle();
 	}
 
-	function handleSeek(e) {
-		if (!replayer) return;
-		const newTime = parseInt(e.target.value);
-		currentTime = newTime;
-		replayer.pause(newTime);
-		if (playing) {
-			setTimeout(() => replayer.play(newTime), 0);
-		}
+	function handleSeek(newTime) {
+		if (!player) return;
+		player.goto(newTime, playing);
 	}
 
 	function changeSpeed(newSpeed) {
 		speed = newSpeed;
-		if (replayer) {
-			replayer.setConfig({ speed: newSpeed });
+		if (player) {
+			player.setSpeed(newSpeed);
 		}
 	}
 
-	function formatTime(ms) {
-		const seconds = Math.floor(ms / 1000);
-		const mins = Math.floor(seconds / 60);
-		const secs = seconds % 60;
-		return `${mins}:${secs.toString().padStart(2, '0')}`;
+	function toggleSkipInactive() {
+		skipInactive = !skipInactive;
+		if (player) {
+			player.toggleSkipInactive();
+		}
+	}
+
+	function toggleFullscreen() {
+		if (!sessionPlayerWrapper) return;
+
+		if (!document.fullscreenElement) {
+			sessionPlayerWrapper.requestFullscreen().then(() => {
+				// Force player to resize after entering fullscreen
+				if (player) {
+					setTimeout(() => {
+						player.triggerResize();
+					}, 100);
+				}
+			});
+		} else {
+			document.exitFullscreen();
+		}
 	}
 </script>
 
-<div class="space-y-4">
-	<div bind:this={container} class="border-border overflow-hidden border bg-white"></div>
+<div bind:this={sessionPlayerWrapper} class="session-player-wrapper">
+	<div class="session-player">
+		<div bind:this={playerContainer} class="player-container"></div>
+	</div>
 
-	<div class="flex items-center gap-3 text-xs">
-		<Button onclick={togglePlay} class="px-2">
-			{playing ? 'Pause' : 'Play'}
-		</Button>
-
-		<span class="text-muted tabular-nums">
-			{formatTime(currentTime)} / {formatTime(duration)}
-		</span>
-
-		<input
-			type="range"
-			value={currentTime}
-			max={duration}
-			oninput={handleSeek}
-			class="bg-border h-1 flex-1 cursor-pointer appearance-none"
+	<div class="controls-wrapper">
+		<PlayerControls
+			{playing}
+			{currentTime}
+			{duration}
+			{speed}
+			{skipInactive}
+			{inactivePeriods}
+			onTogglePlay={togglePlay}
+			onSeek={handleSeek}
+			onChangeSpeed={changeSpeed}
+			onToggleSkipInactive={toggleSkipInactive}
+			onToggleFullscreen={toggleFullscreen}
 		/>
-
-		<div class="flex gap-1">
-			<Button
-				onclick={() => changeSpeed(1)}
-				class="px-2 {speed === 1 ? 'text-foreground' : 'text-muted'}"
-			>
-				1x
-			</Button>
-			<Button
-				onclick={() => changeSpeed(2)}
-				class="px-2 {speed === 2 ? 'text-foreground' : 'text-muted'}"
-			>
-				2x
-			</Button>
-		</div>
 	</div>
 </div>
 
 <style>
-	input[type='range']::-webkit-slider-thumb {
-		appearance: none;
-		width: 12px;
-		height: 12px;
-		background: var(--color-foreground);
-		border-radius: 50%;
-		cursor: pointer;
+	.session-player-wrapper {
+		background: white;
+		border: 1px solid var(--color-border);
+		display: inline-block;
 	}
 
-	input[type='range']::-moz-range-thumb {
-		width: 12px;
-		height: 12px;
-		background: var(--color-foreground);
-		border-radius: 50%;
-		border: none;
-		cursor: pointer;
+	.session-player {
+		width: 100%;
+		height: 100%;
+	}
+
+	.player-container {
+		width: 100%;
+		height: 100%;
+	}
+
+	.controls-wrapper {
+		padding: 1rem;
+		background: white;
+		border: 1px solid var(--color-border);
+	}
+
+	/* Override rrweb-player styles */
+	.session-player :global(.rr-player) {
+		width: 100%;
+		max-width: 100%;
+		height: auto;
+		box-shadow: none !important;
+		border: none !important;
+		background: transparent !important;
+	}
+
+	.session-player :global(.rr-player__frame) {
+		background: white !important;
+		border: none !important;
+		border-radius: 0 !important;
+		box-shadow: none !important;
+	}
+
+	/* Hide the native controller completely */
+	.session-player :global(.rr-controller) {
+		display: none !important;
+	}
+
+	/* Fullscreen mode styling */
+	.session-player-wrapper:fullscreen {
+		background: var(--color-background);
+		padding: 2rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		overflow: hidden;
+	}
+
+	.session-player-wrapper:fullscreen .session-player {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 0;
+		overflow: hidden;
+	}
+
+	.session-player-wrapper:fullscreen .player-container {
+		width: 100%;
+		height: 100%;
+		max-width: 100%;
+		max-height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+	}
+
+	.session-player-wrapper:fullscreen .controls-wrapper {
+		width: 100%;
+		max-width: 1200px;
+		background: white;
+		border: 1px solid var(--color-border);
+		margin: 0 auto;
+		flex-shrink: 0;
+	}
+
+	.session-player-wrapper:fullscreen :global(.rr-player) {
+		width: 100% !important;
+		height: 100% !important;
+		max-width: 100% !important;
+		max-height: 100% !important;
+	}
+
+	.session-player-wrapper:fullscreen :global(.rr-player__frame) {
+		width: 100% !important;
+		height: 100% !important;
+		max-width: 100% !important;
+		max-height: 100% !important;
+	}
+
+	.session-player-wrapper:fullscreen :global(.replayer-wrapper) {
+		transform: none !important;
+		width: 100% !important;
+		height: 100% !important;
+		position: static !important;
+	}
+
+	.session-player-wrapper:fullscreen :global(.replayer-wrapper iframe) {
+		width: 100% !important;
+		height: 100% !important;
+	}
+
+	/* Global rr-player styles */
+	:global(.rr-player) {
+		box-shadow: none !important;
+		border-radius: 0 !important;
+		border: none !important;
+		margin: 0 auto !important;
+		background: transparent !important;
+	}
+
+	:global(.rr-player__frame) {
+		background: white !important;
+		border: none !important;
+		border-radius: 0 !important;
+		box-shadow: none !important;
+	}
+
+	:global(.rr-controller) {
+		display: none !important;
+	}
+
+	:global(.rr-player:fullscreen) {
+		background: var(--color-background) !important;
+		padding: 2rem !important;
+		display: flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+	}
+
+	:global(.rr-player:fullscreen .rr-player__frame) {
+		max-width: 100% !important;
+		max-height: calc(100vh - 100px) !important;
+		width: auto !important;
+		height: auto !important;
 	}
 </style>

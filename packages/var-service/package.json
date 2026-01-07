@@ -49,7 +49,7 @@
 		"clsx": "^2.1.1",
 		"jose": "^5.10.0",
 		"phosphor-svelte": "^3.0.1",
-		"rrweb": "^2.0.0-alpha.17",
+		"rrweb-player": "^1.0.0-alpha.4",
 		"tailwind-merge": "^2.5.2"
 	},
 	"prettier": "@firmly/eslint-config/prettier"
