@@ -11,9 +11,12 @@
 		"prepare": "svelte-kit sync || echo ''",
 		"format-code": "eslint . --fix",
 		"format-code:check": "eslint . --fix=false",
+		"test": "vitest",
+		"test:run": "vitest run",
+		"test:static": "vitest run",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
-		"deploy-dev": "npm run build && wrangler deploy"
+		"deploy-dev": "npm run build && wrangler deploy --env dev"
 	},
 	"devDependencies": {
 		"@chromatic-com/storybook": "^3.2.5",
@@ -31,17 +34,20 @@
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",
 		"@tailwindcss/vite": "^4.1.17",
 		"eslint": "*",
+		"jsdom": "^27.4.0",
 		"prettier": "*",
 		"storybook": "^8.6.4",
 		"svelte": "^5.27.0",
 		"tailwindcss": "^4.0.0",
 		"vite": "^6.0.0",
+		"vitest": "^4.0.16",
 		"wrangler": "*"
 	},
 	"dependencies": {
 		"@firmly/session-recorder": "^0.37.0",
 		"bits-ui": "^2.14.2",
 		"clsx": "^2.1.1",
+		"jose": "^5.10.0",
 		"phosphor-svelte": "^3.0.1",
 		"rrweb": "^2.0.0-alpha.17",
 		"tailwind-merge": "^2.5.2"
