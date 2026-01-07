@@ -23,11 +23,14 @@ export default class SessionsService {
 	}
 
 	async fetchSessionById(sessionId) {
-		const response = await fetch(`${this.dvrServiceUrl}/api/sessions/${sessionId}`, {
-			headers: {
-				Authorization: `Bearer ${this.authToken}`
+		const response = await fetch(
+			`${this.dvrServiceUrl}/api/sessions/${encodeURIComponent(sessionId)}`,
+			{
+				headers: {
+					Authorization: `Bearer ${this.authToken}`
+				}
 			}
-		});
+		);
 
 		if (!response.ok) {
 			if (response.status === 404) {
@@ -37,6 +40,6 @@ export default class SessionsService {
 			throw new Error(`Failed to fetch session: ${response.status}`);
 		}
 
-		return await response.json();
+		return response.json();
 	}
 }

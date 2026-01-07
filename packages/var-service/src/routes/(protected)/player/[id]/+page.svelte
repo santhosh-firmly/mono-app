@@ -13,14 +13,18 @@
 
 	let service = $derived(new SessionsService(data.dvrServiceUrl, data.auth.jwt));
 
-	$effect(() => {
+	$effect(async () => {
 		isLoading = true;
+		error = null;
+		sessionData = null;
 
-		service
-			.fetchSessionById(data.id)
-			.then((session) => (sessionData = session))
-			.catch((err) => (error = err))
-			.finally(() => (isLoading = false));
+		try {
+			sessionData = await service.fetchSessionById(data.id);
+		} catch (err) {
+			error = err.message;
+		} finally {
+			isLoading = false;
+		}
 	});
 </script>
 
