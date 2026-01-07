@@ -1,6 +1,4 @@
 <script>
-	import { cn } from '$lib/utils/cn.js';
-
 	let { session, class: className, ...rest } = $props();
 
 	function formatDate(timestamp) {
@@ -30,7 +28,7 @@
 	}
 </script>
 
-<div class={cn('text-muted text-xs', className)} {...rest}>
+<div class={['text-muted text-xs', className]} {...rest}>
 	{session.eventCount} events · {formatSize(session.eventCount)} · {formatDuration(
 		session.duration
 	)} · {formatDate(session.timestamp)}

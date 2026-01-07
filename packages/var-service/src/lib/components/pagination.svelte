@@ -1,6 +1,4 @@
 <script>
-	import { cn } from '$lib/utils/cn.js';
-
 	let {
 		currentPage = $bindable(1),
 		totalItems,
@@ -54,7 +52,7 @@
 
 {#if showPagination}
 	<nav
-		class={cn('flex items-center justify-center gap-1', className)}
+		class={['flex items-center justify-center gap-1', className]}
 		aria-label="Pagination"
 		{...rest}
 	>
@@ -73,12 +71,12 @@
 				<button
 					type="button"
 					onclick={() => goToPage(item.value)}
-					class={cn(
+					class={[
 						'min-w-8 px-2.5 py-1.5 text-xs transition-all duration-200',
 						item.value === currentPage
 							? 'font-bold'
 							: 'text-muted hover:text-foreground'
-					)}
+					]}
 					aria-label={`Page ${item.value}`}
 					aria-current={item.value === currentPage ? 'page' : undefined}
 				>
