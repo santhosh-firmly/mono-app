@@ -21,11 +21,12 @@ describe('Recorder', () => {
 
 		mockConfig = {
 			maskAll: false,
+			maskAllInputs: true,
 			checkoutEveryNth: 100,
 			checkoutEveryNms: 600000,
 			blockSelector: null,
 			inlineStylesheet: true,
-			maskTextSelector: '[data-sensitive]',
+			maskSelector: '[data-sensitive], [data-sensitive] *',
 			sampling: {
 				mousemove: false,
 				scroll: 150,
@@ -63,11 +64,26 @@ describe('Recorder', () => {
 					emit: mockOnEvent,
 					checkoutEveryNth: 100,
 					checkoutEveryNms: 600000,
-					maskAllInputs: false,
+					maskAllInputs: true,
 					blockSelector: null,
 					inlineStylesheet: true,
-					maskTextSelector: '[data-sensitive]',
+					maskTextSelector: '[data-sensitive], [data-sensitive] *',
+					maskInputSelector: '[data-sensitive], [data-sensitive] *',
 					sampling: mockConfig.sampling
+				})
+			);
+		});
+
+		it('should allow disabling maskAllInputs when maskAll is false', () => {
+			mockConfig.maskAllInputs = false;
+			recorder = new Recorder(mockConfig, mockOnEvent);
+			recorder.start();
+
+			expect(record).toHaveBeenCalledWith(
+				expect.objectContaining({
+					maskAllInputs: false,
+					maskTextSelector: '[data-sensitive], [data-sensitive] *',
+					maskInputSelector: '[data-sensitive], [data-sensitive] *'
 				})
 			);
 		});

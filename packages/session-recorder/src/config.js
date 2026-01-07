@@ -24,11 +24,16 @@ export const DEFAULT_CONFIG = {
 	maxEvents: 500, // Max events before flush
 
 	// Privacy options
-	// When true, all text is replaced with asterisks
+	// When true, all text and inputs are replaced with asterisks
 	maskAll: false,
 
-	// Works independently or together with maskAll
-	maskTextSelector: '[data-sensitive], [data-sensitive]', // Mask elements with data-sensitive attribute and all children
+	// Mask all input fields by default for privacy (passwords, credit cards, etc.)
+	maskAllInputs: true,
+
+	// Single selector that masks both text content and input values
+	// Applied to both maskTextSelector and maskInputSelector in rrweb
+	maskSelector: '[data-sensitive], [data-sensitive] *', // Mask elements with data-sensitive attribute and all children
+
 	blockSelector: null, // No blocking by default
 
 	// rrweb options

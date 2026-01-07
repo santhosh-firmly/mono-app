@@ -84,7 +84,8 @@ const recorder = new SessionRecorder({
   
   // Privacy options
   maskAll: false,          // Mask ALL content (inputs, text, divs, everything)
-  maskTextSelector: '[data-sensitive], [data-sensitive] *',  // Mask specific elements
+  maskAllInputs: true,     // Mask all input fields by default (passwords, credit cards, etc.)
+  maskSelector: '[data-sensitive], [data-sensitive] *',  // Single selector for both text and inputs
   blockSelector: null,     // Optional: completely block elements from recording
   
   // Sampling (defaults shown)
@@ -99,6 +100,13 @@ const recorder = new SessionRecorder({
   onBatchSent: (sessionId, eventCount, bytes) => {}
 });
 ```
+
+### Privacy Options Explained
+
+- **`maskAll`**: When `true`, masks ALL content on the page (overrides all other masking options)
+- **`maskAllInputs`**: When `true`, masks all `<input>`, `<textarea>`, and `<select>` elements by default
+- **`maskSelector`**: CSS selector that masks both text content AND input values (applied to both `maskTextSelector` and `maskInputSelector` in rrweb)
+- **`blockSelector`**: CSS selector for elements to completely exclude from recording (they appear as blank spaces)
 
 ## API
 

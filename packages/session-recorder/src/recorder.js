@@ -47,18 +47,26 @@ export class Recorder {
 			emit: this.onEvent,
 			checkoutEveryNth: this.config.checkoutEveryNth,
 			checkoutEveryNms: this.config.checkoutEveryNms,
-			maskAllInputs: this.config.maskAll || false,
 			blockSelector: this.config.blockSelector,
 			inlineStylesheet: this.config.inlineStylesheet,
 			sampling: this.config.sampling
 		};
 
 		if (this.config.maskAll) {
+			// Mask everything when maskAll is true
+			config.maskAllInputs = true;
 			config.maskTextClass = /.*/;
 			config.maskTextFn = (text) => '*'.repeat(text.length);
 			config.maskInputFn = (text) => '*'.repeat(text.length);
 		} else {
-			config.maskTextSelector = this.config.maskTextSelector;
+			// Use selective masking
+			config.maskAllInputs = this.config.maskAllInputs;
+
+			// Apply the same selector to both text and input masking
+			if (this.config.maskSelector) {
+				config.maskTextSelector = this.config.maskSelector;
+				config.maskInputSelector = this.config.maskSelector;
+			}
 		}
 
 		return config;
