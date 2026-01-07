@@ -7,12 +7,8 @@
 </script>
 
 <DropdownMenu.Root>
-	<DropdownMenu.Trigger asChild let:builder>
-		<Button
-			variant="ghost"
-			builders={[builder]}
-			class="flex h-8 w-8 p-0 data-[state=open]:bg-muted"
-		>
+	<DropdownMenu.Trigger>
+		<Button variant="ghost" class="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
 			<DotsHorizontal class="h-4 w-4" />
 			<span class="sr-only">Open Menu</span>
 		</Button>

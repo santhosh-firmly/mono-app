@@ -1,9 +1,8 @@
 <script>
 	import { Tabs as TabsPrimitive } from 'bits-ui';
 	import { cn } from '$lib/utils.js';
-	let className = undefined;
-	export let value;
-	export { className as class };
+
+	let { value, class: className, children, ...restProps } = $props();
 </script>
 
 <TabsPrimitive.Trigger
@@ -12,8 +11,7 @@
 		className
 	)}
 	{value}
-	{...$$restProps}
-	on:click
+	{...restProps}
 >
-	<slot />
+	{@render children?.()}
 </TabsPrimitive.Trigger>

@@ -133,8 +133,8 @@
 					const { store_id } = row.original;
 
 					return createRender(DataTableRowActions, {
-						onEdit: () => goto(`/merchants/${store_id}/edit`),
-						onOpenProducts: () => goto(`/merchants/${store_id}/products`)
+						onEdit: () => goto(`merchants/${store_id}/edit`),
+						onOpenProducts: () => goto(`merchants/${store_id}/products`)
 					});
 				}
 				return '';

@@ -1,0 +1,240 @@
+{/* foundations/iconography.mdx */}
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Foundations/Iconography" />
+
+# Iconography
+
+The Firmly Dashboard uses **Lucide Icons** for consistent, clean iconography throughout the interface. Lucide is a fork of Feather Icons with additional icons and active maintenance.
+
+## Installation
+
+Icons are imported from `lucide-svelte`:
+
+```svelte
+<script>
+  import Home from 'lucide-svelte/icons/home';
+  import Settings from 'lucide-svelte/icons/settings';
+  import User from 'lucide-svelte/icons/user';
+</script>
+
+<Home class="h-5 w-5" />
+```
+
+---
+
+## Icon Sizes
+
+We use three standard icon sizes throughout the dashboard:
+
+| Size | Class | Usage |
+|------|-------|-------|
+| 16px | `h-4 w-4` | Inline with text, badges, compact buttons |
+| 20px | `h-5 w-5` | Navigation, button icons, form fields |
+| 24px | `h-6 w-6` | Headers, empty states, large buttons |
+
+### Size Examples
+
+```svelte
+<!-- Small (16px) - inline icons -->
+<span class="flex items-center gap-1">
+  <Check class="h-4 w-4" />
+  Verified
+</span>
+
+<!-- Medium (20px) - buttons and nav -->
+<button class="flex items-center gap-2">
+  <Plus class="h-5 w-5" />
+  Add Item
+</button>
+
+<!-- Large (24px) - headers and empty states -->
+<div class="flex flex-col items-center gap-4">
+  <Package class="h-6 w-6 text-muted-foreground" />
+  <p>No orders yet</p>
+</div>
+```
+
+---
+
+## Common Icons by Category
+
+### Navigation
+
+| Icon | Name | Usage |
+|------|------|-------|
+| 🏠 | `home` | Dashboard home |
+| 📦 | `package` | Orders |
+| 🛍️ | `shopping-bag` | Products |
+| 👥 | `users` | Team |
+| ⚙️ | `settings` | Settings |
+| 📊 | `bar-chart-2` | Analytics |
+| 🔔 | `bell` | Notifications |
+
+### Actions
+
+| Icon | Name | Usage |
+|------|------|-------|
+| ➕ | `plus` | Add new item |
+| ✏️ | `pencil` | Edit |
+| 🗑️ | `trash-2` | Delete |
+| 📋 | `copy` | Copy to clipboard |
+| ↗️ | `external-link` | Open in new tab |
+| ⬇️ | `download` | Download |
+| 🔄 | `refresh-cw` | Refresh |
+
+### Status
+
+| Icon | Name | Usage |
+|------|------|-------|
+| ✓ | `check` | Success, completed |
+| ✗ | `x` | Error, close |
+| ⚠️ | `alert-triangle` | Warning |
+| ℹ️ | `info` | Information |
+| ⏳ | `clock` | Pending |
+| ✓✓ | `check-circle-2` | Verified |
+
+### Form & Input
+
+| Icon | Name | Usage |
+|------|------|-------|
+| 🔍 | `search` | Search input |
+| 👁️ | `eye` | Show password |
+| 👁️‍🗨️ | `eye-off` | Hide password |
+| 📧 | `mail` | Email field |
+| 📱 | `phone` | Phone field |
+| 📍 | `map-pin` | Address field |
+
+### User & Authentication
+
+| Icon | Name | Usage |
+|------|------|-------|
+| 👤 | `user` | User profile |
+| 🔐 | `lock` | Authentication |
+| 🔓 | `unlock` | Unlock |
+| ↪️ | `log-out` | Logout |
+| 🔑 | `key` | API keys |
+
+### Data & Tables
+
+| Icon | Name | Usage |
+|------|------|-------|
+| ↕️ | `chevrons-up-down` | Sort |
+| ◀ | `chevron-left` | Previous |
+| ▶ | `chevron-right` | Next |
+| ⋮ | `more-vertical` | Row actions |
+| ⋯ | `more-horizontal` | Additional options |
+| 📃 | `file-text` | Documents |
+
+### Finance & Orders
+
+| Icon | Name | Usage |
+|------|------|-------|
+| 💳 | `credit-card` | Payment |
+| 💰 | `dollar-sign` | Amount |
+| 🧾 | `receipt` | Invoice |
+| 📦 | `package` | Shipment |
+| 🚚 | `truck` | Delivery |
+| 🏪 | `store` | Merchant |
+
+---
+
+## Icon Colors
+
+Icons inherit the text color by default. Use Tailwind classes to control color:
+
+```svelte
+<!-- Default (inherits text color) -->
+<Settings class="h-5 w-5" />
+
+<!-- Muted -->
+<Settings class="h-5 w-5 text-muted-foreground" />
+
+<!-- Success -->
+<CheckCircle class="h-5 w-5 text-green-600" />
+
+<!-- Error -->
+<AlertCircle class="h-5 w-5 text-red-600" />
+
+<!-- Warning -->
+<AlertTriangle class="h-5 w-5 text-yellow-600" />
+
+<!-- Info -->
+<Info class="h-5 w-5 text-blue-600" />
+```
+
+---
+
+## Custom Brand Icons
+
+### Firmly Logo
+
+The Firmly logo is a custom SVG component:
+
+```svelte
+<script>
+  import FirmlyLogo from '$lib/components/firmly-logo.svelte';
+</script>
+
+<FirmlyLogo class="h-8" />
+```
+
+### Merchant Avatar
+
+Merchant avatars show the first letter of the merchant name:
+
+```svelte
+<script>
+  import MerchantAvatar from '$lib/components/merchant/merchant-avatar.svelte';
+</script>
+
+<MerchantAvatar name="Acme Store" size="md" />
+```
+
+---
+
+## Best Practices
+
+### Consistency
+
+1. **Use standard sizes** - Stick to h-4, h-5, or h-6
+2. **Align with text** - Use `flex items-center gap-2` for icon + text
+3. **Match icon weight** - Lucide icons have a 2px stroke weight
+
+### Accessibility
+
+1. **Add labels** - Icons used as buttons need aria-label
+2. **Don't rely on icons alone** - Pair with text when meaning isn't obvious
+3. **Ensure contrast** - Icon color should have sufficient contrast
+
+```svelte
+<!-- Icon-only button with label -->
+<button aria-label="Delete item">
+  <Trash2 class="h-5 w-5" />
+</button>
+
+<!-- Icon with visible text -->
+<button>
+  <Trash2 class="h-5 w-5" />
+  <span>Delete</span>
+</button>
+```
+
+### Loading States
+
+Use animated icons for loading states:
+
+```svelte
+<script>
+  import Loader2 from 'lucide-svelte/icons/loader-2';
+</script>
+
+<Loader2 class="h-5 w-5 animate-spin" />
+```
+
+---
+
+## Resources
+
+- [Lucide Icons](https://lucide.dev/icons/) - Browse all available icons
+- [Lucide Svelte](https://lucide.dev/guide/packages/lucide-svelte) - Svelte integration docs

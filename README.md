@@ -1,78 +1,41 @@
 # Firmly Frontend Monorepo
 
-Welcome to the Firmly Frontend Monorepo! This repository contains all the frontend applications and shared packages used across the Firmly ecosystem.
+Lerna-managed monorepo for Firmly frontend applications. Built with Svelte 5, SvelteKit, and deployed to Cloudflare Workers.
 
-## 📦 What's Inside
+## Packages
 
-This monorepo is organized into multiple packages using Lerna for managing cross-package dependencies and versioning:
+| Package | Description |
+|---------|-------------|
+| **dash** | Merchant dashboard application |
+| **dropin-service** | Payment drop-in widget (v4/v5) |
+| **var-service** | VAR service application |
+| **session-recorder** | Session recording library |
+| **dash-do** | Durable Objects for dash |
+| **eslint-config** | Shared ESLint/Prettier config |
 
-- **dropin-service** - Svelte-based frontend application for the drop-in payment service
-- **eslint-config** - Shared ESLint and Prettier configuration used across all packages
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js (LTS version recommended)
-- npm
-
-### Installation
+## Quick Start
 
 ```bash
-# Install dependencies
 npm install
+npm run dev --workspace dash
 ```
 
-## 🛠️ Development
-
-### Working with packages
+## Commands
 
 ```bash
-# Start development server for a specific package
-npm run dev --workspace dropin-service
-
-# Build a specific package
-npm run build --workspace dropin-service
+npm run dev --workspace <package>     # Start dev server
+npm run build --workspace <package>   # Build package
+npm run storybook --workspace dash    # Run Storybook
+npm test                              # Run all tests
+npm run format-code                   # Lint and format
+npm run deploy-dev                    # Deploy to dev
 ```
 
-### Code Quality
+## Environments
 
-This repository uses a shared ESLint and Prettier configuration to ensure code consistency across all packages:
+Build/deploy commands support: `dev`, `ci`, `qa`, `uat`, `prod`
 
 ```bash
-# Lint and format all packages
-npm run format-code
+npm run build-prod --workspace dash
+npm run deploy-prod --workspace dash
 ```
-
-## 🧪 Testing
-
-```bash
-# Run tests across all packages
-npm test
-
-# Run tests for a specific package
-npm test --workspace dropin-service
-```
-
-## 📝 Committing Changes
-
-We use Husky for pre-commit hooks to ensure code quality before committing:
-
-1. Write your code
-2. Stage your changes
-3. Commit (the pre-commit hook will run automatically)
-
-## 📚 Documentation
-
-Each package contains its own README with package-specific documentation:
-
-- [dropin-service](./packages/dropin-service/README.md)
-- [eslint-config](./packages/eslint-config/README.md)
-
-## 📋 CI/CD
-
-This repository uses GitHub Actions for continuous integration:
-
-- **ci-mono.yml** - Runs tests and linting across all packages
-- **ci-service-delivery.yml** - Handles deployment for the dropin-service
-- **update-version.yml** - Manages version updates

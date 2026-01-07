@@ -1,0 +1,89 @@
+{
+  "order": {
+    "id": "ord_123456",
+    "platform_order_number": "1042",
+    "shop_id": "example-store.com",
+    "display_name": "Example Store",
+    "app_id": "app_abc123xyz",
+    "status": "Completed",
+    "created_dt": "2024-12-15T14:30:00Z",
+    "order_total": 157.99,
+    "order_info": {
+      "line_items": [
+        {
+          "name": "Premium Wireless Headphones",
+          "description": "Premium Wireless Headphones - Black",
+          "sku": "WH-PRO-BLK",
+          "quantity": 1,
+          "unit_price": { "value": 89.99 },
+          "line_price": { "value": 89.99 },
+          "variant": "Black / Large",
+          "image_url": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=200"
+        },
+        {
+          "name": "USB-C Charging Cable",
+          "description": "USB-C to USB-C Fast Charging Cable (6ft)",
+          "sku": "USB-C-6FT",
+          "quantity": 2,
+          "unit_price": { "value": 14.99 },
+          "line_price": { "value": 29.98 },
+          "options": "6ft / White"
+        },
+        {
+          "name": "Headphone Stand",
+          "description": "Aluminum Headphone Stand",
+          "sku": "HS-ALU-001",
+          "quantity": 1,
+          "unit_price": { "value": 24.99 },
+          "line_price": { "value": 24.99 }
+        }
+      ],
+      "sub_total": 144.96,
+      "cart_discount": { "value": 10.00 },
+      "shipping_total": 8.99,
+      "tax": 14.04,
+      "total": 157.99,
+      "shipping_info": {
+        "name": "John Smith",
+        "email": "john.smith@example.com",
+        "phone": "+1 (555) 123-4567",
+        "address_line_1": "123 Main Street",
+        "address_line_2": "Apt 4B",
+        "city": "San Francisco",
+        "state_or_province": "CA",
+        "postal_code": "94102",
+        "country": "United States"
+      },
+      "billing_info": {
+        "name": "John Smith",
+        "address_line_1": "123 Main Street",
+        "address_line_2": "Apt 4B",
+        "city": "San Francisco",
+        "state_or_province": "CA",
+        "postal_code": "94102",
+        "country": "United States"
+      },
+      "shipping_method": {
+        "description": "Express Shipping (2-3 Business Days)",
+        "estimated_delivery": "December 18, 2024",
+        "tracking_number": "1Z999AA10123456784"
+      },
+      "payment_summary": {
+        "card_type": "Visa",
+        "last_four": "4242",
+        "amount": 157.99
+      }
+    }
+  },
+  "navigation": {
+    "currentIndex": 5,
+    "totalOrders": 142,
+    "prevOrder": {
+      "platform_order_number": "1041"
+    },
+    "nextOrder": {
+      "platform_order_number": "1043"
+    }
+  },
+  "destinationName": "Partner Store Name"
+}

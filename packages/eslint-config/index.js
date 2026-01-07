@@ -5,6 +5,7 @@ import { includeIgnoreFile } from '@eslint/compat';
 import svelte from 'eslint-plugin-svelte';
 import globals from 'globals';
 import noRelativeLibImports from './rules/no-relative-lib-imports.js';
+import kebabCaseFilename from './rules/kebab-case-filename.js';
 
 const gitignorePath = fileURLToPath(new URL('../../.gitignore', import.meta.url));
 
@@ -34,9 +35,13 @@ export default function createConfig({ svelteConfig, ignores = [] }) {
 			plugins: {
 				custom: {
 					rules: {
-						'no-relative-lib-imports': noRelativeLibImports
+						'no-relative-lib-imports': noRelativeLibImports,
+						'kebab-case-filename': kebabCaseFilename
 					}
 				}
+			},
+			rules: {
+				'custom/kebab-case-filename': 'error'
 			}
 		},
 		{

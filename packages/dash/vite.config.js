@@ -7,7 +7,9 @@ export default defineConfig((ctx) => {
 		plugins: [sveltekit()]
 	};
 
-	if (!['build'].includes(ctx.command) && ctx.isPreview === false) {
+	// Cloudflare vite plugin provides bindings/D1/KV support in dev mode
+	// Not needed for build - adapter-cloudflare handles production bundling
+	if (ctx.command !== 'build') {
 		config.plugins.push(cloudflare());
 	}
 

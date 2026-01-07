@@ -1,0 +1,173 @@
+{/* foundations/typography.mdx */}
+import { Meta, Typeset } from '@storybook/blocks';
+
+<Meta title="Foundations/Theme/Typography" />
+
+# Typography
+
+The Firmly Dashboard uses **Inter** as the primary font family, with **Josefin Sans** for specific branding elements like the Firmly logo.
+
+## Font Families
+
+### Inter
+
+Inter is a highly readable typeface designed for computer screens. It's used throughout the dashboard for all UI text.
+
+<div>
+  <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '24px', fontWeight: 400 }}>Inter Regular - The quick brown fox jumps over the lazy dog</p>
+  <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '24px', fontWeight: 500 }}>Inter Medium - The quick brown fox jumps over the lazy dog</p>
+  <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '24px', fontWeight: 600 }}>Inter Semibold - The quick brown fox jumps over the lazy dog</p>
+  <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '24px', fontWeight: 700 }}>Inter Bold - The quick brown fox jumps over the lazy dog</p>
+</div>
+
+### Josefin Sans
+
+Used exclusively for the Firmly brand name and logo.
+
+<div>
+  <p style={{ fontFamily: 'Josefin Sans, sans-serif', fontSize: '32px', fontWeight: 500 }}>firmly.</p>
+</div>
+
+---
+
+## Type Scale
+
+Our type scale follows Tailwind CSS conventions, providing consistent sizing throughout the interface.
+
+### Headings
+
+<div>
+  <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '36px', lineHeight: '40px', fontWeight: 700, marginBottom: '16px' }}>
+    text-4xl (36px) - Page Titles
+  </p>
+  <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '30px', lineHeight: '36px', fontWeight: 600, marginBottom: '16px' }}>
+    text-3xl (30px) - Section Headers
+  </p>
+  <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '24px', lineHeight: '32px', fontWeight: 600, marginBottom: '16px' }}>
+    text-2xl (24px) - Card Titles
+  </p>
+  <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '20px', lineHeight: '28px', fontWeight: 600, marginBottom: '16px' }}>
+    text-xl (20px) - Subsection Headers
+  </p>
+  <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '18px', lineHeight: '28px', fontWeight: 600, marginBottom: '16px' }}>
+    text-lg (18px) - Large Text
+  </p>
+</div>
+
+### Body Text
+
+<div>
+  <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '16px', lineHeight: '24px', marginBottom: '12px' }}>
+    text-base (16px) - Default body text. Used for paragraphs and general content.
+  </p>
+  <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', lineHeight: '20px', marginBottom: '12px' }}>
+    text-sm (14px) - Secondary text. Used for descriptions, labels, and table content.
+  </p>
+  <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', lineHeight: '16px', marginBottom: '12px' }}>
+    text-xs (12px) - Small text. Used for captions, timestamps, and helper text.
+  </p>
+</div>
+
+---
+
+## Font Weights
+
+| Weight | Class | Usage |
+|--------|-------|-------|
+| 400 | `font-normal` | Body text, descriptions |
+| 500 | `font-medium` | Labels, nav items, emphasis |
+| 600 | `font-semibold` | Headings, buttons |
+| 700 | `font-bold` | Page titles, strong emphasis |
+
+---
+
+## Line Heights
+
+| Size | Line Height | Tailwind |
+|------|-------------|----------|
+| text-xs (12px) | 16px | `leading-4` |
+| text-sm (14px) | 20px | `leading-5` |
+| text-base (16px) | 24px | `leading-6` |
+| text-lg (18px) | 28px | `leading-7` |
+| text-xl (20px) | 28px | `leading-7` |
+| text-2xl (24px) | 32px | `leading-8` |
+| text-3xl (30px) | 36px | `leading-9` |
+| text-4xl (36px) | 40px | `leading-10` |
+
+---
+
+## Usage Examples
+
+### Page Header
+
+```svelte
+<h1 class="text-2xl font-bold tracking-tight">
+  Dashboard
+</h1>
+<p class="text-muted-foreground">
+  Overview of your store's performance
+</p>
+```
+
+### Card Title
+
+```svelte
+<h2 class="text-lg font-semibold">
+  Recent Orders
+</h2>
+```
+
+### Form Label
+
+```svelte
+<label class="text-sm font-medium">
+  Email Address
+</label>
+```
+
+### Helper Text
+
+```svelte
+<p class="text-xs text-muted-foreground">
+  This will be displayed on your checkout page
+</p>
+```
+
+### Table Content
+
+```svelte
+<td class="text-sm">
+  $1,234.56
+</td>
+<td class="text-sm text-muted-foreground">
+  Jan 5, 2025
+</td>
+```
+
+---
+
+## Best Practices
+
+### Hierarchy
+
+1. Use **one primary heading** per section (usually the page title)
+2. Use progressively smaller headings for nested sections
+3. Don't skip heading levels (h1 → h3)
+
+### Readability
+
+- Keep line length between 50-75 characters for optimal readability
+- Use `tracking-tight` for headings to improve visual weight
+- Add sufficient line height for body text
+
+### Consistency
+
+- Use `font-semibold` for all headings (not bold)
+- Use `font-medium` for labels and navigation
+- Use `font-normal` for body text
+
+### Accessibility
+
+- Maintain minimum 16px for body text
+- Ensure sufficient color contrast
+- Don't rely on text styling alone to convey meaning

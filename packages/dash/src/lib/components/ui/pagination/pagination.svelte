@@ -15,13 +15,12 @@
 	{perPage}
 	{siblingCount}
 	bind:page
-	let:builder
 	let:pages
 	let:range
 	asChild
 	{...$$restProps}
 >
-	<nav {...builder} class={cn('mx-auto flex w-full flex-col items-center', className)}>
+	<nav class={cn('mx-auto flex w-full flex-col items-center', className)}>
 		<slot {pages} {range} {currentPage} />
 	</nav>
 </PaginationPrimitive.Root>

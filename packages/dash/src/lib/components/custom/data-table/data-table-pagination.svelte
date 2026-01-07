@@ -22,15 +22,16 @@
 		<div class="flex items-center space-x-2">
 			<p class="text-sm font-medium">Rows per page</p>
 			<Select.Root
-				onSelectedChange={(selected) => pageSize.set(Number(selected?.value))}
-				selected={{ value: 10, label: '10' }}
+				type="single"
+				value={String($pageSize)}
+				onValueChange={(value) => pageSize.set(Number(value))}
 			>
 				<Select.Trigger class="h-8 w-[70px]">
-					<Select.Value placeholder="Select page size" />
+					<Select.Value placeholder="Select page size">{$pageSize}</Select.Value>
 				</Select.Trigger>
 				<Select.Content>
 					{#each rowsPerPageOptions as quantity (quantity)}
-						<Select.Item value={quantity}>{quantity}</Select.Item>
+						<Select.Item value={String(quantity)}>{quantity}</Select.Item>
 					{/each}
 				</Select.Content>
 			</Select.Root>

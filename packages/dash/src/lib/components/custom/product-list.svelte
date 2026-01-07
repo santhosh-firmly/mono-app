@@ -72,13 +72,8 @@
 						<Table.Cell class="hidden md:table-cell">{product.handle}</Table.Cell>
 						<Table.Cell>
 							<DropdownMenu.Root>
-								<DropdownMenu.Trigger asChild let:builder>
-									<Button
-										aria-haspopup="true"
-										size="icon"
-										variant="ghost"
-										builders={[builder]}
-									>
+								<DropdownMenu.Trigger>
+									<Button aria-haspopup="true" size="icon" variant="ghost">
 										<Ellipsis class="h-4 w-4" />
 										<span class="sr-only">Toggle menu</span>
 									</Button>

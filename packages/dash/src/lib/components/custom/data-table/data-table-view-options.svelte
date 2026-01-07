@@ -20,8 +20,8 @@
 </script>
 
 <DropdownMenu.Root>
-	<DropdownMenu.Trigger asChild let:builder>
-		<Button variant="outline" size="sm" class="ml-auto h-8" builders={[builder]}>
+	<DropdownMenu.Trigger>
+		<Button variant="outline" size="sm" class="ml-auto h-8">
 			<MixerHorizontal class="mr-2 h-4 w-4" />
 			View
 		</Button>

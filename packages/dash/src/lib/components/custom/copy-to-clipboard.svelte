@@ -16,8 +16,8 @@
 {#if isClipboardAvailable}
 	<Button
 		size="icon"
-		variant="outline"
-		class="h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
+		variant=""
+		class="h-6 w-6"
 		on:click={() => {
 			try {
 				navigator.clipboard.writeText(value);
@@ -31,7 +31,7 @@
 		}}
 	>
 		{#if copied}
-			<Checkmark class="h-3 w-3" />
+			<Checkmark class="h-3 w-3 text-green-500" />
 		{:else}
 			<Copy class="h-3 w-3" />
 		{/if}
