@@ -25,12 +25,16 @@ export async function handle({ event, resolve }) {
 	const jwt = event.cookies.get(platform.env.FIRMLY_AUTH_COOKIE);
 
 	try {
-		event.locals.authInfo = (
-			await enforceSSOAuth(jwt, {
-				azureTenantId: platform.env.PUBLIC_AZURE_AD_TENANT_ID,
-				azureClientId: platform.env.PUBLIC_AZURE_AD_CLIENT_ID
-			})
-		).authInfo;
+		const { authInfo } = await enforceSSOAuth(jwt, {
+			azureTenantId: platform.env.PUBLIC_AZURE_AD_TENANT_ID,
+			azureClientId: platform.env.PUBLIC_AZURE_AD_CLIENT_ID
+		});
+
+		event.locals.auth = {
+			name: authInfo.name,
+			email: authInfo.email,
+			jwt
+		};
 
 		return resolve(event);
 	} catch (error) {

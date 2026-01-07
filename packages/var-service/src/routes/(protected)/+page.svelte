@@ -1,5 +1,5 @@
 <script>
-	import { sessionsStore } from '$lib/stores/sessions.svelte.js';
+	import SessionsService from '$lib/services/sessions.js';
 	import SessionList from '$lib/components/session-list.svelte';
 	import Button from '$lib/components/button.svelte';
 	import Avatar from '$lib/components/avatar.svelte';
@@ -9,8 +9,24 @@
 
 	let { data } = $props();
 
-	$effect(() => {
-		sessionsStore.fetchSessions(data.dvrServiceUrl);
+	let sessions = $state([]);
+	let loading = $state(true);
+	let error = $state(null);
+
+	let service = $derived(new SessionsService(data.dvrServiceUrl, data.auth.jwt));
+
+	$effect(async () => {
+		loading = true;
+		error = null;
+		sessions = [];
+
+		try {
+			sessions = await service.fetchSessions();
+		} catch (err) {
+			error = err.message;
+		} finally {
+			loading = false;
+		}
 	});
 
 	function goToExample() {
@@ -28,13 +44,13 @@
 			<h1 class="font-serif text-2xl">Welcome to VAR</h1>
 			<p class="text-muted text-sm">View and replay recorded user sessions.</p>
 		</div>
-		{#if data?.authInfo?.name}
+		{#if data?.auth?.name}
 			<DropdownMenu>
 				{#snippet trigger()}
-					<Avatar name={data.authInfo.name} />
+					<Avatar name={data.auth.name} />
 				{/snippet}
 				<div class="text-muted-foreground border-border mb-1.5 border-b px-3 py-2 text-sm">
-					{data.authInfo.name}
+					{data.auth.name}
 				</div>
 				<DropdownMenuPrimitive.Item
 					class="relative flex cursor-pointer items-center rounded-md px-3 py-2 text-xs text-red-600 transition-colors outline-none select-none hover:bg-red-50"
@@ -46,12 +62,7 @@
 		{/if}
 	</header>
 
-	<SessionList
-		sessions={sessionsStore.sessions}
-		loading={sessionsStore.loading}
-		error={sessionsStore.error}
-		onDelete={() => {}}
-	>
+	<SessionList {sessions} {loading} {error} onDelete={() => {}}>
 		{#snippet emptyState()}
 			<div>
 				<p class="text-muted mb-4 text-sm">No sessions yet</p>

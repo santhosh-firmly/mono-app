@@ -1,8 +1,8 @@
 <script>
 	import { goto } from '$app/navigation';
-	import { sessionsStore } from '$lib/stores/sessions.svelte.js';
 	import SessionPlayer from '$lib/components/session-player.svelte';
 	import SessionDetails from '$lib/components/session-details.svelte';
+	import SessionsService from '$lib/services/sessions.js';
 	import Button from '$lib/components/button.svelte';
 
 	let { data } = $props();
@@ -11,13 +11,20 @@
 	let isLoading = $state();
 	let error = $state();
 
-	$effect(() => {
+	let service = $derived(new SessionsService(data.dvrServiceUrl, data.auth.jwt));
+
+	$effect(async () => {
 		isLoading = true;
-		sessionsStore
-			.fetchSessionById(data.dvrServiceUrl, data.id)
-			.then((session) => (sessionData = session))
-			.catch((err) => (error = err))
-			.finally(() => (isLoading = false));
+		error = null;
+		sessionData = null;
+
+		try {
+			sessionData = await service.fetchSessionById(data.id);
+		} catch (err) {
+			error = err.message;
+		} finally {
+			isLoading = false;
+		}
 	});
 </script>
 
