@@ -26,6 +26,8 @@
 		const secs = seconds % 60;
 		return `${mins}:${secs.toString().padStart(2, '0')}`;
 	}
+
+	const speeds = [0.5, 1, 2, 4];
 </script>
 
 <div class="flex items-center gap-3 text-xs">
@@ -60,30 +62,14 @@
 	</div>
 
 	<div class="border-border flex gap-1 border-l pl-3">
-		<Button
-			onclick={() => onChangeSpeed(0.5)}
-			class="px-2 {speed === 0.5 ? 'text-foreground' : 'text-muted'}"
-		>
-			0.5x
-		</Button>
-		<Button
-			onclick={() => onChangeSpeed(1)}
-			class="px-2 {speed === 1 ? 'text-foreground' : 'text-muted'}"
-		>
-			1x
-		</Button>
-		<Button
-			onclick={() => onChangeSpeed(2)}
-			class="px-2 {speed === 2 ? 'text-foreground' : 'text-muted'}"
-		>
-			2x
-		</Button>
-		<Button
-			onclick={() => onChangeSpeed(4)}
-			class="px-2 {speed === 4 ? 'text-foreground' : 'text-muted'}"
-		>
-			4x
-		</Button>
+		{#each speeds as speedValue (speedValue)}
+			<Button
+				onclick={() => onChangeSpeed(speedValue)}
+				class="px-2 {speed === speedValue ? 'text-foreground' : 'text-muted'}"
+			>
+				{speedValue}x
+			</Button>
+		{/each}
 	</div>
 
 	<div class="border-border border-l pl-3">

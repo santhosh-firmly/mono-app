@@ -167,7 +167,8 @@
 
 	.controls-wrapper {
 		padding: 1rem;
-		border-top: 1px solid var(--color-border);
+		background: white;
+		border: 1px solid var(--color-border);
 	}
 
 	/* Override rrweb-player styles */
@@ -255,5 +256,40 @@
 	.session-player-wrapper:fullscreen :global(.replayer-wrapper iframe) {
 		width: 100% !important;
 		height: 100% !important;
+	}
+
+	/* Global rr-player styles */
+	:global(.rr-player) {
+		box-shadow: none !important;
+		border-radius: 0 !important;
+		border: none !important;
+		margin: 0 auto !important;
+		background: transparent !important;
+	}
+
+	:global(.rr-player__frame) {
+		background: white !important;
+		border: none !important;
+		border-radius: 0 !important;
+		box-shadow: none !important;
+	}
+
+	:global(.rr-controller) {
+		display: none !important;
+	}
+
+	:global(.rr-player:fullscreen) {
+		background: var(--color-background) !important;
+		padding: 2rem !important;
+		display: flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+	}
+
+	:global(.rr-player:fullscreen .rr-player__frame) {
+		max-width: 100% !important;
+		max-height: calc(100vh - 100px) !important;
+		width: auto !important;
+		height: auto !important;
 	}
 </style>

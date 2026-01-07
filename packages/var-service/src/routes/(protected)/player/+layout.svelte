@@ -1,6 +1,5 @@
 <script>
 	import '../../app.css';
-	import './player.css';
 
 	const { children } = $props();
 </script>
