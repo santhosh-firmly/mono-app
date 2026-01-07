@@ -1,6 +1,4 @@
 <script>
-	import { cn } from '$lib/utils/cn.js';
-
 	let {
 		children,
 		variant = 'default',
@@ -20,7 +18,7 @@
 <button
 	{type}
 	{onclick}
-	class={cn('text-xs transition-colors', variants[variant], className)}
+	class={['text-xs transition-colors', variants[variant], className]}
 	{...rest}
 >
 	{@render children()}

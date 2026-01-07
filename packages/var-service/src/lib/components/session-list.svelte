@@ -4,7 +4,6 @@
 	import Input from './input.svelte';
 	import SessionListItem from './session-list-item.svelte';
 	import Skeleton from './skeleton.svelte';
-	import { cn } from '$lib/utils/cn.js';
 	import { DEFAULT_ITEMS_PER_PAGE, PAGINATION_THRESHOLD } from '$lib/constants/pagination.js';
 
 	let {
@@ -45,7 +44,7 @@
 	}
 </script>
 
-<div class={cn('mx-auto flex min-h-125 w-full max-w-170 flex-col', className)} {...rest}>
+<div class={['mx-auto flex min-h-125 w-full max-w-170 flex-col', className]} {...rest}>
 	{#if searchable}
 		<div class="mb-8">
 			<Input bind:value={searchQuery} placeholder="Search sessions..." />

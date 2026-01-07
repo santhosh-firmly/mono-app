@@ -1,10 +1,8 @@
 <script>
-	import { cn } from '$lib/utils/cn.js';
-
 	let { class: className, ...rest } = $props();
 </script>
 
-<div class={cn('bg-muted/20 animate-pulse rounded', className)} {...rest}></div>
+<div class={['bg-muted/20 animate-pulse rounded', className]} {...rest}></div>
 
 <style>
 	@keyframes pulse {

@@ -1,6 +1,4 @@
 <script>
-	import { cn } from '$lib/utils/cn.js';
-
 	let {
 		value = $bindable(''),
 		placeholder = '',
@@ -14,10 +12,10 @@
 	bind:value
 	{type}
 	{placeholder}
-	class={cn(
+	class={[
 		'border-border w-full rounded-full border bg-white px-4 py-3 text-sm',
 		'focus:border-foreground transition-colors focus:outline-none',
 		className
-	)}
+	]}
 	{...rest}
 />
