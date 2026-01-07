@@ -63,13 +63,13 @@ export class Batching {
 		this.events.push(event);
 
 		// Check if any flush limits are exceeded
-		const shouldFlush = this.#shouldFlush();
-
-		if (shouldFlush) {
-			const reason = this.#getFlushReason();
+		// Calculate payload size once and reuse it to avoid redundant JSON.stringify calls
+		const payloadSize = this.#getPayloadSize();
+		if (this.#shouldFlush(payloadSize)) {
+			const reason = this.#getFlushReason(payloadSize);
 			debugLog('Flushing batch (limit reached)', {
 				eventCount: this.events.length,
-				payloadSize: this.#getPayloadSize(),
+				payloadSize,
 				reason
 			});
 			this.flush(reason);
@@ -116,26 +116,27 @@ export class Batching {
 
 	/**
 	 * Checks if the batch should be flushed based on configured limits
+	 * @param {number} payloadSize - Pre-calculated payload size to avoid redundant JSON.stringify
 	 * @returns {boolean} True if any limit is exceeded
 	 * @private
 	 */
-	#shouldFlush() {
+	#shouldFlush(payloadSize) {
 		return (
-			this.events.length >= this.config.maxEvents ||
-			this.#getPayloadSize() >= this.config.maxBatchSize
+			this.events.length >= this.config.maxEvents || payloadSize >= this.config.maxBatchSize
 		);
 	}
 
 	/**
 	 * Determines the reason for flushing based on which limit was exceeded
+	 * @param {number} payloadSize - Pre-calculated payload size to avoid redundant JSON.stringify
 	 * @returns {string} The flush reason ('count', 'size', or 'unknown')
 	 * @private
 	 */
-	#getFlushReason() {
+	#getFlushReason(payloadSize) {
 		if (this.events.length >= this.config.maxEvents) {
 			return 'count';
 		}
-		if (this.#getPayloadSize() >= this.config.maxBatchSize) {
+		if (payloadSize >= this.config.maxBatchSize) {
 			return 'size';
 		}
 		return 'unknown';

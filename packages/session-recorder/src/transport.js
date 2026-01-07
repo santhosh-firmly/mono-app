@@ -87,22 +87,33 @@ export class Transport {
 
 	/**
 	 * Splits events into chunks based on max size
+	 * Optimized to avoid repeated JSON.stringify calls by calculating sizes incrementally
 	 * @param {Array} events - Array of events
 	 * @param {number} maxSize - Maximum size in bytes
 	 * @returns {Array<Array>} Array of event chunks
 	 */
 	#splitIntoChunks(events, maxSize) {
 		const chunks = [];
+		if (events.length === 0) return chunks;
+
 		let currentChunk = [];
+		// Get the size of the payload wrapper without any events
+		// Subtract 2 for the empty array brackets `[]`
+		const basePayloadSize = this.#createPayload([], false).length - 2;
+		let currentChunkSize = basePayloadSize;
 
 		for (const event of events) {
-			const testPayload = this.#createPayload([...currentChunk, event], false);
+			const eventString = JSON.stringify(event);
+			// Add 1 for the comma separator if the chunk is not empty
+			const eventSize = eventString.length + (currentChunk.length > 0 ? 1 : 0);
 
-			if (testPayload.length >= maxSize && currentChunk.length > 0) {
+			if (currentChunkSize + eventSize > maxSize && currentChunk.length > 0) {
 				chunks.push(currentChunk);
 				currentChunk = [event];
+				currentChunkSize = basePayloadSize + eventString.length;
 			} else {
 				currentChunk.push(event);
+				currentChunkSize += eventSize;
 			}
 		}
 
