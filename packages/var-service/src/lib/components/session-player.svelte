@@ -14,6 +14,7 @@
 	let speed = $state(1);
 	let skipInactive = $state(false);
 	let inactivePeriods = $state([]);
+	let sessionPlayerWrapper;
 
 	onMount(() => {
 		if (!events || events.length === 0) return;
@@ -47,7 +48,7 @@
 				showController: false,
 				skipInactive: false,
 				mouseTail: true,
-				UNSAFE_replayCanvas: true
+				UNSAFE_replayCanvas: false
 			}
 		});
 
@@ -60,6 +61,13 @@
 			playing = event.payload === 'playing';
 		});
 
+		const handleFullscreenChange = () => {
+			if (player && !document.fullscreenElement) {
+				setTimeout(() => player.triggerResize(), 100);
+			}
+		};
+		document.addEventListener('fullscreenchange', handleFullscreenChange);
+
 		return () => {
 			if (player) {
 				try {
@@ -68,6 +76,7 @@
 					console.error('Error destroying player:', e);
 				}
 			}
+			document.removeEventListener('fullscreenchange', handleFullscreenChange);
 		};
 	});
 
@@ -96,11 +105,10 @@
 	}
 
 	function toggleFullscreen() {
-		const wrapperElement = document.querySelector('.session-player-wrapper');
-		if (!wrapperElement) return;
+		if (!sessionPlayerWrapper) return;
 
 		if (!document.fullscreenElement) {
-			wrapperElement.requestFullscreen().then(() => {
+			sessionPlayerWrapper.requestFullscreen().then(() => {
 				// Force player to resize after entering fullscreen
 				if (player) {
 					setTimeout(() => {
@@ -112,21 +120,9 @@
 			document.exitFullscreen();
 		}
 	}
-
-	// Listen for fullscreen changes to trigger resize
-	if (typeof document !== 'undefined') {
-		document.addEventListener('fullscreenchange', () => {
-			if (player && !document.fullscreenElement) {
-				// Exited fullscreen, resize back
-				setTimeout(() => {
-					player.triggerResize();
-				}, 100);
-			}
-		});
-	}
 </script>
 
-<div class="session-player-wrapper">
+<div bind:this={sessionPlayerWrapper} class="session-player-wrapper">
 	<div class="session-player">
 		<div bind:this={playerContainer} class="player-container"></div>
 	</div>

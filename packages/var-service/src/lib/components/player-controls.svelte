@@ -16,7 +16,7 @@
 	} = $props();
 
 	function handleSeek(e) {
-		const newTime = parseInt(e.target.value);
+		const newTime = parseInt(e.target.value, 10);
 		onSeek(newTime);
 	}
 
@@ -41,13 +41,15 @@
 
 	<div class="relative flex-1">
 		<div class="progress-track">
-			<div class="progress-fill" style="width: {(currentTime / duration) * 100}%"></div>
+			<div
+				class="progress-fill"
+				style="width: {(duration ? currentTime / duration : 0) * 100}%"
+			></div>
 			{#each inactivePeriods as period, i (i)}
 				<div
 					class="inactive-period"
-					style="left: {(period.start / duration) * 100}%; width: {((period.end -
-						period.start) /
-						duration) *
+					style="left: {(duration ? period.start / duration : 0) *
+						100}%; width: {(duration ? (period.end - period.start) / duration : 0) *
 						100}%;"
 				></div>
 			{/each}
