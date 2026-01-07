@@ -8,12 +8,14 @@ export class Transport {
 	/**
 	 * @param {string} serviceUrl - The URL of the service to send data to
 	 * @param {string} sessionId - The session ID
+	 * @param {string|null} appName - Optional application name for metadata
 	 * @param {Function} onError - Callback for errors
 	 * @param {Function} onBatchSent - Callback when batch is sent
 	 */
-	constructor(serviceUrl, sessionId, onError, onBatchSent) {
+	constructor(serviceUrl, sessionId, appName, onError, onBatchSent) {
 		this.serviceUrl = serviceUrl;
 		this.sessionId = sessionId;
+		this.appName = appName;
 		this.onError = onError;
 		this.onBatchSent = onBatchSent;
 		this.beaconLimit = 64 * 1024;
@@ -77,6 +79,7 @@ export class Transport {
 	#createPayload(events, finalize) {
 		return JSON.stringify({
 			sessionId: this.sessionId,
+			...(this.appName && { appName: this.appName }),
 			events,
 			...(finalize && { finalize: true })
 		});

@@ -18,6 +18,9 @@ export const DEFAULT_SAMPLING = {
 export const DEFAULT_CONFIG = {
 	enabled: true,
 
+	// Application metadata
+	appName: null, // Optional application name for better identification in backend
+
 	// Batching strategy
 	batchInterval: 10000, // 10 seconds
 	maxBatchSize: 500 * 1024, // 500KB - better chunk size for POST requests

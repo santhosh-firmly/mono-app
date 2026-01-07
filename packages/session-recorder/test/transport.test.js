@@ -20,6 +20,7 @@ describe('Transport', () => {
 		transport = new Transport(
 			'https://example.com',
 			'test_session_123',
+			'test-app',
 			mockOnError,
 			mockOnBatchSent
 		);
@@ -33,6 +34,7 @@ describe('Transport', () => {
 		it('should initialize with correct properties', () => {
 			expect(transport.serviceUrl).toBe('https://example.com');
 			expect(transport.sessionId).toBe('test_session_123');
+			expect(transport.appName).toBe('test-app');
 			expect(transport.onError).toBe(mockOnError);
 			expect(transport.onBatchSent).toBe(mockOnBatchSent);
 			expect(transport.beaconLimit).toBe(64 * 1024);
@@ -55,6 +57,7 @@ describe('Transport', () => {
 
 			const payload = JSON.parse(mockFetch.mock.calls[0][1].body);
 			expect(payload.sessionId).toBe('test_session_123');
+			expect(payload.appName).toBe('test-app');
 			expect(payload.events).toEqual(events);
 			expect(payload.finalize).toBeUndefined();
 		});
@@ -64,6 +67,8 @@ describe('Transport', () => {
 			await transport.sendBatch(events, true);
 
 			const payload = JSON.parse(mockFetch.mock.calls[0][1].body);
+			expect(payload.sessionId).toBe('test_session_123');
+			expect(payload.appName).toBe('test-app');
 			expect(payload.finalize).toBe(true);
 			expect(mockFetch).toHaveBeenCalledWith(
 				'https://example.com/api/sessions',
@@ -102,6 +107,24 @@ describe('Transport', () => {
 		it('should send empty batch when finalizing', async () => {
 			await transport.sendBatch([], true);
 			expect(mockFetch).toHaveBeenCalled();
+		});
+
+		it('should not include appName in payload if null', async () => {
+			const transportWithoutAppName = new Transport(
+				'https://example.com',
+				'test_session_123',
+				null,
+				mockOnError,
+				mockOnBatchSent
+			);
+
+			const events = [{ type: 1 }];
+			await transportWithoutAppName.sendBatch(events, false);
+
+			const payload = JSON.parse(mockFetch.mock.calls[0][1].body);
+			expect(payload.sessionId).toBe('test_session_123');
+			expect(payload.appName).toBeUndefined();
+			expect(payload.events).toEqual(events);
 		});
 	});
 

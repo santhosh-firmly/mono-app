@@ -541,10 +541,12 @@
 		if (data.PUBLIC_SESSION_RECORD_URL) {
 			sessionRecorder = new SessionRecorder({
 				serviceUrl: data.PUBLIC_SESSION_RECORD_URL,
+				appName: 'dropin-service',
 				maskAllInputs: true, // Mask all input fields by default
 				maskSelector: '[data-sensitive], [data-sensitive] *' // Mask text and inputs with data-sensitive attribute
 			});
-			sessionRecorder.start();
+			// Use the Firmly session ID for correlation
+			sessionRecorder.start(window.firmly?.sessionId);
 		}
 
 		if (shouldUseMastercard) {

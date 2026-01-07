@@ -36,19 +36,21 @@ export class SessionRecorder {
 
 	/**
 	 * Starts the session recording
+	 * @param {string} [sessionId] - Optional session ID to use (if not provided, generates a new one)
 	 * @returns {string|null} The session ID if started, null if disabled
 	 */
-	start() {
+	start(sessionId) {
 		if (this.isRecording) return this.sessionId;
 		if (!this.config.enabled) return null;
 
-		this.sessionId = generateSessionId();
+		this.sessionId = sessionId || generateSessionId();
 		this.isRecording = true;
 
 		// Initialize components
 		this.dataSender = new Transport(
 			this.config.serviceUrl,
 			this.sessionId,
+			this.config.appName,
 			this.config.onError,
 			this.config.onBatchSent
 		);

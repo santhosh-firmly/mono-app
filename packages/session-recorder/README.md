@@ -21,7 +21,12 @@ const recorder = new SessionRecorder({
   serviceUrl: 'https://dvr.firmly-dev.workers.dev'
 });
 
+// Start with auto-generated session ID
 recorder.start();
+
+// Or provide your own session ID for correlation
+recorder.start('your-custom-session-id');
+
 await recorder.stop();
 ```
 
@@ -76,6 +81,7 @@ const recorder = new SessionRecorder({
 const recorder = new SessionRecorder({
   serviceUrl: 'https://dvr.firmly-dev.workers.dev',  // Required
   enabled: true,                                       // Default: true
+  appName: 'my-app',                                   // Optional: Application name for metadata
   
   // Batching (defaults shown)
   batchInterval: 10000,    // Flush every 10 seconds
@@ -110,14 +116,27 @@ const recorder = new SessionRecorder({
 
 ## API
 
-### `recorder.start()`
-Starts recording, returns session ID.
+### `recorder.start([sessionId])`
+Starts recording and returns the session ID.
+
+**Parameters:**
+- `sessionId` (optional): Custom session ID for correlation with your backend systems. If not provided, a unique ID is auto-generated.
+
+**Returns:** `string | null` - The session ID if recording started, `null` if disabled.
+
+**Example:**
+```javascript
+// Auto-generated session ID
+const sessionId = recorder.start();
+
+// Custom session ID (useful for correlating with your application's session)
+const sessionId = recorder.start(window.firmly?.sessionId);
+```
 
 ### `recorder.stop()`
 Stops recording and sends final batch (async).
 
-### `recorder.getStatus()`
-Returns `{ isRecording, sessionId, batchStats }`.
+**Returns:** `Promise<void>`
 
 ## SvelteKit Example
 
@@ -131,9 +150,15 @@ Returns `{ isRecording, sessionId, batchStats }`.
   onMount(() => {
     recorder = new SessionRecorder({
       serviceUrl: import.meta.env.PUBLIC_DVR_SERVICE_URL,
-      enabled: import.meta.env.PROD
+      appName: 'dropin-service',
+      enabled: import.meta.env.PROD,
+      maskAllInputs: true,
+      maskSelector: '[data-sensitive], [data-sensitive] *'
     });
-    recorder.start();
+    
+    // Use your application's session ID for correlation
+    recorder.start(window.firmly?.sessionId);
+    
     return () => recorder?.stop();
   });
 </script>
@@ -162,10 +187,17 @@ The recorder listens to both `visibilitychange` and `pagehide` events to catch a
 ```json
 {
   "sessionId": "session_1234567890_abc",
+  "appName": "dropin-service",
   "events": [...],
   "finalize": true  // Only on last batch/chunk
 }
 ```
+
+**Payload Fields:**
+- `sessionId`: Unique session identifier (auto-generated or custom)
+- `appName`: Optional application name for backend identification
+- `events`: Array of rrweb events
+- `finalize`: Boolean flag indicating the final batch (only present when `true`)
 
 ## Debug Mode
 
