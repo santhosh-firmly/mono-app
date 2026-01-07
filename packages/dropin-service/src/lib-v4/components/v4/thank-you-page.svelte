@@ -215,7 +215,7 @@
 					<span class="text-fy-on-primary-subtle text-start text-sm font-normal">
 						Shipping to
 					</span>
-					<span class="sensitive-data -primary text-end text-sm font-medium">
+					<span class="sensitive-data -primary text-end text-sm font-medium" data-sensitive>
 						{shippingInfo.name} · {shippingInfo.address} · {shippingInfo.phone}
 					</span>
 					<span class="text-fy-on-primary-subtle text-start text-sm font-normal">

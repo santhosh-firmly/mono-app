@@ -1,21 +1,7 @@
 /**
  * Default configuration for session recorder
+ * Simple, privacy-first configuration using data-sensitive attribute
  */
-
-export const DEFAULT_MASK_INPUT_OPTIONS = {
-	password: true,
-	email: true,
-	tel: true,
-	text: true,
-	textarea: true,
-	number: true,
-	search: true,
-	url: true,
-	select: true,
-	color: false,
-	date: false,
-	range: false
-};
 
 export const DEFAULT_SAMPLING = {
 	mousemove: false, // Disable mousemove to reduce events by 60-80%
@@ -37,11 +23,13 @@ export const DEFAULT_CONFIG = {
 	maxBatchSize: 500 * 1024, // 500KB - better chunk size for POST requests
 	maxEvents: 500, // Max events before flush
 
-	// Privacy (GDPR compliant)
-	maskAllInputs: true,
-	maskInputOptions: DEFAULT_MASK_INPUT_OPTIONS,
-	blockClass: 'sensitive-data',
-	maskTextClass: 'sensitive-data',
+	// Privacy options
+	// When true, all text is replaced with asterisks
+	maskAll: false,
+
+	// Works independently or together with maskAll
+	maskTextSelector: '[data-sensitive], [data-sensitive]', // Mask elements with data-sensitive attribute and all children
+	blockSelector: null, // No blocking by default
 
 	// rrweb options
 	checkoutEveryNth: 100, // Full snapshot every 100 events
@@ -58,17 +46,12 @@ export function mergeConfig(userConfig = {}) {
 	return {
 		...DEFAULT_CONFIG,
 		...userConfig,
-		maskInputOptions: {
-			...DEFAULT_MASK_INPUT_OPTIONS,
-			...(userConfig.maskInputOptions || {})
-		},
 		sampling: {
 			...DEFAULT_SAMPLING,
 			...(userConfig.sampling || {}),
 			mouseInteraction: userConfig.sampling?.mouseInteraction
 				? { ...DEFAULT_SAMPLING.mouseInteraction, ...userConfig.sampling.mouseInteraction }
 				: DEFAULT_SAMPLING.mouseInteraction
-		},
-		maskTextClass: userConfig.maskTextClass || DEFAULT_CONFIG.maskTextClass
+		}
 	};
 }

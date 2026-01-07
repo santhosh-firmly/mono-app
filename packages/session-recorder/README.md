@@ -1,9 +1,9 @@
 # @firmly/session-recorder
 
-Lightweight, GDPR-compliant session recorder based on [rrweb](https://github.com/rrweb-io/rrweb).
+Lightweight, privacy-first session recorder based on [rrweb](https://github.com/rrweb-io/rrweb).
 
 **Simple**: Minimal core code, focused on essentials  
-**Privacy-First**: All inputs masked by default  
+**Privacy-First**: Attribute-based masking with `data-sensitive`  
 **Smart Batching**: Automatic batching with intelligent chunking
 
 ## Installation
@@ -25,6 +25,51 @@ recorder.start();
 await recorder.stop();
 ```
 
+## Privacy-First Design
+
+You have two options for masking sensitive data:
+
+### Option 1: Mask Everything (maximum privacy)
+
+Set `maskAll: true` to mask ALL content on the page (inputs, text, divs, paragraphs, buttons, everything):
+
+```javascript
+const recorder = new SessionRecorder({
+  serviceUrl: 'https://dvr.firmly-dev.workers.dev',
+  maskAll: true  // All content replaced with asterisks
+});
+```
+
+### Option 2: Selective Masking with `data-sensitive`
+
+Use the `data-sensitive` attribute to mask specific elements:
+
+```html
+<!-- Input will be masked -->
+<input type="text" data-sensitive />
+
+<!-- Entire div and all children will be masked -->
+<div data-sensitive>
+  <p>This text will be masked</p>
+  <input type="email" />
+</div>
+
+<!-- Regular elements are NOT masked (unless maskAll: true) -->
+<input type="text" />
+<p>This text is visible in recordings</p>
+```
+
+### Combining Both Options
+
+You can combine `maskAll` with `data-sensitive` (though `maskAll` already masks everything):
+
+```javascript
+const recorder = new SessionRecorder({
+  serviceUrl: 'https://dvr.firmly-dev.workers.dev',
+  maskAll: true  // Masks everything (inputs, text, all content)
+});
+```
+
 ## Configuration
 
 ```javascript
@@ -37,8 +82,10 @@ const recorder = new SessionRecorder({
   maxBatchSize: 512000,    // Max 500KB per batch
   maxEvents: 500,          // Max 500 events per batch
   
-  // Privacy (defaults: all inputs masked)
-  maskAllInputs: true,
+  // Privacy options
+  maskAll: false,          // Mask ALL content (inputs, text, divs, everything)
+  maskTextSelector: '[data-sensitive], [data-sensitive] *',  // Mask specific elements
+  blockSelector: null,     // Optional: completely block elements from recording
   
   // Sampling (defaults shown)
   sampling: {

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { BatchManager } from '../src/batching.js';
+import { Batching } from '../src/batching.js';
 
-describe('BatchManager', () => {
+describe('Batching', () => {
 	let batchManager;
 	let mockConfig;
 
@@ -14,7 +14,7 @@ describe('BatchManager', () => {
 			maxEvents: 500,
 			onFlush: vi.fn()
 		};
-		batchManager = new BatchManager(mockConfig);
+		batchManager = new Batching(mockConfig);
 	});
 
 	afterEach(() => {
@@ -72,7 +72,7 @@ describe('BatchManager', () => {
 
 		it('should flush when maxEvents limit reached', () => {
 			mockConfig.maxEvents = 3;
-			batchManager = new BatchManager(mockConfig);
+			batchManager = new Batching(mockConfig);
 
 			batchManager.addEvent({ type: 1 });
 			batchManager.addEvent({ type: 2 });
@@ -81,13 +81,13 @@ describe('BatchManager', () => {
 			batchManager.addEvent({ type: 3 });
 			expect(mockConfig.onFlush).toHaveBeenCalledWith(
 				[{ type: 1 }, { type: 2 }, { type: 3 }],
-				'limit'
+				'count'
 			);
 		});
 
 		it('should flush when maxBatchSize limit reached', () => {
 			mockConfig.maxBatchSize = 100;
-			batchManager = new BatchManager(mockConfig);
+			batchManager = new Batching(mockConfig);
 
 			const largeEvent = { type: 1, data: 'x'.repeat(50) };
 			batchManager.addEvent(largeEvent);
