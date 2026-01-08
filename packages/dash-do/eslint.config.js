@@ -119,11 +119,4 @@ export default [
             ],
         },
     },
-    {
-        // Override for scripts folder - dependencies are installed locally in scripts/node_modules
-        files: ['packages/domains-service/scripts/**/*.js'],
-        rules: {
-            'import/no-unresolved': 'off',
-        },
-    },
 ];

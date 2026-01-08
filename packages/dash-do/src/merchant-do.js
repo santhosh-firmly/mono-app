@@ -4,12 +4,66 @@ import { getLogger } from 'foundation/utils/log.js';
 const logger = getLogger('MerchantDO');
 
 /**
+ * Matches a URL path against a route pattern.
+ * Supports exact matches and :param patterns.
+ * @returns {Object|null} - Match result with params, or null if no match
+ */
+function matchRoute(routePath, actualPath) {
+    const routeParts = routePath.split('/').filter(Boolean);
+    const actualParts = actualPath.split('/').filter(Boolean);
+
+    if (routeParts.length !== actualParts.length) {
+        return null;
+    }
+
+    const params = {};
+    for (let i = 0; i < routeParts.length; i++) {
+        if (routeParts[i].startsWith(':')) {
+            params[routeParts[i].slice(1)] = decodeURIComponent(actualParts[i]);
+        } else if (routeParts[i] !== actualParts[i]) {
+            return null;
+        }
+    }
+
+    return { params };
+}
+
+/**
  * MerchantDO - Durable Object for per-merchant data storage.
  *
  * Each merchant has their own Durable Object instance identified by their domain.
  * Uses SQLite for persistent storage of team membership and audit logs.
  */
 export class MerchantDO extends BaseDurableObject {
+    // Route configuration - order matters: exact matches should come before parameterized routes
+    static routes = [
+        // Team endpoints
+        { path: '/team', method: 'GET', handler: 'handleGetTeam' },
+        { path: '/team', method: 'POST', handler: 'handleAddTeamMember', needsJson: true },
+        { path: '/team/:userId', method: 'PUT', handler: 'handleUpdateTeamMember', needsJson: true },
+        { path: '/team/:userId', method: 'DELETE', handler: 'handleRemoveTeamMember' },
+
+        // Audit log endpoints
+        { path: '/audit-logs', method: 'GET', handler: 'handleGetAuditLogs' },
+        { path: '/audit-logs', method: 'POST', handler: 'handleCreateAuditLog', needsJson: true },
+
+        // Agreement endpoints
+        { path: '/agreement', method: 'GET', handler: 'handleGetAgreement' },
+        { path: '/agreement', method: 'POST', handler: 'handleSignAgreement', needsJson: true },
+
+        // Onboarding status endpoints
+        { path: '/onboarding', method: 'GET', handler: 'handleGetOnboardingStatus' },
+        { path: '/onboarding/:key', method: 'PUT', handler: 'handleSetOnboardingStatus', needsJson: true },
+
+        // Catalog config endpoints
+        { path: '/catalog-config', method: 'GET', handler: 'handleGetCatalogConfig' },
+        { path: '/catalog-config', method: 'POST', handler: 'handleSetCatalogConfig', needsJson: true },
+
+        // Integration steps endpoints - /bulk must come before parameterized routes
+        { path: '/integration-steps', method: 'GET', handler: 'handleGetIntegrationSteps' },
+        { path: '/integration-steps', method: 'PUT', handler: 'handleUpdateIntegrationStep', needsJson: true },
+        { path: '/integration-steps/bulk', method: 'PUT', handler: 'handleBulkUpdateIntegrationSteps', needsJson: true },
+    ];
     constructor(ctx, env) {
         super(ctx, env);
         this.ctx = ctx;
@@ -132,75 +186,34 @@ export class MerchantDO extends BaseDurableObject {
         const method = request.method;
 
         try {
-            // Team endpoints
-            if (path === '/team' && method === 'GET') {
-                return this.handleGetTeam();
-            }
-            if (path === '/team' && method === 'POST') {
-                const data = await request.json();
-                return this.handleAddTeamMember(data);
-            }
-            if (path.startsWith('/team/') && method === 'PUT') {
-                const userId = decodeURIComponent(path.split('/')[2]);
-                const data = await request.json();
-                return this.handleUpdateTeamMember(userId, data);
-            }
-            if (path.startsWith('/team/') && method === 'DELETE') {
-                const userId = decodeURIComponent(path.split('/')[2]);
-                return this.handleRemoveTeamMember(userId);
-            }
+            // Find matching route
+            for (const route of MerchantDO.routes) {
+                if (route.method !== method) continue;
 
-            // Audit log endpoints
-            if (path === '/audit-logs' && method === 'GET') {
-                const limit = parseInt(url.searchParams.get('limit') || '50', 10);
-                const offset = parseInt(url.searchParams.get('offset') || '0', 10);
-                const includeFirmlyAdmin = url.searchParams.get('includeFirmlyAdmin') === 'true';
-                return this.handleGetAuditLogs(limit, offset, includeFirmlyAdmin);
-            }
-            if (path === '/audit-logs' && method === 'POST') {
-                const data = await request.json();
-                return this.handleCreateAuditLog(data);
-            }
+                const match = matchRoute(route.path, path);
+                if (!match) continue;
 
-            // Agreement endpoints
-            if (path === '/agreement' && method === 'GET') {
-                return this.handleGetAgreement();
-            }
-            if (path === '/agreement' && method === 'POST') {
-                const data = await request.json();
-                return this.handleSignAgreement(data);
-            }
+                // Build handler arguments - path params come first, then JSON body
+                const args = [];
 
-            // Onboarding status endpoints
-            if (path === '/onboarding' && method === 'GET') {
-                return this.handleGetOnboardingStatus();
-            }
-            if (path.startsWith('/onboarding/') && method === 'PUT') {
-                const key = decodeURIComponent(path.split('/')[2]);
-                const data = await request.json();
-                return this.handleSetOnboardingStatus(key, data);
-            }
+                // Add path parameters first
+                const paramValues = Object.values(match.params);
+                args.push(...paramValues);
 
-            // Catalog config endpoints
-            if (path === '/catalog-config' && method === 'GET') {
-                return this.handleGetCatalogConfig();
-            }
-            if (path === '/catalog-config' && method === 'POST') {
-                const data = await request.json();
-                return this.handleSetCatalogConfig(data);
-            }
+                // Add JSON body if needed (after path params)
+                if (route.needsJson) {
+                    args.push(await request.json());
+                }
 
-            // Integration steps endpoints
-            if (path === '/integration-steps' && method === 'GET') {
-                return this.handleGetIntegrationSteps();
-            }
-            if (path === '/integration-steps' && method === 'PUT') {
-                const data = await request.json();
-                return this.handleUpdateIntegrationStep(data);
-            }
-            if (path === '/integration-steps/bulk' && method === 'PUT') {
-                const data = await request.json();
-                return this.handleBulkUpdateIntegrationSteps(data);
+                // Special handling for audit-logs GET (needs query params)
+                if (route.handler === 'handleGetAuditLogs') {
+                    const limit = parseInt(url.searchParams.get('limit') || '50', 10);
+                    const offset = parseInt(url.searchParams.get('offset') || '0', 10);
+                    const includeFirmlyAdmin = url.searchParams.get('includeFirmlyAdmin') === 'true';
+                    args.push(limit, offset, includeFirmlyAdmin);
+                }
+
+                return this[route.handler](...args);
             }
 
             return new Response(JSON.stringify({ error: 'Not found' }), {
@@ -434,10 +447,14 @@ export class MerchantDO extends BaseDurableObject {
         return Response.json(steps);
     }
 
-    handleUpdateIntegrationStep({ stepId, substepId, status, completedBy, source }) {
+    /**
+     * Internal method to execute a single integration step update.
+     * Returns true if the update was valid, false otherwise.
+     */
+    _executeIntegrationStepUpdate({ stepId, substepId, status, completedBy, source }) {
         // Validate status
         if (!['pending', 'in-progress', 'completed'].includes(status)) {
-            return Response.json({ error: 'Invalid status' }, { status: 400 });
+            return false;
         }
 
         // Insert or update the step
@@ -475,21 +492,30 @@ export class MerchantDO extends BaseDurableObject {
             );
         }
 
-        return Response.json({ success: true, stepId, substepId, status });
+        return true;
     }
 
-    handleBulkUpdateIntegrationSteps({ updates }) {
+    handleUpdateIntegrationStep(data) {
+        const success = this._executeIntegrationStepUpdate(data);
+        if (!success) {
+            return Response.json({ error: 'Invalid status' }, { status: 400 });
+        }
+        return Response.json({ success: true, stepId: data.stepId, substepId: data.substepId, status: data.status });
+    }
+
+    async handleBulkUpdateIntegrationSteps({ updates }) {
         if (!Array.isArray(updates)) {
             return Response.json({ error: 'Updates must be an array' }, { status: 400 });
         }
 
         let updatedCount = 0;
-        for (const update of updates) {
-            const result = this.handleUpdateIntegrationStep(update);
-            if (result.status !== 400) {
-                updatedCount++;
+        await this.ctx.storage.transaction(() => {
+            for (const update of updates) {
+                if (this._executeIntegrationStepUpdate(update)) {
+                    updatedCount++;
+                }
             }
-        }
+        });
 
         return Response.json({ success: true, count: updatedCount });
     }

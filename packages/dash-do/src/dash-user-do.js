@@ -4,12 +4,70 @@ import { getLogger } from 'foundation/utils/log.js';
 const logger = getLogger('DashUserDO');
 
 /**
+ * Matches a URL path against a route pattern.
+ * Supports exact matches and :param patterns.
+ * @returns {Object|null} - Match result with params, or null if no match
+ */
+function matchRoute(routePath, actualPath) {
+    const routeParts = routePath.split('/').filter(Boolean);
+    const actualParts = actualPath.split('/').filter(Boolean);
+
+    if (routeParts.length !== actualParts.length) {
+        return null;
+    }
+
+    const params = {};
+    for (let i = 0; i < routeParts.length; i++) {
+        if (routeParts[i].startsWith(':')) {
+            params[routeParts[i].slice(1)] = decodeURIComponent(actualParts[i]);
+        } else if (routeParts[i] !== actualParts[i]) {
+            return null;
+        }
+    }
+
+    return { params };
+}
+
+/**
  * DashUserDO - Durable Object for per-user data storage.
  *
  * Each user has their own Durable Object instance identified by their UUID.
  * Uses SQLite for persistent storage of profile, sessions, access control, and preferences.
  */
 export class DashUserDO extends BaseDurableObject {
+    // Route configuration - order matters: exact matches should come before parameterized routes
+    static routes = [
+        // Profile endpoints
+        { path: '/profile', method: 'GET', handler: 'handleGetProfile' },
+        { path: '/profile', method: 'PUT', handler: 'handleUpdateProfile', needsJson: true },
+
+        // Session endpoints
+        { path: '/sessions', method: 'GET', handler: 'handleListSessions' },
+        { path: '/sessions', method: 'POST', handler: 'handleCreateSession', needsJson: true },
+        { path: '/sessions/all', method: 'DELETE', handler: 'handleTerminateAllSessions' },
+        { path: '/sessions/:id', method: 'GET', handler: 'handleValidateSession' },
+        { path: '/sessions/:id', method: 'PUT', handler: 'handleRefreshSession' },
+        { path: '/sessions/:id', method: 'DELETE', handler: 'handleTerminateSession' },
+
+        // Merchant access endpoints
+        { path: '/merchant-access', method: 'GET', handler: 'handleGetMerchantAccess' },
+        { path: '/merchant-access', method: 'POST', handler: 'handleGrantMerchantAccess', needsJson: true },
+        { path: '/merchant-access/:domain', method: 'DELETE', handler: 'handleRevokeMerchantAccess' },
+
+        // Destination access endpoints
+        { path: '/destination-access', method: 'GET', handler: 'handleGetDestinationAccess' },
+        { path: '/destination-access', method: 'POST', handler: 'handleGrantDestinationAccess', needsJson: true },
+        { path: '/destination-access/:id', method: 'DELETE', handler: 'handleRevokeDestinationAccess' },
+
+        // Preferences endpoints
+        { path: '/preferences', method: 'GET', handler: 'handleGetPreferences' },
+        { path: '/preferences', method: 'PUT', handler: 'handleUpdatePreferences', needsJson: true },
+
+        // Pending invites endpoints
+        { path: '/pending-invites', method: 'GET', handler: 'handleGetPendingInvites' },
+        { path: '/pending-invites', method: 'POST', handler: 'handleAddPendingInvite', needsJson: true },
+        { path: '/pending-invites/:token', method: 'DELETE', handler: 'handleRemovePendingInvite' },
+    ];
     constructor(ctx, env) {
         super(ctx, env);
         this.ctx = ctx;
@@ -96,87 +154,31 @@ export class DashUserDO extends BaseDurableObject {
         const method = request.method;
 
         try {
-            // Profile endpoints
-            if (path === '/profile' && method === 'GET') {
-                return this.handleGetProfile();
-            }
-            if (path === '/profile' && method === 'PUT') {
-                const data = await request.json();
-                return this.handleUpdateProfile(data);
-            }
+            // Find matching route
+            for (const route of DashUserDO.routes) {
+                if (route.method !== method) continue;
 
-            // Session endpoints
-            if (path === '/sessions' && method === 'GET') {
-                return this.handleListSessions();
-            }
-            if (path === '/sessions' && method === 'POST') {
-                const data = await request.json();
-                return this.handleCreateSession(data);
-            }
-            // Check /sessions/all BEFORE /sessions/:id since both match startsWith('/sessions/')
-            if (path === '/sessions/all' && method === 'DELETE') {
-                const excludeSessionId = url.searchParams.get('exclude');
-                return this.handleTerminateAllSessions(excludeSessionId);
-            }
-            if (path.startsWith('/sessions/') && method === 'GET') {
-                const sessionId = path.split('/')[2];
-                return this.handleValidateSession(sessionId);
-            }
-            if (path.startsWith('/sessions/') && method === 'PUT') {
-                const sessionId = path.split('/')[2];
-                return this.handleRefreshSession(sessionId);
-            }
-            if (path.startsWith('/sessions/') && method === 'DELETE') {
-                const sessionId = path.split('/')[2];
-                return this.handleTerminateSession(sessionId);
-            }
+                const match = matchRoute(route.path, path);
+                if (!match) continue;
 
-            // Merchant access endpoints
-            if (path === '/merchant-access' && method === 'GET') {
-                return this.handleGetMerchantAccess();
-            }
-            if (path === '/merchant-access' && method === 'POST') {
-                const data = await request.json();
-                return this.handleGrantMerchantAccess(data);
-            }
-            if (path.startsWith('/merchant-access/') && method === 'DELETE') {
-                const domain = decodeURIComponent(path.split('/')[2]);
-                return this.handleRevokeMerchantAccess(domain);
-            }
+                // Build handler arguments - path params come first, then JSON body
+                const args = [];
 
-            // Destination access endpoints
-            if (path === '/destination-access' && method === 'GET') {
-                return this.handleGetDestinationAccess();
-            }
-            if (path === '/destination-access' && method === 'POST') {
-                const data = await request.json();
-                return this.handleGrantDestinationAccess(data);
-            }
-            if (path.startsWith('/destination-access/') && method === 'DELETE') {
-                const id = decodeURIComponent(path.split('/')[2]);
-                return this.handleRevokeDestinationAccess(id);
-            }
+                // Add path parameters first
+                const paramValues = Object.values(match.params);
+                args.push(...paramValues);
 
-            // Preferences endpoints
-            if (path === '/preferences' && method === 'GET') {
-                return this.handleGetPreferences();
-            }
-            if (path === '/preferences' && method === 'PUT') {
-                const data = await request.json();
-                return this.handleUpdatePreferences(data);
-            }
+                // Add JSON body if needed (after path params)
+                if (route.needsJson) {
+                    args.push(await request.json());
+                }
 
-            // Pending invites endpoints
-            if (path === '/pending-invites' && method === 'GET') {
-                return this.handleGetPendingInvites();
-            }
-            if (path === '/pending-invites' && method === 'POST') {
-                const data = await request.json();
-                return this.handleAddPendingInvite(data);
-            }
-            if (path.startsWith('/pending-invites/') && method === 'DELETE') {
-                const token = decodeURIComponent(path.split('/')[2]);
-                return this.handleRemovePendingInvite(token);
+                // Add URL for handlers that need query params
+                if (route.handler === 'handleTerminateAllSessions') {
+                    args.push(url.searchParams.get('exclude'));
+                }
+
+                return this[route.handler](...args);
             }
 
             return new Response(JSON.stringify({ error: 'Not found' }), {
