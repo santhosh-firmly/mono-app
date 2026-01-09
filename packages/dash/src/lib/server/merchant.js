@@ -586,6 +586,42 @@ export async function getOnboardingStatus({ platform, merchantDomain }) {
 }
 
 /**
+ * Get all onboarding status data in a single call.
+ * This batches multiple status checks into one DO request for efficiency.
+ * @param {Object} params
+ * @param {Object} params.platform - SvelteKit platform object
+ * @param {string} params.merchantDomain - Merchant domain
+ * @returns {Promise<Object>} { integrationComplete, agreementSigned, destinationsConfigured, catalogConfigured, cdnWhitelistingComplete }
+ */
+export async function getOnboardingStatusAll({ platform, merchantDomain }) {
+	try {
+		const response = await fetchMerchantDO(platform, merchantDomain, '/onboarding-status-all');
+
+		if (!response.ok) {
+			console.error('Failed to get all onboarding status:', await response.text());
+			return {
+				integrationComplete: false,
+				agreementSigned: false,
+				destinationsConfigured: false,
+				catalogConfigured: false,
+				cdnWhitelistingComplete: false
+			};
+		}
+
+		return response.json();
+	} catch (error) {
+		console.error('Error getting all onboarding status:', error);
+		return {
+			integrationComplete: false,
+			agreementSigned: false,
+			destinationsConfigured: false,
+			catalogConfigured: false,
+			cdnWhitelistingComplete: false
+		};
+	}
+}
+
+/**
  * Check if integration is marked as complete.
  * @param {Object} params
  * @param {Object} params.platform - SvelteKit platform object
@@ -1234,23 +1270,25 @@ export async function resetMerchantDashboard({ platform, merchantDomain, actor }
 
 		const { clearedTeamMembers } = await resetResponse.json();
 
-		// 2. Remove merchant access from each affected user's DashUserDO
-		for (const member of clearedTeamMembers) {
-			try {
-				await fetchDashUserDO(
-					platform,
-					member.user_id,
-					`/merchant-access/${encodeURIComponent(merchantDomain)}`,
-					{ method: 'DELETE' }
-				);
-			} catch (userError) {
-				console.error(
-					`Failed to remove merchant access for user ${member.user_id}:`,
-					userError
-				);
-				// Continue with other users even if one fails
-			}
-		}
+		// 2. Remove merchant access from each affected user's DashUserDO (in parallel)
+		await Promise.all(
+			clearedTeamMembers.map(async (member) => {
+				try {
+					await fetchDashUserDO(
+						platform,
+						member.user_id,
+						`/merchant-access/${encodeURIComponent(merchantDomain)}`,
+						{ method: 'DELETE' }
+					);
+				} catch (userError) {
+					console.error(
+						`Failed to remove merchant access for user ${member.user_id}:`,
+						userError
+					);
+					// Continue with other users even if one fails
+				}
+			})
+		);
 
 		// 3. Update D1 merchant_dashboards metadata (including KYB and Go Live reset)
 		const db = platform?.env?.dashUsers;

@@ -51,7 +51,7 @@
 					</div>
 					<OnboardingTasks
 						{domain}
-						initialStatuses={args.statuses}
+						statuses={args.statuses}
 						kybStatus={args.kybStatus}
 						goLiveStatus={args.goLiveStatus}
 					/>

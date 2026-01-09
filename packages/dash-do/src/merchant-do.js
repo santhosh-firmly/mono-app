@@ -34,6 +34,7 @@ export class MerchantDO extends BaseDurableObject {
 
         // Onboarding status endpoints
         { path: '/onboarding', method: 'GET', handler: 'handleGetOnboardingStatus' },
+        { path: '/onboarding-status-all', method: 'GET', handler: 'handleGetAllOnboardingStatus' },
         { path: '/onboarding/:key', method: 'PUT', handler: 'handleSetOnboardingStatus', needsJson: true },
 
         // Catalog config endpoints
@@ -248,6 +249,35 @@ export class MerchantDO extends BaseDurableObject {
         }
 
         return Response.json(result);
+    }
+
+    /**
+     * Returns all onboarding status data in a single response.
+     * This batches multiple queries that would otherwise require separate DO calls.
+     */
+    handleGetAllOnboardingStatus() {
+        // Get onboarding statuses (integration, destinations, cdn)
+        const onboardingStatuses = this.sql.exec('SELECT * FROM onboarding_status').toArray();
+        const statusMap = {};
+        for (const status of onboardingStatuses) {
+            statusMap[status.key] = status.completed === 1;
+        }
+
+        // Get agreement signing status
+        const agreementResult = this.sql.exec('SELECT * FROM merchant_agreement LIMIT 1').toArray();
+        const agreementSigned = agreementResult.length > 0;
+
+        // Get catalog config status
+        const catalogResult = this.sql.exec('SELECT * FROM catalog_config WHERE id = 1').toArray();
+        const catalogConfigured = catalogResult.length > 0;
+
+        return Response.json({
+            integrationComplete: statusMap['integration'] === true,
+            agreementSigned,
+            destinationsConfigured: statusMap['destinations'] === true,
+            catalogConfigured,
+            cdnWhitelistingComplete: statusMap['cdn'] === true,
+        });
     }
 
     handleSetOnboardingStatus(key, { completed, userId, userEmail }) {

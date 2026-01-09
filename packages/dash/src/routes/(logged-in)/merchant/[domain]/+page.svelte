@@ -43,7 +43,7 @@
 	<div class="max-w-2xl mx-auto">
 		<OnboardingTasks
 			domain={data.domain}
-			initialStatuses={data.onboardingProgress}
+			statuses={data.onboardingProgress}
 			kybStatus={data.kybStatus}
 			goLiveStatus={data.goLiveStatus}
 		/>

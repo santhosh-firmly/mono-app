@@ -130,25 +130,25 @@
 
 <Story name="All Pending (0%)">
 	<div class="max-w-2xl">
-		<OnboardingTasks domain="merchant.com" initialStatuses={allPending} />
+		<OnboardingTasks domain="merchant.com" statuses={allPending} />
 	</div>
 </Story>
 
 <Story name="Just Started - Integration In Progress">
 	<div class="max-w-2xl">
-		<OnboardingTasks domain="merchant.com" initialStatuses={justStarted} />
+		<OnboardingTasks domain="merchant.com" statuses={justStarted} />
 	</div>
 </Story>
 
 <Story name="Agreement Completed">
 	<div class="max-w-2xl">
-		<OnboardingTasks domain="merchant.com" initialStatuses={agreementCompleted} />
+		<OnboardingTasks domain="merchant.com" statuses={agreementCompleted} />
 	</div>
 </Story>
 
 <Story name="KYB Pending Approval">
 	<div class="max-w-2xl">
-		<OnboardingTasks domain="merchant.com" initialStatuses={kybPending} />
+		<OnboardingTasks domain="merchant.com" statuses={kybPending} />
 	</div>
 </Story>
 
@@ -156,7 +156,7 @@
 	<div class="max-w-2xl">
 		<OnboardingTasks
 			domain="merchant.com"
-			initialStatuses={kybRejected}
+			statuses={kybRejected}
 			kybStatus={kybStatusRejected}
 		/>
 	</div>
@@ -164,19 +164,19 @@
 
 <Story name="KYB Approved - Tasks Unlocked">
 	<div class="max-w-2xl">
-		<OnboardingTasks domain="merchant.com" initialStatuses={kybApproved} />
+		<OnboardingTasks domain="merchant.com" statuses={kybApproved} />
 	</div>
 </Story>
 
 <Story name="Midway Progress (57%)">
 	<div class="max-w-2xl">
-		<OnboardingTasks domain="merchant.com" initialStatuses={midwayProgress} />
+		<OnboardingTasks domain="merchant.com" statuses={midwayProgress} />
 	</div>
 </Story>
 
 <Story name="Go Live Pending Approval">
 	<div class="max-w-2xl">
-		<OnboardingTasks domain="merchant.com" initialStatuses={almostDone} />
+		<OnboardingTasks domain="merchant.com" statuses={almostDone} />
 	</div>
 </Story>
 
@@ -184,7 +184,7 @@
 	<div class="max-w-2xl">
 		<OnboardingTasks
 			domain="merchant.com"
-			initialStatuses={goLiveRejected}
+			statuses={goLiveRejected}
 			goLiveStatus={goLiveStatusRejected}
 		/>
 	</div>
@@ -192,6 +192,6 @@
 
 <Story name="All Completed (100%)">
 	<div class="max-w-2xl">
-		<OnboardingTasks domain="merchant.com" initialStatuses={allCompleted} />
+		<OnboardingTasks domain="merchant.com" statuses={allCompleted} />
 	</div>
 </Story>

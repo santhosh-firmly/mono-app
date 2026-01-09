@@ -18,7 +18,7 @@
 
 	let {
 		domain = '',
-		initialStatuses = {
+		statuses = {
 			integration: 'in-progress',
 			agreement: 'pending',
 			kyb: 'pending',
@@ -32,10 +32,10 @@
 	} = $props();
 
 	// Check if KYB is approved (allows access to post-KYB steps)
-	let isKybApproved = $derived(initialStatuses.kyb === 'completed');
+	let isKybApproved = $derived(statuses.kyb === 'completed');
 
 	// Check if integration is complete (required for go-live)
-	let isIntegrationComplete = $derived(initialStatuses.integration === 'completed');
+	let isIntegrationComplete = $derived(statuses.integration === 'completed');
 
 	// Task definitions without hrefs (those are computed)
 	const taskDefinitions = [
@@ -115,7 +115,7 @@
 	// Derived tasks combining definitions with statuses, computed hrefs, and blocking
 	let tasks = $derived(
 		taskDefinitions.map((def) => {
-			const status = initialStatuses[def.id] || 'pending';
+			const status = statuses[def.id] || 'pending';
 			const blockedByKyb = def.requiresKybApproval && !isKybApproved;
 			const blockedByIntegration = def.requiresIntegrationComplete && !isIntegrationComplete;
 			const isBlocked = blockedByKyb || blockedByIntegration;

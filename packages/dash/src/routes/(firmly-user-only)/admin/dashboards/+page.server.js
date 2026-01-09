@@ -1,10 +1,4 @@
-import {
-	checkIntegrationComplete,
-	getMerchantAgreement,
-	checkDestinationsConfigured,
-	checkCatalogConfigured,
-	checkCDNWhitelistingComplete
-} from '$lib/server/merchant.js';
+import { getOnboardingStatusAll } from '$lib/server/merchant.js';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ platform }) {
@@ -94,20 +88,11 @@ export async function load({ platform }) {
 			dashboards.map(async (dashboard) => {
 				let pendingInvite = null;
 
-				// Check all onboarding statuses in parallel
-				const [
-					integrationComplete,
-					agreementData,
-					destinationsConfigured,
-					catalogConfigured,
-					cdnWhitelistingComplete
-				] = await Promise.all([
-					checkIntegrationComplete({ platform, merchantDomain: dashboard.domain }),
-					getMerchantAgreement({ platform, merchantDomain: dashboard.domain }),
-					checkDestinationsConfigured({ platform, merchantDomain: dashboard.domain }),
-					checkCatalogConfigured({ platform, merchantDomain: dashboard.domain }),
-					checkCDNWhitelistingComplete({ platform, merchantDomain: dashboard.domain })
-				]);
+				// Get all onboarding statuses in a single call (reduces 5 DO calls to 1)
+				const onboardingStatus = await getOnboardingStatusAll({
+					platform,
+					merchantDomain: dashboard.domain
+				});
 
 				if (kv && !dashboard.owner_user_id) {
 					// Only check for pending invites if no owner has accepted yet
@@ -129,11 +114,11 @@ export async function load({ platform }) {
 				return {
 					...dashboard,
 					pendingInvite,
-					integration_complete: integrationComplete,
-					agreement_signed: agreementData?.signed === true,
-					destinations_configured: destinationsConfigured,
-					catalog_configured: catalogConfigured,
-					cdn_whitelisting_complete: cdnWhitelistingComplete
+					integration_complete: onboardingStatus.integrationComplete,
+					agreement_signed: onboardingStatus.agreementSigned,
+					destinations_configured: onboardingStatus.destinationsConfigured,
+					catalog_configured: onboardingStatus.catalogConfigured,
+					cdn_whitelisting_complete: onboardingStatus.cdnWhitelistingComplete
 				};
 			})
 		);

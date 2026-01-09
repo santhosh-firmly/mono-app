@@ -29,7 +29,7 @@
 	<div class="max-w-2xl mx-auto">
 		<OnboardingTasks
 			{domain}
-			initialStatuses={args.statuses}
+			statuses={args.statuses}
 			kybStatus={args.kybStatus}
 			goLiveStatus={args.goLiveStatus}
 		/>
