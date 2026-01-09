@@ -529,19 +529,20 @@
 		return;
 	}
 
-	onMount(() => {
+	onMount(async () => {
 		// Start initialization tracking
 		initializationState.start();
 
 		// Initialize the dropin session immediately - don't wait for SDK
-		initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server, data.merchantDomain);
-		initializeAppVersion(version);
+		await initialize(data.PUBLIC_api_id, data.PUBLIC_cf_server, data.merchantDomain);
+		await initializeAppVersion(version);
 
 		// Start session recording if URL is configured
+		// IMPORTANT: Start after initialization to ensure window.firmly.sessionId and appName are set
 		if (data.PUBLIC_SESSION_RECORD_URL) {
 			sessionRecorder = new SessionRecorder({
 				serviceUrl: data.PUBLIC_SESSION_RECORD_URL,
-				appName: 'dropin-service',
+				appName: window.firmly?.appName || 'dropin-service',
 				maskAllInputs: true, // Mask all input fields by default
 				maskSelector: '[data-sensitive], [data-sensitive] *' // Mask text and inputs with data-sensitive attribute
 			});
