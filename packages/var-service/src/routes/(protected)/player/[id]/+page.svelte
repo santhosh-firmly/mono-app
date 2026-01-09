@@ -29,7 +29,7 @@
 </script>
 
 {#key sessionData?.metadata?.sessionId}
-	<div class="py-16">
+	<div>
 		{#if error}
 			<div class="py-12 text-center">
 				<p class="text-muted text-sm">{error}</p>
@@ -40,12 +40,15 @@
 				<p class="text-muted text-sm">Loading...</p>
 			</div>
 		{:else if sessionData}
-			<div class="mx-auto px-4" style="max-width: 680px;">
+			<div>
 				<header class="mb-12">
 					<Button variant="ghost" onclick={() => goto('/')} class="mb-3 inline-block"
 						>← Back</Button
 					>
-					<h1 class="mb-2 font-serif text-2xl">{sessionData.metadata.url}</h1>
+					<h1 class="mb-1 font-serif text-2xl">{sessionData.metadata.sessionId}</h1>
+					<p class="text-muted mb-3 text-sm" title={sessionData.metadata.url}>
+						{sessionData.metadata.url}
+					</p>
 					<SessionDetails session={sessionData.metadata} />
 				</header>
 			</div>

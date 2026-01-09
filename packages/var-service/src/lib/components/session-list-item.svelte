@@ -19,7 +19,8 @@
 		{#if children}
 			{@render children()}
 		{:else}
-			<h2 class="text-foreground mb-1 font-serif text-base">{session.url}</h2>
+			<h2 class="text-foreground mb-0.5 font-serif text-base">{session.sessionId}</h2>
+			<p class="text-muted mb-2 text-sm" title={session.url}>{session.url}</p>
 			<SessionDetails {session} />
 		{/if}
 	</button>
