@@ -20,18 +20,37 @@ describe('config', () => {
 			expect(config.maxBatchSize).toBe(DEFAULT_CONFIG.maxBatchSize);
 		});
 
-		it('should merge maskInputOptions deeply', () => {
+		it('should merge maskSelector config', () => {
 			const userConfig = {
-				maskInputOptions: {
-					password: false,
-					email: false
-				}
+				maskSelector: '[data-private]'
 			};
 			const config = mergeConfig(userConfig);
 
-			expect(config.maskInputOptions.password).toBe(false);
-			expect(config.maskInputOptions.email).toBe(false);
-			expect(config.maskInputOptions.text).toBe(true);
+			expect(config.maskSelector).toBe('[data-private]');
+			expect(config.maskAll).toBe(false);
+		});
+
+		it('should allow enabling maskAll', () => {
+			const userConfig = {
+				maskAll: true
+			};
+			const config = mergeConfig(userConfig);
+
+			expect(config.maskAll).toBe(true);
+			expect(config.maskSelector).toBe('[data-sensitive], [data-sensitive] *');
+		});
+
+		it('should have maskAllInputs enabled by default', () => {
+			const config = mergeConfig();
+			expect(config.maskAllInputs).toBe(true);
+		});
+
+		it('should allow disabling maskAllInputs', () => {
+			const userConfig = {
+				maskAllInputs: false
+			};
+			const config = mergeConfig(userConfig);
+			expect(config.maskAllInputs).toBe(false);
 		});
 
 		it('should merge sampling options deeply', () => {

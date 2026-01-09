@@ -1661,6 +1661,7 @@
 												<span
 													class="sensitive-data-mask text-sm"
 													data-testid="collapsed-shipping-address"
+													data-sensitive
 												>
 													{$cart.shipping_info?.first_name}
 													{$cart.shipping_info?.last_name} · {$cart
@@ -1761,6 +1762,7 @@
 														}
 													}}
 													data-testid="email-input"
+													data-sensitive
 													autocomplete={shippingAutoCompleteEnabled
 														? 'shipping email'
 														: ''}

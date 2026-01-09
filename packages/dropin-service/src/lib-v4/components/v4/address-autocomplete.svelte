@@ -120,6 +120,7 @@
 						on:mouseover={() => (autocompleteSelectedIdx = index)}
 						on:focus={() => (autocompleteSelectedIdx = index)}
 						on:click={() => addressOnClick(prediction.id)}
+						data-sensitive
 					>
 						{@html prediction.highlighted}
 					</button>

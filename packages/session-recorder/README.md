@@ -1,9 +1,9 @@
 # @firmly/session-recorder
 
-Lightweight, GDPR-compliant session recorder based on [rrweb](https://github.com/rrweb-io/rrweb).
+Lightweight, privacy-first session recorder based on [rrweb](https://github.com/rrweb-io/rrweb).
 
 **Simple**: Minimal core code, focused on essentials  
-**Privacy-First**: All inputs masked by default  
+**Privacy-First**: Attribute-based masking with `data-sensitive`  
 **Smart Batching**: Automatic batching with intelligent chunking
 
 ## Installation
@@ -21,8 +21,58 @@ const recorder = new SessionRecorder({
   serviceUrl: 'https://dvr.firmly-dev.workers.dev'
 });
 
+// Start with auto-generated session ID
 recorder.start();
+
+// Or provide your own session ID for correlation
+recorder.start('your-custom-session-id');
+
 await recorder.stop();
+```
+
+## Privacy-First Design
+
+You have two options for masking sensitive data:
+
+### Option 1: Mask Everything (maximum privacy)
+
+Set `maskAll: true` to mask ALL content on the page (inputs, text, divs, paragraphs, buttons, everything):
+
+```javascript
+const recorder = new SessionRecorder({
+  serviceUrl: 'https://dvr.firmly-dev.workers.dev',
+  maskAll: true  // All content replaced with asterisks
+});
+```
+
+### Option 2: Selective Masking with `data-sensitive`
+
+Use the `data-sensitive` attribute to mask specific elements:
+
+```html
+<!-- Input will be masked -->
+<input type="text" data-sensitive />
+
+<!-- Entire div and all children will be masked -->
+<div data-sensitive>
+  <p>This text will be masked</p>
+  <input type="email" />
+</div>
+
+<!-- Regular elements are NOT masked (unless maskAll: true) -->
+<input type="text" />
+<p>This text is visible in recordings</p>
+```
+
+### Combining Both Options
+
+You can combine `maskAll` with `data-sensitive` (though `maskAll` already masks everything):
+
+```javascript
+const recorder = new SessionRecorder({
+  serviceUrl: 'https://dvr.firmly-dev.workers.dev',
+  maskAll: true  // Masks everything (inputs, text, all content)
+});
 ```
 
 ## Configuration
@@ -31,14 +81,18 @@ await recorder.stop();
 const recorder = new SessionRecorder({
   serviceUrl: 'https://dvr.firmly-dev.workers.dev',  // Required
   enabled: true,                                       // Default: true
+  appName: 'my-app',                                   // Optional: Application name for metadata
   
   // Batching (defaults shown)
   batchInterval: 10000,    // Flush every 10 seconds
   maxBatchSize: 512000,    // Max 500KB per batch
   maxEvents: 500,          // Max 500 events per batch
   
-  // Privacy (defaults: all inputs masked)
-  maskAllInputs: true,
+  // Privacy options
+  maskAll: false,          // Mask ALL content (inputs, text, divs, everything)
+  maskAllInputs: true,     // Mask all input fields by default (passwords, credit cards, etc.)
+  maskSelector: '[data-sensitive], [data-sensitive] *',  // Single selector for both text and inputs
+  blockSelector: null,     // Optional: completely block elements from recording
   
   // Sampling (defaults shown)
   sampling: {
@@ -53,16 +107,36 @@ const recorder = new SessionRecorder({
 });
 ```
 
+### Privacy Options Explained
+
+- **`maskAll`**: When `true`, masks ALL content on the page (overrides all other masking options)
+- **`maskAllInputs`**: When `true`, masks all `<input>`, `<textarea>`, and `<select>` elements by default
+- **`maskSelector`**: CSS selector that masks both text content AND input values (applied to both `maskTextSelector` and `maskInputSelector` in rrweb)
+- **`blockSelector`**: CSS selector for elements to completely exclude from recording (they appear as blank spaces)
+
 ## API
 
-### `recorder.start()`
-Starts recording, returns session ID.
+### `recorder.start([sessionId])`
+Starts recording and returns the session ID.
+
+**Parameters:**
+- `sessionId` (optional): Custom session ID for correlation with your backend systems. If not provided, a unique ID is auto-generated.
+
+**Returns:** `string | null` - The session ID if recording started, `null` if disabled.
+
+**Example:**
+```javascript
+// Auto-generated session ID
+const sessionId = recorder.start();
+
+// Custom session ID (useful for correlating with your application's session)
+const sessionId = recorder.start(window.firmly?.sessionId);
+```
 
 ### `recorder.stop()`
 Stops recording and sends final batch (async).
 
-### `recorder.getStatus()`
-Returns `{ isRecording, sessionId, batchStats }`.
+**Returns:** `Promise<void>`
 
 ## SvelteKit Example
 
@@ -76,9 +150,15 @@ Returns `{ isRecording, sessionId, batchStats }`.
   onMount(() => {
     recorder = new SessionRecorder({
       serviceUrl: import.meta.env.PUBLIC_DVR_SERVICE_URL,
-      enabled: import.meta.env.PROD
+      appName: 'dropin-service',
+      enabled: import.meta.env.PROD,
+      maskAllInputs: true,
+      maskSelector: '[data-sensitive], [data-sensitive] *'
     });
-    recorder.start();
+    
+    // Use your application's session ID for correlation
+    recorder.start(window.firmly?.sessionId);
+    
     return () => recorder?.stop();
   });
 </script>
@@ -107,10 +187,17 @@ The recorder listens to both `visibilitychange` and `pagehide` events to catch a
 ```json
 {
   "sessionId": "session_1234567890_abc",
+  "appName": "dropin-service",
   "events": [...],
   "finalize": true  // Only on last batch/chunk
 }
 ```
+
+**Payload Fields:**
+- `sessionId`: Unique session identifier (auto-generated or custom)
+- `appName`: Optional application name for backend identification
+- `events`: Array of rrweb events
+- `finalize`: Boolean flag indicating the final batch (only present when `true`)
 
 ## Debug Mode
 
