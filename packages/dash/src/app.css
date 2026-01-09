@@ -1,8 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Recursive:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap');
 
 :root {
-	--font-sans: Recursive;
-	--font-display: ;
+	font-family: "Inter", sans-serif;
+	font-optical-sizing: auto;
+	font-style: normal;
 }
 
 @tailwind base;
@@ -22,13 +23,13 @@ body {
 	::before,
 	::after {
 		--tw-ring-color: theme('colors.foreground/0.25');
-		@apply border-neutral-200;
+		@apply border-border;
 	}
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+.font-josefin {
+	font-family: 'Josefin Sans', sans-serif;
+}
 
 @layer base {
 	:root {
@@ -47,8 +48,8 @@ body {
 		--border: 0 0% 89.8%;
 		--input: 0 0% 89.8%;
 
-		--primary: 0 0% 0%; /* Changed to black */
-		--primary-foreground: 0 0% 98%;
+		--primary: 270 91% 65%; /* Firmly purple #a855f7 */
+		--primary-foreground: 0 0% 100%;
 
 		--secondary: 0 0% 96.1%;
 		--secondary-foreground: 0 0% 9%;
@@ -65,34 +66,35 @@ body {
 	}
 
 	.dark {
-		--background: 0 0% 3.9%;
-		--foreground: 0 0% 98%;
+		/* Softer dark theme with grayish tones instead of pure black */
+		--background: 0 0% 9%; /* #171717 - soft dark gray */
+		--foreground: 0 0% 95%; /* #f2f2f2 - slightly softer white */
 
-		--muted: 0 0% 14.9%;
-		--muted-foreground: 0 0% 63.9%;
+		--muted: 0 0% 15%; /* #262626 - elevated surface */
+		--muted-foreground: 0 0% 65%; /* #a6a6a6 - readable gray text */
 
-		--popover: 0 0% 3.9%;
-		--popover-foreground: 0 0% 98%;
+		--popover: 0 0% 12%; /* #1f1f1f - slightly elevated from background */
+		--popover-foreground: 0 0% 95%;
 
-		--card: 0 0% 3.9%;
-		--card-foreground: 0 0% 98%;
+		--card: 0 0% 12%; /* #1f1f1f - cards float above background */
+		--card-foreground: 0 0% 95%;
 
-		--border: 0 0% 14.9%;
-		--input: 0 0% 14.9%;
+		--border: 0 0% 20%; /* #333333 - visible but subtle borders */
+		--input: 0 0% 18%; /* #2e2e2e - input fields slightly lighter */
 
-		--primary: 0 0% 100%; /* Changed to white */
-		--primary-foreground: 0 0% 9%;
+		--primary: 270 91% 70%; /* Firmly purple lighter for dark mode */
+		--primary-foreground: 0 0% 100%;
 
-		--secondary: 0 0% 14.9%;
-		--secondary-foreground: 0 0% 98%;
+		--secondary: 0 0% 18%; /* #2e2e2e */
+		--secondary-foreground: 0 0% 95%;
 
-		--accent: 0 0% 14.9%;
-		--accent-foreground: 0 0% 98%;
+		--accent: 0 0% 18%; /* #2e2e2e */
+		--accent-foreground: 0 0% 95%;
 
-		--destructive: 0 62.8% 30.6%;
+		--destructive: 0 72% 45%; /* Brighter red for dark mode visibility */
 		--destructive-foreground: 0 0% 98%;
 
-		--ring: 0 0% 83.1%;
+		--ring: 270 91% 70%; /* Purple ring to match primary */
 	}
 }
 

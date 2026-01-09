@@ -1,0 +1,43 @@
+{
+  "sessions": [
+    {
+      "id": "sess_001",
+      "device_type": "desktop",
+      "device_name": "Chrome on macOS",
+      "ip_address": "192.168.1.100",
+      "location": "San Francisco, CA",
+      "last_access_at": "2024-12-31T10:30:00Z",
+      "isCurrent": true,
+      "created_at": "2024-12-01T08:00:00Z"
+    },
+    {
+      "id": "sess_002",
+      "device_type": "mobile",
+      "device_name": "Safari on iPhone",
+      "ip_address": "192.168.1.105",
+      "location": "San Francisco, CA",
+      "last_access_at": "2024-12-30T18:45:00Z",
+      "isCurrent": false,
+      "created_at": "2024-12-15T12:00:00Z"
+    },
+    {
+      "id": "sess_003",
+      "device_type": "desktop",
+      "device_name": "Firefox on Windows",
+      "ip_address": "10.0.0.50",
+      "location": "New York, NY",
+      "last_access_at": "2024-12-28T09:20:00Z",
+      "isCurrent": false,
+      "created_at": "2024-12-20T16:30:00Z"
+    }
+  ],
+  "user": {
+    "id": "user_001",
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "company": "Acme Inc.",
+    "title": "Software Engineer",
+    "location": "San Francisco, CA",
+    "avatar_url": null
+  }
+}

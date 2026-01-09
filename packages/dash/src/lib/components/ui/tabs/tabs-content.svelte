@@ -1,9 +1,8 @@
 <script>
 	import { Tabs as TabsPrimitive } from 'bits-ui';
 	import { cn } from '$lib/utils.js';
-	let className = undefined;
-	export let value;
-	export { className as class };
+
+	let { value, class: className, children, ...restProps } = $props();
 </script>
 
 <TabsPrimitive.Content
@@ -12,7 +11,7 @@
 		className
 	)}
 	{value}
-	{...$$restProps}
+	{...restProps}
 >
-	<slot />
+	{@render children?.()}
 </TabsPrimitive.Content>

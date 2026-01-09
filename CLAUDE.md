@@ -202,6 +202,96 @@ Both applications use `@sveltejs/adapter-cloudflare` and are deployed to Cloudfl
 - **Lerna** - Monorepo management
 - **esbuild** - SDK bundling (dropin-service)
 
+## Storybook (Svelte CSF)
+
+Both packages use `@storybook/addon-svelte-csf` for writing stories in native Svelte format. Story files use the `.stories.svelte` extension.
+
+### Basic Story Structure
+
+```svelte
+<script module>
+  import { defineMeta } from '@storybook/addon-svelte-csf';
+  import MyComponent from './my-component.svelte';
+
+  const { Story } = defineMeta({
+    title: 'Components/Category/MyComponent',
+    component: MyComponent,
+    tags: ['autodocs'],  // Enable auto-generated documentation
+    parameters: {
+      layout: 'padded'   // or 'centered', 'fullscreen'
+    },
+    argTypes: {
+      propName: { control: 'text' }
+    }
+  });
+</script>
+
+{#snippet template(args)}
+  <MyComponent {...args} />
+{/snippet}
+
+<Story name="Default" args={{ propName: 'value' }} {template} />
+```
+
+### Template Patterns
+
+**Shared template (recommended for similar stories):**
+
+```svelte
+{#snippet template(args)}
+  <MyComponent {...args} />
+{/snippet}
+
+<Story name="Default" args={{ variant: 'primary' }} {template} />
+<Story name="Secondary" args={{ variant: 'secondary' }} {template} />
+```
+
+**Multiple templates for different variations:**
+
+```svelte
+{#snippet template(args)}
+  <MyComponent {...args} />
+{/snippet}
+
+{#snippet withIconTemplate(args)}
+  <MyComponent {...args}>
+    <Icon slot="icon" />
+  </MyComponent>
+{/snippet}
+
+<Story name="Default" args={{ label: 'Click me' }} {template} />
+<Story name="With Icon" args={{ label: 'Click me' }} {withIconTemplate} />
+```
+
+**Inline template (for unique stories):**
+
+```svelte
+<Story name="Custom">
+  {#snippet template(args)}
+    <div class="custom-wrapper">
+      <MyComponent {...args} />
+    </div>
+  {/snippet}
+</Story>
+```
+
+### Important Syntax Rules
+
+- Use `{template}` shorthand, NOT `children={template}`
+- Define templates as Svelte 5 snippets with `{#snippet template(args)}`
+- The template receives `args` as the first parameter
+- Add `tags: ['autodocs']` only to public-facing, reusable components
+
+### Running Storybook
+
+```bash
+# dropin-service
+npm run storybook --workspace dropin-service
+
+# dash
+npm run storybook --workspace dash
+```
+
 ## SvelteKit Patterns
 
 ### Routing

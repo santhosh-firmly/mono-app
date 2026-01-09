@@ -5,8 +5,8 @@
 	import Store from 'lucide-svelte/icons/store';
 	import MapPin from 'lucide-svelte/icons/map-pin';
 	import Mail from 'lucide-svelte/icons/mail';
-	import Phone from 'lucide-svelte/icons/phone';
 	import Building2 from 'lucide-svelte/icons/building-2';
+	import { SvelteSet } from 'svelte/reactivity';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
@@ -19,11 +19,11 @@
 	export let order;
 
 	let faviconError = false;
-	let imageErrors = new Set();
+	let imageErrors = new SvelteSet();
 
 	$: if (order) {
 		faviconError = false;
-		imageErrors = new Set();
+		imageErrors = new SvelteSet();
 	}
 
 	function handleFaviconError() {
@@ -48,7 +48,9 @@
 					on:error={handleFaviconError}
 				/>
 			{:else}
-				<div class="w-10 h-10 rounded-lg border bg-white flex items-center justify-center shadow-sm">
+				<div
+					class="w-10 h-10 rounded-lg border bg-white flex items-center justify-center shadow-sm"
+				>
 					<Store class="h-5 w-5 text-muted-foreground" />
 				</div>
 			{/if}
@@ -102,7 +104,9 @@
 							/>
 						</div>
 					{:else}
-						<div class="flex-shrink-0 w-14 h-14 bg-muted rounded-md border flex items-center justify-center">
+						<div
+							class="flex-shrink-0 w-14 h-14 bg-muted rounded-md border flex items-center justify-center"
+						>
 							<Package class="h-6 w-6 text-muted-foreground" />
 						</div>
 					{/if}
@@ -138,7 +142,9 @@
 			{#if order?.order_info?.cart_discount?.value > 0}
 				<div class="flex justify-between">
 					<span class="text-muted-foreground">Discount</span>
-					<span class="text-green-600">-{formatCurrency(order?.order_info?.cart_discount || 0)}</span>
+					<span class="text-green-600"
+						>-{formatCurrency(order?.order_info?.cart_discount || 0)}</span
+					>
 				</div>
 			{/if}
 			<div class="flex justify-between">
@@ -180,7 +186,9 @@
 					Customer
 				</div>
 				<div class="text-muted-foreground space-y-0.5">
-					<p class="truncate">{displayFromHash(order?.order_info?.shipping_info?.email)}</p>
+					<p class="truncate">
+						{displayFromHash(order?.order_info?.shipping_info?.email)}
+					</p>
 					<p>{displayFromHash(order?.order_info?.shipping_info?.phone)}</p>
 				</div>
 			</div>
@@ -205,7 +213,12 @@
 	</Card.Content>
 
 	<Card.Footer class="flex flex-row items-center justify-end border-t bg-muted/50 px-6 py-3">
-		<Button href="/orders/{order?.platform_order_number}" variant="default" size="sm" class="gap-1.5">
+		<Button
+			href="/admin/orders/{order?.platform_order_number}"
+			variant="default"
+			size="sm"
+			class="gap-1.5"
+		>
 			<span>View Details</span>
 			<ExternalLink class="h-3.5 w-3.5" />
 		</Button>

@@ -1,0 +1,32 @@
+{
+	"name": "@firmly/dash-do",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"main": "src/index.js",
+	"scripts": {
+		"dev": "wrangler dev",
+		"deploy-dev": "wrangler deploy --env dev",
+		"deploy-ci": "wrangler deploy --env ci",
+		"deploy-qa": "wrangler deploy --env qa",
+		"deploy-uat": "wrangler deploy --env uat",
+		"deploy-prod": "wrangler deploy --env prod",
+		"format-code": "eslint . --fix",
+		"format-code:check": "eslint . --fix=false",
+		"build": "echo '{}' > data.json",
+		"test": "npm run build && vitest run --silent",
+		"test:watch": "npm run build && vitest",
+		"test:ui": "npm run build && vitest --ui"
+	},
+	"dependencies": {
+		"foundation": "github:goyalu/foundation#*"
+	},
+	"devDependencies": {
+		"@babel/eslint-parser": "^7.28.5",
+		"@babel/plugin-syntax-import-assertions": "^7.27.1",
+		"@cloudflare/vitest-pool-workers": "^0.11.1",
+		"eslint-plugin-import": "^2.32.0",
+		"vitest": "~3.1.4",
+		"wrangler": "^4.14.1"
+	}
+}

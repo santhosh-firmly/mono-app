@@ -27,9 +27,8 @@
 
 <div class="relative w-full">
 	<Popover.Root bind:open={isOpen}>
-		<Popover.Trigger asChild let:builder>
+		<Popover.Trigger>
 			<Button
-				builders={[builder]}
 				variant="outline"
 				role="combobox"
 				aria-expanded={isOpen}

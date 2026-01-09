@@ -1,0 +1,87 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Introduction" />
+
+# Firmly Dashboard Design System
+
+Welcome to the Firmly Dashboard component library. This Storybook documents all the components, patterns, and design guidelines used across the Firmly merchant dashboard.
+
+## Overview
+
+The Firmly Dashboard is built with:
+
+- **Svelte 5** with runes (`$state`, `$derived`, `$props`, `$effect`)
+- **SvelteKit** for routing and server-side rendering
+- **Tailwind CSS** for utility-first styling
+- **shadcn-svelte** for base UI components
+- **Lucide Icons** for consistent iconography
+
+## Design Principles
+
+### Clarity
+Every element should serve a purpose. Remove unnecessary decoration and focus on what helps users accomplish their tasks.
+
+### Consistency
+Use established patterns throughout the interface. Similar actions should look and behave similarly.
+
+### Feedback
+Provide immediate, clear feedback for user actions. Loading states, success messages, and error handling should be obvious.
+
+### Accessibility
+Components are built with accessibility in mind, including proper ARIA labels, keyboard navigation, and color contrast.
+
+## Getting Started
+
+### For Developers
+
+Browse the component categories in the sidebar:
+
+1. **Foundations** - Core design tokens (colors, typography, spacing, icons)
+2. **Forms** - Input components for data entry
+3. **Data Display** - Tables, charts, and cards for showing information
+4. **Feedback** - Alerts, badges, and progress indicators
+5. **Overlays** - Dialogs, popovers, and menus
+6. **Navigation** - Navbars, tabs, and pagination
+7. **Authentication** - Login, signup, and verification components
+8. **Merchant** - Merchant-specific dashboard components
+9. **Orders** - Order management components
+10. **Admin** - Firmly admin panel components
+11. **Profile** - User profile components
+12. **Pages** - Full page compositions
+
+### Using Components
+
+Components are imported from `$lib/components`:
+
+```svelte
+<script>
+  import { Button } from '$lib/components/ui/button';
+  import { Card } from '$lib/components/ui/card';
+</script>
+
+<Card.Root>
+  <Card.Header>
+    <Card.Title>My Card</Card.Title>
+  </Card.Header>
+  <Card.Content>
+    <Button>Click me</Button>
+  </Card.Content>
+</Card.Root>
+```
+
+## Contributing
+
+When adding new components:
+
+1. Create the component in the appropriate directory under `src/lib/components/`
+2. Add a story file alongside the component (e.g., `my-component.stories.svelte`)
+3. Include multiple variants (default, empty state, disabled, etc.)
+4. Add `tags: ['autodocs']` for automatic documentation generation
+
+## Resources
+
+- [Svelte 5 Documentation](https://svelte.dev/docs)
+- [SvelteKit Documentation](https://kit.svelte.dev/docs)
+- [Tailwind CSS](https://tailwindcss.com/docs)
+- [shadcn-svelte](https://www.shadcn-svelte.com/)
+- [Lucide Icons](https://lucide.dev/icons/)

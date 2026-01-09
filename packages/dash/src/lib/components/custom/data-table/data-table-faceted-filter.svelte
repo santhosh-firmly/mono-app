@@ -39,8 +39,8 @@
 </script>
 
 <Popover.Root bind:open>
-	<Popover.Trigger asChild let:builder>
-		<Button builders={[builder]} variant="outline" size="sm" class="h-8 border-dashed">
+	<Popover.Trigger>
+		<Button variant="outline" size="sm" class="h-8 border-dashed">
 			<PlusCircled class="mr-2 h-4 w-4" />
 			{title}
 

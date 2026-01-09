@@ -35,11 +35,28 @@ export default {
 				...globalConfig.workspaces['packages/*'].paths,
 				'$lib/*': ['./src/lib/*']
 			},
-			ignoreDependencies: ['@firmly/eslint-config', 'autoprefixer'],
+			ignoreDependencies: [
+				...globalConfig.workspaces['packages/*'].ignoreDependencies,
+				'@firmly/eslint-config',
+				'@storybook/addon-themes'
+			],
+			ignoreUnresolved: [
+				...globalConfig.workspaces['packages/*'].ignoreUnresolved,
+				'\\$lib/.*', // SvelteKit $lib alias
+				'svelte',
+				'svelte/store',
+				'svelte/transition',
+				'svelte/animate',
+				'svelte/easing',
+				'@storybook/addon-essentials',
+				'@storybook/addon-interactions',
+				'@storybook/addon-postcss'
+			],
 			ignore: [
-				'./$types',
-				'./src/lib/components/ui/**', // Disable validation for shadcn export way.
-				'*.config.js'
+				'**/*.stories.svelte', // Story files
+				'./src/lib/components/ui/**', // shadcn components
+				'./*.config.js',
+				'./*.config.cjs'
 			]
 		},
 		'packages/var-service': {
@@ -57,6 +74,12 @@ export default {
 		'packages/eslint-config': {
 			// Used as plugin by prettier, tailwind
 			ignoreDependencies: ['prettier-plugin-svelte', 'prettier-plugin-tailwindcss']
+		},
+		'packages/dash-do': {
+			ignore: ['./eslint.config.js'],
+			// ESLint dependencies used by eslint.config.js
+			// cloudflare:test is a Cloudflare Workers test module, not an npm package
+			ignoreDependencies: ['@babel/eslint-parser', '@babel/plugin-syntax-import-assertions', 'eslint-plugin-import', 'cloudflare']
 		}
 	}
 };

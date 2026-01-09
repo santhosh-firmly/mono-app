@@ -1,13 +1,15 @@
 {
 	"name": "dash",
 	"compatibility_date": "2025-01-21",
-	"compatibility_flags": ["nodejs_compat"],
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
 	"send_metrics": false,
 	"workers_dev": false,
 	"preview_urls": false,
 	"logpush": true,
 	"observability": {
-		"enabled": true
+		"enabled": false
 	},
 	"d1_databases": [
 		{
@@ -19,6 +21,31 @@
 			"binding": "reporting",
 			"database_name": "reporting",
 			"database_id": "d269cace-932c-41e0-bf7c-b852db8e83f1"
+		},
+		{
+			"binding": "dashUsers",
+			"database_name": "dash-users",
+			"database_id": "f631867a-792c-41c6-a189-cd62ac0423d8"
+		}
+	],
+	// KV namespace for OTP storage - create with: wrangler kv:namespace create OTP_STORE
+	"kv_namespaces": [
+		{
+			"binding": "OTP_STORE",
+			"id": "c44dfcb6c5404854b82b9023ff1d4d39"
+		}
+	],
+	// R2 bucket for avatar storage - create with: wrangler r2 bucket create dash-avatars
+	"r2_buckets": [
+		{
+			"binding": "AVATARS",
+			"bucket_name": "dash-avatars-dev"
+		}
+	],
+	"services": [
+		{
+			"binding": "DASH_DO",
+			"service": "dash-do"
 		}
 	],
 	"vars": {
@@ -53,12 +80,35 @@
 					"binding": "reporting",
 					"database_name": "reporting",
 					"database_id": "d269cace-932c-41e0-bf7c-b852db8e83f1"
+				},
+				{
+					"binding": "dashUsers",
+					"database_name": "dash-users",
+					"database_id": "f631867a-792c-41c6-a189-cd62ac0423d8"
+				}
+			],
+			"kv_namespaces": [
+				{
+					"binding": "OTP_STORE",
+					"id": "c44dfcb6c5404854b82b9023ff1d4d39",
+					"preview_id": "c44dfcb6c5404854b82b9023ff1d4d39"
+				}
+			],
+			"r2_buckets": [
+				{
+					"binding": "AVATARS",
+					"bucket_name": "dash-avatars-dev",
+					"preview_bucket_name": "dash-avatars-dev"
 				}
 			],
 			"services": [
 				{
 					"binding": "envLoader",
 					"service": "env-loader"
+				},
+				{
+					"binding": "DASH_DO",
+					"service": "dash-do"
 				}
 			],
 			"vars": {
@@ -93,12 +143,33 @@
 					"binding": "reporting",
 					"database_name": "reporting",
 					"database_id": "c873f38b-03af-48b5-90dd-5ea7bba33ef1"
+				},
+				{
+					"binding": "dashUsers",
+					"database_name": "dash-users",
+					"database_id": "TO_BE_CREATED_CI"
+				}
+			],
+			"kv_namespaces": [
+				{
+					"binding": "OTP_STORE",
+					"id": "TO_BE_CREATED_CI"
+				}
+			],
+			"r2_buckets": [
+				{
+					"binding": "AVATARS",
+					"bucket_name": "dash-avatars-ci"
 				}
 			],
 			"services": [
 				{
 					"binding": "envLoader",
 					"service": "env-loader"
+				},
+				{
+					"binding": "DASH_DO",
+					"service": "dash-do"
 				}
 			],
 			"vars": {
@@ -133,12 +204,33 @@
 					"binding": "reporting",
 					"database_name": "reporting",
 					"database_id": "9fe0e79a-dd06-4e65-894c-cf2e15e715e6"
+				},
+				{
+					"binding": "dashUsers",
+					"database_name": "dash-users",
+					"database_id": "TO_BE_CREATED_QA"
+				}
+			],
+			"kv_namespaces": [
+				{
+					"binding": "OTP_STORE",
+					"id": "TO_BE_CREATED_QA"
+				}
+			],
+			"r2_buckets": [
+				{
+					"binding": "AVATARS",
+					"bucket_name": "dash-avatars-qa"
 				}
 			],
 			"services": [
 				{
 					"binding": "envLoader",
 					"service": "env-loader"
+				},
+				{
+					"binding": "DASH_DO",
+					"service": "dash-do"
 				}
 			],
 			"vars": {
@@ -167,12 +259,33 @@
 					"binding": "reporting",
 					"database_name": "reporting",
 					"database_id": "9ffc4df7-f27a-44a2-b526-44de76eed733"
+				},
+				{
+					"binding": "dashUsers",
+					"database_name": "dash-users",
+					"database_id": "TO_BE_CREATED_UAT"
+				}
+			],
+			"kv_namespaces": [
+				{
+					"binding": "OTP_STORE",
+					"id": "TO_BE_CREATED_UAT"
+				}
+			],
+			"r2_buckets": [
+				{
+					"binding": "AVATARS",
+					"bucket_name": "dash-avatars-uat"
 				}
 			],
 			"services": [
 				{
 					"binding": "envLoader",
 					"service": "env-loader"
+				},
+				{
+					"binding": "DASH_DO",
+					"service": "dash-do"
 				}
 			],
 			"routes": [
@@ -207,12 +320,33 @@
 					"binding": "reporting",
 					"database_name": "reporting",
 					"database_id": "bf2df3ce-3973-4dd4-9fcd-57c11297d57c"
+				},
+				{
+					"binding": "dashUsers",
+					"database_name": "dash-users",
+					"database_id": "TO_BE_CREATED_PROD"
+				}
+			],
+			"kv_namespaces": [
+				{
+					"binding": "OTP_STORE",
+					"id": "TO_BE_CREATED_PROD"
+				}
+			],
+			"r2_buckets": [
+				{
+					"binding": "AVATARS",
+					"bucket_name": "dash-avatars-prod"
 				}
 			],
 			"services": [
 				{
 					"binding": "envLoader",
 					"service": "env-loader"
+				},
+				{
+					"binding": "DASH_DO",
+					"service": "dash-do"
 				}
 			],
 			"routes": [

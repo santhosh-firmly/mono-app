@@ -1,42 +1,42 @@
 {
-	"name": "mono-app",
-	"private": true,
-	"type": "module",
-	"workspaces": [
-		"packages/*"
-	],
-	"scripts": {
-		"build": "lerna run build",
-		"build-dev": "lerna run build-dev",
-		"build-ci": "lerna run build-ci",
-		"build-qa": "lerna run build-qa",
-		"build-uat": "lerna run build-uat",
-		"build-prod": "lerna run build-prod",
-		"deploy-dev": "lerna run deploy-dev",
-		"deploy-ci": "lerna run deploy-ci",
-		"deploy-qa": "lerna run deploy-qa",
-		"deploy-uat": "lerna run deploy-uat",
-		"deploy-prod": "lerna run deploy-prod",
-		"outdated": "npx check-outdated --prefer-wanted --ignore-packages @vitest,@vitest/ui,@vitest/coverage-istanbul,vitest,eslint",
-		"depcheck": "knip -c knip.config.js --no-config-hints",
-		"format": "prettier --write './*.{js,jsx,ts,tsx,json,md,yml,yaml}'",
-		"format-code": "npm run format && lerna run format-code",
-		"test": "lerna run test:static",
-		"update-version": "lerna version --no-push --force-publish --yes",
-		"update-version-no-hooks": "lerna version --no-push --force-publish --no-commit-hooks --yes",
-		"prepare": "husky"
-	},
-	"devDependencies": {
-		"@firmly/eslint-config": "^0.4.0",
-		"eslint": "^9.18.0",
-		"husky": "^9.1.7",
-		"knip": "^5.68.0",
-		"lerna": "^8.1.2",
-		"prettier": "^3.6.0",
-		"wrangler": "^4.9.1"
-	},
-	"prettier": "@firmly/eslint-config/prettier",
-	"resolutions": {
-		"svelte-headless-table/svelte": "^5.27.0"
-	}
+  "name": "mono-app",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "lerna run build",
+    "build-dev": "lerna run build-dev",
+    "build-ci": "lerna run build-ci",
+    "build-qa": "lerna run build-qa",
+    "build-uat": "lerna run build-uat",
+    "build-prod": "lerna run build-prod",
+    "deploy-dev": "lerna run deploy-dev",
+    "deploy-ci": "lerna run deploy-ci",
+    "deploy-qa": "lerna run deploy-qa",
+    "deploy-uat": "lerna run deploy-uat",
+    "deploy-prod": "lerna run deploy-prod",
+    "outdated": "npx check-outdated --prefer-wanted --ignore-packages @vitest,@vitest/ui,@vitest/coverage-istanbul,vitest,eslint",
+    "depcheck": "knip -c knip.config.js --no-config-hints",
+    "format": "prettier --write './*.{js,jsx,ts,tsx,json,md,yml,yaml}'",
+    "format-code": "npm run format && lerna run format-code",
+    "test": "lerna run test:static",
+    "update-version": "lerna version --no-push --force-publish --yes",
+    "update-version-no-hooks": "lerna version --no-push --force-publish --no-commit-hooks --yes",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@firmly/eslint-config": "^0.4.0",
+    "eslint": "^9.18.0",
+    "husky": "^9.1.7",
+    "knip": "^5.68.0",
+    "lerna": "^8.1.2",
+    "prettier": "^3.6.0",
+    "wrangler": "^4.9.1"
+  },
+  "prettier": "@firmly/eslint-config/prettier",
+  "resolutions": {
+    "svelte-headless-table/svelte": "^5.27.0"
+  }
 }

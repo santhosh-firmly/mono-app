@@ -7,14 +7,8 @@
 	export { className as class };
 </script>
 
-<PaginationPrimitive.NextButton asChild let:builder>
-	<Button
-		variant="ghost"
-		class={cn('gap-1 pr-2.5', className)}
-		builders={[builder]}
-		on:click
-		{...$$restProps}
-	>
+<PaginationPrimitive.NextButton>
+	<Button variant="ghost" class={cn('gap-1 pr-2.5', className)} on:click {...$$restProps}>
 		<slot>
 			<span>Next</span>
 			<ChevronRight class="h-4 w-4" />

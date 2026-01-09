@@ -1,0 +1,314 @@
+{/* foundations/colors.mdx */}
+import { Meta, ColorPalette, ColorItem } from '@storybook/blocks';
+
+<Meta title="Foundations/Theme/Colors" />
+
+# Color System
+
+The Firmly Dashboard uses a semantic color system built on CSS custom properties. This allows for consistent theming and easy dark mode support.
+
+## Dark Theme Philosophy
+
+The dark theme uses **soft gray tones** instead of pure black (#000) for several key reasons:
+
+- **Reduced eye strain** - Pure black on screens creates high contrast that can be fatiguing during extended use
+- **Visual depth** - Lighter backgrounds allow cards and popovers to "float" above the surface using subtle elevation differences
+- **Better color perception** - Colors (especially the Firmly purple) appear more vibrant against soft gray than against pure black
+- **Modern aesthetic** - Leading design systems (GitHub, VS Code, Notion) all use gray-based dark themes
+
+### Dark Theme Color Scale
+
+| Element | Lightness | Hex | Purpose |
+|---------|-----------|-----|---------|
+| Background | 9% | #171717 | Base surface |
+| Card/Popover | 12% | #1f1f1f | Elevated surfaces |
+| Muted | 15% | #262626 | Subtle backgrounds |
+| Secondary/Accent | 18% | #2e2e2e | Interactive surfaces |
+| Border | 20% | #333333 | Component boundaries |
+
+---
+
+## Core Palette
+
+Our color system is divided into semantic categories that describe the purpose of each color, not its appearance.
+
+### Background & Foreground
+
+The base colors for surfaces and text content. The dark theme uses softer grayish tones instead of pure black for better readability and reduced eye strain.
+
+<ColorPalette>
+  <ColorItem
+    title="Background"
+    subtitle="--background"
+    colors={{ Light: 'hsl(0 0% 100%)', Dark: 'hsl(0 0% 9%)' }}
+  />
+  <ColorItem
+    title="Foreground"
+    subtitle="--foreground"
+    colors={{ Light: 'hsl(0 0% 3.9%)', Dark: 'hsl(0 0% 95%)' }}
+  />
+</ColorPalette>
+
+### Primary (Firmly Purple)
+
+Primary colors are used for main actions and key UI elements like primary buttons. The primary color is **Firmly Purple** (#a855f7), the brand color used across the dashboard.
+
+<ColorPalette>
+  <ColorItem
+    title="Primary"
+    subtitle="--primary"
+    colors={{ Light: 'hsl(270 91% 65%)', Dark: 'hsl(270 91% 70%)' }}
+  />
+  <ColorItem
+    title="Primary Foreground"
+    subtitle="--primary-foreground"
+    colors={{ Light: 'hsl(0 0% 100%)', Dark: 'hsl(0 0% 100%)' }}
+  />
+</ColorPalette>
+
+### Secondary
+
+Secondary colors for less prominent actions and alternative buttons.
+
+<ColorPalette>
+  <ColorItem
+    title="Secondary"
+    subtitle="--secondary"
+    colors={{ Light: 'hsl(0 0% 96.1%)', Dark: 'hsl(0 0% 18%)' }}
+  />
+  <ColorItem
+    title="Secondary Foreground"
+    subtitle="--secondary-foreground"
+    colors={{ Light: 'hsl(0 0% 9%)', Dark: 'hsl(0 0% 95%)' }}
+  />
+</ColorPalette>
+
+### Muted
+
+Muted colors for subtle backgrounds and placeholder text.
+
+<ColorPalette>
+  <ColorItem
+    title="Muted"
+    subtitle="--muted"
+    colors={{ Light: 'hsl(0 0% 93%)', Dark: 'hsl(0 0% 15%)' }}
+  />
+  <ColorItem
+    title="Muted Foreground"
+    subtitle="--muted-foreground"
+    colors={{ Light: 'hsl(0 0% 45.1%)', Dark: 'hsl(0 0% 65%)' }}
+  />
+</ColorPalette>
+
+### Accent
+
+Accent colors for hover states and highlights.
+
+<ColorPalette>
+  <ColorItem
+    title="Accent"
+    subtitle="--accent"
+    colors={{ Light: 'hsl(0 0% 96.1%)', Dark: 'hsl(0 0% 18%)' }}
+  />
+  <ColorItem
+    title="Accent Foreground"
+    subtitle="--accent-foreground"
+    colors={{ Light: 'hsl(0 0% 9%)', Dark: 'hsl(0 0% 95%)' }}
+  />
+</ColorPalette>
+
+### Destructive
+
+Destructive colors for warnings, errors, and delete actions. The dark mode uses a brighter red for better visibility against the gray background.
+
+<ColorPalette>
+  <ColorItem
+    title="Destructive"
+    subtitle="--destructive"
+    colors={{ Light: 'hsl(0 72.2% 50.6%)', Dark: 'hsl(0 72% 45%)' }}
+  />
+  <ColorItem
+    title="Destructive Foreground"
+    subtitle="--destructive-foreground"
+    colors={{ Light: 'hsl(0 0% 98%)', Dark: 'hsl(0 0% 98%)' }}
+  />
+</ColorPalette>
+
+### Card & Popover
+
+Surface colors for elevated elements like cards, dialogs, and popovers. In dark mode, these surfaces are slightly lighter than the background to create visual depth.
+
+<ColorPalette>
+  <ColorItem
+    title="Card"
+    subtitle="--card"
+    colors={{ Light: 'hsl(0 0% 100%)', Dark: 'hsl(0 0% 12%)' }}
+  />
+  <ColorItem
+    title="Popover"
+    subtitle="--popover"
+    colors={{ Light: 'hsl(0 0% 100%)', Dark: 'hsl(0 0% 12%)' }}
+  />
+</ColorPalette>
+
+### Border & Input
+
+Colors for borders and form inputs. Dark mode borders are more visible to maintain clear component boundaries.
+
+<ColorPalette>
+  <ColorItem
+    title="Border"
+    subtitle="--border"
+    colors={{ Light: 'hsl(0 0% 89.8%)', Dark: 'hsl(0 0% 20%)' }}
+  />
+  <ColorItem
+    title="Input"
+    subtitle="--input"
+    colors={{ Light: 'hsl(0 0% 89.8%)', Dark: 'hsl(0 0% 18%)' }}
+  />
+  <ColorItem
+    title="Ring"
+    subtitle="--ring (focus indicator)"
+    colors={{ Light: 'hsl(0 0% 3.9%)', Dark: 'hsl(270 91% 70%)' }}
+  />
+</ColorPalette>
+
+---
+
+## Brand Colors
+
+The Firmly brand identity is built around purple. **Purple-500 (#a855f7)** is the primary color used throughout the dashboard.
+
+### Firmly Purple Palette
+
+The full purple palette is available for creating variations and accents:
+
+<ColorPalette>
+  <ColorItem
+    title="Firmly Purple"
+    subtitle="Primary brand color"
+    colors={{
+      '50': '#faf5ff',
+      '100': '#f3e8ff',
+      '200': '#e9d5ff',
+      '300': '#d8b4fe',
+      '400': '#c084fc',
+      '500 (Primary)': '#a855f7',
+      '600': '#9333ea',
+      '700': '#7c3aed',
+      '800': '#6b21a8',
+      '900': '#581c87'
+    }}
+  />
+</ColorPalette>
+
+**Usage:**
+- Use `bg-primary` and `text-primary` for brand elements
+- Use `bg-primary/10` for subtle brand backgrounds
+- Use `bg-primary/5` for very subtle brand tints
+
+### Semantic Status Colors
+
+Used for status indicators, alerts, and badges.
+
+<ColorPalette>
+  <ColorItem
+    title="Success"
+    subtitle="Completed, verified states"
+    colors={{
+      Light: '#22c55e',
+      Background: '#dcfce7',
+      Text: '#166534'
+    }}
+  />
+  <ColorItem
+    title="Warning"
+    subtitle="Pending, attention states"
+    colors={{
+      Light: '#f59e0b',
+      Background: '#fef3c7',
+      Text: '#92400e'
+    }}
+  />
+  <ColorItem
+    title="Error"
+    subtitle="Failed, error states"
+    colors={{
+      Light: '#ef4444',
+      Background: '#fee2e2',
+      Text: '#991b1b'
+    }}
+  />
+  <ColorItem
+    title="Info"
+    subtitle="Informational messages"
+    colors={{
+      Light: '#3b82f6',
+      Background: '#dbeafe',
+      Text: '#1e40af'
+    }}
+  />
+</ColorPalette>
+
+---
+
+## Merchant Action Colors
+
+Each merchant can customize their checkout experience with custom action colors. These are used in the drop-in widget and merchant previews.
+
+<ColorPalette>
+  <ColorItem
+    title="Primary Background"
+    subtitle="Merchant-defined"
+    colors={{
+      Default: '#f8f4ff',
+      Example: '#ecfdf5'
+    }}
+  />
+  <ColorItem
+    title="Action Color"
+    subtitle="Buttons and CTAs"
+    colors={{
+      Default: '#7c3aed',
+      Example: '#059669'
+    }}
+  />
+</ColorPalette>
+
+---
+
+## Usage Guidelines
+
+### Accessibility
+
+- Always ensure sufficient contrast between text and background colors
+- WCAG 2.1 requires a minimum contrast ratio of 4.5:1 for normal text
+- Large text (18pt+ or 14pt+ bold) requires 3:1 minimum contrast
+- Use the semantic colors to maintain accessibility in both light and dark modes
+
+### Best Practices
+
+1. **Use semantic colors** - Refer to colors by their purpose (`--destructive`) not their value
+2. **Avoid hardcoded colors** - Use CSS variables or Tailwind classes
+3. **Test in both modes** - Ensure your component works in light and dark themes
+4. **Consider color blindness** - Don't rely on color alone to convey meaning
+
+### Tailwind Usage
+
+```html
+<!-- Background colors -->
+<div class="bg-background">...</div>
+<div class="bg-card">...</div>
+<div class="bg-muted">...</div>
+
+<!-- Text colors -->
+<p class="text-foreground">Main text</p>
+<p class="text-muted-foreground">Secondary text</p>
+
+<!-- Border colors -->
+<div class="border border-border">...</div>
+
+<!-- Semantic colors -->
+<button class="bg-primary text-primary-foreground">Primary</button>
+<button class="bg-destructive text-destructive-foreground">Delete</button>
+```

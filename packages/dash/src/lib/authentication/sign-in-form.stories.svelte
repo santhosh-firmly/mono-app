@@ -1,7 +1,7 @@
 <script context="module">
 	import SignInForm from './sign-in-form.svelte';
 	export const meta = {
-		title: 'Components/Authentication/Sign In',
+		title: 'Authentication/Sign In Form',
 		component: SignInForm
 	};
 </script>

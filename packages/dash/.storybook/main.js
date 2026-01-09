@@ -1,3 +1,5 @@
+import remarkGfm from 'remark-gfm';
+
 /** @type { import('@storybook/sveltekit').StorybookConfig } */
 const config = {
 	stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|ts|svelte)'],
@@ -9,9 +11,19 @@ const config = {
 				// TODO: Temporary when using V4 and project is not migrated.
 				{ legacyTemplate: true }
 		},
-		'@chromatic-com/storybook',
 		'@storybook/addon-interactions',
-		'@storybook/addon-postcss'
+		'@storybook/addon-postcss',
+		'@storybook/addon-themes',
+		{
+			name: '@storybook/addon-docs',
+			options: {
+				mdxPluginOptions: {
+					mdxCompileOptions: {
+						remarkPlugins: [remarkGfm]
+					}
+				}
+			}
+		}
 	],
 	framework: {
 		name: '@storybook/sveltekit',
