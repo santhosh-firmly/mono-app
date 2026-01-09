@@ -307,15 +307,27 @@ export class DashUserDO extends BaseDurableObject {
     // Destination access methods
     handleGetDestinationAccess() {
         const access = this.sql.exec('SELECT * FROM destination_access').toArray();
-        return Response.json(access);
+        // Map column names to match client expectations (app_id, role)
+        const mapped = access.map((row) => ({
+            app_id: row.destination_id,
+            role: row.access_level,
+            granted_at: row.granted_at,
+        }));
+        return Response.json(mapped);
     }
 
-    handleGrantDestinationAccess({ destinationId, accessLevel = 'full' }) {
+    handleGrantDestinationAccess({ destinationId, appId, accessLevel, role }) {
+        // Accept both naming conventions for backward compatibility
+        // New: appId, role (from destination.js)
+        // Old: destinationId, accessLevel
+        const id = appId || destinationId;
+        const level = role || accessLevel || 'full';
+
         this.sql.exec(
             `INSERT OR REPLACE INTO destination_access (destination_id, access_level, granted_at)
 			 VALUES (?, ?, datetime('now'))`,
-            destinationId,
-            accessLevel,
+            id,
+            level,
         );
         return Response.json({ success: true });
     }

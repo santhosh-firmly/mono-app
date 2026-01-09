@@ -1,7 +1,5 @@
 <script>
-	import { onDestroy } from 'svelte';
-	import Cropper from 'cropperjs';
-	// import 'cropperjs/dist/cropper.css';
+	import { onDestroy, onMount } from 'svelte';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
@@ -27,8 +25,18 @@
 
 	// Non-reactive cropper instance (not $state to avoid infinite loops)
 	let cropper = null;
+	// Cropper class (loaded dynamically to avoid SSR issues)
+	let CropperClass = $state(null);
 	// Track last initialized URL to prevent re-initialization
 	let lastInitializedUrl = null;
+	// Container element for cropper
+	let cropperContainer = $state(null);
+
+	// Load Cropper.js dynamically on mount (client-side only)
+	onMount(async () => {
+		const module = await import('cropperjs');
+		CropperClass = module.default;
+	});
 
 	// Color adjustments (percentages from -50 to 50)
 	let brightness = $state(0);
@@ -90,32 +98,104 @@
 	}
 
 	function initCropper(element) {
+		if (!CropperClass) return; // Not loaded yet
+
 		if (cropper) {
 			cropper.destroy();
 		}
 
-		cropper = new Cropper(element, {
-			aspectRatio: 1,
-			viewMode: 1,
-			dragMode: 'move',
-			autoCropArea: 1,
-			cropBoxMovable: false,
-			cropBoxResizable: false,
-			toggleDragModeOnDblclick: false,
-			minContainerWidth: 280,
-			minContainerHeight: 280,
-			ready() {
-				// Circular mask via CSS is applied in the container
+		// Cropper.js v2 uses Web Components with a template
+		// For avatar: fixed selection, movable/zoomable image
+		cropper = new CropperClass(element, {
+			container: cropperContainer,
+			template: `
+				<cropper-canvas background style="width: 100%; height: 100%;">
+					<cropper-image translatable scalable></cropper-image>
+					<cropper-shade hidden></cropper-shade>
+					<cropper-handle action="move" plain></cropper-handle>
+					<cropper-handle action="scale" plain></cropper-handle>
+					<cropper-selection
+						initial-coverage="0.85"
+						aspect-ratio="1"
+						outlined
+					>
+						<cropper-handle action="move" plain></cropper-handle>
+					</cropper-selection>
+				</cropper-canvas>
+			`
+		});
+
+		// Center and fit the image after cropper is ready
+		requestAnimationFrame(() => {
+			const image = cropper?.getCropperImage?.();
+			const canvas = cropper?.getCropperCanvas?.();
+			if (image && canvas) {
+				// Use 'cover' to ensure image fills the entire selection (no blank areas)
+				image.$center?.('cover');
+
+				// Save initial transform as valid after a short delay
+				setTimeout(() => {
+					lastValidTransform = image.$getTransform?.();
+				}, 100);
+
+				// Listen for action events to constrain image
+				canvas.addEventListener('actionend', () => constrainImageToSelection());
+				canvas.addEventListener('action', () => constrainImageToSelection());
 			}
 		});
 	}
 
+	// Store last valid transform to revert if needed
+	let lastValidTransform = null;
+
+	// Constrain image so it always covers the selection (no blank areas)
+	function constrainImageToSelection() {
+		const image = cropper?.getCropperImage?.();
+		const selection = cropper?.getCropperSelection?.();
+
+		if (!image || !selection) return;
+
+		const imageRect = image.getBoundingClientRect();
+		const selectionRect = selection.getBoundingClientRect();
+
+		// Check if current position is valid (image covers selection)
+		const isValid =
+			imageRect.left <= selectionRect.left + 2 &&
+			imageRect.right >= selectionRect.right - 2 &&
+			imageRect.top <= selectionRect.top + 2 &&
+			imageRect.bottom >= selectionRect.bottom - 2 &&
+			imageRect.width >= selectionRect.width - 2 &&
+			imageRect.height >= selectionRect.height - 2;
+
+		if (isValid) {
+			// Save current transform as valid
+			lastValidTransform = image.$getTransform?.();
+		} else if (lastValidTransform) {
+			// Revert to last valid transform
+			image.$setTransform?.(lastValidTransform);
+		} else {
+			// No valid transform saved, reset to cover
+			image.$center?.('cover');
+			lastValidTransform = image.$getTransform?.();
+		}
+	}
+
 	function handleZoomIn() {
-		cropper?.zoom(0.1);
+		const image = cropper?.getCropperImage?.();
+		if (image?.$scale) {
+			// v2: scale the image (1.1 = 10% larger)
+			image.$scale(1.1, 1.1);
+		}
 	}
 
 	function handleZoomOut() {
-		cropper?.zoom(-0.1);
+		const image = cropper?.getCropperImage?.();
+		if (image?.$scale) {
+			// v2: scale the image (0.9 = 10% smaller)
+			image.$scale(0.9, 0.9);
+			// Ensure image still covers selection after zoom out
+			requestAnimationFrame(() => constrainImageToSelection());
+		}
 	}
 
 	async function handleSave() {
@@ -125,13 +205,26 @@
 		error = '';
 
 		try {
-			// Get cropped canvas
-			const croppedCanvas = cropper.getCroppedCanvas({
-				width: 256,
-				height: 256,
-				imageSmoothingEnabled: true,
-				imageSmoothingQuality: 'high'
-			});
+			let croppedCanvas;
+
+			// Cropper.js v2: use $toCanvas on the selection element
+			const selection = cropper.getCropperSelection?.();
+			if (selection?.$toCanvas) {
+				croppedCanvas = await selection.$toCanvas({
+					width: 256,
+					height: 256
+				});
+			} else if (cropper.getCroppedCanvas) {
+				// Fallback for v1 API
+				croppedCanvas = cropper.getCroppedCanvas({
+					width: 256,
+					height: 256,
+					imageSmoothingEnabled: true,
+					imageSmoothingQuality: 'high'
+				});
+			} else {
+				throw new Error('Unable to get cropped canvas');
+			}
 
 			// Apply color adjustments by drawing to a new canvas with filters
 			const finalCanvas = document.createElement('canvas');
@@ -167,21 +260,34 @@
 		}
 		previewUrl = null;
 		lastInitializedUrl = null;
+		lastValidTransform = null;
 		error = '';
 		resetAdjustments();
 		open = false;
 	}
 
-	// Initialize cropper when image element and URL are ready
+	// Initialize cropper when image element, container, URL, and CropperClass are ready
 	$effect(() => {
-		if (imageElement && previewUrl && previewUrl !== lastInitializedUrl) {
+		if (
+			CropperClass &&
+			imageElement &&
+			cropperContainer &&
+			previewUrl &&
+			previewUrl !== lastInitializedUrl
+		) {
 			lastInitializedUrl = previewUrl;
-			// Use setTimeout to ensure image is fully loaded
-			setTimeout(() => {
-				if (imageElement) {
-					initCropper(imageElement);
-				}
-			}, 100);
+
+			const doInit = () => {
+				// Small delay to ensure DOM is ready
+				setTimeout(() => initCropper(imageElement), 50);
+			};
+
+			// Wait for image to be fully loaded
+			if (imageElement.complete && imageElement.naturalWidth > 0) {
+				doInit();
+			} else {
+				imageElement.onload = doInit;
+			}
 		}
 	});
 
@@ -239,19 +345,19 @@
 			{:else}
 				<!-- Image editor -->
 				<div class="space-y-4">
-					<!-- Cropper container with circular mask -->
+					<!-- Cropper container -->
 					<div
-						class="relative mx-auto h-72 w-72 overflow-hidden rounded-full"
-						style="filter: {filterStyle()}"
+						bind:this={cropperContainer}
+						class="cropper-wrapper mx-auto overflow-hidden rounded-lg"
+						style="width: 288px; height: 288px; filter: {filterStyle()}"
 					>
-						<div class="absolute inset-0">
-							<img
-								bind:this={imageElement}
-								src={previewUrl}
-								alt="Avatar preview"
-								class="block max-w-full"
-							/>
-						</div>
+						<img
+							bind:this={imageElement}
+							src={previewUrl}
+							alt="Avatar preview"
+							class="block max-w-full"
+							style="opacity: 0; position: absolute;"
+						/>
 					</div>
 
 					<!-- Zoom controls -->
@@ -331,6 +437,7 @@
 							onclick={() => {
 								if (previewUrl) URL.revokeObjectURL(previewUrl);
 								previewUrl = null;
+								lastValidTransform = null;
 								if (cropper) {
 									cropper.destroy();
 									cropper = null;
@@ -385,18 +492,46 @@
 		border: none;
 	}
 
-	/* Cropper.js customization for circular crop */
-	:global(.cropper-view-box),
-	:global(.cropper-face) {
-		border-radius: 50%;
+	/* Cropper.js v2 container */
+	.cropper-wrapper {
+		background: #1f2937;
+		position: relative;
 	}
 
-	:global(.cropper-view-box) {
-		box-shadow: 0 0 0 1px #39f;
-		outline: 0;
+	/* Cropper.js v2 Web Components styling */
+	:global(.cropper-wrapper cropper-canvas) {
+		display: block;
+		width: 288px !important;
+		height: 288px !important;
 	}
 
-	:global(.cropper-dashed) {
+	:global(.cropper-wrapper cropper-image) {
+		cursor: move;
+	}
+
+	/* Circular selection for avatar */
+	:global(.cropper-wrapper cropper-selection) {
+		border-radius: 50% !important;
+		overflow: hidden;
+	}
+
+	/* Hide the grid inside selection for cleaner look */
+	:global(.cropper-wrapper cropper-grid) {
 		display: none;
+	}
+
+	/* Style the crosshair */
+	:global(.cropper-wrapper cropper-crosshair) {
+		opacity: 0.5;
+	}
+
+	/* Selection outline - circular */
+	:global(.cropper-wrapper cropper-selection[outlined]::after) {
+		content: '';
+		position: absolute;
+		inset: 0;
+		border-radius: 50%;
+		border: 2px solid rgba(255, 255, 255, 0.8);
+		pointer-events: none;
 	}
 </style>

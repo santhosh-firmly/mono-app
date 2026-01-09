@@ -302,6 +302,106 @@ describe('MerchantDO', () => {
         });
     });
 
+    describe('Reset', () => {
+        it('should reset all merchant data', async () => {
+            // First, add some data
+            await durable.fetch('http://test/team', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: 'user-123',
+                    userEmail: 'user@example.com',
+                    role: 'owner',
+                }),
+            });
+
+            await durable.fetch('http://test/audit-logs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    eventType: 'TEST_EVENT',
+                    actorId: 'actor-123',
+                    actorEmail: 'actor@example.com',
+                }),
+            });
+
+            await durable.fetch('http://test/agreement', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: 'user-123',
+                    userEmail: 'user@example.com',
+                }),
+            });
+
+            await durable.fetch('http://test/onboarding/destinations', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    completed: true,
+                    userId: 'user-123',
+                    userEmail: 'user@example.com',
+                }),
+            });
+
+            await durable.fetch('http://test/catalog-config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    catalogType: 'full',
+                    userId: 'user-123',
+                    userEmail: 'user@example.com',
+                }),
+            });
+
+            await durable.fetch('http://test/integration-steps', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    stepId: 'setup-sdk',
+                    status: 'completed',
+                }),
+            });
+
+            // Reset
+            const resetResponse = await durable.fetch('http://test/reset', {
+                method: 'POST',
+            });
+
+            expect(resetResponse.status).toBe(200);
+            const resetData = await resetResponse.json();
+            expect(resetData.success).toBe(true);
+            expect(resetData.clearedTeamMembers).toBeDefined();
+            expect(resetData.clearedTeamMembers.length).toBe(1);
+            expect(resetData.clearedTeamMembers[0].user_id).toBe('user-123');
+
+            // Verify all data is cleared
+            const teamResponse = await durable.fetch('http://test/team', { method: 'GET' });
+            const team = await teamResponse.json();
+            expect(team.length).toBe(0);
+
+            const auditResponse = await durable.fetch('http://test/audit-logs', { method: 'GET' });
+            const audit = await auditResponse.json();
+            expect(audit.logs.length).toBe(0);
+
+            const agreementResponse = await durable.fetch('http://test/agreement', { method: 'GET' });
+            const agreement = await agreementResponse.json();
+            expect(agreement.signed).toBe(false);
+
+            const onboardingResponse = await durable.fetch('http://test/onboarding', { method: 'GET' });
+            const onboarding = await onboardingResponse.json();
+            expect(onboarding).toEqual({});
+
+            const catalogResponse = await durable.fetch('http://test/catalog-config', { method: 'GET' });
+            const catalog = await catalogResponse.json();
+            expect(catalog.hasExistingConfig).toBe(false);
+
+            const stepsResponse = await durable.fetch('http://test/integration-steps', { method: 'GET' });
+            const steps = await stepsResponse.json();
+            expect(steps.length).toBe(0);
+        });
+    });
+
     describe('Error Handling', () => {
         it('should return 404 for unknown routes', async () => {
             const response = await durable.fetch('http://test/unknown-route', { method: 'GET' });

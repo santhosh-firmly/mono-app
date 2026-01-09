@@ -2,13 +2,13 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import MerchantPageHeader from '$lib/components/merchant/merchant-page-header.svelte';
+	import SelectionCard from '$lib/components/merchant/selection-card.svelte';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import Loader2 from 'lucide-svelte/icons/loader-2';
 	import Package from 'lucide-svelte/icons/package';
 	import PackageOpen from 'lucide-svelte/icons/package-open';
 	import Save from 'lucide-svelte/icons/save';
-	import Check from 'lucide-svelte/icons/check';
 
 	let domain = $derived($page.params.domain);
 
@@ -77,7 +77,7 @@
 
 			if (result.isFirstTimeSave) {
 				// Redirect to dashboard after completing onboarding step
-				goto(`/merchant/${domain}`);
+				goto(`/merchant/${domain}`, { invalidateAll: true });
 				return;
 			}
 			successMessage = 'Catalog configuration updated successfully!';
@@ -114,132 +114,44 @@
 			</Card.Header>
 			<Card.Content class="space-y-4">
 				<!-- Entire Catalog Option -->
-				<button
-					type="button"
-					class={[
-						'w-full border-2 rounded-lg p-6 text-left transition-all',
-						selection === 'full'
-							? 'border-primary bg-primary/5'
-							: 'border-border hover:border-muted-foreground/50'
-					]}
+				<SelectionCard
+					selected={selection === 'full'}
 					onclick={() => (selection = 'full')}
-				>
-					<div class="flex items-start gap-4">
-						<div
-							class={[
-								'flex h-5 w-5 items-center justify-center rounded-full border-2 mt-0.5',
-								selection === 'full'
-									? 'border-primary bg-primary'
-									: 'border-muted-foreground/50'
-							]}
-						>
-							{#if selection === 'full'}
-								<Check class="h-3 w-3 text-white" />
-							{/if}
-						</div>
-						<div class="flex-1">
-							<div class="flex items-center gap-3 mb-2">
-								<Package class="h-5 w-5 text-primary" />
-								<span class="text-lg font-medium text-foreground"
-									>Entire Catalog</span
-								>
-							</div>
-							<p class="text-sm text-muted-foreground mb-3">
-								Sell all products from your store across enabled destinations. New
-								products will be automatically synced and made available.
-							</p>
-							<div class="space-y-1.5">
-								<div class="flex items-center gap-2 text-sm text-muted-foreground">
-									<span class="text-green-600 dark:text-green-400">✓</span>
-									<span>Automatic product synchronization</span>
-								</div>
-								<div class="flex items-center gap-2 text-sm text-muted-foreground">
-									<span class="text-green-600 dark:text-green-400">✓</span>
-									<span>Real-time inventory updates</span>
-								</div>
-								<div class="flex items-center gap-2 text-sm text-muted-foreground">
-									<span class="text-green-600 dark:text-green-400">✓</span>
-									<span>New products auto-added</span>
-								</div>
-								<div class="flex items-center gap-2 text-sm text-muted-foreground">
-									<span class="text-green-600 dark:text-green-400">✓</span>
-									<span>Fastest time to market</span>
-								</div>
-							</div>
-							<div class="mt-4 bg-primary/10 border border-primary/20 rounded p-3">
-								<p class="text-sm text-primary">
-									<strong>Recommended:</strong> Best for merchants who want maximum
-									exposure and simplified management
-								</p>
-							</div>
-						</div>
-					</div>
-				</button>
+					icon={Package}
+					iconClass="text-primary"
+					title="Entire Catalog"
+					description="Sell all products from your store across enabled destinations. New products will be automatically synced and made available."
+					features={[
+						{ text: 'Automatic product synchronization' },
+						{ text: 'Real-time inventory updates' },
+						{ text: 'New products auto-added' },
+						{ text: 'Fastest time to market' }
+					]}
+					recommendation={{
+						text: '<strong>Recommended:</strong> Best for merchants who want maximum exposure and simplified management',
+						variant: 'primary'
+					}}
+				/>
 
 				<!-- Selected Products Option -->
-				<button
-					type="button"
-					class={[
-						'w-full border-2 rounded-lg p-6 text-left transition-all',
-						selection === 'subset'
-							? 'border-primary bg-primary/5'
-							: 'border-border hover:border-muted-foreground/50'
-					]}
+				<SelectionCard
+					selected={selection === 'subset'}
 					onclick={() => (selection = 'subset')}
-				>
-					<div class="flex items-start gap-4">
-						<div
-							class={[
-								'flex h-5 w-5 items-center justify-center rounded-full border-2 mt-0.5',
-								selection === 'subset'
-									? 'border-primary bg-primary'
-									: 'border-muted-foreground/50'
-							]}
-						>
-							{#if selection === 'subset'}
-								<Check class="h-3 w-3 text-white" />
-							{/if}
-						</div>
-						<div class="flex-1">
-							<div class="flex items-center gap-3 mb-2">
-								<PackageOpen class="h-5 w-5 text-orange-600 dark:text-orange-400" />
-								<span class="text-lg font-medium text-foreground"
-									>Selected Products (Subset)</span
-								>
-							</div>
-							<p class="text-sm text-muted-foreground mb-3">
-								Choose specific product categories or individual products to sell.
-								Maintain full control over which items appear on each destination.
-							</p>
-							<div class="space-y-1.5">
-								<div class="flex items-center gap-2 text-sm text-muted-foreground">
-									<span class="text-green-600 dark:text-green-400">✓</span>
-									<span>Granular product control</span>
-								</div>
-								<div class="flex items-center gap-2 text-sm text-muted-foreground">
-									<span class="text-green-600 dark:text-green-400">✓</span>
-									<span>Category-level filtering</span>
-								</div>
-								<div class="flex items-center gap-2 text-sm text-muted-foreground">
-									<span class="text-green-600 dark:text-green-400">✓</span>
-									<span>Destination-specific catalogs</span>
-								</div>
-								<div class="flex items-center gap-2 text-sm text-muted-foreground">
-									<span class="text-green-600 dark:text-green-400">✓</span>
-									<span>Test with limited inventory</span>
-								</div>
-							</div>
-							<div
-								class="mt-4 bg-orange-500/10 border border-orange-500/20 rounded p-3"
-							>
-								<p class="text-sm text-orange-700 dark:text-orange-400">
-									<strong>Advanced:</strong> Configure product selection after whitelisting
-									setup
-								</p>
-							</div>
-						</div>
-					</div>
-				</button>
+					icon={PackageOpen}
+					iconClass="text-orange-600 dark:text-orange-400"
+					title="Selected Products (Subset)"
+					description="Choose specific product categories or individual products to sell. Maintain full control over which items appear on each destination."
+					features={[
+						{ text: 'Granular product control' },
+						{ text: 'Category-level filtering' },
+						{ text: 'Destination-specific catalogs' },
+						{ text: 'Test with limited inventory' }
+					]}
+					recommendation={{
+						text: '<strong>Advanced:</strong> Configure product selection after whitelisting setup',
+						variant: 'secondary'
+					}}
+				/>
 
 				{#if error}
 					<div

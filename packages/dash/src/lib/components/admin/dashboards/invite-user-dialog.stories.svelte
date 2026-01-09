@@ -3,7 +3,7 @@
 	import InviteUserDialog from './invite-user-dialog.svelte';
 
 	const { Story } = defineMeta({
-		title: 'Admin/Invite User Dialog',
+		title: 'Admin/Dashboards/Invite User Dialog',
 		component: InviteUserDialog,
 		tags: ['autodocs'],
 		parameters: {

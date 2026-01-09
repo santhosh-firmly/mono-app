@@ -2,8 +2,9 @@
  * Dash Durable Objects Worker
  *
  * This worker hosts Durable Objects for the dash application:
- * - DashUserDO: Per-user data storage (sessions, merchant access, preferences)
- * - MerchantDO: Per-merchant data storage (team membership, audit logs)
+ * - DashUserDO: Per-user data storage (sessions, merchant access, destination access, preferences)
+ * - MerchantDO: Per-merchant data storage (team membership, audit logs, agreement, onboarding)
+ * - DestinationDO: Per-destination data storage (team membership, audit logs, profile, invites)
  *
  * The dash SvelteKit app connects to this worker via service binding.
  */
@@ -16,6 +17,7 @@ import { name, version } from '../package.json';
 
 import { DashUserDO as DashUserDOClass } from './dash-user-do.js';
 import { MerchantDO as MerchantDOClass } from './merchant-do.js';
+import { DestinationDO as DestinationDOClass } from './destination-do.js';
 
 const metricsConfig = {
     data: {
@@ -29,6 +31,7 @@ initializeLocalStorage(localStorageSource);
 
 export const DashUserDO = cloudflareDurableObjectWrapper(metricsConfig, DashUserDOClass, 'dash-user');
 export const MerchantDO = cloudflareDurableObjectWrapper(metricsConfig, MerchantDOClass, 'merchant');
+export const DestinationDO = cloudflareDurableObjectWrapper(metricsConfig, DestinationDOClass, 'destination');
 
 export default {
     /**
@@ -36,6 +39,7 @@ export default {
      * Routes requests to the appropriate Durable Object based on headers:
      * - X-User-ID -> DashUserDO
      * - X-Merchant-Domain -> MerchantDO
+     * - X-Destination-AppId -> DestinationDO
      */
     async fetch(request, env) {
         const url = new URL(request.url);
@@ -45,6 +49,21 @@ export default {
             return new Response(JSON.stringify({ status: 'ok' }), {
                 headers: { 'Content-Type': 'application/json' },
             });
+        }
+
+        // Check for Destination AppId header (routes to DestinationDO)
+        const destinationAppId = request.headers.get('X-Destination-AppId');
+        if (destinationAppId) {
+            const doId = env.DESTINATION_DO.idFromName(destinationAppId);
+            const stub = env.DESTINATION_DO.get(doId);
+
+            return stub.fetch(
+                new Request(url.toString(), {
+                    method: request.method,
+                    headers: request.headers,
+                    body: request.body,
+                }),
+            );
         }
 
         // Check for Merchant Domain header (routes to MerchantDO)
@@ -78,7 +97,7 @@ export default {
         }
 
         // No routing header provided
-        return new Response(JSON.stringify({ error: 'X-User-ID or X-Merchant-Domain header is required' }), {
+        return new Response(JSON.stringify({ error: 'X-User-ID, X-Merchant-Domain, or X-Destination-AppId header is required' }), {
             status: 400,
             headers: { 'Content-Type': 'application/json' },
         });

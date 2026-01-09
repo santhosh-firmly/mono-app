@@ -83,13 +83,13 @@
 	}
 </script>
 
-<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-background">
 	<div class="mx-auto max-w-2xl px-4 py-8">
 		<!-- Back button -->
 		<div class="mb-6">
 			<a
 				href={backUrl}
-				class="inline-flex items-center text-sm text-gray-600 hover:text-gray-900"
+				class="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
 			>
 				<ArrowLeft class="mr-2 h-4 w-4" />
 				Back to Dashboards

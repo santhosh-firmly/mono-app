@@ -548,7 +548,14 @@ export const AuditEventTypes = {
 	CDN_WHITELISTING_COMPLETED: 'cdn_whitelisting_completed',
 	INTEGRATION_STEP_COMPLETED: 'integration_step_completed',
 	INTEGRATION_STEP_UPDATED: 'integration_step_updated',
-	INTEGRATION_STEPS_SYNCED: 'integration_steps_synced'
+	INTEGRATION_STEPS_SYNCED: 'integration_steps_synced',
+	DASHBOARD_RESET: 'dashboard_reset',
+	KYB_SUBMITTED: 'kyb_submitted',
+	KYB_APPROVED: 'kyb_approved',
+	KYB_REJECTED: 'kyb_rejected',
+	GO_LIVE_SUBMITTED: 'go_live_submitted',
+	GO_LIVE_APPROVED: 'go_live_approved',
+	GO_LIVE_REJECTED: 'go_live_rejected'
 };
 
 // ============================================================================
@@ -759,15 +766,19 @@ export async function getMerchantDestinations({ platform, merchantDomain }) {
 
 			return {
 				id: row.key,
-				name: info.subject || row.key,
+				name: info.display_name || info.subject || row.key,
 				isComingSoon: info.isComingSoon === true,
+				isSystem: info.isSystem === true,
 				isActive,
 				canToggle,
 				restrictMerchantAccess
 			};
 		});
 
-		return { destinations, enabledIds, hasConfig };
+		// Filter out system destinations from merchant view
+		const visibleDestinations = destinations.filter((d) => !d.isSystem);
+
+		return { destinations: visibleDestinations, enabledIds, hasConfig };
 	} catch (error) {
 		console.error('Error getting merchant destinations:', error);
 		return { destinations: [], enabledIds: new Set(), hasConfig: false };
@@ -1153,7 +1164,9 @@ async function syncOnboardingIntegrationStatus({ platform, merchantDomain, actor
 				platform,
 				merchantDomain,
 				completed: true,
-				actor: actor || { id: 'system', email: 'system@firmly.com', isFirmlyAdmin }
+				actor: actor
+					? { ...actor, isFirmlyAdmin }
+					: { id: 'system', email: 'system@firmly.com', isFirmlyAdmin }
 			});
 		} else if (!integrationStatus.isComplete && currentlyComplete) {
 			// Steps no longer all complete - mark integration as in-progress
@@ -1161,7 +1174,9 @@ async function syncOnboardingIntegrationStatus({ platform, merchantDomain, actor
 				platform,
 				merchantDomain,
 				completed: false,
-				actor: actor || { id: 'system', email: 'system@firmly.com', isFirmlyAdmin }
+				actor: actor
+					? { ...actor, isFirmlyAdmin }
+					: { id: 'system', email: 'system@firmly.com', isFirmlyAdmin }
 			});
 		}
 	} catch (error) {
@@ -1187,5 +1202,496 @@ export async function syncIntegrationSteps({ platform, merchantDomain }) {
 	} catch (error) {
 		console.error('Error syncing integration steps:', error);
 		return { success: false, error: error.message, steps: [] };
+	}
+}
+
+// ============================================================================
+// Admin Operations
+// ============================================================================
+
+/**
+ * Reset a merchant dashboard (admin operation).
+ * Clears all MerchantDO data and updates D1 metadata.
+ * Also removes merchant access from affected users' DashUserDO.
+ * @param {Object} params
+ * @param {Object} params.platform - SvelteKit platform object
+ * @param {string} params.merchantDomain - Merchant domain
+ * @param {Object} params.actor - Actor info { id, email }
+ * @returns {Promise<Object>} { success: boolean, clearedTeamMembers: Array, error?: string }
+ */
+export async function resetMerchantDashboard({ platform, merchantDomain, actor }) {
+	try {
+		// 1. Reset MerchantDO (clears team, audit logs, agreement, onboarding, catalog, integration)
+		const resetResponse = await fetchMerchantDO(platform, merchantDomain, '/reset', {
+			method: 'POST'
+		});
+
+		if (!resetResponse.ok) {
+			const error = await resetResponse.text();
+			console.error('Failed to reset MerchantDO:', error);
+			return { success: false, error: 'Failed to reset merchant data' };
+		}
+
+		const { clearedTeamMembers } = await resetResponse.json();
+
+		// 2. Remove merchant access from each affected user's DashUserDO
+		for (const member of clearedTeamMembers) {
+			try {
+				await fetchDashUserDO(
+					platform,
+					member.user_id,
+					`/merchant-access/${encodeURIComponent(merchantDomain)}`,
+					{ method: 'DELETE' }
+				);
+			} catch (userError) {
+				console.error(
+					`Failed to remove merchant access for user ${member.user_id}:`,
+					userError
+				);
+				// Continue with other users even if one fails
+			}
+		}
+
+		// 3. Update D1 merchant_dashboards metadata (including KYB and Go Live reset)
+		const db = platform?.env?.dashUsers;
+		if (db) {
+			await db
+				.prepare(
+					`UPDATE merchant_dashboards
+					 SET owner_user_id = NULL,
+					     status = 'pending',
+					     kyb_status = NULL,
+					     kyb_submitted_at = NULL,
+					     kyb_reviewed_at = NULL,
+					     kyb_reviewed_by = NULL,
+					     kyb_rejection_notes = NULL,
+					     go_live_status = NULL,
+					     go_live_submitted_at = NULL,
+					     go_live_reviewed_at = NULL,
+					     go_live_reviewed_by = NULL,
+					     go_live_rejection_notes = NULL
+					 WHERE domain = ?`
+				)
+				.bind(merchantDomain)
+				.run();
+		}
+
+		// 4. Cancel any pending invites in KV
+		const kv = platform?.env?.OTP_STORE;
+		if (kv) {
+			const existingToken = await kv.get(`invite-domain:${merchantDomain}`);
+			if (existingToken) {
+				await kv.delete(`invite:${existingToken}`);
+				await kv.delete(`invite-domain:${merchantDomain}`);
+			}
+		}
+
+		// 5. Create audit log for the reset (in a fresh audit_logs table)
+		await createAuditLog({
+			platform,
+			merchantDomain,
+			eventType: 'dashboard_reset',
+			actorId: actor.id,
+			actorEmail: actor.email,
+			details: {
+				clearedTeamMembersCount: clearedTeamMembers.length,
+				clearedEmails: clearedTeamMembers.map((m) => m.user_email)
+			},
+			isFirmlyAdmin: true,
+			actorType: 'firmly_admin'
+		});
+
+		return { success: true, clearedTeamMembers };
+	} catch (error) {
+		console.error('Error resetting merchant dashboard:', error);
+		return { success: false, error: error.message };
+	}
+}
+
+// ============================================================================
+// KYB (Know Your Business) Functions
+// ============================================================================
+
+/**
+ * Get KYB status for a merchant.
+ * @param {Object} params
+ * @param {Object} params.platform - SvelteKit platform object
+ * @param {string} params.merchantDomain - Merchant domain
+ * @returns {Promise<Object>} KYB status object
+ */
+export async function getKYBStatus({ platform, merchantDomain }) {
+	try {
+		const db = platform?.env?.dashUsers;
+		if (!db) {
+			throw new Error('dashUsers D1 binding not configured');
+		}
+
+		const result = await db
+			.prepare(
+				`SELECT kyb_status, kyb_submitted_at, kyb_reviewed_at, kyb_reviewed_by, kyb_rejection_notes
+				 FROM merchant_dashboards
+				 WHERE domain = ?`
+			)
+			.bind(merchantDomain)
+			.first();
+
+		if (!result) {
+			return {
+				kyb_status: null,
+				kyb_submitted_at: null,
+				kyb_reviewed_at: null,
+				kyb_reviewed_by: null,
+				kyb_rejection_notes: null
+			};
+		}
+
+		return result;
+	} catch (error) {
+		console.error('Error getting KYB status:', error);
+		return {
+			kyb_status: null,
+			kyb_submitted_at: null,
+			kyb_reviewed_at: null,
+			kyb_reviewed_by: null,
+			kyb_rejection_notes: null
+		};
+	}
+}
+
+/**
+ * Submit KYB for review.
+ * @param {Object} params
+ * @param {Object} params.platform - SvelteKit platform object
+ * @param {string} params.merchantDomain - Merchant domain
+ * @param {Object} params.actor - Actor info { id, email }
+ * @returns {Promise<Object>} { success: boolean, error?: string }
+ */
+export async function submitKYB({ platform, merchantDomain, actor }) {
+	try {
+		const db = platform?.env?.dashUsers;
+		if (!db) {
+			throw new Error('dashUsers D1 binding not configured');
+		}
+
+		// Update KYB status to pending
+		await db
+			.prepare(
+				`UPDATE merchant_dashboards
+				 SET kyb_status = 'pending',
+				     kyb_submitted_at = datetime('now'),
+				     kyb_rejection_notes = NULL
+				 WHERE domain = ?`
+			)
+			.bind(merchantDomain)
+			.run();
+
+		// Create audit log
+		await createAuditLog({
+			platform,
+			merchantDomain,
+			eventType: AuditEventTypes.KYB_SUBMITTED,
+			actorId: actor.id,
+			actorEmail: actor.email,
+			details: { submittedAt: new Date().toISOString() }
+		});
+
+		return { success: true };
+	} catch (error) {
+		console.error('Error submitting KYB:', error);
+		return { success: false, error: error.message };
+	}
+}
+
+/**
+ * Approve KYB (admin only).
+ * @param {Object} params
+ * @param {Object} params.platform - SvelteKit platform object
+ * @param {string} params.merchantDomain - Merchant domain
+ * @param {Object} params.actor - Actor info { id, email }
+ * @param {string} params.notes - Optional notes
+ * @returns {Promise<Object>} { success: boolean, error?: string }
+ */
+export async function approveKYB({ platform, merchantDomain, actor, notes = null }) {
+	try {
+		const db = platform?.env?.dashUsers;
+		if (!db) {
+			throw new Error('dashUsers D1 binding not configured');
+		}
+
+		// Update KYB status to approved
+		await db
+			.prepare(
+				`UPDATE merchant_dashboards
+				 SET kyb_status = 'approved',
+				     kyb_reviewed_at = datetime('now'),
+				     kyb_reviewed_by = ?,
+				     kyb_rejection_notes = NULL
+				 WHERE domain = ?`
+			)
+			.bind(actor.email, merchantDomain)
+			.run();
+
+		// Create audit log
+		await createAuditLog({
+			platform,
+			merchantDomain,
+			eventType: AuditEventTypes.KYB_APPROVED,
+			actorId: actor.id,
+			actorEmail: actor.email,
+			details: { notes },
+			isFirmlyAdmin: true,
+			actorType: 'firmly_admin'
+		});
+
+		return { success: true };
+	} catch (error) {
+		console.error('Error approving KYB:', error);
+		return { success: false, error: error.message };
+	}
+}
+
+/**
+ * Reject KYB (admin only).
+ * @param {Object} params
+ * @param {Object} params.platform - SvelteKit platform object
+ * @param {string} params.merchantDomain - Merchant domain
+ * @param {Object} params.actor - Actor info { id, email }
+ * @param {string} params.notes - Rejection reason (required)
+ * @returns {Promise<Object>} { success: boolean, error?: string }
+ */
+export async function rejectKYB({ platform, merchantDomain, actor, notes }) {
+	try {
+		if (!notes) {
+			return { success: false, error: 'Rejection notes are required' };
+		}
+
+		const db = platform?.env?.dashUsers;
+		if (!db) {
+			throw new Error('dashUsers D1 binding not configured');
+		}
+
+		// Update KYB status to rejected
+		await db
+			.prepare(
+				`UPDATE merchant_dashboards
+				 SET kyb_status = 'rejected',
+				     kyb_reviewed_at = datetime('now'),
+				     kyb_reviewed_by = ?,
+				     kyb_rejection_notes = ?
+				 WHERE domain = ?`
+			)
+			.bind(actor.email, notes, merchantDomain)
+			.run();
+
+		// Create audit log
+		await createAuditLog({
+			platform,
+			merchantDomain,
+			eventType: AuditEventTypes.KYB_REJECTED,
+			actorId: actor.id,
+			actorEmail: actor.email,
+			details: { notes },
+			isFirmlyAdmin: true,
+			actorType: 'firmly_admin'
+		});
+
+		return { success: true };
+	} catch (error) {
+		console.error('Error rejecting KYB:', error);
+		return { success: false, error: error.message };
+	}
+}
+
+// ============================================================================
+// Go Live Approval Functions
+// ============================================================================
+
+/**
+ * Get Go Live status for a merchant.
+ * @param {Object} params
+ * @param {Object} params.platform - SvelteKit platform object
+ * @param {string} params.merchantDomain - Merchant domain
+ * @returns {Promise<Object>} Go Live status object
+ */
+export async function getGoLiveStatus({ platform, merchantDomain }) {
+	try {
+		const db = platform?.env?.dashUsers;
+		if (!db) {
+			throw new Error('dashUsers D1 binding not configured');
+		}
+
+		const result = await db
+			.prepare(
+				`SELECT go_live_status, go_live_submitted_at, go_live_reviewed_at, go_live_reviewed_by, go_live_rejection_notes
+				 FROM merchant_dashboards
+				 WHERE domain = ?`
+			)
+			.bind(merchantDomain)
+			.first();
+
+		if (!result) {
+			return {
+				go_live_status: null,
+				go_live_submitted_at: null,
+				go_live_reviewed_at: null,
+				go_live_reviewed_by: null,
+				go_live_rejection_notes: null
+			};
+		}
+
+		return result;
+	} catch (error) {
+		console.error('Error getting Go Live status:', error);
+		return {
+			go_live_status: null,
+			go_live_submitted_at: null,
+			go_live_reviewed_at: null,
+			go_live_reviewed_by: null,
+			go_live_rejection_notes: null
+		};
+	}
+}
+
+/**
+ * Submit Go Live for review.
+ * @param {Object} params
+ * @param {Object} params.platform - SvelteKit platform object
+ * @param {string} params.merchantDomain - Merchant domain
+ * @param {Object} params.actor - Actor info { id, email }
+ * @returns {Promise<Object>} { success: boolean, error?: string }
+ */
+export async function submitGoLive({ platform, merchantDomain, actor }) {
+	try {
+		const db = platform?.env?.dashUsers;
+		if (!db) {
+			throw new Error('dashUsers D1 binding not configured');
+		}
+
+		// Update Go Live status to pending
+		await db
+			.prepare(
+				`UPDATE merchant_dashboards
+				 SET go_live_status = 'pending',
+				     go_live_submitted_at = datetime('now'),
+				     go_live_rejection_notes = NULL
+				 WHERE domain = ?`
+			)
+			.bind(merchantDomain)
+			.run();
+
+		// Create audit log
+		await createAuditLog({
+			platform,
+			merchantDomain,
+			eventType: AuditEventTypes.GO_LIVE_SUBMITTED,
+			actorId: actor.id,
+			actorEmail: actor.email,
+			details: { submittedAt: new Date().toISOString() }
+		});
+
+		return { success: true };
+	} catch (error) {
+		console.error('Error submitting Go Live:', error);
+		return { success: false, error: error.message };
+	}
+}
+
+/**
+ * Approve Go Live (admin only).
+ * @param {Object} params
+ * @param {Object} params.platform - SvelteKit platform object
+ * @param {string} params.merchantDomain - Merchant domain
+ * @param {Object} params.actor - Actor info { id, email }
+ * @param {string} params.notes - Optional notes
+ * @returns {Promise<Object>} { success: boolean, error?: string }
+ */
+export async function approveGoLive({ platform, merchantDomain, actor, notes = null }) {
+	try {
+		const db = platform?.env?.dashUsers;
+		if (!db) {
+			throw new Error('dashUsers D1 binding not configured');
+		}
+
+		// Update Go Live status to approved
+		await db
+			.prepare(
+				`UPDATE merchant_dashboards
+				 SET go_live_status = 'approved',
+				     go_live_reviewed_at = datetime('now'),
+				     go_live_reviewed_by = ?,
+				     go_live_rejection_notes = NULL
+				 WHERE domain = ?`
+			)
+			.bind(actor.email, merchantDomain)
+			.run();
+
+		// Create audit log
+		await createAuditLog({
+			platform,
+			merchantDomain,
+			eventType: AuditEventTypes.GO_LIVE_APPROVED,
+			actorId: actor.id,
+			actorEmail: actor.email,
+			details: { notes },
+			isFirmlyAdmin: true,
+			actorType: 'firmly_admin'
+		});
+
+		return { success: true };
+	} catch (error) {
+		console.error('Error approving Go Live:', error);
+		return { success: false, error: error.message };
+	}
+}
+
+/**
+ * Reject Go Live (admin only).
+ * @param {Object} params
+ * @param {Object} params.platform - SvelteKit platform object
+ * @param {string} params.merchantDomain - Merchant domain
+ * @param {Object} params.actor - Actor info { id, email }
+ * @param {string} params.notes - Rejection reason (required)
+ * @returns {Promise<Object>} { success: boolean, error?: string }
+ */
+export async function rejectGoLive({ platform, merchantDomain, actor, notes }) {
+	try {
+		if (!notes) {
+			return { success: false, error: 'Rejection notes are required' };
+		}
+
+		const db = platform?.env?.dashUsers;
+		if (!db) {
+			throw new Error('dashUsers D1 binding not configured');
+		}
+
+		// Update Go Live status to rejected
+		await db
+			.prepare(
+				`UPDATE merchant_dashboards
+				 SET go_live_status = 'rejected',
+				     go_live_reviewed_at = datetime('now'),
+				     go_live_reviewed_by = ?,
+				     go_live_rejection_notes = ?
+				 WHERE domain = ?`
+			)
+			.bind(actor.email, notes, merchantDomain)
+			.run();
+
+		// Create audit log
+		await createAuditLog({
+			platform,
+			merchantDomain,
+			eventType: AuditEventTypes.GO_LIVE_REJECTED,
+			actorId: actor.id,
+			actorEmail: actor.email,
+			details: { notes },
+			isFirmlyAdmin: true,
+			actorType: 'firmly_admin'
+		});
+
+		return { success: true };
+	} catch (error) {
+		console.error('Error rejecting Go Live:', error);
+		return { success: false, error: error.message };
 	}
 }

@@ -119,6 +119,16 @@
 				</div>
 			</Card.Header>
 			<Card.Content>
+				{#if !hasExistingConfig}
+					<div class="mb-6 bg-primary/10 border border-primary/20 rounded-lg p-4">
+						<p class="text-sm text-primary">
+							Review the destinations below and click "Confirm Configuration" to
+							complete this onboarding step. You can update your destination
+							preferences at any time.
+						</p>
+					</div>
+				{/if}
+
 				{#if destinations.length === 0}
 					<div class="py-12 text-center">
 						<StoreIcon class="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
@@ -162,9 +172,13 @@
 											</div>
 										</Table.Cell>
 										<Table.Cell class="text-right hidden sm:table-cell">
-											{typeof destination.orders === 'number'
-												? destination.orders.toLocaleString()
-												: destination.orders}
+											{#if destination.isComingSoon}
+												<span class="text-muted-foreground">-</span>
+											{:else}
+												{typeof destination.orders === 'number'
+													? destination.orders.toLocaleString()
+													: destination.orders}
+											{/if}
 										</Table.Cell>
 										<Table.Cell class="text-right hidden md:table-cell">
 											{destination.aov !== null
@@ -201,21 +215,9 @@
 											<div class="flex items-center justify-center gap-2">
 												<Switch
 													checked={destination.isActive}
-													disabled={destination.isComingSoon ||
-														!destination.canToggle}
+													disabled={!destination.canToggle}
 													on:click={() => onToggle(destination.id)}
 												/>
-												<span class="text-sm text-muted-foreground w-16">
-													{#if destination.isComingSoon}
-														-
-													{:else if !destination.canToggle}
-														Enabled
-													{:else if destination.isActive}
-														Allow
-													{:else}
-														Disallow
-													{/if}
-												</span>
 											</div>
 										</Table.Cell>
 									</Table.Row>
@@ -240,25 +242,6 @@
 						<p class="text-sm text-green-700 dark:text-green-400">{successMessage}</p>
 					</div>
 				{/if}
-
-				{#if !hasExistingConfig}
-					<div class="mt-6 bg-primary/10 border border-primary/20 rounded-lg p-4">
-						<p class="text-sm text-primary">
-							Review the destinations below and click "Confirm Configuration" to
-							complete this onboarding step. You can update your destination
-							preferences at any time.
-						</p>
-					</div>
-				{/if}
-
-				<div
-					class="mt-6 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 rounded-lg p-4"
-				>
-					<p class="text-sm text-blue-700 dark:text-blue-400">
-						Tip: Enable high-performing destinations to maximize your reach. Monitor
-						dispute rates and reputation scores to maintain quality.
-					</p>
-				</div>
 			</Card.Content>
 			<Card.Footer class="flex justify-end border-t px-6 py-4">
 				<Button onclick={onSave} disabled={saving || !canSave()}>

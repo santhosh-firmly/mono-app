@@ -130,11 +130,12 @@ async function handleAuth({ event, resolve }) {
 	event.locals.session = userSession;
 
 	// ============================================
-	// PROTECTED USER ROUTES (/, /merchant/*, /profile, /api/auth/*, /api/profile, /api/sessions)
+	// PROTECTED USER ROUTES (/, /merchant/*, /destination/*, /profile, /api/auth/*, /api/profile, /api/sessions)
 	// ============================================
 	if (
 		pathname === '/' ||
 		pathname.startsWith('/merchant/') ||
+		pathname.startsWith('/destination/') ||
 		pathname.startsWith('/profile') ||
 		pathname.startsWith('/api/auth/') ||
 		pathname.startsWith('/api/profile') ||

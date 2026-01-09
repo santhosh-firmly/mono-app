@@ -225,8 +225,12 @@ export async function POST({ locals, params, platform, request }) {
 
 				// Upsert into merchant_dashboards
 				await dashUsers
-					.prepare(`UPDATE merchant_dashboards SET info = ? WHERE domain = ?`)
-					.bind(JSON.stringify(newInfo), domain)
+					.prepare(
+						`INSERT INTO merchant_dashboards (domain, info)
+						 VALUES (?, ?)
+						 ON CONFLICT(domain) DO UPDATE SET info = excluded.info`
+					)
+					.bind(domain, JSON.stringify(newInfo))
 					.run();
 			} catch (e) {
 				console.warn('Could not save company/contact info:', e.message);

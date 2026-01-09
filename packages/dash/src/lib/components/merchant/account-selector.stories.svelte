@@ -3,7 +3,7 @@
 	import AccountSelector from './account-selector.svelte';
 
 	const { Story } = defineMeta({
-		title: 'Merchant/Account Selector',
+		title: 'Merchant/Navigation/Account Selector',
 		component: AccountSelector,
 		tags: ['autodocs'],
 		parameters: {

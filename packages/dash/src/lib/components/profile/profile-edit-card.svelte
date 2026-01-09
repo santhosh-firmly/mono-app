@@ -159,11 +159,11 @@
 		<div class="mb-4 flex justify-center">
 			<div class="group relative">
 				{#key hasAvatarLocal}
-					<Avatar.Root class="h-24 w-24 border-4 border-white shadow-lg">
+					<Avatar.Root class="h-24 w-24 border-4 border-background shadow-lg">
 						{#if avatarUrl}
 							<Avatar.Image src={avatarUrl} alt={user?.name || 'Avatar'} />
 						{/if}
-						<Avatar.Fallback class="bg-purple-100 text-2xl font-medium text-purple-700">
+						<Avatar.Fallback class="bg-primary/10 text-2xl font-medium text-primary">
 							{getInitials(isEditing ? formData.name : user?.name)}
 						</Avatar.Fallback>
 					</Avatar.Root>
@@ -172,7 +172,7 @@
 				<button
 					type="button"
 					onclick={() => (showAvatarEditor = true)}
-					class="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-purple-600 text-white shadow-md transition-transform hover:scale-110 hover:bg-purple-700"
+					class="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-primary text-primary-foreground shadow-md transition-transform hover:scale-110 hover:bg-primary/90"
 					aria-label="Change avatar"
 				>
 					<Camera class="h-4 w-4" />
@@ -182,7 +182,7 @@
 					<button
 						type="button"
 						onclick={() => (showRemoveConfirm = true)}
-						class="absolute bottom-0 left-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-red-500 text-white shadow-md transition-transform hover:scale-110 hover:bg-red-600"
+						class="absolute bottom-0 left-0 flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-destructive text-destructive-foreground shadow-md transition-transform hover:scale-110 hover:bg-destructive/90"
 						aria-label="Remove avatar"
 					>
 						<Trash2 class="h-4 w-4" />
@@ -206,36 +206,36 @@
 
 	<Card.Content class="space-y-4 pt-4">
 		{#if error}
-			<div class="rounded-md bg-red-50 p-3 text-sm text-red-700">
+			<div class="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
 				{error}
 			</div>
 		{/if}
 
 		{#if success}
-			<div class="rounded-md bg-green-50 p-3 text-sm text-green-700">
+			<div class="rounded-md bg-green-500/10 p-3 text-sm text-green-700 dark:text-green-400">
 				{success}
 			</div>
 		{/if}
 
-		<div class="divide-y">
+		<div class="divide-y divide-border">
 			<!-- Email (read-only) -->
 			<div class="flex items-center gap-4 py-4">
-				<div class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
-					<Mail class="h-5 w-5 text-gray-600" />
+				<div class="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+					<Mail class="h-5 w-5 text-muted-foreground" />
 				</div>
 				<div class="flex-1">
-					<p class="text-sm font-medium text-gray-500">Email</p>
-					<p class="text-sm text-gray-900">{user?.email}</p>
+					<p class="text-sm font-medium text-muted-foreground">Email</p>
+					<p class="text-sm text-foreground">{user?.email}</p>
 				</div>
 			</div>
 
 			<!-- Company -->
 			<div class="flex items-center gap-4 py-4">
-				<div class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
-					<Building class="h-5 w-5 text-gray-600" />
+				<div class="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+					<Building class="h-5 w-5 text-muted-foreground" />
 				</div>
 				<div class="flex-1">
-					<p class="text-sm font-medium text-gray-500">Company</p>
+					<p class="text-sm font-medium text-muted-foreground">Company</p>
 					{#if isEditing}
 						<Input
 							bind:value={formData.company}
@@ -243,33 +243,33 @@
 							class="mt-1"
 						/>
 					{:else}
-						<p class="text-sm text-gray-900">{user?.company || '-'}</p>
+						<p class="text-sm text-foreground">{user?.company || '-'}</p>
 					{/if}
 				</div>
 			</div>
 
 			<!-- Title -->
 			<div class="flex items-center gap-4 py-4">
-				<div class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
-					<Briefcase class="h-5 w-5 text-gray-600" />
+				<div class="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+					<Briefcase class="h-5 w-5 text-muted-foreground" />
 				</div>
 				<div class="flex-1">
-					<p class="text-sm font-medium text-gray-500">Title</p>
+					<p class="text-sm font-medium text-muted-foreground">Title</p>
 					{#if isEditing}
 						<Input bind:value={formData.title} placeholder="Job title" class="mt-1" />
 					{:else}
-						<p class="text-sm text-gray-900">{user?.title || '-'}</p>
+						<p class="text-sm text-foreground">{user?.title || '-'}</p>
 					{/if}
 				</div>
 			</div>
 
 			<!-- Location -->
 			<div class="flex items-center gap-4 py-4">
-				<div class="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100">
-					<MapPin class="h-5 w-5 text-gray-600" />
+				<div class="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+					<MapPin class="h-5 w-5 text-muted-foreground" />
 				</div>
 				<div class="flex-1">
-					<p class="text-sm font-medium text-gray-500">Location</p>
+					<p class="text-sm font-medium text-muted-foreground">Location</p>
 					{#if isEditing}
 						<Input
 							bind:value={formData.location}
@@ -277,7 +277,7 @@
 							class="mt-1"
 						/>
 					{:else}
-						<p class="text-sm text-gray-900">{user?.location || '-'}</p>
+						<p class="text-sm text-foreground">{user?.location || '-'}</p>
 					{/if}
 				</div>
 			</div>

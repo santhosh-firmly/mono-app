@@ -3,9 +3,9 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Badge } from '$lib/components/ui/badge/index.js';
+	import { InvalidInviteCard } from '$lib/components/invite/index.js';
 	import Loader2 from 'lucide-svelte/icons/loader-2';
 	import CheckCircle from 'lucide-svelte/icons/check-circle';
-	import XCircle from 'lucide-svelte/icons/x-circle';
 	import Mail from 'lucide-svelte/icons/mail';
 	import Globe from 'lucide-svelte/icons/globe';
 	import Shield from 'lucide-svelte/icons/shield';
@@ -58,24 +58,10 @@
 </script>
 
 <div class="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-	<Card.Root class="w-full max-w-md">
-		{#if !data.valid}
-			<!-- Invalid/Expired Invite -->
-			<Card.Header class="text-center">
-				<div
-					class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100"
-				>
-					<XCircle class="h-8 w-8 text-red-600" />
-				</div>
-				<Card.Title class="text-xl">Invalid Invitation</Card.Title>
-				<Card.Description class="text-base">
-					{data.error || 'This invitation link is not valid.'}
-				</Card.Description>
-			</Card.Header>
-			<Card.Footer class="justify-center">
-				<Button variant="outline" href="/">Go to Home</Button>
-			</Card.Footer>
-		{:else}
+	{#if !data.valid}
+		<InvalidInviteCard error={data.error || 'This invitation link is not valid.'} />
+	{:else}
+		<Card.Root class="w-full max-w-md">
 			<!-- Valid Invite -->
 			<Card.Header class="text-center">
 				<div
@@ -155,6 +141,6 @@
 					</p>
 				{/if}
 			</Card.Footer>
-		{/if}
-	</Card.Root>
+		</Card.Root>
+	{/if}
 </div>

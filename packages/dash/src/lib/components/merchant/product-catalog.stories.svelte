@@ -4,7 +4,7 @@
 	import ProductCatalog from './product-catalog.svelte';
 
 	const { Story } = defineMeta({
-		title: 'Merchant/Catalog/Product Catalog',
+		title: 'Merchant/Catalog/Overview',
 		component: ProductCatalog,
 		tags: ['autodocs'],
 		parameters: {

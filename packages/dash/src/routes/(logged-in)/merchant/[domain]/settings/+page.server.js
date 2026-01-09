@@ -1,8 +1,9 @@
 import { error } from '@sveltejs/kit';
+import { getKYBStatus } from '$lib/server/merchant.js';
 
 /**
  * Load function for merchant general settings page.
- * Loads merchant display_name, presentation settings, and company/contact info.
+ * Loads merchant display_name, presentation settings, company/contact info, and KYB status.
  */
 export async function load({ params, platform, parent }) {
 	const { domain } = params;
@@ -73,6 +74,9 @@ export async function load({ params, platform, parent }) {
 		// Determine if user can edit (owner or Firmly admin)
 		const canEdit = isFirmlyAdmin || userRole === 'owner';
 
+		// Fetch KYB status
+		const kybStatus = await getKYBStatus({ platform, merchantDomain: domain });
+
 		return {
 			merchant: {
 				displayName: storeInfo.display_name || domain,
@@ -90,7 +94,8 @@ export async function load({ params, platform, parent }) {
 				company: companyInfo.company || {},
 				contact: companyInfo.contact || {}
 			},
-			canEdit
+			canEdit,
+			kybStatus
 		};
 	} catch (e) {
 		if (e.status) throw e;

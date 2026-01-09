@@ -3,7 +3,7 @@
 	import CreateDashboardDialog from './create-dashboard-dialog.svelte';
 
 	const { Story } = defineMeta({
-		title: 'Admin/Create Dashboard Dialog',
+		title: 'Admin/Dashboards/Create Dashboard Dialog',
 		component: CreateDashboardDialog,
 		tags: ['autodocs'],
 		parameters: {

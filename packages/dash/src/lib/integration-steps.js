@@ -17,8 +17,8 @@
 // Placeholder steps - to be replaced with actual step definitions
 export const INTEGRATION_STEPS = [
 	{
-		id: 'integration-started',
-		title: 'Integration started',
+		id: 'platform-identification',
+		title: 'Platform identification',
 		substeps: null
 	},
 	{
@@ -32,13 +32,16 @@ export const INTEGRATION_STEPS = [
 		substeps: null
 	},
 	{
+		id: 'shipping-integration',
+		title: 'Shipping integration',
+		substeps: null
+	},
+	{
 		id: 'payment-integration',
 		title: 'Payment integration',
 		substeps: [
 			{ id: 'credit-card', title: 'Credit card integration' },
-			{ id: 'paypal', title: 'PayPal integration' },
-			{ id: 'klarna', title: 'Klarna integration' },
-			{ id: 'affirm', title: 'Affirm integration' }
+			{ id: 'paypal', title: 'PayPal integration' }
 		]
 	},
 	{

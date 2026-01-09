@@ -159,7 +159,7 @@
 
 <!-- Desktop Navigation - Full sidebar -->
 <aside
-	class="sticky top-0 hidden h-[calc(100vh-4rem)] w-64 flex-shrink-0 flex-col overflow-y-auto border-r border-border bg-card lg:flex"
+	class="sticky top-16 hidden h-[calc(100vh-4rem)] w-64 flex-shrink-0 flex-col overflow-y-auto border-r border-border bg-card lg:flex"
 >
 	<nav class="flex-1 space-y-1 px-3 py-4">
 		{#each navItems as item (item.label)}

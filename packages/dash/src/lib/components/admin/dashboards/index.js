@@ -1,3 +1,10 @@
 export { default as InviteUserDialog } from './invite-user-dialog.svelte';
 export { default as CancelInviteDialog } from './cancel-invite-dialog.svelte';
+export { default as ResetDashboardDialog } from './reset-dashboard-dialog.svelte';
+export { default as CreateDestinationDialog } from './create-destination-dialog.svelte';
+export { default as KYBReviewDialog } from './kyb-review-dialog.svelte';
+export { default as GoLiveReviewDialog } from './go-live-review-dialog.svelte';
 export { default as DashboardsTable } from './dashboards-table.svelte';
+export { default as DestinationsTable } from './destinations-table.svelte';
+export { default as ResponsiveActions } from './responsive-actions.svelte';
+export { default as ContactCell } from './contact-cell.svelte';

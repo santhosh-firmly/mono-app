@@ -4,8 +4,10 @@
 	import Store from 'lucide-svelte/icons/store';
 	import ClipboardList from 'lucide-svelte/icons/clipboard-list';
 	import LayoutDashboard from 'lucide-svelte/icons/layout-dashboard';
+	import Users from 'lucide-svelte/icons/users';
 	import PanelLeft from 'lucide-svelte/icons/panel-left';
 	import Search from 'lucide-svelte/icons/search';
+	import Send from 'lucide-svelte/icons/send';
 
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
@@ -52,9 +54,19 @@
 			href: '/admin/merchants'
 		},
 		{
+			icon: Send,
+			label: 'Destinations',
+			href: '/admin/destinations'
+		},
+		{
 			icon: ClipboardList,
 			label: 'Orders',
 			href: '/admin/orders'
+		},
+		{
+			icon: Users,
+			label: 'Users',
+			href: '/admin/users'
 		}
 	];
 </script>

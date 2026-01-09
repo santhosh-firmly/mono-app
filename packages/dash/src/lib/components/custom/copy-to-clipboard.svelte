@@ -18,8 +18,9 @@
 		size="icon"
 		variant=""
 		class="h-6 w-6"
-		on:click={() => {
+		onclick={(ev) => {
 			try {
+				ev.stopPropagation();
 				navigator.clipboard.writeText(value);
 				copied = true;
 				setTimeout(() => {

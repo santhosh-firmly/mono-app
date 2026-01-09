@@ -1,6 +1,7 @@
 <script>
 	import { goto, invalidateAll } from '$app/navigation';
 	import * as Card from '$lib/components/ui/card/index.js';
+	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 	import Globe from 'lucide-svelte/icons/globe';
@@ -10,6 +11,8 @@
 	import Check from 'lucide-svelte/icons/check';
 	import X from 'lucide-svelte/icons/x';
 	import Search from 'lucide-svelte/icons/search';
+	import StoreIcon from 'lucide-svelte/icons/store';
+	import Building2 from 'lucide-svelte/icons/building-2';
 	import FirmlyLogo from '$lib/components/firmly-logo.svelte';
 	import MerchantUserMenu from '$lib/components/merchant/merchant-user-menu.svelte';
 	import MerchantAvatar from '$lib/components/merchant/merchant-avatar.svelte';
@@ -19,10 +22,18 @@
 	let declining = $state({});
 	let searchQuery = $state('');
 	let highlightedIndex = $state(-1);
+	let activeTab = $state('merchants');
 
-	// Filter and sort dashboards alphabetically
+	// Determine which tab to show by default based on what dashboards exist
+	$effect(() => {
+		if (data.dashboards.length === 0 && data.destinations?.length > 0) {
+			activeTab = 'destinations';
+		}
+	});
+
+	// Filter and sort merchant dashboards alphabetically
 	let filteredDashboards = $derived(
-		data.dashboards
+		(data.dashboards || [])
 			.filter((dashboard) => {
 				if (!searchQuery) return true;
 				const query = searchQuery.toLowerCase();
@@ -38,17 +49,41 @@
 			})
 	);
 
+	// Filter and sort destination dashboards alphabetically
+	let filteredDestinations = $derived(
+		(data.destinations || [])
+			.filter((destination) => {
+				if (!searchQuery) return true;
+				const query = searchQuery.toLowerCase();
+				return (
+					destination.appId.toLowerCase().includes(query) ||
+					(destination.displayName &&
+						destination.displayName.toLowerCase().includes(query))
+				);
+			})
+			.sort((a, b) => {
+				const nameA = (a.displayName || a.appId).toLowerCase();
+				const nameB = (b.displayName || b.appId).toLowerCase();
+				return nameA.localeCompare(nameB);
+			})
+	);
+
+	// Get current filtered list based on active tab
+	let currentFilteredList = $derived(
+		activeTab === 'merchants' ? filteredDashboards : filteredDestinations
+	);
+
 	// Reset highlighted index when filter changes
 	$effect(() => {
-		// Access filteredDashboards to create dependency
-		filteredDashboards;
+		// Access currentFilteredList to create dependency
+		currentFilteredList;
 		highlightedIndex = -1;
 	});
 
 	function handleKeydown(e) {
 		if (e.key === 'ArrowDown') {
 			e.preventDefault();
-			if (highlightedIndex < filteredDashboards.length - 1) {
+			if (highlightedIndex < currentFilteredList.length - 1) {
 				highlightedIndex++;
 			} else {
 				highlightedIndex = 0;
@@ -58,16 +93,26 @@
 			if (highlightedIndex > 0) {
 				highlightedIndex--;
 			} else {
-				highlightedIndex = filteredDashboards.length - 1;
+				highlightedIndex = currentFilteredList.length - 1;
 			}
 		} else if (e.key === 'Enter') {
 			e.preventDefault();
-			if (highlightedIndex >= 0 && highlightedIndex < filteredDashboards.length) {
-				const selected = filteredDashboards[highlightedIndex];
-				goto(`/merchant/${selected.domain}`);
+			if (highlightedIndex >= 0 && highlightedIndex < currentFilteredList.length) {
+				const selected = currentFilteredList[highlightedIndex];
+				if (activeTab === 'merchants') {
+					goto(`/merchant/${selected.domain}`);
+				} else {
+					goto(`/destination/${selected.appId}`);
+				}
 			}
 		}
 	}
+
+	// Check if we have both types
+	let hasBothTypes = $derived(data.dashboards?.length > 0 && data.destinations?.length > 0);
+	let totalDashboardCount = $derived(
+		(data.dashboards?.length || 0) + (data.destinations?.length || 0)
+	);
 
 	const roleLabels = {
 		owner: 'Owner',
@@ -214,7 +259,7 @@
 				</div>
 			{/if}
 
-			{#if data.dashboards.length === 0 && (!data.pendingInvites || data.pendingInvites.length === 0)}
+			{#if totalDashboardCount === 0 && (!data.pendingInvites || data.pendingInvites.length === 0)}
 				<!-- Empty state - no dashboards and no pending invites -->
 				<Card.Root class="mx-auto max-w-md">
 					<Card.Content class="py-12 text-center">
@@ -222,35 +267,35 @@
 						<h2 class="mb-2 text-xl font-semibold">No Dashboards Available</h2>
 						<p class="text-muted-foreground">
 							{#if data.isFirmlyAdmin}
-								No merchant dashboards have been created yet.
+								No dashboards have been created yet.
 							{:else}
-								You don't have access to any merchant dashboards yet. Please contact
-								your administrator for an invitation.
+								You don't have access to any dashboards yet. Please contact your
+								administrator for an invitation.
 							{/if}
 						</p>
 					</Card.Content>
 				</Card.Root>
-			{:else if data.dashboards.length > 0}
+			{:else if totalDashboardCount > 0}
 				<!-- Dashboard Selection -->
 				<div class="mb-6 text-center">
 					<h1 class="mb-2 text-2xl font-semibold">
 						{#if data.isFirmlyAdmin}
-							All Merchant Dashboards
+							All Dashboards
 						{:else}
 							Select a Dashboard
 						{/if}
 					</h1>
 					<p class="text-muted-foreground">
 						{#if data.isFirmlyAdmin}
-							Access any merchant dashboard as admin ({data.dashboards.length} total)
+							Access any dashboard as admin ({totalDashboardCount} total)
 						{:else}
-							Choose a merchant dashboard to manage
+							Choose a dashboard to manage
 						{/if}
 					</p>
 				</div>
 
 				<!-- Search Input -->
-				{#if data.dashboards.length > 5}
+				{#if totalDashboardCount > 5}
 					<div class="relative mx-auto mb-6 max-w-md">
 						<Search
 							class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
@@ -265,49 +310,114 @@
 					</div>
 				{/if}
 
+				<!-- Tabs for Merchant vs Destination (only show if user has both types) -->
+				{#if hasBothTypes}
+					<Tabs.Root bind:value={activeTab} class="mb-6">
+						<Tabs.List class="mx-auto w-fit">
+							<Tabs.Trigger value="merchants" class="gap-2">
+								<StoreIcon class="h-4 w-4" />
+								Merchants ({data.dashboards.length})
+							</Tabs.Trigger>
+							<Tabs.Trigger value="destinations" class="gap-2">
+								<Building2 class="h-4 w-4" />
+								Destinations ({data.destinations?.length || 0})
+							</Tabs.Trigger>
+						</Tabs.List>
+					</Tabs.Root>
+				{/if}
+
 				<!-- Dashboard List -->
-				<Card.Root>
+				<Card.Root class="shadow-md">
 					<div class="divide-y">
-						{#each filteredDashboards as dashboard, index (dashboard.domain)}
-							{@const isHighlighted = index === highlightedIndex}
-							<a
-								href={`/merchant/${dashboard.domain}`}
-								class="group flex items-center justify-between gap-4 p-4 transition-colors hover:bg-primary/5 {isHighlighted
-									? 'bg-primary/5'
-									: ''}"
-								onmouseenter={() => (highlightedIndex = index)}
-							>
-								<div class="flex items-center gap-4">
-									<MerchantAvatar domain={dashboard.domain} size="md" />
-									<div>
-										<h3 class="font-medium text-foreground">
-											{dashboard.displayName || dashboard.domain}
-										</h3>
-										{#if dashboard.displayName && dashboard.displayName !== dashboard.domain}
-											<p class="text-sm text-muted-foreground">
-												{dashboard.domain}
-											</p>
-										{:else}
-											<p class="text-sm text-muted-foreground">
-												Merchant Dashboard
-											</p>
-										{/if}
-									</div>
-								</div>
-								<div
-									class="flex items-center gap-2 text-sm font-medium text-primary transition-opacity {isHighlighted
-										? 'opacity-100'
-										: 'opacity-0 group-hover:opacity-100'}"
+						{#if activeTab === 'merchants' || (!hasBothTypes && data.dashboards?.length > 0)}
+							{#each filteredDashboards as dashboard, index (dashboard.domain)}
+								{@const isHighlighted = index === highlightedIndex}
+								<a
+									href={`/merchant/${dashboard.domain}`}
+									class="group flex items-center justify-between gap-4 p-4 transition-colors hover:bg-primary/5 {isHighlighted
+										? 'bg-primary/5'
+										: ''}"
+									onmouseenter={() => (highlightedIndex = index)}
 								>
-									Open
-									<ArrowRight class="h-4 w-4" />
+									<div class="flex items-center gap-4">
+										<MerchantAvatar domain={dashboard.domain} size="md" />
+										<div>
+											<h3 class="font-medium text-foreground">
+												{dashboard.displayName || dashboard.domain}
+											</h3>
+											{#if dashboard.displayName && dashboard.displayName !== dashboard.domain}
+												<p class="text-sm text-muted-foreground">
+													{dashboard.domain}
+												</p>
+											{:else}
+												<p class="text-sm text-muted-foreground">
+													Merchant Dashboard
+												</p>
+											{/if}
+										</div>
+									</div>
+									<div
+										class="flex items-center gap-2 text-sm font-medium text-primary transition-opacity {isHighlighted
+											? 'opacity-100'
+											: 'opacity-0 group-hover:opacity-100'}"
+									>
+										Open
+										<ArrowRight class="h-4 w-4" />
+									</div>
+								</a>
+							{:else}
+								<div class="p-8 text-center text-muted-foreground">
+									No merchant dashboards match your search
 								</div>
-							</a>
-						{:else}
-							<div class="p-8 text-center text-muted-foreground">
-								No dashboards match your search
-							</div>
-						{/each}
+							{/each}
+						{/if}
+
+						{#if activeTab === 'destinations' || (!hasBothTypes && data.destinations?.length > 0 && data.dashboards?.length === 0)}
+							{#each filteredDestinations as destination, index (destination.appId)}
+								{@const isHighlighted = index === highlightedIndex}
+								<a
+									href={`/destination/${destination.appId}`}
+									class="group flex items-center justify-between gap-4 p-4 transition-colors hover:bg-primary/5 {isHighlighted
+										? 'bg-primary/5'
+										: ''}"
+									onmouseenter={() => (highlightedIndex = index)}
+								>
+									<div class="flex items-center gap-4">
+										<div
+											class="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary"
+										>
+											<Building2 class="h-5 w-5" />
+										</div>
+										<div>
+											<h3 class="font-medium text-foreground">
+												{destination.displayName || destination.appId}
+											</h3>
+											{#if destination.displayName && destination.displayName !== destination.appId}
+												<p class="text-sm text-muted-foreground">
+													{destination.appId}
+												</p>
+											{:else}
+												<p class="text-sm text-muted-foreground">
+													Destination Dashboard
+												</p>
+											{/if}
+										</div>
+									</div>
+									<div
+										class="flex items-center gap-2 text-sm font-medium text-primary transition-opacity {isHighlighted
+											? 'opacity-100'
+											: 'opacity-0 group-hover:opacity-100'}"
+									>
+										Open
+										<ArrowRight class="h-4 w-4" />
+									</div>
+								</a>
+							{:else}
+								<div class="p-8 text-center text-muted-foreground">
+									No destination dashboards match your search
+								</div>
+							{/each}
+						{/if}
 					</div>
 				</Card.Root>
 			{/if}
