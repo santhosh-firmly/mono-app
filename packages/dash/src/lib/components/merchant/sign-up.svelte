@@ -65,7 +65,7 @@
 			const urlDomain = extractDomain(url);
 			const emailDomain = getEmailDomain(email);
 			if (urlDomain && emailDomain && urlDomain !== emailDomain) {
-				newErrors.email = `Email must be from ${urlDomain}`;
+				newErrors.email = `Email must be from ${urlDomain}. If you must use a different email, please <a href="mailto:support@firmly.ai" class="underline text-primary">contact support</a>.`;
 				isValid = false;
 			}
 		}
@@ -165,7 +165,8 @@
 					oninput={() => (errors = { ...errors, email: '' })}
 				/>
 				{#if errors.email}
-					<p class="text-sm text-red-500">{errors.email}</p>
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -- errors.email is trusted internal content -->
+					<p class="text-sm text-red-500">{@html errors.email}</p>
 				{/if}
 				<p class="text-sm text-gray-500">We'll send a verification code to this email</p>
 			</div>

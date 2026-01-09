@@ -1,14 +1,16 @@
 <script>
 	import { page } from '$app/stores';
-	import { beforeNavigate } from '$app/navigation';
+	import { beforeNavigate, goto, invalidateAll } from '$app/navigation';
 	import MerchantPageHeader from '$lib/components/merchant/merchant-page-header.svelte';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import * as Tabs from '$lib/components/ui/tabs/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import { AlertBanner } from '$lib/components/ui/alert-banner/index.js';
+	import { StickyFormFooter } from '$lib/components/ui/sticky-form-footer/index.js';
+	import KybStatusBanner from '$lib/components/merchant/kyb-status-banner.svelte';
 	import Loader2 from 'lucide-svelte/icons/loader-2';
-	import Save from 'lucide-svelte/icons/save';
-	import AlertCircle from 'lucide-svelte/icons/alert-circle';
-	import CheckCircle from 'lucide-svelte/icons/check-circle-2';
+	import Send from 'lucide-svelte/icons/send';
+	import CheckCircle from 'lucide-svelte/icons/check-circle';
 	import {
 		BrandIdentityCard,
 		LegalDocumentsCard,
@@ -19,6 +21,7 @@
 	let { data } = $props();
 
 	let domain = $derived($page.params.domain);
+	let fromOnboarding = $derived($page.url.searchParams.get('from') === 'onboarding');
 
 	// Tab state
 	let activeSection = $state('company');
@@ -50,6 +53,11 @@
 	let saving = $state(false);
 	let error = $state('');
 	let successMessage = $state('');
+
+	// KYB submission state
+	let submittingKyb = $state(false);
+	let kybError = $state('');
+	let kybSuccessMessage = $state('');
 
 	// Track original values for change detection
 	let originalValues = $state({
@@ -92,6 +100,17 @@
 			contactName !== originalValues.contactName ||
 			contactEmail !== originalValues.contactEmail ||
 			contactPhone !== originalValues.contactPhone
+	);
+
+	// Check if company info is sufficiently filled for KYB submission
+	let canSubmitKyb = $derived(
+		data.canEdit &&
+			!hasChanges &&
+			data.kybStatus?.kyb_status !== 'pending' &&
+			data.kybStatus?.kyb_status !== 'approved' &&
+			companyName?.trim() &&
+			contactName?.trim() &&
+			contactEmail?.trim()
 	);
 
 	// Unsaved changes warning - browser close/refresh
@@ -197,45 +216,60 @@
 			saving = false;
 		}
 	}
+
+	async function submitKYB() {
+		if (!data.canEdit) return;
+
+		submittingKyb = true;
+		kybError = '';
+		kybSuccessMessage = '';
+
+		try {
+			const response = await fetch(`/merchant/${domain}/api/kyb`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' }
+			});
+
+			const result = await response.json();
+
+			if (!response.ok) {
+				throw new Error(result.error || 'Failed to submit KYB');
+			}
+
+			// If user came from onboarding, redirect back to merchant home
+			if (fromOnboarding) {
+				await goto(`/merchant/${domain}`);
+				return;
+			}
+
+			kybSuccessMessage = 'Your information has been submitted for review.';
+
+			// Refresh page data to update KYB status
+			await invalidateAll();
+		} catch (err) {
+			kybError = err.message;
+		} finally {
+			submittingKyb = false;
+		}
+	}
 </script>
 
 <div class="space-y-6 pb-24 md:pb-6">
 	<MerchantPageHeader title="Settings" description="Manage your store's settings and branding" />
 
 	{#if !data.canEdit}
-		<Card.Root class="border-yellow-200 bg-yellow-50">
-			<Card.Content class="py-4">
-				<div class="flex items-center gap-3">
-					<AlertCircle class="h-5 w-5 text-yellow-600" />
-					<p class="text-sm text-yellow-700">
-						You have view-only access to these settings. Contact an owner to make
-						changes.
-					</p>
-				</div>
-			</Card.Content>
-		</Card.Root>
+		<AlertBanner
+			variant="warning"
+			message="You have view-only access to these settings. Contact an owner to make changes."
+		/>
 	{/if}
 
 	{#if successMessage}
-		<Card.Root class="border-green-200 bg-green-50">
-			<Card.Content class="py-4">
-				<div class="flex items-center gap-3">
-					<CheckCircle class="h-5 w-5 text-green-600" />
-					<p class="text-sm text-green-700">{successMessage}</p>
-				</div>
-			</Card.Content>
-		</Card.Root>
+		<AlertBanner variant="success" message={successMessage} />
 	{/if}
 
 	{#if error}
-		<Card.Root class="border-red-200 bg-red-50">
-			<Card.Content class="py-4">
-				<div class="flex items-center gap-3">
-					<AlertCircle class="h-5 w-5 text-red-600" />
-					<p class="text-sm text-red-700">{error}</p>
-				</div>
-			</Card.Content>
-		</Card.Root>
+		<AlertBanner variant="error" message={error} />
 	{/if}
 
 	<!-- Tabs Navigation -->
@@ -250,6 +284,13 @@
 	<!-- Tab Content -->
 	{#if activeSection === 'company'}
 		<div class="space-y-6">
+			<!-- KYB Status Banners -->
+			<KybStatusBanner kybStatus={data.kybStatus} />
+
+			{#if kybError}
+				<AlertBanner variant="error" message={kybError} />
+			{/if}
+
 			<CompanyInfoCard
 				bind:companyName
 				bind:employeeCount
@@ -268,6 +309,50 @@
 				bind:contactPhone
 				disabled={!data.canEdit}
 			/>
+
+			<!-- KYB Submit Button -->
+			{#if data.canEdit && data.kybStatus?.kyb_status !== 'approved' && data.kybStatus?.kyb_status !== 'pending'}
+				<Card.Root>
+					<Card.Header>
+						<Card.Title class="text-lg">Submit for Business Verification</Card.Title>
+						<Card.Description>
+							Once you've filled in your company and contact information, submit it
+							for Firmly to review and verify your business.
+						</Card.Description>
+					</Card.Header>
+					<Card.Content>
+						<Button
+							onclick={submitKYB}
+							disabled={submittingKyb || !canSubmitKyb || hasChanges}
+							class="bg-purple-600 hover:bg-purple-700"
+						>
+							{#if submittingKyb}
+								<Loader2 class="mr-2 h-4 w-4 animate-spin" />
+								Submitting...
+							{:else}
+								<Send class="mr-2 h-4 w-4" />
+								Submit for Review
+							{/if}
+						</Button>
+						{#if kybSuccessMessage}
+							<div class="flex items-center gap-2 mt-3 text-green-600">
+								<CheckCircle class="h-4 w-4" />
+								<p class="text-sm">{kybSuccessMessage}</p>
+							</div>
+						{/if}
+						{#if hasChanges}
+							<p class="text-xs text-muted-foreground mt-2">
+								Please save your changes before submitting.
+							</p>
+						{:else if !canSubmitKyb && data.kybStatus?.kyb_status !== 'pending' && data.kybStatus?.kyb_status !== 'approved'}
+							<p class="text-xs text-muted-foreground mt-2">
+								Please fill in company name, contact name, and contact email before
+								submitting.
+							</p>
+						{/if}
+					</Card.Content>
+				</Card.Root>
+			{/if}
 		</div>
 	{:else if activeSection === 'branding'}
 		<BrandIdentityCard
@@ -285,24 +370,5 @@
 
 <!-- Sticky Save Button -->
 {#if data.canEdit}
-	<div
-		class="fixed bottom-0 left-0 right-0 z-50 border-t bg-white/95 backdrop-blur-sm p-4 md:relative md:border-0 md:bg-transparent md:backdrop-blur-none md:p-0 md:mt-6"
-	>
-		<div class="flex justify-end max-w-4xl mx-auto md:max-w-none">
-			<Button
-				onclick={saveSettings}
-				disabled={saving || !hasChanges}
-				class="bg-purple-600 hover:bg-purple-700 w-full md:w-auto"
-				size="lg"
-			>
-				{#if saving}
-					<Loader2 class="mr-2 h-4 w-4 animate-spin" />
-					Saving...
-				{:else}
-					<Save class="mr-2 h-5 w-5" />
-					Save Changes
-				{/if}
-			</Button>
-		</div>
-	</div>
+	<StickyFormFooter onSave={saveSettings} disabled={!hasChanges} loading={saving} />
 {/if}

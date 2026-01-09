@@ -1,32 +1,17 @@
 import { BaseDurableObject } from 'foundation/durable-objects/durable-object-base.js';
 import { getLogger } from 'foundation/utils/log.js';
+import { handleRoutes } from './shared/route-utils.js';
+import {
+    teamRoutes,
+    auditLogRoutes,
+    initializeTeamSchema,
+    initializeAuditLogSchema,
+    teamHandlers,
+    auditLogHandlers,
+    clearTeamAndAuditLogs,
+} from './shared/team-audit-mixin.js';
 
 const logger = getLogger('MerchantDO');
-
-/**
- * Matches a URL path against a route pattern.
- * Supports exact matches and :param patterns.
- * @returns {Object|null} - Match result with params, or null if no match
- */
-function matchRoute(routePath, actualPath) {
-    const routeParts = routePath.split('/').filter(Boolean);
-    const actualParts = actualPath.split('/').filter(Boolean);
-
-    if (routeParts.length !== actualParts.length) {
-        return null;
-    }
-
-    const params = {};
-    for (let i = 0; i < routeParts.length; i++) {
-        if (routeParts[i].startsWith(':')) {
-            params[routeParts[i].slice(1)] = decodeURIComponent(actualParts[i]);
-        } else if (routeParts[i] !== actualParts[i]) {
-            return null;
-        }
-    }
-
-    return { params };
-}
 
 /**
  * MerchantDO - Durable Object for per-merchant data storage.
@@ -37,15 +22,11 @@ function matchRoute(routePath, actualPath) {
 export class MerchantDO extends BaseDurableObject {
     // Route configuration - order matters: exact matches should come before parameterized routes
     static routes = [
-        // Team endpoints
-        { path: '/team', method: 'GET', handler: 'handleGetTeam' },
-        { path: '/team', method: 'POST', handler: 'handleAddTeamMember', needsJson: true },
-        { path: '/team/:userId', method: 'PUT', handler: 'handleUpdateTeamMember', needsJson: true },
-        { path: '/team/:userId', method: 'DELETE', handler: 'handleRemoveTeamMember' },
+        // Team endpoints (from shared)
+        ...teamRoutes,
 
-        // Audit log endpoints
-        { path: '/audit-logs', method: 'GET', handler: 'handleGetAuditLogs' },
-        { path: '/audit-logs', method: 'POST', handler: 'handleCreateAuditLog', needsJson: true },
+        // Audit log endpoints (from shared)
+        ...auditLogRoutes,
 
         // Agreement endpoints
         { path: '/agreement', method: 'GET', handler: 'handleGetAgreement' },
@@ -53,6 +34,7 @@ export class MerchantDO extends BaseDurableObject {
 
         // Onboarding status endpoints
         { path: '/onboarding', method: 'GET', handler: 'handleGetOnboardingStatus' },
+        { path: '/onboarding-status-all', method: 'GET', handler: 'handleGetAllOnboardingStatus' },
         { path: '/onboarding/:key', method: 'PUT', handler: 'handleSetOnboardingStatus', needsJson: true },
 
         // Catalog config endpoints
@@ -75,107 +57,67 @@ export class MerchantDO extends BaseDurableObject {
     }
 
     async initializeSchema() {
-        // Team membership table
-        this.sql.exec(`
-			CREATE TABLE IF NOT EXISTS team (
-				user_id TEXT PRIMARY KEY,
-				user_email TEXT NOT NULL,
-				role TEXT NOT NULL DEFAULT 'viewer',
-				granted_at TEXT DEFAULT (datetime('now')),
-				granted_by TEXT
-			)
-		`);
+        // Team membership table (shared)
+        initializeTeamSchema(this.sql);
 
-        // Audit logs table
-        this.sql.exec(`
-			CREATE TABLE IF NOT EXISTS audit_logs (
-				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				event_type TEXT NOT NULL,
-				actor_id TEXT NOT NULL,
-				actor_email TEXT NOT NULL,
-				target_id TEXT,
-				target_email TEXT,
-				details TEXT,
-				is_firmly_admin INTEGER DEFAULT 0,
-				actor_type TEXT DEFAULT 'user',
-				created_at TEXT DEFAULT (datetime('now'))
-			)
-		`);
-
-        // Migration: add is_firmly_admin column to existing tables
-        try {
-            this.sql.exec(`ALTER TABLE audit_logs ADD COLUMN is_firmly_admin INTEGER DEFAULT 0`);
-        } catch {
-            // Column already exists, ignore error
-        }
-
-        // Migration: add actor_type column to existing tables
-        try {
-            this.sql.exec(`ALTER TABLE audit_logs ADD COLUMN actor_type TEXT DEFAULT 'user'`);
-        } catch {
-            // Column already exists, ignore error
-        }
-
-        // Index for efficient audit log queries
-        this.sql.exec(`
-			CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at)
-		`);
+        // Audit logs table (shared)
+        initializeAuditLogSchema(this.sql);
 
         // Merchant agreement table
         this.sql.exec(`
-			CREATE TABLE IF NOT EXISTS merchant_agreement (
-				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				signed_by_user_id TEXT NOT NULL,
-				signed_by_email TEXT NOT NULL,
-				signed_at TEXT DEFAULT (datetime('now')),
-				browser_info TEXT,
-				client_ip TEXT,
-				client_location TEXT,
-				agreement_version TEXT DEFAULT '1.0'
-			)
-		`);
+            CREATE TABLE IF NOT EXISTS merchant_agreement (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                signed_by_user_id TEXT NOT NULL,
+                signed_by_email TEXT NOT NULL,
+                signed_at TEXT DEFAULT (datetime('now')),
+                browser_info TEXT,
+                client_ip TEXT,
+                client_location TEXT,
+                agreement_version TEXT DEFAULT '1.0'
+            )
+        `);
 
         // Onboarding status table
         this.sql.exec(`
-			CREATE TABLE IF NOT EXISTS onboarding_status (
-				key TEXT PRIMARY KEY,
-				completed INTEGER DEFAULT 0,
-				completed_at TEXT,
-				completed_by_user_id TEXT,
-				completed_by_email TEXT
-			)
-		`);
+            CREATE TABLE IF NOT EXISTS onboarding_status (
+                key TEXT PRIMARY KEY,
+                completed INTEGER DEFAULT 0,
+                completed_at TEXT,
+                completed_by_user_id TEXT,
+                completed_by_email TEXT
+            )
+        `);
 
         // Catalog configuration table
         this.sql.exec(`
-			CREATE TABLE IF NOT EXISTS catalog_config (
-				id INTEGER PRIMARY KEY CHECK (id = 1),
-				catalog_type TEXT NOT NULL,
-				configured_at TEXT DEFAULT (datetime('now')),
-				configured_by_user_id TEXT,
-				configured_by_email TEXT
-			)
-		`);
+            CREATE TABLE IF NOT EXISTS catalog_config (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                catalog_type TEXT NOT NULL,
+                configured_at TEXT DEFAULT (datetime('now')),
+                configured_by_user_id TEXT,
+                configured_by_email TEXT
+            )
+        `);
 
         // Integration steps table
         this.sql.exec(`
-			CREATE TABLE IF NOT EXISTS integration_steps (
-				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				step_id TEXT NOT NULL,
-				substep_id TEXT,
-				status TEXT NOT NULL DEFAULT 'pending',
-				completed_at TEXT,
-				completed_by TEXT,
-				source TEXT NOT NULL DEFAULT 'api',
-				updated_at TEXT DEFAULT (datetime('now')),
-				UNIQUE(step_id, substep_id)
-			)
-		`);
+            CREATE TABLE IF NOT EXISTS integration_steps (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                step_id TEXT NOT NULL,
+                substep_id TEXT,
+                status TEXT NOT NULL DEFAULT 'pending',
+                completed_at TEXT,
+                completed_by TEXT,
+                source TEXT NOT NULL DEFAULT 'api',
+                updated_at TEXT DEFAULT (datetime('now')),
+                UNIQUE(step_id, substep_id)
+            )
+        `);
 
         // Index for efficient integration steps queries
         this.sql.exec(`
-			CREATE INDEX IF NOT EXISTS idx_integration_steps_step_id ON integration_steps(step_id)
-		`);
+            CREATE INDEX IF NOT EXISTS idx_integration_steps_step_id ON integration_steps(step_id)
+        `);
     }
 
     async fetch(request) {
@@ -186,34 +128,23 @@ export class MerchantDO extends BaseDurableObject {
         const method = request.method;
 
         try {
-            // Find matching route
-            for (const route of MerchantDO.routes) {
-                if (route.method !== method) continue;
+            // Use shared route handler
+            const response = await handleRoutes({
+                routes: MerchantDO.routes,
+                handlers: this,
+                request,
+                options: {
+                    onAuditLogs: (route) => route.handler === 'handleGetAuditLogs',
+                },
+            });
 
-                const match = matchRoute(route.path, path);
-                if (!match) continue;
+            if (response) {
+                return response;
+            }
 
-                // Build handler arguments - path params come first, then JSON body
-                const args = [];
-
-                // Add path parameters first
-                const paramValues = Object.values(match.params);
-                args.push(...paramValues);
-
-                // Add JSON body if needed (after path params)
-                if (route.needsJson) {
-                    args.push(await request.json());
-                }
-
-                // Special handling for audit-logs GET (needs query params)
-                if (route.handler === 'handleGetAuditLogs') {
-                    const limit = parseInt(url.searchParams.get('limit') || '50', 10);
-                    const offset = parseInt(url.searchParams.get('offset') || '0', 10);
-                    const includeFirmlyAdmin = url.searchParams.get('includeFirmlyAdmin') === 'true';
-                    args.push(limit, offset, includeFirmlyAdmin);
-                }
-
-                return this[route.handler](...args);
+            // Reset endpoint (admin only)
+            if (path === '/reset' && method === 'POST') {
+                return this.handleReset();
             }
 
             return new Response(JSON.stringify({ error: 'Not found' }), {
@@ -229,79 +160,42 @@ export class MerchantDO extends BaseDurableObject {
         }
     }
 
-    // Team methods
+    // ============================================================================
+    // Team methods (delegating to shared handlers)
+    // ============================================================================
+
     handleGetTeam() {
-        const team = this.sql.exec('SELECT * FROM team ORDER BY granted_at ASC').toArray();
-        return Response.json(team);
+        return teamHandlers.getTeam(this.sql);
     }
 
-    handleAddTeamMember({ userId, userEmail, role = 'viewer', grantedBy }) {
-        this.sql.exec(
-            `INSERT OR REPLACE INTO team (user_id, user_email, role, granted_at, granted_by)
-			 VALUES (?, ?, ?, datetime('now'), ?)`,
-            userId,
-            userEmail,
-            role,
-            grantedBy,
-        );
-        return Response.json({ success: true });
+    handleAddTeamMember(data) {
+        return teamHandlers.addTeamMember(this.sql, data);
     }
 
-    handleUpdateTeamMember(userId, { role }) {
-        const result = this.sql.exec(`UPDATE team SET role = ? WHERE user_id = ? RETURNING *`, role, userId);
-
-        const updated = result.toArray();
-        if (updated.length === 0) {
-            return Response.json({ error: 'Team member not found' }, { status: 404 });
-        }
-
-        return Response.json({ success: true, member: updated[0] });
+    handleUpdateTeamMember(userId, data) {
+        return teamHandlers.updateTeamMember(this.sql, userId, data);
     }
 
     handleRemoveTeamMember(userId) {
-        const result = this.sql.exec(`DELETE FROM team WHERE user_id = ? RETURNING *`, userId);
-
-        const deleted = result.toArray();
-        if (deleted.length === 0) {
-            return Response.json({ error: 'Team member not found' }, { status: 404 });
-        }
-
-        return Response.json({ success: true });
+        return teamHandlers.removeTeamMember(this.sql, userId);
     }
 
-    // Audit log methods
-    handleGetAuditLogs(limit, offset, includeFirmlyAdmin = false) {
-        // Regular users don't see Firmly admin actions
-        const whereClause = includeFirmlyAdmin ? '' : 'WHERE is_firmly_admin = 0';
+    // ============================================================================
+    // Audit log methods (delegating to shared handlers)
+    // ============================================================================
 
-        const logs = this.sql.exec(`SELECT * FROM audit_logs ${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`, limit, offset).toArray();
-
-        const countResult = this.sql.exec(`SELECT COUNT(*) as total FROM audit_logs ${whereClause}`).toArray();
-        const total = countResult[0]?.total || 0;
-
-        return Response.json({ logs, total, limit, offset });
+    handleGetAuditLogs(limit, offset, includeFirmlyAdmin) {
+        return auditLogHandlers.getAuditLogs(this.sql, limit, offset, includeFirmlyAdmin);
     }
 
-    handleCreateAuditLog({ eventType, actorId, actorEmail, targetId, targetEmail, details, isFirmlyAdmin = false, actorType = 'user' }) {
-        const detailsJson = details ? JSON.stringify(details) : null;
-
-        this.sql.exec(
-            `INSERT INTO audit_logs (event_type, actor_id, actor_email, target_id, target_email, details, is_firmly_admin, actor_type)
-			 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            eventType,
-            actorId,
-            actorEmail,
-            targetId || null,
-            targetEmail || null,
-            detailsJson,
-            isFirmlyAdmin ? 1 : 0,
-            actorType,
-        );
-
-        return Response.json({ success: true });
+    handleCreateAuditLog(data) {
+        return auditLogHandlers.createAuditLog(this.sql, data);
     }
 
+    // ============================================================================
     // Agreement methods
+    // ============================================================================
+
     handleGetAgreement() {
         const result = this.sql.exec('SELECT * FROM merchant_agreement ORDER BY signed_at DESC LIMIT 1').toArray();
 
@@ -322,7 +216,7 @@ export class MerchantDO extends BaseDurableObject {
 
         this.sql.exec(
             `INSERT INTO merchant_agreement (signed_by_user_id, signed_by_email, browser_info, client_ip, client_location, agreement_version)
-			 VALUES (?, ?, ?, ?, ?, ?)`,
+             VALUES (?, ?, ?, ?, ?, ?)`,
             userId,
             userEmail,
             browserInfo || null,
@@ -336,7 +230,10 @@ export class MerchantDO extends BaseDurableObject {
         return Response.json({ success: true, agreement });
     }
 
+    // ============================================================================
     // Onboarding status methods
+    // ============================================================================
+
     handleGetOnboardingStatus() {
         const statuses = this.sql.exec('SELECT * FROM onboarding_status').toArray();
 
@@ -354,16 +251,45 @@ export class MerchantDO extends BaseDurableObject {
         return Response.json(result);
     }
 
+    /**
+     * Returns all onboarding status data in a single response.
+     * This batches multiple queries that would otherwise require separate DO calls.
+     */
+    handleGetAllOnboardingStatus() {
+        // Get onboarding statuses (integration, destinations, cdn)
+        const onboardingStatuses = this.sql.exec('SELECT * FROM onboarding_status').toArray();
+        const statusMap = {};
+        for (const status of onboardingStatuses) {
+            statusMap[status.key] = status.completed === 1;
+        }
+
+        // Get agreement signing status
+        const agreementResult = this.sql.exec('SELECT * FROM merchant_agreement LIMIT 1').toArray();
+        const agreementSigned = agreementResult.length > 0;
+
+        // Get catalog config status
+        const catalogResult = this.sql.exec('SELECT * FROM catalog_config WHERE id = 1').toArray();
+        const catalogConfigured = catalogResult.length > 0;
+
+        return Response.json({
+            integrationComplete: statusMap['integration'] === true,
+            agreementSigned,
+            destinationsConfigured: statusMap['destinations'] === true,
+            catalogConfigured,
+            cdnWhitelistingComplete: statusMap['cdn'] === true,
+        });
+    }
+
     handleSetOnboardingStatus(key, { completed, userId, userEmail }) {
         if (completed) {
             this.sql.exec(
                 `INSERT INTO onboarding_status (key, completed, completed_at, completed_by_user_id, completed_by_email)
-				 VALUES (?, 1, datetime('now'), ?, ?)
-				 ON CONFLICT(key) DO UPDATE SET
-					completed = 1,
-					completed_at = datetime('now'),
-					completed_by_user_id = excluded.completed_by_user_id,
-					completed_by_email = excluded.completed_by_email`,
+                 VALUES (?, 1, datetime('now'), ?, ?)
+                 ON CONFLICT(key) DO UPDATE SET
+                    completed = 1,
+                    completed_at = datetime('now'),
+                    completed_by_user_id = excluded.completed_by_user_id,
+                    completed_by_email = excluded.completed_by_email`,
                 key,
                 userId,
                 userEmail,
@@ -371,12 +297,12 @@ export class MerchantDO extends BaseDurableObject {
         } else {
             this.sql.exec(
                 `INSERT INTO onboarding_status (key, completed, completed_at, completed_by_user_id, completed_by_email)
-				 VALUES (?, 0, NULL, NULL, NULL)
-				 ON CONFLICT(key) DO UPDATE SET
-					completed = 0,
-					completed_at = NULL,
-					completed_by_user_id = NULL,
-					completed_by_email = NULL`,
+                 VALUES (?, 0, NULL, NULL, NULL)
+                 ON CONFLICT(key) DO UPDATE SET
+                    completed = 0,
+                    completed_at = NULL,
+                    completed_by_user_id = NULL,
+                    completed_by_email = NULL`,
                 key,
             );
         }
@@ -384,7 +310,10 @@ export class MerchantDO extends BaseDurableObject {
         return Response.json({ success: true, key, completed });
     }
 
+    // ============================================================================
     // Catalog config methods
+    // ============================================================================
+
     handleGetCatalogConfig() {
         const result = this.sql.exec('SELECT * FROM catalog_config WHERE id = 1').toArray();
 
@@ -416,12 +345,12 @@ export class MerchantDO extends BaseDurableObject {
 
         this.sql.exec(
             `INSERT INTO catalog_config (id, catalog_type, configured_at, configured_by_user_id, configured_by_email)
-			 VALUES (1, ?, datetime('now'), ?, ?)
-			 ON CONFLICT(id) DO UPDATE SET
-				catalog_type = excluded.catalog_type,
-				configured_at = datetime('now'),
-				configured_by_user_id = excluded.configured_by_user_id,
-				configured_by_email = excluded.configured_by_email`,
+             VALUES (1, ?, datetime('now'), ?, ?)
+             ON CONFLICT(id) DO UPDATE SET
+                catalog_type = excluded.catalog_type,
+                configured_at = datetime('now'),
+                configured_by_user_id = excluded.configured_by_user_id,
+                configured_by_email = excluded.configured_by_email`,
             catalogType,
             userId,
             userEmail,
@@ -434,13 +363,16 @@ export class MerchantDO extends BaseDurableObject {
         });
     }
 
+    // ============================================================================
     // Integration steps methods
+    // ============================================================================
+
     handleGetIntegrationSteps() {
         const steps = this.sql
             .exec(
                 `SELECT step_id, substep_id, status, completed_at, completed_by, source, updated_at
-				 FROM integration_steps
-				 ORDER BY step_id, substep_id`,
+                 FROM integration_steps
+                 ORDER BY step_id, substep_id`,
             )
             .toArray();
 
@@ -461,13 +393,13 @@ export class MerchantDO extends BaseDurableObject {
         if (status === 'completed') {
             this.sql.exec(
                 `INSERT INTO integration_steps (step_id, substep_id, status, completed_at, completed_by, source, updated_at)
-				 VALUES (?, ?, ?, datetime('now'), ?, ?, datetime('now'))
-				 ON CONFLICT(step_id, substep_id) DO UPDATE SET
-					status = excluded.status,
-					completed_at = datetime('now'),
-					completed_by = excluded.completed_by,
-					source = excluded.source,
-					updated_at = datetime('now')`,
+                 VALUES (?, ?, ?, datetime('now'), ?, ?, datetime('now'))
+                 ON CONFLICT(step_id, substep_id) DO UPDATE SET
+                    status = excluded.status,
+                    completed_at = datetime('now'),
+                    completed_by = excluded.completed_by,
+                    source = excluded.source,
+                    updated_at = datetime('now')`,
                 stepId,
                 substepId || null,
                 status,
@@ -478,13 +410,13 @@ export class MerchantDO extends BaseDurableObject {
             // For non-completed statuses, clear completion info
             this.sql.exec(
                 `INSERT INTO integration_steps (step_id, substep_id, status, completed_at, completed_by, source, updated_at)
-				 VALUES (?, ?, ?, NULL, NULL, ?, datetime('now'))
-				 ON CONFLICT(step_id, substep_id) DO UPDATE SET
-					status = excluded.status,
-					completed_at = NULL,
-					completed_by = NULL,
-					source = excluded.source,
-					updated_at = datetime('now')`,
+                 VALUES (?, ?, ?, NULL, NULL, ?, datetime('now'))
+                 ON CONFLICT(step_id, substep_id) DO UPDATE SET
+                    status = excluded.status,
+                    completed_at = NULL,
+                    completed_by = NULL,
+                    source = excluded.source,
+                    updated_at = datetime('now')`,
                 stepId,
                 substepId || null,
                 status,
@@ -518,5 +450,25 @@ export class MerchantDO extends BaseDurableObject {
         });
 
         return Response.json({ success: true, count: updatedCount });
+    }
+
+    // ============================================================================
+    // Reset method - clears all merchant data (admin operation)
+    // ============================================================================
+
+    handleReset() {
+        // Clear team and audit logs using shared helper
+        const clearedTeamMembers = clearTeamAndAuditLogs(this.sql);
+
+        // Clear merchant-specific tables
+        this.sql.exec('DELETE FROM merchant_agreement');
+        this.sql.exec('DELETE FROM onboarding_status');
+        this.sql.exec('DELETE FROM catalog_config');
+        this.sql.exec('DELETE FROM integration_steps');
+
+        return Response.json({
+            success: true,
+            clearedTeamMembers,
+        });
     }
 }

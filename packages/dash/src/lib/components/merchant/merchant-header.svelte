@@ -18,13 +18,14 @@
 		user,
 		domain,
 		merchantAccess = [],
+		destinationAccess = [],
 		currentPath,
 		userRole = 'viewer',
 		pendingInvites = []
 	} = $props();
 
-	// Only show account selector when user has access to multiple dashboards
-	let showAccountSelector = $derived(merchantAccess.length > 1);
+	// Show account selector when user has access to multiple dashboards (either type)
+	let showAccountSelector = $derived(merchantAccess.length + destinationAccess.length > 1);
 	let isOwner = $derived(userRole === 'owner');
 
 	let navItems = $derived([
@@ -71,7 +72,11 @@
 					</a>
 					{#if showAccountSelector}
 						<div class="mb-4 px-2">
-							<AccountSelector currentDomain={domain} {merchantAccess} />
+							<AccountSelector
+								currentDomain={domain}
+								{merchantAccess}
+								{destinationAccess}
+							/>
 						</div>
 					{/if}
 					{#each navItems as { icon: Icon, label, href } (label)}
@@ -125,7 +130,7 @@
 		<!-- Account selector - shown when user has multiple dashboards -->
 		{#if showAccountSelector}
 			<div class="hidden sm:block">
-				<AccountSelector currentDomain={domain} {merchantAccess} />
+				<AccountSelector currentDomain={domain} {merchantAccess} {destinationAccess} />
 			</div>
 		{/if}
 	</div>

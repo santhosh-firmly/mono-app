@@ -14,6 +14,7 @@ const config = {
 		'@storybook/addon-interactions',
 		'@storybook/addon-postcss',
 		'@storybook/addon-themes',
+		'@storybook/addon-links',
 		{
 			name: '@storybook/addon-docs',
 			options: {

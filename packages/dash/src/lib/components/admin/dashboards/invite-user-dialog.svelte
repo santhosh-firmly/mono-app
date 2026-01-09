@@ -16,8 +16,11 @@
 		onSubmit = async () => {},
 		isSubmitting = false,
 		error = '',
-		success = ''
+		success = '',
+		dashboardType = 'merchant' // 'merchant' or 'destination'
 	} = $props();
+
+	let typeLabel = $derived(dashboardType === 'merchant' ? 'merchant' : 'destination');
 
 	let form = $state({ email: initialEmail, role: initialRole });
 
@@ -47,7 +50,7 @@
 			<Dialog.Description>
 				{isResend
 					? 'Resend the invitation email. This will invalidate the previous invite link.'
-					: 'Send an invitation email to grant access to this merchant dashboard.'}
+					: `Send an invitation email to grant access to this ${typeLabel} dashboard.`}
 			</Dialog.Description>
 		</Dialog.Header>
 
@@ -71,7 +74,7 @@
 					disabled={isSubmitting}
 				>
 					<option value="owner">Owner - Full access + manage team</option>
-					<option value="editor">Editor - Edit merchant settings</option>
+					<option value="editor">Editor - Edit settings</option>
 					<option value="viewer">Viewer - Read-only access</option>
 				</select>
 			</div>

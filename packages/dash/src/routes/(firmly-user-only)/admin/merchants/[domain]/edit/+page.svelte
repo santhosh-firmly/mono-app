@@ -167,7 +167,7 @@
 							<!-- Onboarding Tasks -->
 							<OnboardingTasks
 								domain={data.domain}
-								initialStatuses={data.onboardingProgress}
+								statuses={data.onboardingProgress}
 							/>
 
 							<!-- Integration Progress -->

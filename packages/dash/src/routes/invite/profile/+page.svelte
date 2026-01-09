@@ -5,8 +5,8 @@
 	import { Input } from '$lib/components/ui/input/index.js';
 	import { Label } from '$lib/components/ui/label/index.js';
 	import { Badge } from '$lib/components/ui/badge/index.js';
+	import { InvalidInviteCard } from '$lib/components/invite/index.js';
 	import Loader2 from 'lucide-svelte/icons/loader-2';
-	import XCircle from 'lucide-svelte/icons/x-circle';
 	import User from 'lucide-svelte/icons/user';
 	import ArrowLeft from 'lucide-svelte/icons/arrow-left';
 	import Mail from 'lucide-svelte/icons/mail';
@@ -126,28 +126,15 @@
 </script>
 
 <div class="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-	<Card.Root class="w-full max-w-md">
-		{#if !data.valid}
-			<!-- Invalid/Expired Invite -->
-			<Card.Header class="text-center">
-				<div
-					class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100"
-				>
-					<XCircle class="h-8 w-8 text-red-600" />
-				</div>
-				<Card.Title class="text-xl">Invalid Invitation</Card.Title>
-				<Card.Description class="text-base">
-					{data.error || 'This invitation link is not valid.'}
-				</Card.Description>
-			</Card.Header>
-			<Card.Footer class="justify-center">
-				{#if data.redirectTo}
-					<Button href={data.redirectTo}>Go to Invitation</Button>
-				{:else}
-					<Button variant="outline" href="/">Go to Home</Button>
-				{/if}
-			</Card.Footer>
-		{:else}
+	{#if !data.valid}
+		<InvalidInviteCard
+			error={data.error || 'This invitation link is not valid.'}
+			href={data.redirectTo || '/'}
+			buttonText={data.redirectTo ? 'Go to Invitation' : 'Go to Home'}
+			buttonVariant={data.redirectTo ? 'default' : 'outline'}
+		/>
+	{:else}
+		<Card.Root class="w-full max-w-md">
 			<!-- Valid Invite - Profile Form -->
 			<Card.Header class="text-center">
 				<div
@@ -208,7 +195,7 @@
 									type="text"
 									inputmode="numeric"
 									maxlength="6"
-									pattern="\d{6}"
+									pattern="\d\{6}"
 									bind:value={verificationCode}
 									placeholder="Enter 6-digit code"
 									disabled={isSubmitting}
@@ -322,6 +309,6 @@
 					</Button>
 				</Card.Footer>
 			</form>
-		{/if}
-	</Card.Root>
+		</Card.Root>
+	{/if}
 </div>

@@ -181,3 +181,55 @@ export async function sendInviteEmail(
 		apiKey
 	);
 }
+
+/**
+ * Send a destination dashboard invitation email.
+ * @param {Object} options
+ * @param {string} options.email - Recipient email
+ * @param {string} options.appId - Destination app ID
+ * @param {string} options.role - Role being granted (owner, editor, viewer)
+ * @param {string} options.inviteUrl - URL to accept the invitation
+ * @param {string} options.invitedByEmail - Email of the admin who sent the invite
+ * @param {string} apiKey - MailerSend API key
+ * @returns {Promise<{success: boolean, messageId?: string, error?: string}>}
+ */
+export async function sendDestinationInviteEmail(
+	{ email, appId, role, inviteUrl, invitedByEmail },
+	apiKey
+) {
+	const roleDescriptions = {
+		owner: 'Full access and team management',
+		editor: 'Edit destination settings',
+		viewer: 'Read-only access'
+	};
+	const roleDescription = roleDescriptions[role] || role;
+
+	return sendEmail(
+		{
+			to: email,
+			subject: `You're invited to manage ${appId} on Firmly`,
+			text: `You've been invited to manage the Firmly destination dashboard for ${appId}.\n\nRole: ${role} (${roleDescription})\nInvited by: ${invitedByEmail}\n\nClick the link below to accept the invitation:\n\n${inviteUrl}\n\nThis invitation will expire in 7 days.\n\nIf you weren't expecting this invitation, please ignore this email.`,
+			html: `
+				<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+					<h2 style="color: #1a1a1a;">You're Invited!</h2>
+					<p style="color: #4a4a4a; font-size: 16px;">You've been invited to manage the Firmly destination dashboard for:</p>
+					<div style="background: #f5f5f5; padding: 16px; text-align: center; margin: 20px 0; border-radius: 8px;">
+						<span style="font-size: 20px; font-weight: 600; color: #1a1a1a;">${appId}</span>
+					</div>
+					<p style="color: #4a4a4a; font-size: 14px;"><strong>Role:</strong> ${role} (${roleDescription})</p>
+					<p style="color: #4a4a4a; font-size: 14px;"><strong>Invited by:</strong> ${invitedByEmail}</p>
+					<div style="text-align: center; margin: 30px 0;">
+						<a href="${inviteUrl}" style="display: inline-block; background-color: #7979ff; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">Accept Invitation</a>
+					</div>
+					<p style="color: #666; font-size: 14px;">Or copy and paste this link into your browser:</p>
+					<p style="color: #7979ff; font-size: 14px; word-break: break-all;">${inviteUrl}</p>
+					<p style="color: #666; font-size: 14px; margin-top: 20px;">This invitation will expire in 7 days.</p>
+					<p style="color: #666; font-size: 14px;">If you weren't expecting this invitation, please ignore this email.</p>
+					<hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+					<p style="color: #999; font-size: 12px;">firmly.ai</p>
+				</div>
+			`
+		},
+		apiKey
+	);
+}

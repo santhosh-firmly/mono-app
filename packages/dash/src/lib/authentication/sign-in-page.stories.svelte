@@ -1,15 +1,18 @@
-<script context="module">
+<script module>
+	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import SignInPage from './sign-in-page.svelte';
-	export const meta = {
-		title: 'Authentication/Sign In Page',
-		component: SignInPage
-	};
+
+	const { Story } = defineMeta({
+		title: 'Pages/Auth/Sign In',
+		component: SignInPage,
+		parameters: {
+			layout: 'fullscreen'
+		}
+	});
 </script>
 
-<script>
-	import { Story } from '@storybook/addon-svelte-csf';
-</script>
+{#snippet template(args)}
+	<SignInPage {...args} />
+{/snippet}
 
-<Story name="Default">
-	<SignInPage />
-</Story>
+<Story name="Default" args={{}} {template} />

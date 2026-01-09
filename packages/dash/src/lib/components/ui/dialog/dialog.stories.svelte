@@ -3,7 +3,7 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 
 	const { Story } = defineMeta({
-		title: 'Overlays/Dialog',
+		title: 'Feedback/Dialog',
 		component: Dialog.Root,
 		tags: ['autodocs'],
 		parameters: {

@@ -4,6 +4,7 @@
 	import MerchantHeader from '$lib/components/merchant/merchant-header.svelte';
 	import IntegrationProgress from '$lib/components/merchant/integration-progress.svelte';
 	import FirmlyAdminBanner from '$lib/components/merchant/firmly-admin-banner.svelte';
+	import ContentContainer from '$lib/components/ui/content-container.svelte';
 
 	let { data, children } = $props();
 
@@ -21,6 +22,7 @@
 		user={data.user}
 		domain={data.domain}
 		merchantAccess={data.merchantAccess}
+		destinationAccess={data.destinationAccess}
 		userRole={data.userRole}
 		pendingInvites={data.pendingInvites}
 		{currentPath}
@@ -42,7 +44,9 @@
 			<div class="flex flex-1">
 				<!-- Main Content -->
 				<main class="flex-1 p-4 lg:p-6">
-					{@render children()}
+					<ContentContainer>
+						{@render children()}
+					</ContentContainer>
 				</main>
 
 				<!-- Right Sidebar - Only during onboarding and integration not complete -->

@@ -1,6 +1,8 @@
 <script>
+	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import MerchantPageHeader from '$lib/components/merchant/merchant-page-header.svelte';
+	import ConfigurationStep from '$lib/components/merchant/configuration-step.svelte';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Badge } from '$lib/components/ui/badge/index.js';
@@ -9,8 +11,6 @@
 	import Server from 'lucide-svelte/icons/server';
 	import Shield from 'lucide-svelte/icons/shield';
 	import CheckCircle from 'lucide-svelte/icons/check-circle-2';
-	import Copy from 'lucide-svelte/icons/copy';
-	import Check from 'lucide-svelte/icons/check';
 	import AlertTriangle from 'lucide-svelte/icons/alert-triangle';
 
 	let domain = $derived($page.params.domain);
@@ -229,9 +229,14 @@
 			}
 
 			isCompleted = true;
-			successMessage = result.isFirstTimeSave
-				? 'CDN whitelisting complete! This onboarding task is now finished.'
-				: 'CDN whitelisting status updated!';
+
+			if (result.isFirstTimeSave) {
+				// Redirect to dashboard to see onboarding tasks list
+				goto(`/merchant/${domain}`, { invalidateAll: true });
+				return;
+			}
+
+			successMessage = 'CDN whitelisting status updated!';
 		} catch (err) {
 			error = err.message;
 		} finally {
@@ -342,40 +347,7 @@
 					<!-- Steps -->
 					<div class="space-y-4">
 						{#each currentConfig.steps as step, index (step.title)}
-							<div class="border border-border rounded-lg p-5 space-y-3">
-								<h4 class="flex items-center gap-3">
-									<span
-										class="flex-shrink-0 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium"
-									>
-										{index + 1}
-									</span>
-									<span class="font-medium text-foreground">{step.title}</span>
-								</h4>
-								<p class="text-sm text-muted-foreground ml-10">
-									{step.description}
-								</p>
-								{#if step.code}
-									<div class="ml-10 relative">
-										<div
-											class="bg-gray-900 text-gray-100 rounded-lg p-4 pr-12 font-mono text-sm overflow-x-auto"
-										>
-											<pre class="whitespace-pre-wrap">{step.code}</pre>
-										</div>
-										<Button
-											size="sm"
-											variant="ghost"
-											class="absolute top-2 right-2 text-gray-400 hover:text-white"
-											onclick={() => handleCopy(step.code, step.copyId)}
-										>
-											{#if copiedSection === step.copyId}
-												<Check class="h-4 w-4" />
-											{:else}
-												<Copy class="h-4 w-4" />
-											{/if}
-										</Button>
-									</div>
-								{/if}
-							</div>
+							<ConfigurationStep {step} {index} {copiedSection} onCopy={handleCopy} />
 						{/each}
 					</div>
 
@@ -433,7 +405,7 @@
 							Completing...
 						{:else}
 							<CheckCircle class="mr-2 h-5 w-5" />
-							Complete Setup & Go Live
+							Complete Setup
 						{/if}
 					</Button>
 				</Card.Footer>

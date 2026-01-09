@@ -95,6 +95,11 @@ export async function POST({ request, platform, locals, url }) {
 			expirationTtl: 7 * 24 * 60 * 60 // 7 days in seconds
 		});
 
+		// Store domain -> token reference for lookup
+		await kv.put(`invite-domain:${merchantDomain}`, token, {
+			expirationTtl: 7 * 24 * 60 * 60 // 7 days in seconds
+		});
+
 		// If invitee already has an account, store pending invite in their DashUserDO
 		const inviteeUser = await getUserIdByEmail({ platform, email });
 		if (inviteeUser) {

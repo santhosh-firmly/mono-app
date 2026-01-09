@@ -41,7 +41,12 @@
 
 {#if data.isOnboarding}
 	<div class="max-w-2xl mx-auto">
-		<OnboardingTasks domain={data.domain} initialStatuses={data.onboardingProgress} />
+		<OnboardingTasks
+			domain={data.domain}
+			statuses={data.onboardingProgress}
+			kybStatus={data.kybStatus}
+			goLiveStatus={data.goLiveStatus}
+		/>
 	</div>
 {:else if loading}
 	<div class="flex items-center justify-center py-12">

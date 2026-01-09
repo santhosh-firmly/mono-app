@@ -314,3 +314,10 @@ npm run storybook --workspace dash
 - The pre-commit hook runs checks only on packages changed since `origin/main`
 - Main branch for PRs: `main`
 - Shared ESLint/Prettier config is maintained in `@firmly/eslint-config` package
+
+## Active Technologies
+- JavaScript (ES2022), Svelte 5 with runes, SvelteKit 2 + SvelteKit, Tailwind CSS v3, date-fns, shadcn-svelte components (001-destination-dashboard)
+- Cloudflare D1 (firmlyConfigs, dashUsers, reporting), Durable Objects (DashUserDO for user access, new DestinationDO for destination data) (001-destination-dashboard)
+
+## Recent Changes
+- 001-destination-dashboard: Added JavaScript (ES2022), Svelte 5 with runes, SvelteKit 2 + SvelteKit, Tailwind CSS v3, date-fns, shadcn-svelte components

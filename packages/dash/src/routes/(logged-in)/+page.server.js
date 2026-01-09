@@ -1,36 +1,57 @@
 import { redirect } from '@sveltejs/kit';
 import { getMerchantAccess, getProfile, getPendingInvites } from '$lib/server/user.js';
+import { getDestinationAccess } from '$lib/server/destination.js';
 
 /**
  * Load function for the dashboard landing page.
  * Implements smart redirect: if user has only 1 dashboard, redirect directly to it.
- * Firmly admins see all merchant dashboards.
+ * Shows both merchant and destination dashboards.
+ * Firmly admins see all merchant and destination dashboards.
  */
 export async function load({ locals, platform }) {
 	const { userId, email, isFirmlyAdmin } = locals.session;
 
-	// Firmly admins see all merchant dashboards (from stores table)
+	// Firmly admins see all merchant and destination dashboards
 	if (isFirmlyAdmin) {
 		const authInfo = locals.authInfo || {};
 		const configDb = platform?.env?.firmlyConfigs;
 
 		let allMerchants = [];
+		let allDestinations = [];
+
 		if (configDb) {
 			try {
-				const { results } = await configDb
+				// Fetch merchants
+				const { results: merchantResults } = await configDb
 					.prepare('SELECT key, info FROM stores ORDER BY key ASC')
 					.all();
-				allMerchants = (results || []).map((r) => {
+				allMerchants = (merchantResults || []).map((r) => {
 					const storeInfo = JSON.parse(r.info || '{}');
 					return {
+						type: 'merchant',
 						domain: r.key,
 						displayName: storeInfo.display_name || r.key,
 						role: 'owner',
 						grantedAt: null
 					};
 				});
+
+				// Fetch destinations
+				const { results: destResults } = await configDb
+					.prepare('SELECT key, info FROM app_identifiers ORDER BY key ASC')
+					.all();
+				allDestinations = (destResults || []).map((r) => {
+					const destInfo = JSON.parse(r.info || '{}');
+					return {
+						type: 'destination',
+						appId: r.key,
+						displayName: destInfo.subject || r.key,
+						role: 'owner',
+						grantedAt: null
+					};
+				});
 			} catch (error) {
-				console.error('Error fetching merchants for admin:', error);
+				console.error('Error fetching dashboards for admin:', error);
 			}
 		}
 
@@ -42,20 +63,29 @@ export async function load({ locals, platform }) {
 				hasAvatar: false
 			},
 			dashboards: allMerchants,
+			destinations: allDestinations,
 			isFirmlyAdmin: true
 		};
 	}
 
 	// Regular user flow
-	const [merchantAccess, pendingInvites] = await Promise.all([
+	const [merchantAccess, destinationAccess, pendingInvites] = await Promise.all([
 		getMerchantAccess({ platform, userId }),
+		getDestinationAccess({ platform, userId }),
 		getPendingInvites({ platform, userId })
 	]);
 
-	// Smart redirect: if only 1 dashboard and no pending invites, go directly to it
-	if (merchantAccess.length === 1 && pendingInvites.length === 0) {
-		const domain = merchantAccess[0].merchant_domain;
-		redirect(302, `/merchant/${domain}`);
+	const totalDashboards = merchantAccess.length + destinationAccess.length;
+
+	// Smart redirect: if only 1 dashboard (merchant or destination) and no pending invites
+	if (totalDashboards === 1 && pendingInvites.length === 0) {
+		if (merchantAccess.length === 1) {
+			const domain = merchantAccess[0].merchant_domain;
+			redirect(302, `/merchant/${domain}`);
+		} else if (destinationAccess.length === 1) {
+			const appId = destinationAccess[0].app_id;
+			redirect(302, `/destination/${appId}`);
+		}
 	}
 
 	// Get user profile for header
@@ -70,7 +100,15 @@ export async function load({ locals, platform }) {
 			hasAvatar: profile.hasAvatar || false
 		},
 		dashboards: merchantAccess.map((access) => ({
+			type: 'merchant',
 			domain: access.merchant_domain,
+			role: access.role,
+			grantedAt: access.granted_at
+		})),
+		destinations: destinationAccess.map((access) => ({
+			type: 'destination',
+			appId: access.app_id,
+			displayName: access.display_name || access.app_id,
 			role: access.role,
 			grantedAt: access.granted_at
 		})),

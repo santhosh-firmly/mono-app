@@ -90,7 +90,7 @@
 
 			if (result.isFirstTimeSave) {
 				// Redirect to dashboard after completing onboarding step
-				goto(`/merchant/${domain}`);
+				goto(`/merchant/${domain}`, { invalidateAll: true });
 				return;
 			} else if (hasChanges()) {
 				successMessage = 'Destinations updated successfully!';

@@ -5,7 +5,7 @@ import { createAuditLog, AuditEventTypes } from '$lib/server/merchant.js';
 /**
  * POST /admin/api/invites/cancel
  * Cancel a pending invitation for a merchant.
- * Body: { merchantDomain, token }
+ * Body: { merchantDomain } - token is looked up from KV
  */
 export async function POST({ request, platform, locals }) {
 	const db = platform?.env?.dashUsers;
@@ -16,24 +16,27 @@ export async function POST({ request, platform, locals }) {
 	}
 
 	try {
-		const { merchantDomain, token } = await request.json();
+		const { merchantDomain } = await request.json();
 
-		if (!merchantDomain || !token) {
-			return json({ error: 'Merchant domain and token are required' }, { status: 400 });
+		if (!merchantDomain) {
+			return json({ error: 'Merchant domain is required' }, { status: 400 });
+		}
+
+		// Lookup the token by merchant domain
+		const token = await kv.get(`invite-domain:${merchantDomain}`);
+		if (!token) {
+			return json({ error: 'No pending invite found for this merchant' }, { status: 404 });
 		}
 
 		// Get invite data
 		const inviteDataStr = await kv.get(`invite:${token}`);
 		if (!inviteDataStr) {
+			// Token reference exists but invite is gone - clean up
+			await kv.delete(`invite-domain:${merchantDomain}`);
 			return json({ error: 'Invite not found' }, { status: 404 });
 		}
 
 		const inviteData = JSON.parse(inviteDataStr);
-
-		// Verify the invite belongs to the specified merchant domain
-		if (inviteData.merchantDomain !== merchantDomain) {
-			return json({ error: 'Invite not found for this merchant' }, { status: 404 });
-		}
 
 		// Remove from user's pending invites if they have an account
 		const inviteeUser = await getUserIdByEmail({ platform, email: inviteData.email });
@@ -41,8 +44,9 @@ export async function POST({ request, platform, locals }) {
 			await removePendingInvite({ platform, userId: inviteeUser.userId, token });
 		}
 
-		// Delete the invite KV entry
+		// Delete the invite KV entries
 		await kv.delete(`invite:${token}`);
+		await kv.delete(`invite-domain:${merchantDomain}`);
 
 		// Clear owner_email from merchant_dashboards if this was an owner invite
 		// and no user has accepted ownership yet

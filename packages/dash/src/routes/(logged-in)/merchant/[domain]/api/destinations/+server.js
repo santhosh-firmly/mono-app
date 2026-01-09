@@ -1,6 +1,10 @@
 import { json } from '@sveltejs/kit';
 import { getMerchantAccess } from '$lib/server/user.js';
-import { getMerchantDestinations, updateMerchantDestinations } from '$lib/server/merchant.js';
+import {
+	getMerchantDestinations,
+	updateMerchantDestinations,
+	getKYBStatus
+} from '$lib/server/merchant.js';
 
 /**
  * GET /merchant/[domain]/api/destinations
@@ -19,6 +23,15 @@ export async function GET({ locals, params, platform }) {
 
 			if (!hasAccess) {
 				return json({ error: 'Access denied' }, { status: 403 });
+			}
+
+			// Check KYB status - only approved merchants can access destinations
+			const kybStatus = await getKYBStatus({ platform, merchantDomain: domain });
+			if (kybStatus.kyb_status !== 'approved') {
+				return json(
+					{ error: 'KYB approval required to access destinations' },
+					{ status: 403 }
+				);
 			}
 		}
 
@@ -60,7 +73,7 @@ export async function GET({ locals, params, platform }) {
 			const stats = orderStats.get(dest.id) || { orders: 0, totalRevenue: 0, aov: 0 };
 			return {
 				...dest,
-				orders: dest.isComingSoon ? 'Coming Soon' : stats.orders,
+				orders: stats.orders,
 				aov: dest.isComingSoon ? null : stats.aov,
 				// Placeholder values for dispute rate and reputation score
 				// These would come from a different data source in production
@@ -68,6 +81,9 @@ export async function GET({ locals, params, platform }) {
 				reputationScore: dest.isComingSoon ? null : null
 			};
 		});
+
+		// Sort by display name alphabetically
+		destinationsWithStats.sort((a, b) => a.name.localeCompare(b.name));
 
 		return json({
 			destinations: destinationsWithStats,
@@ -105,6 +121,15 @@ export async function POST({ locals, params, platform, request }) {
 					{
 						error: 'Insufficient permissions. Only owners and editors can update destinations.'
 					},
+					{ status: 403 }
+				);
+			}
+
+			// Check KYB status - only approved merchants can modify destinations
+			const kybStatus = await getKYBStatus({ platform, merchantDomain: domain });
+			if (kybStatus.kyb_status !== 'approved') {
+				return json(
+					{ error: 'KYB approval required to modify destinations' },
 					{ status: 403 }
 				);
 			}

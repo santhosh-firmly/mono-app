@@ -28,8 +28,8 @@
 				return;
 			}
 
-			// Redirect back to dashboard
-			goto(`/merchant/${data.domain}`);
+			// Redirect back to dashboard with invalidation to refresh onboarding status
+			goto(`/merchant/${data.domain}`, { invalidateAll: true });
 		} catch {
 			error = 'Failed to sign agreement. Please try again.';
 			isSubmitting = false;

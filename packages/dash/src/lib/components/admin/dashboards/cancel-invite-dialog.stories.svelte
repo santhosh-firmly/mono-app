@@ -3,7 +3,7 @@
 	import CancelInviteDialog from './cancel-invite-dialog.svelte';
 
 	const { Story } = defineMeta({
-		title: 'Admin/Cancel Invite Dialog',
+		title: 'Admin/Dashboards/Cancel Invite Dialog',
 		component: CancelInviteDialog,
 		tags: ['autodocs'],
 		parameters: {

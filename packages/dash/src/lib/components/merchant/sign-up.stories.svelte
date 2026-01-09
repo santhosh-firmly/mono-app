@@ -143,8 +143,8 @@
 		const continueBtn = canvas.getByRole('button', { name: /continue/i });
 		await userEvent.click(continueBtn);
 
-		// Error should indicate domain mismatch
-		await expect(canvas.getByText('Email must be from example.com')).toBeInTheDocument();
+		// Error should indicate domain mismatch (partial match since message includes HTML link)
+		await expect(canvas.getByText(/Email must be from example\.com/)).toBeInTheDocument();
 	}}
 />
 

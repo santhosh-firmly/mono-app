@@ -15,7 +15,8 @@
 	"durable_objects": {
 		"bindings": [
 			{ "name": "DASH_USER_DO", "class_name": "DashUserDO" },
-			{ "name": "MERCHANT_DO", "class_name": "MerchantDO" }
+			{ "name": "MERCHANT_DO", "class_name": "MerchantDO" },
+			{ "name": "DESTINATION_DO", "class_name": "DestinationDO" }
 		]
 	},
 	// Durable Object migrations
@@ -27,6 +28,10 @@
 		{
 			"tag": "v2",
 			"new_sqlite_classes": ["MerchantDO"]
+		},
+		{
+			"tag": "v3",
+			"new_sqlite_classes": ["DestinationDO"]
 		}
 	],
 	// Environment configurations
@@ -44,7 +49,8 @@
 			"durable_objects": {
 				"bindings": [
 					{ "name": "DASH_USER_DO", "class_name": "DashUserDO" },
-					{ "name": "MERCHANT_DO", "class_name": "MerchantDO" }
+					{ "name": "MERCHANT_DO", "class_name": "MerchantDO" },
+					{ "name": "DESTINATION_DO", "class_name": "DestinationDO" }
 				]
 			},
 			"migrations": [
@@ -55,6 +61,10 @@
 				{
 					"tag": "v2",
 					"new_sqlite_classes": ["MerchantDO"]
+				},
+				{
+					"tag": "v3",
+					"new_sqlite_classes": ["DestinationDO"]
 				}
 			]
 		},
@@ -71,7 +81,8 @@
 			"durable_objects": {
 				"bindings": [
 					{ "name": "DASH_USER_DO", "class_name": "DashUserDO" },
-					{ "name": "MERCHANT_DO", "class_name": "MerchantDO" }
+					{ "name": "MERCHANT_DO", "class_name": "MerchantDO" },
+					{ "name": "DESTINATION_DO", "class_name": "DestinationDO" }
 				]
 			},
 			"migrations": [
@@ -82,6 +93,10 @@
 				{
 					"tag": "v2",
 					"new_sqlite_classes": ["MerchantDO"]
+				},
+				{
+					"tag": "v3",
+					"new_sqlite_classes": ["DestinationDO"]
 				}
 			]
 		},
@@ -98,7 +113,8 @@
 			"durable_objects": {
 				"bindings": [
 					{ "name": "DASH_USER_DO", "class_name": "DashUserDO" },
-					{ "name": "MERCHANT_DO", "class_name": "MerchantDO" }
+					{ "name": "MERCHANT_DO", "class_name": "MerchantDO" },
+					{ "name": "DESTINATION_DO", "class_name": "DestinationDO" }
 				]
 			},
 			"migrations": [
@@ -109,6 +125,10 @@
 				{
 					"tag": "v2",
 					"new_sqlite_classes": ["MerchantDO"]
+				},
+				{
+					"tag": "v3",
+					"new_sqlite_classes": ["DestinationDO"]
 				}
 			]
 		},
@@ -125,7 +145,8 @@
 			"durable_objects": {
 				"bindings": [
 					{ "name": "DASH_USER_DO", "class_name": "DashUserDO" },
-					{ "name": "MERCHANT_DO", "class_name": "MerchantDO" }
+					{ "name": "MERCHANT_DO", "class_name": "MerchantDO" },
+					{ "name": "DESTINATION_DO", "class_name": "DestinationDO" }
 				]
 			},
 			"migrations": [
@@ -136,6 +157,10 @@
 				{
 					"tag": "v2",
 					"new_sqlite_classes": ["MerchantDO"]
+				},
+				{
+					"tag": "v3",
+					"new_sqlite_classes": ["DestinationDO"]
 				}
 			]
 		},
@@ -152,7 +177,8 @@
 			"durable_objects": {
 				"bindings": [
 					{ "name": "DASH_USER_DO", "class_name": "DashUserDO" },
-					{ "name": "MERCHANT_DO", "class_name": "MerchantDO" }
+					{ "name": "MERCHANT_DO", "class_name": "MerchantDO" },
+					{ "name": "DESTINATION_DO", "class_name": "DestinationDO" }
 				]
 			},
 			"migrations": [
@@ -163,6 +189,10 @@
 				{
 					"tag": "v2",
 					"new_sqlite_classes": ["MerchantDO"]
+				},
+				{
+					"tag": "v3",
+					"new_sqlite_classes": ["DestinationDO"]
 				}
 			]
 		}

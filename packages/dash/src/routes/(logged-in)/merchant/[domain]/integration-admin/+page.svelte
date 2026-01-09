@@ -2,9 +2,9 @@
 	import { page } from '$app/stores';
 	import { invalidateAll } from '$app/navigation';
 	import MerchantPageHeader from '$lib/components/merchant/merchant-page-header.svelte';
+	import StatusToggleGroup from '$lib/components/merchant/status-toggle-group.svelte';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import * as Table from '$lib/components/ui/table/index.js';
-	import * as Select from '$lib/components/ui/select/index.js';
 	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import CheckCircle from 'lucide-svelte/icons/check-circle';
@@ -22,12 +22,6 @@
 
 	// Track pending changes (key: stepId or stepId-substepId, value: { originalStatus, newStatus })
 	let pendingChanges = $state({});
-
-	const statusOptions = [
-		{ value: 'pending', label: 'Pending' },
-		{ value: 'in-progress', label: 'In Progress' },
-		{ value: 'completed', label: 'Completed' }
-	];
 
 	// Check if there are any pending changes
 	let hasChanges = $derived(Object.keys(pendingChanges).length > 0);
@@ -152,11 +146,6 @@
 			return log.event_type;
 		}
 	}
-
-	function getStatusLabel(status) {
-		const option = statusOptions.find((o) => o.value === status);
-		return option?.label || status;
-	}
 </script>
 
 <div class="space-y-6">
@@ -251,33 +240,12 @@
 							</Table.Cell>
 							<Table.Cell class="text-right">
 								{#if !step.substeps}
-									<Select.Root
-										selected={{
-											value: stepEffectiveStatus,
-											label: getStatusLabel(stepEffectiveStatus)
-										}}
-										onSelectedChange={(selected) => {
-											if (selected) {
-												trackChange(
-													step.id,
-													null,
-													step.status,
-													selected.value
-												);
-											}
-										}}
-									>
-										<Select.Trigger class="w-[130px]">
-											<Select.Value placeholder="Select status" />
-										</Select.Trigger>
-										<Select.Content>
-											{#each statusOptions as option (option.value)}
-												<Select.Item value={option.value}
-													>{option.label}</Select.Item
-												>
-											{/each}
-										</Select.Content>
-									</Select.Root>
+									<StatusToggleGroup
+										status={stepEffectiveStatus}
+										onChange={(newStatus) =>
+											trackChange(step.id, null, step.status, newStatus)}
+										size="md"
+									/>
 								{:else}
 									<span class="text-xs text-muted-foreground"
 										>Derived from substeps</span
@@ -336,33 +304,17 @@
 										{/if}
 									</Table.Cell>
 									<Table.Cell class="text-right">
-										<Select.Root
-											selected={{
-												value: substepEffectiveStatus,
-												label: getStatusLabel(substepEffectiveStatus)
-											}}
-											onSelectedChange={(selected) => {
-												if (selected) {
-													trackChange(
-														step.id,
-														substep.id,
-														substep.status,
-														selected.value
-													);
-												}
-											}}
-										>
-											<Select.Trigger class="w-[130px]">
-												<Select.Value placeholder="Select status" />
-											</Select.Trigger>
-											<Select.Content>
-												{#each statusOptions as option (option.value)}
-													<Select.Item value={option.value}
-														>{option.label}</Select.Item
-													>
-												{/each}
-											</Select.Content>
-										</Select.Root>
+										<StatusToggleGroup
+											status={substepEffectiveStatus}
+											onChange={(newStatus) =>
+												trackChange(
+													step.id,
+													substep.id,
+													substep.status,
+													newStatus
+												)}
+											size="sm"
+										/>
 									</Table.Cell>
 								</Table.Row>
 							{/each}
@@ -372,7 +324,7 @@
 			</Table.Root>
 		</Card.Content>
 		{#if hasChanges}
-			<Card.Footer class="flex justify-end gap-2 border-t bg-muted/50">
+			<Card.Footer class="mt-4 flex justify-end gap-2 border-t bg-muted/50 pt-4">
 				<Button variant="outline" onclick={discardChanges} disabled={saving}>
 					Discard Changes
 				</Button>

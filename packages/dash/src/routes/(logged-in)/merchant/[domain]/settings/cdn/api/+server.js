@@ -1,5 +1,10 @@
 import { json } from '@sveltejs/kit';
-import { getOnboardingStatus, createAuditLog } from '$lib/server/merchant.js';
+import {
+	getOnboardingStatus,
+	createAuditLog,
+	submitGoLive,
+	getGoLiveStatus
+} from '$lib/server/merchant.js';
 import { getMerchantAccess } from '$lib/server/user.js';
 
 /**
@@ -120,9 +125,29 @@ export async function POST({ locals, params, platform, request }) {
 			actorType: isFirmlyAdmin ? 'firmly_admin' : 'user'
 		});
 
+		// Auto-submit go-live request if CDN is now completed and go-live hasn't been submitted yet
+		let goLiveSubmitted = false;
+		if (completed === true && isFirstTimeSave) {
+			const goLiveStatus = await getGoLiveStatus({
+				platform,
+				merchantDomain: params.domain
+			});
+
+			// Only auto-submit if go-live hasn't been submitted yet
+			if (!goLiveStatus.go_live_status) {
+				const goLiveResult = await submitGoLive({
+					platform,
+					merchantDomain: params.domain,
+					actor: { id: userId, email }
+				});
+				goLiveSubmitted = goLiveResult.success;
+			}
+		}
+
 		return json({
 			success: true,
-			isFirstTimeSave
+			isFirstTimeSave,
+			goLiveSubmitted
 		});
 	} catch (error) {
 		console.error('Error saving CDN status:', error);
