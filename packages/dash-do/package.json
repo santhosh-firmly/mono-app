@@ -13,7 +13,7 @@
 		"deploy-prod": "wrangler deploy --env prod",
 		"format-code": "eslint . --fix",
 		"format-code:check": "eslint . --fix=false",
-		"build": "echo '{}' > data.json",
+		"build-ci": "echo '{}' > data.json",
 		"test": "npm run build && vitest run --silent",
 		"test:watch": "npm run build && vitest",
 		"test:ui": "npm run build && vitest --ui"
