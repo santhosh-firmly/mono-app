@@ -1,9 +1,9 @@
 <script>
 	import { goto } from '$app/navigation';
-	import Pagination from './pagination.svelte';
-	import Input from './input.svelte';
+	import Pagination from '$lib/components/ui/pagination.svelte';
+	import Input from '$lib/components/ui/input.svelte';
 	import SessionListItem from './session-list-item.svelte';
-	import Skeleton from './skeleton.svelte';
+	import Skeleton from '$lib/components/ui/skeleton.svelte';
 	import { DEFAULT_ITEMS_PER_PAGE, PAGINATION_THRESHOLD } from '$lib/constants/pagination.js';
 
 	let {
