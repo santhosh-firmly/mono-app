@@ -41,15 +41,18 @@
 <div class={['text-muted flex items-center gap-1.5 text-xs', className]} {...rest}>
 	{#if session.status}
 		<span class="flex items-center gap-1">
-			<span class={`inline-block h-1.5 w-1.5 rounded-full ${getStatusColor(session.status)}`}
-			></span>
+			<span class={`inline-block h-1.5 w-1.5 rounded-full ${getStatusColor(session.status)}`}>
+			</span>
 			<span class="capitalize">{session.status}</span>
 		</span>
 		<span>·</span>
 	{/if}
-	<span
-		>{session.eventCount} events · {formatSize(session.eventCount)} · {formatDuration(
-			session.duration
-		)} · {formatDate(session.timestamp)}</span
-	>
+	<span>
+		{session.appName || 'Unknown'}
+		{#if session.status !== 'buffered' && session.status !== 'recording'}
+			· {session.eventCount} events · {formatSize(session.eventCount)} · {formatDuration(
+				session.duration
+			)} · {formatDate(session.timestamp)}
+		{/if}
+	</span>
 </div>

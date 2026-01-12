@@ -62,7 +62,7 @@
 		{/if}
 	</header>
 
-	<SessionList {sessions} {loading} {error} onDelete={() => {}}>
+	<SessionList {sessions} {loading} {error}>
 		{#snippet emptyState()}
 			<div>
 				<p class="text-muted mb-4 text-sm">No sessions yet</p>
