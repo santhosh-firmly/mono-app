@@ -1,4 +1,5 @@
 <script>
+	import { goto } from '$app/navigation';
 	import { SessionRecorder } from '@firmly/session-recorder';
 	import Example from '$lib/views/example.svelte';
 
@@ -26,4 +27,4 @@
 	}
 </script>
 
-<Example {recording} onToggleRecording={handleToggleRecording} />
+<Example {recording} onToggleRecording={handleToggleRecording} onGoHome={() => goto('/')} />

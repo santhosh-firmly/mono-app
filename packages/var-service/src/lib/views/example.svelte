@@ -2,7 +2,7 @@
 	import Input from '$lib/components/ui/input.svelte';
 	import Button from '$lib/components/ui/button.svelte';
 
-	let { recording, onToggleRecording } = $props();
+	let { recording, onToggleRecording, onGoHome } = $props();
 
 	let todos = $state([
 		{ id: 1, text: 'Record a session', completed: false },
@@ -33,11 +33,7 @@
 <div class="py-16">
 	<header class="mb-12 flex items-center justify-between">
 		<div>
-			<Button
-				variant="ghost"
-				onclick={() => (window.location.href = '/')}
-				class="mb-3 inline-block">← Back</Button
-			>
+			<Button variant="ghost" onclick={onGoHome} class="mb-3 inline-block">← Back</Button>
 			<h1 class="font-serif text-2xl">Todo List</h1>
 		</div>
 
