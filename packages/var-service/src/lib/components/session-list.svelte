@@ -13,7 +13,6 @@
 		searchable = true,
 		emptyMessage = 'No sessions yet',
 		itemsPerPage = DEFAULT_ITEMS_PER_PAGE,
-		onDelete = null,
 		itemContent,
 		emptyState,
 		class: className,
@@ -44,7 +43,7 @@
 	}
 </script>
 
-<div class={['mx-auto flex min-h-125 w-full max-w-170 flex-col', className]} {...rest}>
+<div class={['mx-auto flex min-h-125 w-full flex-col', className]} {...rest}>
 	{#if searchable}
 		<div class="mb-8">
 			<Input bind:value={searchQuery} placeholder="Search sessions..." />
@@ -83,11 +82,11 @@
 			<div class="flex-1 space-y-1">
 				{#each currentSessions as session (session.sessionId)}
 					{#if itemContent}
-						<SessionListItem {session} onPlay={handlePlay} {onDelete}>
+						<SessionListItem {session} onPlay={handlePlay}>
 							{@render itemContent(session)}
 						</SessionListItem>
 					{:else}
-						<SessionListItem {session} onPlay={handlePlay} {onDelete} />
+						<SessionListItem {session} onPlay={handlePlay} />
 					{/if}
 				{/each}
 			</div>

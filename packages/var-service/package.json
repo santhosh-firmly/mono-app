@@ -46,11 +46,9 @@
 	"dependencies": {
 		"@firmly/session-recorder": "^0.38.1",
 		"bits-ui": "^2.14.2",
-		"clsx": "^2.1.1",
 		"jose": "^5.10.0",
 		"phosphor-svelte": "^3.0.1",
-		"rrweb-player": "^1.0.0-alpha.4",
-		"tailwind-merge": "^2.5.2"
+		"rrweb-player": "^1.0.0-alpha.4"
 	},
 	"prettier": "@firmly/eslint-config/prettier"
 }

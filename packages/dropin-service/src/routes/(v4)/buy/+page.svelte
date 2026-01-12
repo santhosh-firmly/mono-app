@@ -731,7 +731,7 @@
 {/if}
 
 <!-- The following div helps detecting if the iframe is visible or not and correctly showing the contents. -->
-<div class="bottom-0 left-0 h-[1px] w-[1px]"></div>
+<div class="bottom-0 left-0 h-px w-px"></div>
 {#if error}
 	{error}
 {:else}
@@ -800,7 +800,7 @@
 						></ThankYouPage>
 					</div>
 				{:else if showCheckout}
-					<div class="absolute top-0 left-0 z-[999] h-full w-full">
+					<div class="absolute top-0 left-0 z-999 h-full w-full">
 						<FlowSinglePage
 							redirectOnPlaceOrder={false}
 							{cart}

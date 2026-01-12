@@ -3,7 +3,7 @@
  * Simple, privacy-first configuration using data-sensitive attribute
  */
 
-export const DEFAULT_SAMPLING = {
+const DEFAULT_SAMPLING = {
 	mousemove: false, // Disable mousemove to reduce events by 60-80%
 	mouseInteraction: {
 		Click: true,

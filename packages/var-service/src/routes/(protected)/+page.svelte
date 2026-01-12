@@ -39,7 +39,7 @@
 </script>
 
 <div>
-	<header class="mb-12 flex items-center justify-between">
+	<header class="mx-auto mb-12 flex items-center justify-between">
 		<div>
 			<h1 class="font-serif text-2xl">Welcome to VAR</h1>
 			<p class="text-muted text-sm">View and replay recorded user sessions.</p>
@@ -62,7 +62,7 @@
 		{/if}
 	</header>
 
-	<SessionList {sessions} {loading} {error} onDelete={() => {}}>
+	<SessionList {sessions} {loading} {error}>
 		{#snippet emptyState()}
 			<div>
 				<p class="text-muted mb-4 text-sm">No sessions yet</p>
