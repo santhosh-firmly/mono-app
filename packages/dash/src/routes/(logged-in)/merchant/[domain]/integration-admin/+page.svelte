@@ -14,6 +14,7 @@
 	import RefreshCw from 'lucide-svelte/icons/refresh-cw';
 	import Shield from 'lucide-svelte/icons/shield';
 	import Save from 'lucide-svelte/icons/save';
+	import { adminFetch } from '$lib/utils/fetch.js';
 
 	let { data } = $props();
 	let domain = $derived($page.params.domain);
@@ -58,7 +59,7 @@
 			const changes = Object.values(pendingChanges);
 
 			// Call the batch save endpoint
-			const response = await fetch(`/merchant/${domain}/api/integration-status/batch`, {
+			const response = await adminFetch(`/merchant/${domain}/api/integration-status/batch`, {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ changes })
@@ -88,7 +89,7 @@
 	async function triggerSync() {
 		syncing = true;
 		try {
-			const response = await fetch(`/merchant/${domain}/api/integration-status/sync`, {
+			const response = await adminFetch(`/merchant/${domain}/api/integration-status/sync`, {
 				method: 'POST'
 			});
 

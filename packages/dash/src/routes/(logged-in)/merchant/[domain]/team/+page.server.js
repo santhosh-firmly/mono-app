@@ -1,5 +1,5 @@
 import { getMerchantAccess } from '$lib/server/user.js';
-import { getMerchantTeam, addTeamMember } from '$lib/server/merchant.js';
+import { getMerchantTeam, addTeamMember, getPendingInvites } from '$lib/server/merchant.js';
 
 /**
  * Load function for the team management page.
@@ -7,7 +7,7 @@ import { getMerchantTeam, addTeamMember } from '$lib/server/merchant.js';
  * get the team data and check if the current user is an owner.
  */
 export async function load({ locals, params, platform, parent }) {
-	const { userId, email } = locals.session;
+	const { userId, email, isFirmlyAdmin } = locals.session;
 	const { domain } = params;
 
 	// Get parent data which includes userRole (already verified access)
@@ -39,8 +39,17 @@ export async function load({ locals, params, platform, parent }) {
 		}
 	}
 
+	// Get pending invites
+	// Firmly admins see all invites, regular users don't see admin-created invites
+	const pendingInvites = await getPendingInvites({
+		platform,
+		merchantDomain: domain,
+		includeFirmlyAdmin: isFirmlyAdmin
+	});
+
 	return {
 		team,
+		pendingInvites,
 		isOwner,
 		currentUserId: userId
 	};

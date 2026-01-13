@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import OrdersPage from '$lib/components/pages/destination/orders-page.svelte';
+	import { adminFetch } from '$lib/utils/fetch.js';
 
 	let appId = $derived($page.params.app_id);
 
@@ -41,7 +42,9 @@
 				params.set('merchant', selectedMerchant);
 			}
 
-			const response = await fetch(`/destination/${appId}/api/orders?${params.toString()}`);
+			const response = await adminFetch(
+				`/destination/${appId}/api/orders?${params.toString()}`
+			);
 			const result = await response.json();
 
 			if (!response.ok) {

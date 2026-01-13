@@ -6,6 +6,12 @@
  */
 
 import { INTEGRATION_STEPS, buildIntegrationStatus } from '$lib/integration-steps.js';
+import {
+	fetchExternalIntegrationStatus,
+	transformExternalStatus,
+	isForwardTransition
+} from '$lib/server/control-panel.js';
+import { getProfilesWithAvatarsForUsers } from '$lib/server/user.js';
 
 /**
  * Helper to make requests to the MerchantDO via dash-do service.
@@ -55,10 +61,11 @@ async function fetchDashUserDO(platform, userId, path, options = {}) {
 
 /**
  * Get all team members for a merchant from MerchantDO.
+ * Enriches team data with user profiles (name, avatarDataUrl).
  * @param {Object} params
  * @param {Object} params.platform - SvelteKit platform object
  * @param {string} params.merchantDomain - Merchant domain
- * @returns {Promise<Array>} List of team members
+ * @returns {Promise<Array>} List of team members with profile data
  */
 export async function getMerchantTeam({ platform, merchantDomain }) {
 	try {
@@ -67,7 +74,23 @@ export async function getMerchantTeam({ platform, merchantDomain }) {
 			console.error('Failed to get merchant team:', await response.text());
 			return [];
 		}
-		return response.json();
+		const team = await response.json();
+
+		if (team.length === 0) return [];
+
+		// Fetch profiles for all team members in parallel
+		const userIds = team.map((member) => member.user_id);
+		const profilesMap = await getProfilesWithAvatarsForUsers({ platform, userIds });
+
+		// Enrich team data with profile information
+		return team.map((member) => {
+			const profile = profilesMap.get(member.user_id) || {};
+			return {
+				...member,
+				name: profile.name || null,
+				avatarDataUrl: profile.avatarDataUrl || null
+			};
+		});
 	} catch (error) {
 		console.error('Error getting merchant team:', error);
 		return [];
@@ -341,6 +364,182 @@ export async function removeTeamMember({
 	}
 }
 
+// ============================================================================
+// Pending Invite Functions
+// ============================================================================
+
+/**
+ * Get pending invites for a merchant.
+ * @param {Object} params
+ * @param {Object} params.platform - SvelteKit platform object
+ * @param {string} params.merchantDomain - Merchant domain
+ * @param {boolean} params.includeFirmlyAdmin - Include invites by Firmly admins (default false)
+ * @returns {Promise<Array>} List of pending invites
+ */
+export async function getPendingInvites({ platform, merchantDomain, includeFirmlyAdmin = false }) {
+	try {
+		const response = await fetchMerchantDO(
+			platform,
+			merchantDomain,
+			`/pending-invites?includeFirmlyAdmin=${includeFirmlyAdmin}`
+		);
+
+		if (!response.ok) {
+			console.error('Failed to get pending invites:', await response.text());
+			return [];
+		}
+
+		return response.json();
+	} catch (error) {
+		console.error('Error getting pending invites:', error);
+		return [];
+	}
+}
+
+/**
+ * Add a pending invite to a merchant.
+ * @param {Object} params
+ * @param {Object} params.platform - SvelteKit platform object
+ * @param {string} params.merchantDomain - Merchant domain
+ * @param {string} params.token - Unique invite token
+ * @param {string} params.email - Invitee email
+ * @param {string} params.role - Role (owner, editor, viewer)
+ * @param {string} params.invitedByUserId - User ID who sent the invite
+ * @param {string} params.invitedByEmail - Email of user who sent the invite
+ * @param {boolean} params.isFirmlyAdmin - Whether inviter is a Firmly admin
+ * @param {string} params.expiresAt - ISO date string for expiry
+ * @returns {Promise<boolean>} Success
+ */
+export async function addPendingInvite({
+	platform,
+	merchantDomain,
+	token,
+	email,
+	role,
+	invitedByUserId,
+	invitedByEmail,
+	isFirmlyAdmin = false,
+	expiresAt
+}) {
+	try {
+		const response = await fetchMerchantDO(platform, merchantDomain, '/pending-invites', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				token,
+				email,
+				role,
+				invitedByUserId,
+				invitedByEmail,
+				isFirmlyAdmin,
+				expiresAt
+			})
+		});
+
+		if (!response.ok) {
+			console.error('Failed to add pending invite:', await response.text());
+			return false;
+		}
+
+		return true;
+	} catch (error) {
+		console.error('Error adding pending invite:', error);
+		return false;
+	}
+}
+
+/**
+ * Remove a pending invite from a merchant.
+ * @param {Object} params
+ * @param {Object} params.platform - SvelteKit platform object
+ * @param {string} params.merchantDomain - Merchant domain
+ * @param {string} params.token - Invite token
+ * @returns {Promise<boolean>} Success
+ */
+export async function removePendingInvite({ platform, merchantDomain, token }) {
+	try {
+		const response = await fetchMerchantDO(
+			platform,
+			merchantDomain,
+			`/pending-invites/${encodeURIComponent(token)}`,
+			{ method: 'DELETE' }
+		);
+
+		if (!response.ok) {
+			console.error('Failed to remove pending invite:', await response.text());
+			return false;
+		}
+
+		return true;
+	} catch (error) {
+		console.error('Error removing pending invite:', error);
+		return false;
+	}
+}
+
+/**
+ * Get a pending invite by email.
+ * @param {Object} params
+ * @param {Object} params.platform - SvelteKit platform object
+ * @param {string} params.merchantDomain - Merchant domain
+ * @param {string} params.email - Invitee email
+ * @returns {Promise<Object|null>} Invite object or null if not found
+ */
+export async function getPendingInviteByEmail({ platform, merchantDomain, email }) {
+	try {
+		const response = await fetchMerchantDO(
+			platform,
+			merchantDomain,
+			`/pending-invites/by-email/${encodeURIComponent(email)}`
+		);
+
+		if (!response.ok) {
+			console.error('Failed to get pending invite by email:', await response.text());
+			return null;
+		}
+
+		return response.json();
+	} catch (error) {
+		console.error('Error getting pending invite by email:', error);
+		return null;
+	}
+}
+
+/**
+ * Update a pending invite (role and/or expiry).
+ * @param {Object} params
+ * @param {Object} params.platform - SvelteKit platform object
+ * @param {string} params.merchantDomain - Merchant domain
+ * @param {string} params.token - Invite token
+ * @param {string} params.role - New role (optional)
+ * @param {string} params.expiresAt - New expiry ISO date (optional)
+ * @returns {Promise<boolean>} Success
+ */
+export async function updatePendingInvite({ platform, merchantDomain, token, role, expiresAt }) {
+	try {
+		const response = await fetchMerchantDO(
+			platform,
+			merchantDomain,
+			`/pending-invites/${encodeURIComponent(token)}`,
+			{
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ role, expiresAt })
+			}
+		);
+
+		if (!response.ok) {
+			console.error('Failed to update pending invite:', await response.text());
+			return false;
+		}
+
+		return true;
+	} catch (error) {
+		console.error('Error updating pending invite:', error);
+		return false;
+	}
+}
+
 /**
  * Get audit logs for a merchant.
  * @param {Object} params
@@ -464,6 +663,99 @@ export async function getMerchantAgreement({ platform, merchantDomain }) {
 	} catch (error) {
 		console.error('Error getting merchant agreement:', error);
 		return { signed: false, agreement: null };
+	}
+}
+
+/**
+ * Get the agreement configuration for a merchant.
+ * @param {Object} params
+ * @param {Object} params.platform - SvelteKit platform object
+ * @param {string} params.merchantDomain - Merchant domain
+ * @returns {Promise<Object>} Agreement config { contentType, markdownContent, pdfKey, externallySigned, ... }
+ */
+export async function getAgreementConfig({ platform, merchantDomain }) {
+	try {
+		const response = await fetchMerchantDO(platform, merchantDomain, '/agreement-config');
+
+		if (!response.ok) {
+			console.error('Failed to get agreement config:', await response.text());
+			return {
+				contentType: 'default',
+				markdownContent: null,
+				pdfKey: null,
+				externallySigned: false
+			};
+		}
+
+		return response.json();
+	} catch (error) {
+		console.error('Error getting agreement config:', error);
+		return {
+			contentType: 'default',
+			markdownContent: null,
+			pdfKey: null,
+			externallySigned: false
+		};
+	}
+}
+
+/**
+ * Update the agreement configuration for a merchant.
+ * @param {Object} params
+ * @param {Object} params.platform - SvelteKit platform object
+ * @param {string} params.merchantDomain - Merchant domain
+ * @param {string} params.contentType - 'default', 'markdown', or 'pdf'
+ * @param {string} params.markdownContent - Markdown content (for markdown type)
+ * @param {string} params.pdfKey - R2 object key (for pdf type)
+ * @param {boolean} params.externallySigned - Whether agreement is externally signed
+ * @param {Object} params.actor - Actor info { id, email }
+ * @returns {Promise<Object>} { success: boolean, error?: string }
+ */
+export async function updateAgreementConfig({
+	platform,
+	merchantDomain,
+	contentType,
+	markdownContent = null,
+	pdfKey = null,
+	externallySigned = false,
+	actor
+}) {
+	try {
+		const response = await fetchMerchantDO(platform, merchantDomain, '/agreement-config', {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				contentType,
+				markdownContent,
+				pdfKey,
+				externallySigned,
+				userId: actor.id,
+				userEmail: actor.email
+			})
+		});
+
+		const data = await response.json();
+
+		if (!response.ok) {
+			return { success: false, error: data.error || 'Failed to update agreement config' };
+		}
+
+		// Create audit log
+		await createAuditLog({
+			platform,
+			merchantDomain,
+			eventType: 'agreement_config_updated',
+			actorId: actor.id,
+			actorEmail: actor.email,
+			details: { contentType, externallySigned },
+			isFirmlyAdmin: true,
+			actorType: 'firmly_admin'
+		});
+
+		return { success: true, ...data };
+	} catch (error) {
+		console.error('Error updating agreement config:', error);
+		return { success: false, error: error.message };
 	}
 }
 
@@ -803,6 +1095,7 @@ export async function getMerchantDestinations({ platform, merchantDomain }) {
 			return {
 				id: row.key,
 				name: info.display_name || info.subject || row.key,
+				category: info.category || null,
 				isComingSoon: info.isComingSoon === true,
 				isSystem: info.isSystem === true,
 				isActive,
@@ -1222,22 +1515,144 @@ async function syncOnboardingIntegrationStatus({ platform, merchantDomain, actor
 }
 
 /**
- * Sync integration steps from external API (placeholder).
- * Called on component mount to update statuses.
+ * Sync integration steps from external Control Panel API.
+ * Called on component mount and manual sync trigger.
+ *
+ * Applies forward-only constraint: steps can only progress, never regress.
+ * Status mapping:
+ * - COMPLETE → completed
+ * - IN_PROGRESS → in-progress (if not already completed)
+ * - PENDING → pending (if not already in-progress or completed)
+ * - NOT_STARTED → pending (if not already in-progress or completed)
+ * - BLOCKED/BROKEN → in-progress (if not already completed)
+ * - NOT_NEEDED/NOT_SUPPORTED → skipped
+ *
  * @param {Object} params
  * @param {Object} params.platform - SvelteKit platform object
  * @param {string} params.merchantDomain - Merchant domain
- * @returns {Promise<Object>} { success: boolean, steps: Array, error?: string }
+ * @returns {Promise<Object>} { success: boolean, steps: Array, error?: string, updatedCount?: number }
  */
 export async function syncIntegrationSteps({ platform, merchantDomain }) {
 	try {
-		// PLACEHOLDER: This will be implemented later to call external API
-		// For now, just return current status without modifying
-		const steps = await getIntegrationSteps({ platform, merchantDomain });
-		return { success: true, steps };
+		// 1. Get current integration steps from database
+		const currentSteps = await getIntegrationSteps({ platform, merchantDomain });
+
+		// Create a map for quick lookup of current statuses
+		const currentStatusMap = new Map();
+		for (const record of currentSteps) {
+			const key = record.substep_id
+				? `${record.step_id}:${record.substep_id}`
+				: record.step_id;
+			currentStatusMap.set(key, record.status || 'pending');
+		}
+
+		// 2. Fetch external status from Control Panel API
+		const externalResult = await fetchExternalIntegrationStatus({
+			platform,
+			merchantDomain
+		});
+
+		// If fetch failed or merchant not found, return current status without changes
+		if (!externalResult.success || externalResult.notFound || !externalResult.data) {
+			if (externalResult.error) {
+				console.warn(
+					`External sync skipped for ${merchantDomain}: ${externalResult.error}`
+				);
+			}
+			return { success: true, steps: currentSteps };
+		}
+
+		// 3. Transform external status to internal format
+		const externalSteps = transformExternalStatus(externalResult.data);
+
+		// 4. Apply forward-only constraint and collect updates
+		const updates = [];
+		for (const externalStep of externalSteps) {
+			const key = externalStep.substepId
+				? `${externalStep.stepId}:${externalStep.substepId}`
+				: externalStep.stepId;
+
+			const currentStatus = currentStatusMap.get(key) || 'pending';
+			const newStatus = externalStep.status;
+
+			// Only update if it's a forward transition
+			if (isForwardTransition(currentStatus, newStatus)) {
+				updates.push({
+					stepId: externalStep.stepId,
+					substepId: externalStep.substepId,
+					status: newStatus,
+					source: 'external'
+				});
+			}
+		}
+
+		// 5. Apply updates to database via MerchantDO
+		let updatedCount = 0;
+		for (const update of updates) {
+			try {
+				const response = await fetchMerchantDO(
+					platform,
+					merchantDomain,
+					'/integration-steps',
+					{
+						method: 'PUT',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({
+							stepId: update.stepId,
+							substepId: update.substepId,
+							status: update.status,
+							completedBy: null,
+							source: update.source
+						})
+					}
+				);
+
+				if (response.ok) {
+					updatedCount++;
+				} else {
+					console.error(
+						`Failed to update step ${update.stepId}: ${await response.text()}`
+					);
+				}
+			} catch (updateError) {
+				console.error(`Error updating step ${update.stepId}:`, updateError);
+			}
+		}
+
+		// 6. Create audit log if any steps were updated
+		if (updatedCount > 0) {
+			await createAuditLog({
+				platform,
+				merchantDomain,
+				eventType: AuditEventTypes.INTEGRATION_STEPS_SYNCED,
+				actorId: 'system',
+				actorEmail: 'system@firmly.com',
+				details: { updatedSteps: updatedCount, source: 'external_api' },
+				isFirmlyAdmin: true, // Hide from regular users - internal system event
+				actorType: 'system'
+			});
+
+			// Sync onboarding integration status
+			await syncOnboardingIntegrationStatus({
+				platform,
+				merchantDomain,
+				actor: null,
+				isFirmlyAdmin: false
+			});
+		}
+
+		// 7. Fetch and return updated steps
+		const updatedSteps = await getIntegrationSteps({ platform, merchantDomain });
+		return { success: true, steps: updatedSteps, updatedCount };
 	} catch (error) {
 		console.error('Error syncing integration steps:', error);
-		return { success: false, error: error.message, steps: [] };
+		// On error, try to return current status
+		try {
+			const fallbackSteps = await getIntegrationSteps({ platform, merchantDomain });
+			return { success: false, error: error.message, steps: fallbackSteps };
+		} catch {
+			return { success: false, error: error.message, steps: [] };
+		}
 	}
 }
 
@@ -1268,18 +1683,24 @@ export async function resetMerchantDashboard({ platform, merchantDomain, actor }
 			return { success: false, error: 'Failed to reset merchant data' };
 		}
 
-		const { clearedTeamMembers } = await resetResponse.json();
+		const { clearedTeamMembers, clearedPendingInvites } = await resetResponse.json();
 
 		// 2. Remove merchant access from each affected user's DashUserDO (in parallel)
 		await Promise.all(
 			clearedTeamMembers.map(async (member) => {
 				try {
-					await fetchDashUserDO(
+					const response = await fetchDashUserDO(
 						platform,
 						member.user_id,
 						`/merchant-access/${encodeURIComponent(merchantDomain)}`,
 						{ method: 'DELETE' }
 					);
+					if (!response.ok) {
+						const errorText = await response.text();
+						console.error(
+							`Failed to remove merchant access for user ${member.user_id}: ${response.status} - ${errorText}`
+						);
+					}
 				} catch (userError) {
 					console.error(
 						`Failed to remove merchant access for user ${member.user_id}:`,
@@ -1290,14 +1711,88 @@ export async function resetMerchantDashboard({ platform, merchantDomain, actor }
 			})
 		);
 
-		// 3. Update D1 merchant_dashboards metadata (including KYB and Go Live reset)
+		// 2b. Remove pending invites from invitees' DashUserDOs (if they have accounts)
+		if (clearedPendingInvites && clearedPendingInvites.length > 0) {
+			const db = platform?.env?.dashUsers;
+			if (db) {
+				await Promise.all(
+					clearedPendingInvites.map(async (invite) => {
+						try {
+							// Look up user by email to see if they have an account
+							const userResult = await db
+								.prepare('SELECT id FROM users WHERE email = ?')
+								.bind(invite.email.toLowerCase())
+								.first();
+
+							if (userResult?.id) {
+								const response = await fetchDashUserDO(
+									platform,
+									userResult.id,
+									`/pending-invites/${encodeURIComponent(invite.token)}`,
+									{ method: 'DELETE' }
+								);
+								if (!response.ok && response.status !== 404) {
+									const errorText = await response.text();
+									console.error(
+										`Failed to remove pending invite for ${invite.email}: ${response.status} - ${errorText}`
+									);
+								}
+							}
+						} catch (inviteError) {
+							console.error(
+								`Failed to remove pending invite for ${invite.email}:`,
+								inviteError
+							);
+							// Continue with other invites even if one fails
+						}
+					})
+				);
+			}
+		}
+
+		// 2c. Safety net: Also clear owner from D1 owner_user_id (in case they weren't in team table)
+		// This handles legacy data where owner was added via grantMerchantAccess() without addTeamMember()
 		const db = platform?.env?.dashUsers;
+		if (db) {
+			// Get owner_user_id BEFORE we clear it
+			const ownerData = await db
+				.prepare('SELECT owner_user_id FROM merchant_dashboards WHERE domain = ?')
+				.bind(merchantDomain)
+				.first();
+
+			if (ownerData?.owner_user_id) {
+				// Check if this owner was already in clearedTeamMembers
+				const ownerAlreadyCleared = clearedTeamMembers.some(
+					(m) => m.user_id === ownerData.owner_user_id
+				);
+
+				if (!ownerAlreadyCleared) {
+					// Owner not in team table - clear their DashUserDO access
+					try {
+						await fetchDashUserDO(
+							platform,
+							ownerData.owner_user_id,
+							`/merchant-access/${encodeURIComponent(merchantDomain)}`,
+							{ method: 'DELETE' }
+						);
+					} catch (ownerError) {
+						console.error(
+							`Failed to remove merchant access for owner ${ownerData.owner_user_id}:`,
+							ownerError
+						);
+					}
+				}
+			}
+		}
+
+		// 3. Update D1 merchant_dashboards metadata (including KYB and Go Live reset)
 		if (db) {
 			await db
 				.prepare(
 					`UPDATE merchant_dashboards
 					 SET owner_user_id = NULL,
 					     status = 'pending',
+					     info = NULL,
 					     kyb_status = NULL,
 					     kyb_submitted_at = NULL,
 					     kyb_reviewed_at = NULL,
@@ -1317,10 +1812,18 @@ export async function resetMerchantDashboard({ platform, merchantDomain, actor }
 		// 4. Cancel any pending invites in KV
 		const kv = platform?.env?.OTP_STORE;
 		if (kv) {
+			// Delete admin invite token (old flow)
 			const existingToken = await kv.get(`invite-domain:${merchantDomain}`);
 			if (existingToken) {
 				await kv.delete(`invite:${existingToken}`);
 				await kv.delete(`invite-domain:${merchantDomain}`);
+			}
+
+			// Delete all team invite tokens
+			if (clearedPendingInvites && clearedPendingInvites.length > 0) {
+				await Promise.all(
+					clearedPendingInvites.map((invite) => kv.delete(`invite:${invite.token}`))
+				);
 			}
 		}
 

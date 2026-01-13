@@ -16,6 +16,8 @@
 	import Clock from 'lucide-svelte/icons/clock';
 	import Database from 'lucide-svelte/icons/database';
 	import Users from 'lucide-svelte/icons/users';
+	import FolderOpen from 'lucide-svelte/icons/folder-open';
+	import CategoryCombobox from '$lib/components/admin/category-combobox.svelte';
 
 	let { data } = $props();
 
@@ -28,6 +30,7 @@
 	let partnerTokenExpiration = $state(data.destination.partnerTokenExpiration);
 	let disableOrderSaving = $state(data.destination.disableOrderSaving);
 	let restrictMerchantAccess = $state(data.destination.restrictMerchantAccess);
+	let category = $state(data.destination.category || '');
 
 	// UI state
 	let saving = $state(false);
@@ -41,7 +44,8 @@
 		isComingSoon: data.destination.isComingSoon,
 		partnerTokenExpiration: data.destination.partnerTokenExpiration,
 		disableOrderSaving: data.destination.disableOrderSaving,
-		restrictMerchantAccess: data.destination.restrictMerchantAccess
+		restrictMerchantAccess: data.destination.restrictMerchantAccess,
+		category: data.destination.category || ''
 	});
 
 	let hasChanges = $derived(
@@ -50,7 +54,8 @@
 			isComingSoon !== originalValues.isComingSoon ||
 			partnerTokenExpiration !== originalValues.partnerTokenExpiration ||
 			disableOrderSaving !== originalValues.disableOrderSaving ||
-			restrictMerchantAccess !== originalValues.restrictMerchantAccess
+			restrictMerchantAccess !== originalValues.restrictMerchantAccess ||
+			category !== originalValues.category
 	);
 
 	// Validation - allow up to 3 months (7776000 seconds = 90 days)
@@ -129,7 +134,8 @@
 					isComingSoon,
 					partnerTokenExpiration: parseInt(partnerTokenExpiration, 10),
 					disableOrderSaving,
-					restrictMerchantAccess
+					restrictMerchantAccess,
+					category
 				})
 			});
 
@@ -148,7 +154,8 @@
 				isComingSoon,
 				partnerTokenExpiration: parseInt(partnerTokenExpiration, 10),
 				disableOrderSaving,
-				restrictMerchantAccess
+				restrictMerchantAccess,
+				category
 			};
 		} catch (err) {
 			error = err.message;
@@ -242,6 +249,33 @@
 				/>
 				<p class="text-xs text-muted-foreground">
 					Leave empty to use the subject ({data.destination.subject})
+				</p>
+			</div>
+		</Card.Content>
+	</Card.Root>
+
+	<!-- Category -->
+	<Card.Root>
+		<Card.Header>
+			<Card.Title class="flex items-center gap-2">
+				<FolderOpen class="h-5 w-5" />
+				Category
+			</Card.Title>
+			<Card.Description
+				>Organize this destination into a category for merchants</Card.Description
+			>
+		</Card.Header>
+		<Card.Content>
+			<div class="space-y-2">
+				<Label for="category">Category</Label>
+				<CategoryCombobox
+					value={category}
+					customCategories={data.allCategories}
+					onSelect={(val) => (category = val)}
+					placeholder="Select or type a category..."
+				/>
+				<p class="text-xs text-muted-foreground">
+					Choose from predefined categories or type a custom one
 				</p>
 			</div>
 		</Card.Content>

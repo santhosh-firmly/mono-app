@@ -20,7 +20,8 @@ export async function PATCH({ params, platform, request }) {
 			isComingSoon,
 			partnerTokenExpiration,
 			disableOrderSaving,
-			restrictMerchantAccess
+			restrictMerchantAccess,
+			category
 		} = body;
 
 		// Validate token expiration (allow up to 3 months = 7776000 seconds)
@@ -84,6 +85,14 @@ export async function PATCH({ params, platform, request }) {
 
 		if (disableOrderSaving !== undefined) {
 			updatedInfo.disableOrderSaving = disableOrderSaving === true;
+		}
+
+		if (category !== undefined) {
+			if (category.trim() === '') {
+				delete updatedInfo.category;
+			} else {
+				updatedInfo.category = category.trim();
+			}
 		}
 
 		// Update app_identifiers

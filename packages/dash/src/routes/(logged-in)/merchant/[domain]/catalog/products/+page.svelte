@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import ProductCatalog from '$lib/components/merchant/product-catalog.svelte';
+	import { adminFetch } from '$lib/utils/fetch.js';
 
 	let domain = $derived($page.params.domain);
 
@@ -37,7 +38,7 @@
 				params.set('search', searchQuery);
 			}
 
-			const response = await fetch(`/merchant/${domain}/catalog/products/api?${params}`);
+			const response = await adminFetch(`/merchant/${domain}/catalog/products/api?${params}`);
 			const result = await response.json();
 
 			if (!response.ok) {

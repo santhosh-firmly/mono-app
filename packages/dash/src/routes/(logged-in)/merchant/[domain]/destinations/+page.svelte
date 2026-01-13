@@ -1,7 +1,8 @@
 <script>
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import DestinationsPage from '$lib/components/pages/merchant/destinations-page.svelte';
+	import { adminFetch } from '$lib/utils/fetch.js';
 
 	let domain = $derived($page.params.domain);
 
@@ -35,7 +36,7 @@
 		error = '';
 
 		try {
-			const response = await fetch(`/merchant/${domain}/api/destinations`);
+			const response = await adminFetch(`/merchant/${domain}/api/destinations`);
 			const result = await response.json();
 
 			if (!response.ok) {
@@ -72,7 +73,7 @@
 		try {
 			const enabledDestinations = destinations.filter((d) => d.isActive).map((d) => d.id);
 
-			const response = await fetch(`/merchant/${domain}/api/destinations`, {
+			const response = await adminFetch(`/merchant/${domain}/api/destinations`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ enabledDestinations })
@@ -89,8 +90,9 @@
 			hasExistingConfig = true;
 
 			if (result.isFirstTimeSave) {
-				// Redirect to dashboard after completing onboarding step
-				goto(`/merchant/${domain}`, { invalidateAll: true });
+				// Invalidate all data first, then redirect to dashboard
+				await invalidateAll();
+				goto(`/merchant/${domain}`);
 				return;
 			} else if (hasChanges()) {
 				successMessage = 'Destinations updated successfully!';

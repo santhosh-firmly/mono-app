@@ -155,7 +155,7 @@ export async function GET({ locals, params, platform }) {
 		for (const dest of destinationsList) {
 			try {
 				const info = typeof dest.info === 'string' ? JSON.parse(dest.info) : dest.info;
-				destinationsMap[dest.key] = info?.subject || dest.key;
+				destinationsMap[dest.key] = info?.display_name || info?.subject || dest.key;
 			} catch {
 				destinationsMap[dest.key] = dest.key;
 			}

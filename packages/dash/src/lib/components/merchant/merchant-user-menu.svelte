@@ -7,9 +7,12 @@
 	import Sun from 'lucide-svelte/icons/sun';
 	import Moon from 'lucide-svelte/icons/moon';
 	import Monitor from 'lucide-svelte/icons/monitor';
+	import Shield from 'lucide-svelte/icons/shield';
+	import UserCircle from 'lucide-svelte/icons/user-circle';
 	import { theme } from '$lib/stores/theme.svelte.js';
+	import { adminMode } from '$lib/stores/admin-mode.svelte.js';
 
-	let { user } = $props();
+	let { user, isFirmlyAdmin = false, hasAzureADAuth = false } = $props();
 
 	// Avatar URL if user has avatar
 	let avatarUrl = $derived(
@@ -69,6 +72,22 @@
 			</DropdownMenu.Item>
 		</DropdownMenu.Group>
 		<DropdownMenu.Separator />
+		{#if hasAzureADAuth}
+			<DropdownMenu.Group>
+				<DropdownMenu.Item onclick={() => adminMode.toggle(isFirmlyAdmin)}>
+					<div class="flex w-full items-center gap-2">
+						{#if isFirmlyAdmin}
+							<UserCircle class="h-4 w-4" />
+							Switch to User Mode
+						{:else}
+							<Shield class="h-4 w-4" />
+							Switch to Admin Mode
+						{/if}
+					</div>
+				</DropdownMenu.Item>
+			</DropdownMenu.Group>
+			<DropdownMenu.Separator />
+		{/if}
 		<DropdownMenu.Sub>
 			<DropdownMenu.SubTrigger>
 				{#if theme.preference === 'light'}

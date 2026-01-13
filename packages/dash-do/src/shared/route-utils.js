@@ -9,7 +9,7 @@
  * @param {string} actualPath - Actual request path
  * @returns {Object|null} - Match result with params, or null if no match
  */
-export function matchRoute(routePath, actualPath) {
+function matchRoute(routePath, actualPath) {
     const routeParts = routePath.split('/').filter(Boolean);
     const actualParts = actualPath.split('/').filter(Boolean);
 
@@ -68,6 +68,12 @@ export async function handleRoutes({ routes, handlers, request, options = {} }) 
             const offset = parseInt(url.searchParams.get('offset') || '0', 10);
             const includeFirmlyAdmin = url.searchParams.get('includeFirmlyAdmin') === 'true';
             args.push(limit, offset, includeFirmlyAdmin);
+        }
+
+        // Special handling for pending-invites GET (needs includeFirmlyAdmin query param)
+        if (route.handler === 'handleGetPendingInvites') {
+            const includeFirmlyAdmin = url.searchParams.get('includeFirmlyAdmin') === 'true';
+            args.push(includeFirmlyAdmin);
         }
 
         return handlers[route.handler](...args);

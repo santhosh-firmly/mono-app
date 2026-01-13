@@ -11,6 +11,7 @@
 	import ArrowDown from 'lucide-svelte/icons/arrow-down';
 	import Loader2 from 'lucide-svelte/icons/loader-2';
 	import { formatCurrency } from '$lib/currency.js';
+	import { adminFetch } from '$lib/utils/fetch.js';
 
 	let appId = $derived($page.params.app_id);
 
@@ -36,7 +37,7 @@
 				order: sortOrder
 			});
 
-			const response = await fetch(
+			const response = await adminFetch(
 				`/destination/${appId}/merchants/api?${params.toString()}`
 			);
 			const result = await response.json();

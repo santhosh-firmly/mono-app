@@ -39,18 +39,7 @@ sequenceDiagram
 
 ## Configuration
 
-Azure AD is configured via environment variables in `wrangler.jsonc`:
-
-```jsonc
-{
-  "vars": {
-    "PUBLIC_AZURE_AD_CLIENT_ID": "194f24d1-f48d-401e-acaa-b0e2900bce67",
-    "PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
-    "PUBLIC_AZURE_REDIRECT_URL": "https://dash.firmly.live/auth/callback",
-    "FIRMLY_AUTH_COOKIE": "fuser"
-  }
-}
-```
+Azure AD requires the following environment variables:
 
 | Variable | Description |
 |----------|-------------|
@@ -63,23 +52,9 @@ Azure AD is configured via environment variables in `wrangler.jsonc`:
 
 Azure AD JWTs are verified using Microsoft's JWKS (JSON Web Key Set) endpoint:
 
-```javascript
-// auth.js
-import { createRemoteJWKSet, jwtVerify } from 'jose';
-
-const MICROSOFT_KEYS_ENDPOINT = 'https://login.microsoftonline.com/common/discovery/v2.0/keys';
-
-export async function enforceSSOAuth(jwt, { azureTenantId, azureClientId }) {
-  const jwks = createRemoteJWKSet(new URL(MICROSOFT_KEYS_ENDPOINT));
-
-  const { payload } = await jwtVerify(jwt, jwks, {
-    issuer: `https://login.microsoftonline.com/${azureTenantId}/v2.0`,
-    audience: azureClientId
-  });
-
-  return { authInfo: payload };
-}
-```
+- The `jose` library fetches public keys from Microsoft's JWKS endpoint
+- Keys are automatically cached and rotated
+- Verification checks issuer (must match tenant ID) and audience (must match client ID)
 
 ### JWT Claims
 
@@ -94,85 +69,26 @@ export async function enforceSSOAuth(jwt, { azureTenantId, azureClientId }) {
 
 ## Route Protection
 
-Admin routes are protected in `hooks.server.js`:
+Admin routes under `/admin/*` are protected in `hooks.server.js`:
 
-```javascript
-// hooks.server.js
-export async function handle({ event, resolve }) {
-  const { pathname } = event.url;
-
-  // Admin routes require Azure AD
-  if (pathname.startsWith('/admin')) {
-    return handleAdminAuth(event, resolve);
-  }
-
-  // ... other routes
-}
-
-async function handleAdminAuth(event, resolve) {
-  const { platform, cookies } = event;
-
-  const jwt = cookies.get(platform?.env?.FIRMLY_AUTH_COOKIE);
-
-  try {
-    event.locals.authInfo = (
-      await enforceSSOAuth(jwt, {
-        azureTenantId: platform?.env?.PUBLIC_AZURE_AD_TENANT_ID,
-        azureClientId: platform?.env?.PUBLIC_AZURE_AD_CLIENT_ID
-      })
-    ).authInfo;
-
-    return resolve(event);
-  } catch {
-    redirect(302, '/auth/sign-in');
-  }
-}
-```
+- Check for `FIRMLY_AUTH_COOKIE` cookie
+- Verify JWT against Microsoft's JWKS
+- If valid, populate `event.locals.authInfo` with user claims
+- If invalid or missing, redirect to `/auth/sign-in`
 
 ## Hybrid Authentication
 
 A unique feature is that Azure AD admins can also access merchant dashboards:
 
-```javascript
-// hooks.server.js
-export async function handle({ event, resolve }) {
-  // Check for Firmly admin (Azure AD) FIRST - takes precedence
-  const firmlyAuthCookie = cookies.get(platform?.env?.FIRMLY_AUTH_COOKIE);
-  let userSession = null;
-  let isFirmlyAdmin = false;
+- When accessing `/merchant/*` routes, the system first checks for Azure AD cookie
+- If valid Azure AD session exists, create a synthetic session with `isFirmlyAdmin: true`
+- This allows support staff to view any merchant dashboard with admin privileges
+- If no Azure AD session, fall back to regular JWT session validation
 
-  if (firmlyAuthCookie) {
-    try {
-      const { authInfo } = await enforceSSOAuth(firmlyAuthCookie, {
-        azureTenantId: platform?.env?.PUBLIC_AZURE_AD_TENANT_ID,
-        azureClientId: platform?.env?.PUBLIC_AZURE_AD_CLIENT_ID
-      });
-
-      // Create synthetic session for Firmly admin
-      event.locals.authInfo = authInfo;
-      userSession = {
-        userId: authInfo.oid || authInfo.sub,
-        email: authInfo.email || authInfo.preferred_username,
-        sessionId: null,
-        isFirmlyAdmin: true
-      };
-      isFirmlyAdmin = true;
-    } catch {
-      // Azure AD auth failed, fall through to JWT session
-    }
-  }
-
-  // Fall back to JWT session for regular users
-  if (!userSession) {
-    // ... JWT validation
-  }
-}
-```
-
-This allows support staff to:
+This enables support staff to:
 - View any merchant dashboard
 - Debug issues without creating test accounts
-- Actions are logged with admin identity
+- All actions are logged with admin identity
 
 ## Admin Routes
 
@@ -190,65 +106,17 @@ This allows support staff to:
 
 ## Sign-In Flow
 
-### 1. Redirect to Azure AD
-
-```javascript
-// routes/(firmly-user-only)/auth/sign-in/+page.server.js
-export function load({ url, platform }) {
-  const clientId = platform?.env?.PUBLIC_AZURE_AD_CLIENT_ID;
-  const tenantId = platform?.env?.PUBLIC_AZURE_AD_TENANT_ID;
-  const redirectUri = platform?.env?.PUBLIC_AZURE_REDIRECT_URL;
-
-  const authUrl = new URL(`https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/authorize`);
-  authUrl.searchParams.set('client_id', clientId);
-  authUrl.searchParams.set('response_type', 'id_token');
-  authUrl.searchParams.set('redirect_uri', redirectUri);
-  authUrl.searchParams.set('response_mode', 'fragment');
-  authUrl.searchParams.set('scope', 'openid profile email');
-  authUrl.searchParams.set('nonce', crypto.randomUUID());
-
-  redirect(302, authUrl.toString());
-}
-```
-
-### 2. Handle Callback
-
-```javascript
-// routes/(firmly-user-only)/auth/callback/+server.js
-export async function GET({ url, cookies, platform }) {
-  // Token is in URL fragment (handled client-side)
-  // Client sends token to server to set cookie
-
-  const token = url.searchParams.get('id_token');
-
-  // Verify token
-  await enforceSSOAuth(token, {
-    azureTenantId: platform?.env?.PUBLIC_AZURE_AD_TENANT_ID,
-    azureClientId: platform?.env?.PUBLIC_AZURE_AD_CLIENT_ID
-  });
-
-  // Set cookie
-  cookies.set(platform?.env?.FIRMLY_AUTH_COOKIE, token, {
-    path: '/',
-    httpOnly: true,
-    secure: true,
-    sameSite: 'lax',
-    maxAge: 24 * 60 * 60 // 24 hours
-  });
-
-  redirect(302, '/admin');
-}
-```
+1. User visits `/admin` without valid cookie
+2. Redirect to `/auth/sign-in` which builds Azure AD authorization URL
+3. User authenticates with Microsoft (may include MFA)
+4. Azure AD redirects to `/auth/callback` with ID token in URL fragment
+5. Client-side code extracts token and sends to server
+6. Server verifies token and sets `FIRMLY_AUTH_COOKIE`
+7. Redirect to `/admin`
 
 ## Logout
 
-```javascript
-// routes/(firmly-user-only)/auth/logout/+server.js
-export async function GET({ cookies, platform }) {
-  cookies.delete(platform?.env?.FIRMLY_AUTH_COOKIE, { path: '/' });
-  redirect(302, '/auth/sign-in');
-}
-```
+Logout clears the `FIRMLY_AUTH_COOKIE` and redirects to sign-in page.
 
 ## Security Considerations
 
@@ -265,18 +133,9 @@ The `jose` library automatically caches JWKS keys to avoid repeated fetches. Mic
 
 ### Per-Environment Configuration
 
-Each environment has its own Azure AD app registration:
-
-| Environment | Client ID |
-|-------------|-----------|
-| dev | `194f24d1-f48d-401e-acaa-b0e2900bce67` |
-| ci | `b75259e2-e211-4481-a8a8-67ca518838c5` |
-| qa | `adc4dd13-b11f-4c32-b853-806b174c9574` |
-| uat | `d6e4c0e6-03d6-4681-ae55-6886f9fae696` |
-| prod | `c5002bb2-89f9-48eb-b719-a318e021ae6c` |
+Each environment has its own Azure AD app registration with a unique client ID. This ensures separation between dev, ci, qa, uat, and prod environments.
 
 ## Related Documentation
 
 - [Authentication Overview](./overview.md)
 - [Routes Overview](../routes/overview.md) - Route protection
-- [Admin Routes](../routes/admin-routes.md) - Full admin route list

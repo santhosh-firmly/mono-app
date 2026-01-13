@@ -4,14 +4,14 @@ Lerna-managed monorepo for Firmly frontend applications. Built with Svelte 5, Sv
 
 ## Packages
 
-| Package | Description |
-|---------|-------------|
-| **dash** | Merchant dashboard application |
-| **dropin-service** | Payment drop-in widget (v4/v5) |
-| **var-service** | VAR service application |
-| **session-recorder** | Session recording library |
-| **dash-do** | Durable Objects for dash |
-| **eslint-config** | Shared ESLint/Prettier config |
+| Package              | Description                    |
+| -------------------- | ------------------------------ |
+| **dash**             | Merchant dashboard application |
+| **dropin-service**   | Payment drop-in widget (v4/v5) |
+| **var-service**      | VAR service application        |
+| **session-recorder** | Session recording library      |
+| **dash-do**          | Durable Objects for dash       |
+| **eslint-config**    | Shared ESLint/Prettier config  |
 
 ## Quick Start
 

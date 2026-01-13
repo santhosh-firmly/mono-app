@@ -1,13 +1,17 @@
 import { BaseDurableObject } from 'foundation/durable-objects/durable-object-base.js';
 import { getLogger } from 'foundation/utils/log.js';
+
 import { handleRoutes } from './shared/route-utils.js';
 import {
     teamRoutes,
     auditLogRoutes,
+    pendingInviteRoutes,
     initializeTeamSchema,
     initializeAuditLogSchema,
+    initializePendingInvitesSchema,
     teamHandlers,
     auditLogHandlers,
+    pendingInviteHandlers,
     clearTeamAndAuditLogs,
 } from './shared/team-audit-mixin.js';
 
@@ -25,12 +29,17 @@ export class MerchantDO extends BaseDurableObject {
         // Team endpoints (from shared)
         ...teamRoutes,
 
+        // Pending invite endpoints (from shared)
+        ...pendingInviteRoutes,
+
         // Audit log endpoints (from shared)
         ...auditLogRoutes,
 
         // Agreement endpoints
         { path: '/agreement', method: 'GET', handler: 'handleGetAgreement' },
         { path: '/agreement', method: 'POST', handler: 'handleSignAgreement', needsJson: true },
+        { path: '/agreement-config', method: 'GET', handler: 'handleGetAgreementConfig' },
+        { path: '/agreement-config', method: 'PUT', handler: 'handleSetAgreementConfig', needsJson: true },
 
         // Onboarding status endpoints
         { path: '/onboarding', method: 'GET', handler: 'handleGetOnboardingStatus' },
@@ -60,6 +69,9 @@ export class MerchantDO extends BaseDurableObject {
         // Team membership table (shared)
         initializeTeamSchema(this.sql);
 
+        // Pending invites table (shared)
+        initializePendingInvitesSchema(this.sql);
+
         // Audit logs table (shared)
         initializeAuditLogSchema(this.sql);
 
@@ -74,6 +86,20 @@ export class MerchantDO extends BaseDurableObject {
                 client_ip TEXT,
                 client_location TEXT,
                 agreement_version TEXT DEFAULT '1.0'
+            )
+        `);
+
+        // Agreement configuration table (for custom markdown or PDF agreements)
+        this.sql.exec(`
+            CREATE TABLE IF NOT EXISTS agreement_config (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                content_type TEXT NOT NULL DEFAULT 'default',
+                markdown_content TEXT,
+                pdf_key TEXT,
+                externally_signed INTEGER DEFAULT 0,
+                updated_at TEXT DEFAULT (datetime('now')),
+                updated_by_user_id TEXT,
+                updated_by_email TEXT
             )
         `);
 
@@ -181,6 +207,22 @@ export class MerchantDO extends BaseDurableObject {
     }
 
     // ============================================================================
+    // Pending invite methods (delegating to shared handlers)
+    // ============================================================================
+
+    handleGetPendingInvites(includeFirmlyAdmin) {
+        return pendingInviteHandlers.getPendingInvites(this.sql, includeFirmlyAdmin);
+    }
+
+    handleAddPendingInvite(data) {
+        return pendingInviteHandlers.addPendingInvite(this.sql, data);
+    }
+
+    handleRemovePendingInvite(token) {
+        return pendingInviteHandlers.removePendingInvite(this.sql, token);
+    }
+
+    // ============================================================================
     // Audit log methods (delegating to shared handlers)
     // ============================================================================
 
@@ -197,13 +239,40 @@ export class MerchantDO extends BaseDurableObject {
     // ============================================================================
 
     handleGetAgreement() {
+        // Check if there's a custom agreement config
+        const configResult = this.sql.exec('SELECT * FROM agreement_config WHERE id = 1').toArray();
+        const config = configResult.length > 0 ? configResult[0] : null;
+
+        // If externally signed, return as signed without details
+        if (config && config.externally_signed === 1) {
+            return Response.json({
+                signed: true,
+                externallySigned: true,
+                contentType: config.content_type,
+                pdfKey: config.pdf_key,
+                agreement: null,
+            });
+        }
+
         const result = this.sql.exec('SELECT * FROM merchant_agreement ORDER BY signed_at DESC LIMIT 1').toArray();
 
         if (result.length === 0) {
-            return Response.json({ signed: false, agreement: null });
+            return Response.json({
+                signed: false,
+                agreement: null,
+                contentType: config?.content_type || 'default',
+                markdownContent: config?.markdown_content || null,
+                pdfKey: config?.pdf_key || null,
+            });
         }
 
-        return Response.json({ signed: true, agreement: result[0] });
+        return Response.json({
+            signed: true,
+            agreement: result[0],
+            contentType: config?.content_type || 'default',
+            markdownContent: config?.markdown_content || null,
+            pdfKey: config?.pdf_key || null,
+        });
     }
 
     handleSignAgreement({ userId, userEmail, browserInfo, clientIp, clientLocation, agreementVersion = '1.0' }) {
@@ -228,6 +297,73 @@ export class MerchantDO extends BaseDurableObject {
         const agreement = this.sql.exec('SELECT * FROM merchant_agreement ORDER BY id DESC LIMIT 1').toArray()[0];
 
         return Response.json({ success: true, agreement });
+    }
+
+    handleGetAgreementConfig() {
+        const result = this.sql.exec('SELECT * FROM agreement_config WHERE id = 1').toArray();
+
+        if (result.length === 0) {
+            return Response.json({
+                contentType: 'default',
+                markdownContent: null,
+                pdfKey: null,
+                externallySigned: false,
+                updatedAt: null,
+                updatedByUserId: null,
+                updatedByEmail: null,
+            });
+        }
+
+        const config = result[0];
+        return Response.json({
+            contentType: config.content_type,
+            markdownContent: config.markdown_content,
+            pdfKey: config.pdf_key,
+            externallySigned: config.externally_signed === 1,
+            updatedAt: config.updated_at,
+            updatedByUserId: config.updated_by_user_id,
+            updatedByEmail: config.updated_by_email,
+        });
+    }
+
+    handleSetAgreementConfig({ contentType, markdownContent, pdfKey, externallySigned, userId, userEmail }) {
+        // Validate content type
+        if (!['default', 'markdown', 'pdf'].includes(contentType)) {
+            return Response.json({ error: 'Invalid content type' }, { status: 400 });
+        }
+
+        // If setting to default, clear custom content
+        if (contentType === 'default') {
+            this.sql.exec('DELETE FROM agreement_config WHERE id = 1');
+            return Response.json({ success: true, contentType: 'default' });
+        }
+
+        this.sql.exec(
+            `INSERT INTO agreement_config (id, content_type, markdown_content, pdf_key, externally_signed, updated_at, updated_by_user_id, updated_by_email)
+             VALUES (1, ?, ?, ?, ?, datetime('now'), ?, ?)
+             ON CONFLICT(id) DO UPDATE SET
+                content_type = excluded.content_type,
+                markdown_content = excluded.markdown_content,
+                pdf_key = excluded.pdf_key,
+                externally_signed = excluded.externally_signed,
+                updated_at = datetime('now'),
+                updated_by_user_id = excluded.updated_by_user_id,
+                updated_by_email = excluded.updated_by_email`,
+            contentType,
+            markdownContent || null,
+            pdfKey || null,
+            externallySigned ? 1 : 0,
+            userId,
+            userEmail,
+        );
+
+        return Response.json({
+            success: true,
+            contentType,
+            markdownContent: markdownContent || null,
+            pdfKey: pdfKey || null,
+            externallySigned: externallySigned || false,
+        });
     }
 
     // ============================================================================
@@ -458,17 +594,19 @@ export class MerchantDO extends BaseDurableObject {
 
     handleReset() {
         // Clear team and audit logs using shared helper
-        const clearedTeamMembers = clearTeamAndAuditLogs(this.sql);
+        const { teamMembers, pendingInvites } = clearTeamAndAuditLogs(this.sql);
 
         // Clear merchant-specific tables
         this.sql.exec('DELETE FROM merchant_agreement');
+        this.sql.exec('DELETE FROM agreement_config');
         this.sql.exec('DELETE FROM onboarding_status');
         this.sql.exec('DELETE FROM catalog_config');
         this.sql.exec('DELETE FROM integration_steps');
 
         return Response.json({
             success: true,
-            clearedTeamMembers,
+            clearedTeamMembers: teamMembers,
+            clearedPendingInvites: pendingInvites,
         });
     }
 }

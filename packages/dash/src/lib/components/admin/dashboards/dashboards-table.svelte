@@ -26,13 +26,13 @@
 	function getActions(dashboard) {
 		const actions = [];
 
-		// Primary action: View Dashboard
+		// Primary action: View Dashboard (opens in admin mode)
 		actions.push({
 			id: 'view',
 			icon: ExternalLink,
 			label: 'View Dashboard',
 			variant: 'default',
-			href: `/merchant/${dashboard.domain}`,
+			href: `/merchant/${dashboard.domain}?admin_mode=true`,
 			target: '_blank'
 		});
 
@@ -215,6 +215,9 @@
 							</div>
 							{#if dashboard.is_disabled}
 								<Badge variant="outline" class="text-xs">Disabled</Badge>
+							{/if}
+							{#if dashboard.not_in_config}
+								<Badge variant="destructive" class="text-xs">Not in Config</Badge>
 							{/if}
 						</div>
 					</Table.Cell>

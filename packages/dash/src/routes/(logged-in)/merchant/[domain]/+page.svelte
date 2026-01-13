@@ -4,6 +4,7 @@
 	import { MerchantDashboard } from '$lib/components/merchant/dashboard/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import Loader2 from 'lucide-svelte/icons/loader-2';
+	import { adminFetch } from '$lib/utils/fetch.js';
 
 	let { data } = $props();
 	let domain = $derived($page.params.domain);
@@ -23,7 +24,7 @@
 		error = '';
 
 		try {
-			const response = await fetch(`/merchant/${domain}/api/dashboard`);
+			const response = await adminFetch(`/merchant/${domain}/api/dashboard`);
 			const result = await response.json();
 
 			if (!response.ok) {

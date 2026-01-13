@@ -43,3 +43,19 @@ export const flyAndScale = (node, params = { y: -8, x: 0, start: 0.95, duration:
 		easing: cubicOut
 	};
 };
+
+/**
+ * Get initials from a name for avatar fallback.
+ * @param {string|null|undefined} name - The name to extract initials from
+ * @returns {string} One or two character initials, or '?' if no name
+ */
+export function getInitials(name) {
+	if (!name) return '?';
+	const trimmed = name.trim();
+	if (!trimmed) return '?';
+	const parts = trimmed.split(' ').filter((p) => p.length > 0);
+	if (parts.length >= 2) {
+		return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+	}
+	return trimmed[0].toUpperCase();
+}

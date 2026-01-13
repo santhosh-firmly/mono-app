@@ -1,5 +1,5 @@
 <script>
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import MerchantPageHeader from '$lib/components/merchant/merchant-page-header.svelte';
 	import SelectionCard from '$lib/components/merchant/selection-card.svelte';
@@ -9,6 +9,7 @@
 	import Package from 'lucide-svelte/icons/package';
 	import PackageOpen from 'lucide-svelte/icons/package-open';
 	import Save from 'lucide-svelte/icons/save';
+	import { adminFetch } from '$lib/utils/fetch.js';
 
 	let domain = $derived($page.params.domain);
 
@@ -29,7 +30,7 @@
 		error = '';
 
 		try {
-			const response = await fetch(`/merchant/${domain}/catalog/api`);
+			const response = await adminFetch(`/merchant/${domain}/catalog/api`);
 			const result = await response.json();
 
 			if (!response.ok) {
@@ -61,7 +62,7 @@
 		successMessage = '';
 
 		try {
-			const response = await fetch(`/merchant/${domain}/catalog/api`, {
+			const response = await adminFetch(`/merchant/${domain}/catalog/api`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ catalogType: selection })
@@ -76,8 +77,9 @@
 			originalSelection = selection;
 
 			if (result.isFirstTimeSave) {
-				// Redirect to dashboard after completing onboarding step
-				goto(`/merchant/${domain}`, { invalidateAll: true });
+				// Invalidate all data first, then redirect to dashboard
+				await invalidateAll();
+				goto(`/merchant/${domain}`);
 				return;
 			}
 			successMessage = 'Catalog configuration updated successfully!';

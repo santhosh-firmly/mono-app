@@ -14,34 +14,6 @@ Components for login and verification flows.
 | `email-sent-card.svelte` | Email confirmation message |
 | `verification-status-card.svelte` | Status display after verification |
 
-### LoginCard
-
-```svelte
-<script>
-  import LoginCard from '$lib/components/auth/login-card.svelte';
-</script>
-
-<LoginCard
-  onotp={(email) => sendOTP(email)}
-  onmagiclink={(email) => sendMagicLink(email)}
-/>
-```
-
-### OTPInput
-
-```svelte
-<script>
-  import OTPInput from '$lib/components/auth/otp-input.svelte';
-  let code = $state('');
-</script>
-
-<OTPInput
-  bind:value={code}
-  length={6}
-  oncomplete={(code) => verifyCode(code)}
-/>
-```
-
 ## Order (`order/`)
 
 Components for displaying order information.
@@ -59,37 +31,6 @@ Components for displaying order information.
 | `payment-info-card.svelte` | Payment details |
 | `partner-info-card.svelte` | Partner/vendor info |
 | `store-info-card.svelte` | Merchant store info |
-
-### OrderHeader
-
-```svelte
-<script>
-  import OrderHeader from '$lib/components/order/order-header.svelte';
-</script>
-
-<OrderHeader
-  orderId="ORD-12345"
-  status="completed"
-  createdAt="2024-01-15T10:30:00Z"
-/>
-```
-
-### OrderSummary
-
-```svelte
-<script>
-  import OrderSummary from '$lib/components/order/order-summary.svelte';
-</script>
-
-<OrderSummary
-  subtotal={99.00}
-  discount={10.00}
-  shipping={5.99}
-  tax={8.50}
-  total={103.49}
-  currency="USD"
-/>
-```
 
 ## Merchant (`merchant/`)
 
@@ -109,39 +50,6 @@ Components for merchant dashboard functionality.
 | `product-card.svelte` | Product display card |
 | `stats-card.svelte` | Statistics display |
 
-### AccountSelector
-
-```svelte
-<script>
-  import AccountSelector from '$lib/components/merchant/account-selector.svelte';
-</script>
-
-<AccountSelector
-  accounts={[
-    { domain: 'merchant1.com', role: 'owner' },
-    { domain: 'merchant2.com', role: 'editor' }
-  ]}
-  currentDomain="merchant1.com"
-  onselect={(domain) => goto(`/merchant/${domain}`)}
-/>
-```
-
-### IntegrationProgress
-
-```svelte
-<script>
-  import IntegrationProgress from '$lib/components/merchant/integration-progress.svelte';
-</script>
-
-<IntegrationProgress
-  status={{
-    agreement: { completed: true },
-    destinations: { completed: true },
-    integration: { completed: false }
-  }}
-/>
-```
-
 ## Merchant Settings (`merchant-settings/`)
 
 Components for merchant configuration pages.
@@ -156,19 +64,6 @@ Components for merchant configuration pages.
 | `main-contact-card.svelte` | Contact information |
 | `legal-documents-card.svelte` | Terms and policies |
 
-### GeneralSettings
-
-```svelte
-<script>
-  import GeneralSettings from '$lib/components/merchant-settings/general-settings.svelte';
-</script>
-
-<GeneralSettings
-  settings={merchantSettings}
-  onsave={(settings) => saveSettings(settings)}
-/>
-```
-
 ## Team (`team/`)
 
 Components for team management.
@@ -180,36 +75,6 @@ Components for team management.
 | `change-role-dialog.svelte` | Role change confirmation |
 | `remove-member-dialog.svelte` | Member removal confirmation |
 
-### TeamMembersTable
-
-```svelte
-<script>
-  import TeamMembersTable from '$lib/components/team/team-members-table.svelte';
-</script>
-
-<TeamMembersTable
-  members={teamMembers}
-  currentUserId={userId}
-  isOwner={role === 'owner'}
-  onchangerole={(userId, newRole) => updateRole(userId, newRole)}
-  onremove={(userId) => removeMember(userId)}
-/>
-```
-
-### TeamInviteDialog
-
-```svelte
-<script>
-  import TeamInviteDialog from '$lib/components/team/team-invite-dialog.svelte';
-  let open = $state(false);
-</script>
-
-<TeamInviteDialog
-  bind:open
-  oninvite={({ email, role }) => sendInvite(email, role)}
-/>
-```
-
 ## Profile (`profile/`)
 
 Components for user profile management.
@@ -220,65 +85,15 @@ Components for user profile management.
 | `active-sessions-card.svelte` | Session management |
 | `avatar-editor.svelte` | Avatar upload/selection |
 
-### ProfileEditCard
-
-```svelte
-<script>
-  import ProfileEditCard from '$lib/components/profile/profile-edit-card.svelte';
-</script>
-
-<ProfileEditCard
-  profile={userProfile}
-  onsave={(profile) => updateProfile(profile)}
-/>
-```
-
-### ActiveSessionsCard
-
-```svelte
-<script>
-  import ActiveSessionsCard from '$lib/components/profile/active-sessions-card.svelte';
-</script>
-
-<ActiveSessionsCard
-  sessions={activeSessions}
-  currentSessionId={sessionId}
-  onterminate={(sessionId) => terminateSession(sessionId)}
-  onterminateall={() => terminateAllSessions()}
-/>
-```
-
 ## Charts (`charts/`)
 
 Data visualization components using Chart.js.
 
 | Component | Description |
 |-----------|-------------|
-| `area-chart.svelte` | Area/line chart |
+| `area-chart.svelte` | Area/line chart with optional comparison |
 | `bar-chart.svelte` | Bar chart |
 | `pie-chart.svelte` | Pie/donut chart |
-
-### AreaChart
-
-```svelte
-<script>
-  import AreaChart from '$lib/components/charts/area-chart.svelte';
-</script>
-
-<AreaChart
-  data={{
-    labels: ['Jan', 'Feb', 'Mar'],
-    datasets: [{
-      label: 'Orders',
-      data: [65, 59, 80]
-    }]
-  }}
-  comparison={{
-    label: 'Last Period',
-    data: [50, 45, 60]
-  }}
-/>
-```
 
 ## Admin (`admin/dashboards/`)
 
@@ -291,45 +106,11 @@ Components for admin functionality.
 | `invite-user-dialog.svelte` | User invitation modal |
 | `cancel-invite-dialog.svelte` | Cancel invite confirmation |
 
-### DashboardsTable
-
-```svelte
-<script>
-  import DashboardsTable from '$lib/components/admin/dashboards/dashboards-table.svelte';
-</script>
-
-<DashboardsTable
-  dashboards={allDashboards}
-  oninvite={(domain) => openInviteDialog(domain)}
-  oncancel={(domain) => cancelInvite(domain)}
-/>
-```
-
 ## Custom (`custom/`)
 
 ### DataTable
 
-Advanced table with svelte-headless-table:
-
-```svelte
-<script>
-  import DataTable from '$lib/components/custom/data-table/data-table.svelte';
-</script>
-
-<DataTable
-  data={orders}
-  columns={[
-    { accessorKey: 'id', header: 'Order ID' },
-    { accessorKey: 'status', header: 'Status' },
-    { accessorKey: 'total', header: 'Total' }
-  ]}
-  searchable
-  sortable
-  paginated
-/>
-```
-
-Features:
+Advanced table with svelte-headless-table featuring:
 - Column sorting
 - Full-text search
 - Faceted filters
@@ -339,35 +120,13 @@ Features:
 
 ### Combobox
 
-Search-and-select dropdown:
-
-```svelte
-<script>
-  import Combobox from '$lib/components/custom/combobox.svelte';
-</script>
-
-<Combobox
-  options={[
-    { value: 'us', label: 'United States' },
-    { value: 'uk', label: 'United Kingdom' }
-  ]}
-  placeholder="Select country..."
-  onselect={(value) => setCountry(value)}
-/>
-```
+Search-and-select dropdown for picking from a list of options.
 
 ### CopyToClipboard
 
-```svelte
-<script>
-  import CopyToClipboard from '$lib/components/custom/copy-to-clipboard.svelte';
-</script>
-
-<CopyToClipboard text="api-key-12345" />
-```
+Click-to-copy utility button.
 
 ## Related Documentation
 
 - [Components Overview](./overview.md) - Component architecture
 - [UI Library](./ui-library.md) - UI primitives
-- [Patterns](./patterns.md) - Design patterns

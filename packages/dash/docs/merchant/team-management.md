@@ -44,197 +44,39 @@ graph TB
     end
 ```
 
-### MerchantDO (Per-merchant)
+### Storage Locations
 
-```sql
-CREATE TABLE team (
-  user_id TEXT PRIMARY KEY,
-  email TEXT NOT NULL,
-  role TEXT NOT NULL,
-  granted_at TEXT DEFAULT CURRENT_TIMESTAMP,
-  granted_by TEXT
-);
-```
-
-### DashUserDO (Per-user)
-
-```sql
-CREATE TABLE merchant_access (
-  merchant_domain TEXT PRIMARY KEY,
-  role TEXT DEFAULT 'owner',
-  granted_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-### D1 (Global index)
-
-```sql
-CREATE TABLE merchant_team (
-  merchant_domain TEXT NOT NULL,
-  user_id TEXT NOT NULL,
-  user_email TEXT NOT NULL,
-  role TEXT,
-  granted_at TEXT,
-  granted_by TEXT,
-  PRIMARY KEY (merchant_domain, user_id)
-);
-```
+| Location | Purpose |
+|----------|---------|
+| **MerchantDO** `team` | Per-merchant team list, stores user_id, email, role, granted_at, granted_by |
+| **DashUserDO** `merchant_access` | Per-user merchant access list, stores merchant_domain, role, granted_at |
+| **D1** `merchant_team` | Global index for admin queries, stores composite key of merchant_domain + user_id |
 
 ## Team Operations
 
 ### Getting Team Members
 
-```javascript
-// merchant.js
-export async function getMerchantTeam({ platform, merchantDomain }) {
-  const response = await fetchMerchantDO(platform, merchantDomain, '/team');
-  if (!response.ok) return [];
-  return response.json();
-}
-
-// Returns:
-[
-  {
-    userId: "uuid-1",
-    email: "owner@merchant.com",
-    role: "owner",
-    grantedAt: "2024-01-01T00:00:00Z",
-    grantedBy: "admin-uuid"
-  },
-  {
-    userId: "uuid-2",
-    email: "editor@merchant.com",
-    role: "editor",
-    grantedAt: "2024-01-15T00:00:00Z",
-    grantedBy: "uuid-1"
-  }
-]
-```
+Fetch from MerchantDO `/team` endpoint. Returns list with userId, email, role, grantedAt, grantedBy.
 
 ### Adding Team Members
 
-Members are added through the invite system, but the underlying function is:
+Members are added through the invite system:
 
-```javascript
-// merchant.js
-export async function addTeamMember({
-  platform,
-  merchantDomain,
-  userId,
-  userEmail,
-  role,
-  grantedBy,
-  actor
-}) {
-  // 1. Add to MerchantDO team table
-  await fetchMerchantDO(platform, merchantDomain, '/team', {
-    method: 'POST',
-    body: JSON.stringify({ userId, userEmail, role, grantedBy })
-  });
-
-  // 2. Add to user's DashUserDO merchant_access table
-  await fetchDashUserDO(platform, userId, '/merchant-access', {
-    method: 'POST',
-    body: JSON.stringify({ merchantDomain, role })
-  });
-
-  // 3. Create audit log
-  if (actor) {
-    await createAuditLog({
-      platform,
-      merchantDomain,
-      eventType: 'invite_accepted',
-      actorId: actor.id,
-      actorEmail: actor.email,
-      targetId: userId,
-      targetEmail: userEmail,
-      details: { role }
-    });
-  }
-
-  return true;
-}
-```
+1. Add to MerchantDO team table
+2. Add to user's DashUserDO merchant_access table
+3. Create audit log
 
 ### Updating Roles
 
-```javascript
-// merchant.js
-export async function updateTeamMemberRole({
-  platform,
-  merchantDomain,
-  userId,
-  newRole,
-  actor,
-  targetEmail
-}) {
-  // 1. Update in MerchantDO
-  await fetchMerchantDO(platform, merchantDomain, `/team/${userId}`, {
-    method: 'PUT',
-    body: JSON.stringify({ role: newRole })
-  });
-
-  // 2. Update in user's DashUserDO
-  await fetchDashUserDO(platform, userId, '/merchant-access', {
-    method: 'POST',
-    body: JSON.stringify({ merchantDomain, role: newRole })
-  });
-
-  // 3. Create audit log
-  if (actor) {
-    await createAuditLog({
-      platform,
-      merchantDomain,
-      eventType: 'role_changed',
-      actorId: actor.id,
-      actorEmail: actor.email,
-      targetId: userId,
-      targetEmail,
-      details: { newRole }
-    });
-  }
-
-  return true;
-}
-```
+1. Update in MerchantDO
+2. Update in user's DashUserDO
+3. Create audit log
 
 ### Removing Team Members
 
-```javascript
-// merchant.js
-export async function removeTeamMember({
-  platform,
-  merchantDomain,
-  userId,
-  actor,
-  targetEmail
-}) {
-  // 1. Remove from MerchantDO
-  await fetchMerchantDO(platform, merchantDomain, `/team/${userId}`, {
-    method: 'DELETE'
-  });
-
-  // 2. Remove from user's DashUserDO
-  await fetchDashUserDO(platform, userId, `/merchant-access/${merchantDomain}`, {
-    method: 'DELETE'
-  });
-
-  // 3. Create audit log
-  if (actor) {
-    await createAuditLog({
-      platform,
-      merchantDomain,
-      eventType: 'member_removed',
-      actorId: actor.id,
-      actorEmail: actor.email,
-      targetId: userId,
-      targetEmail
-    });
-  }
-
-  return true;
-}
-```
+1. Remove from MerchantDO
+2. Remove from user's DashUserDO
+3. Create audit log
 
 ## Team Invite Flow
 
@@ -281,41 +123,15 @@ The team management page (`/merchant/{domain}/team`) shows:
 
 All team operations verify the user has permission:
 
-```javascript
-// routes/(logged-in)/merchant/[domain]/api/team/+server.js
-export async function POST({ request, platform, locals, params }) {
-  const { merchantDomain } = params;
-  const { userId, isFirmlyAdmin } = locals.session;
-
-  // Check if user is owner or admin
-  if (!isFirmlyAdmin) {
-    const access = await getMerchantAccess({ platform, userId });
-    const merchantAccess = access.find(a => a.merchantDomain === merchantDomain);
-
-    if (!merchantAccess || merchantAccess.role !== 'owner') {
-      return json({ error: 'Not authorized' }, { status: 403 });
-    }
-  }
-
-  // Process request...
-}
-```
+- Check if user is owner or Firmly admin
+- If not owner and not admin, return 403 Forbidden
 
 ## Self-Removal Prevention
 
-Owners cannot remove themselves to prevent orphaned dashboards:
-
-```javascript
-// Check before removal
-if (userId === targetUserId) {
-  return json({ error: 'Cannot remove yourself' }, { status: 400 });
-}
-```
+Owners cannot remove themselves to prevent orphaned dashboards.
 
 ## Related Documentation
 
 - [Dashboard System](./dashboard-system.md) - Dashboard overview
 - [Invite System](../authentication/invite-system.md) - Invitation flow
 - [Audit Logs](./audit-logs.md) - Team action logging
-- [API: Team](../api/merchant/team.md) - Team API reference
-- [API: Team Invite](../api/merchant/team-invite.md) - Invite API reference

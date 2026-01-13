@@ -1,7 +1,18 @@
 import { json } from '@sveltejs/kit';
-import { getMerchantAccess, getUserIdByEmail, addPendingInvite } from '$lib/server/user.js';
+import {
+	getMerchantAccess,
+	getUserIdByEmail,
+	addPendingInvite as addPendingInviteToUser,
+	removePendingInvite as removePendingInviteFromUser
+} from '$lib/server/user.js';
 import { sendInviteEmail } from '$lib/server/email.js';
-import { createAuditLog, AuditEventTypes } from '$lib/server/merchant.js';
+import {
+	createAuditLog,
+	AuditEventTypes,
+	addPendingInvite as addPendingInviteToMerchant,
+	getPendingInviteByEmail,
+	updatePendingInvite as updatePendingInviteInMerchant
+} from '$lib/server/merchant.js';
 import { validateBusinessEmail } from '$lib/server/email-validation.js';
 
 /**
@@ -71,45 +82,120 @@ export async function POST({ locals, params, platform, request, url }) {
 			return json({ error: 'Only owners can invite new owners' }, { status: 403 });
 		}
 
-		// Generate invite token (64 hex chars = 32 bytes = 256 bits)
-		const tokenBytes = new Uint8Array(32);
-		crypto.getRandomValues(tokenBytes);
-		const token = Array.from(tokenBytes)
-			.map((b) => b.toString(16).padStart(2, '0'))
-			.join('');
-
-		// Calculate expiry (7 days)
-		const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
-
-		// Store invite in KV with 7-day TTL
-		const inviteData = {
-			email,
+		// Check if there's already a pending invite for this email
+		const existingInvite = await getPendingInviteByEmail({
+			platform,
 			merchantDomain: domain,
-			role,
-			invitedBy: userId,
-			invitedByEmail: senderEmail,
-			expiresAt,
-			type: 'merchant_team_invite'
-		};
-
-		await kv.put(`invite:${token}`, JSON.stringify(inviteData), {
-			expirationTtl: 7 * 24 * 60 * 60 // 7 days in seconds
+			email
 		});
 
-		// If invitee already has an account, store pending invite in their DashUserDO
-		const inviteeUser = await getUserIdByEmail({ platform, email });
-		if (inviteeUser) {
-			await addPendingInvite({
-				platform,
-				userId: inviteeUser.userId,
-				invite: {
-					token,
-					merchantDomain: domain,
-					role,
-					invitedByEmail: senderEmail,
-					expiresAt: new Date(expiresAt).toISOString()
-				}
+		let token;
+		let expiresAt;
+		let isResend = false;
+
+		if (existingInvite) {
+			// Use existing token and update role if changed
+			token = existingInvite.token;
+			isResend = true;
+
+			// Extend expiry for resends
+			expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
+
+			// Update the invite in KV with new expiry and potentially new role
+			const inviteData = {
+				email,
+				merchantDomain: domain,
+				role,
+				invitedBy: userId,
+				invitedByEmail: senderEmail,
+				expiresAt,
+				type: 'merchant_team_invite'
+			};
+
+			await kv.put(`invite:${token}`, JSON.stringify(inviteData), {
+				expirationTtl: 7 * 24 * 60 * 60 // 7 days in seconds
 			});
+
+			// Update role and expiry in MerchantDO
+			await updatePendingInviteInMerchant({
+				platform,
+				merchantDomain: domain,
+				token,
+				role,
+				expiresAt: new Date(expiresAt).toISOString()
+			});
+
+			// If invitee already has an account, update their pending invite
+			const inviteeUser = await getUserIdByEmail({ platform, email });
+			if (inviteeUser) {
+				// Remove old invite and add updated one
+				await removePendingInviteFromUser({ platform, userId: inviteeUser.userId, token });
+				await addPendingInviteToUser({
+					platform,
+					userId: inviteeUser.userId,
+					invite: {
+						token,
+						merchantDomain: domain,
+						role,
+						invitedByEmail: senderEmail,
+						expiresAt: new Date(expiresAt).toISOString()
+					}
+				});
+			}
+		} else {
+			// Generate new invite token (64 hex chars = 32 bytes = 256 bits)
+			const tokenBytes = new Uint8Array(32);
+			crypto.getRandomValues(tokenBytes);
+			token = Array.from(tokenBytes)
+				.map((b) => b.toString(16).padStart(2, '0'))
+				.join('');
+
+			// Calculate expiry (7 days)
+			expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
+
+			// Store invite in KV with 7-day TTL
+			const inviteData = {
+				email,
+				merchantDomain: domain,
+				role,
+				invitedBy: userId,
+				invitedByEmail: senderEmail,
+				expiresAt,
+				type: 'merchant_team_invite'
+			};
+
+			await kv.put(`invite:${token}`, JSON.stringify(inviteData), {
+				expirationTtl: 7 * 24 * 60 * 60 // 7 days in seconds
+			});
+
+			// Store pending invite in MerchantDO for team page display
+			await addPendingInviteToMerchant({
+				platform,
+				merchantDomain: domain,
+				token,
+				email,
+				role,
+				invitedByUserId: userId,
+				invitedByEmail: senderEmail,
+				isFirmlyAdmin,
+				expiresAt: new Date(expiresAt).toISOString()
+			});
+
+			// If invitee already has an account, store pending invite in their DashUserDO
+			const inviteeUser = await getUserIdByEmail({ platform, email });
+			if (inviteeUser) {
+				await addPendingInviteToUser({
+					platform,
+					userId: inviteeUser.userId,
+					invite: {
+						token,
+						merchantDomain: domain,
+						role,
+						invitedByEmail: senderEmail,
+						expiresAt: new Date(expiresAt).toISOString()
+					}
+				});
+			}
 		}
 
 		// Build invite URL
@@ -145,15 +231,18 @@ export async function POST({ locals, params, platform, request, url }) {
 			actorId: userId,
 			actorEmail: senderEmail,
 			targetEmail: email,
-			details: { role },
+			details: { role, isResend },
 			isFirmlyAdmin,
 			actorType
 		});
 
+		const message = isResend ? `Invitation resent to ${email}` : `Invitation sent to ${email}`;
+
 		return json({
 			success: true,
-			message: `Invitation sent to ${email}`,
-			expiresAt
+			message,
+			expiresAt,
+			isResend
 		});
 	} catch (error) {
 		console.error('Error sending team invite:', error);

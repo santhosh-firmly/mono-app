@@ -1,6 +1,7 @@
 <script>
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import MerchantAgreement from '$lib/components/merchant/merchant-agreement.svelte';
+	import { adminFetch } from '$lib/utils/fetch.js';
 
 	let { data } = $props();
 
@@ -12,7 +13,7 @@
 		error = '';
 
 		try {
-			const response = await fetch(`/merchant/${data.domain}/api/agreement`, {
+			const response = await adminFetch(`/merchant/${data.domain}/api/agreement`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -28,8 +29,9 @@
 				return;
 			}
 
-			// Redirect back to dashboard with invalidation to refresh onboarding status
-			goto(`/merchant/${data.domain}`, { invalidateAll: true });
+			// Invalidate all data first, then redirect to dashboard
+			await invalidateAll();
+			goto(`/merchant/${data.domain}`);
 		} catch {
 			error = 'Failed to sign agreement. Please try again.';
 			isSubmitting = false;
@@ -59,5 +61,9 @@
 		signedInfo={data.signedInfo}
 		{isSubmitting}
 		onaccept={handleAccept}
+		contentType={data.contentType}
+		markdownContent={data.markdownContent}
+		pdfUrl={data.pdfUrl}
+		externallySigned={data.externallySigned}
 	/>
 </div>

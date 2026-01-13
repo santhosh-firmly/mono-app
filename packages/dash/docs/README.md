@@ -11,8 +11,7 @@ The Firmly Dashboard is an internal admin portal and merchant-facing dashboard b
 | [Security](./security-considerations.md) | Security controls, known risks, pre-launch checklist |
 | [Merchant System](./merchant/dashboard-system.md) | Dashboards, teams, onboarding |
 | [Routes](./routes/overview.md) | Page structure, route groups, middleware |
-| [Components](./components/overview.md) | UI library, feature components, patterns |
-| [API Reference](./api/README.md) | All API endpoints with examples |
+| [Components](./components/overview.md) | UI library, feature components |
 | [Database](./database/d1-schema.md) | D1 and Durable Object schemas |
 
 ## Overview
@@ -62,30 +61,6 @@ graph TB
 
 For detailed architecture documentation, see [Architecture Overview](./architecture/overview.md).
 
-## Getting Started
-
-### Local Development
-
-```bash
-# Terminal 1: Run dash-do worker (Durable Objects)
-cd packages/dash-do
-npm run dev
-
-# Terminal 2: Run dash with Cloudflare bindings
-cd packages/dash
-npm run preview:cloudflare
-```
-
-### Running Tests
-
-```bash
-npm test --workspace dash
-```
-
-### Deployment
-
-See [Deployment Guide](./architecture/deployment.md) for environment setup and deployment instructions.
-
 ## Documentation Structure
 
 ```
@@ -116,14 +91,7 @@ docs/
 ├── components/
 │   ├── overview.md              # Component architecture
 │   ├── ui-library.md            # Bits UI foundation
-│   ├── feature-components.md    # Domain components
-│   └── patterns.md              # Svelte 5 patterns
-├── api/
-│   ├── README.md                # API conventions
-│   ├── auth/                    # Auth endpoints
-│   ├── user/                    # User endpoints
-│   ├── merchant/                # Merchant endpoints
-│   └── admin/                   # Admin endpoints
+│   └── feature-components.md    # Domain components
 └── database/
     ├── d1-schema.md             # D1 tables
     └── durable-objects.md       # DO schemas

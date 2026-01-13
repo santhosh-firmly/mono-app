@@ -43,6 +43,20 @@ export async function load({ params, platform }) {
 		}
 	}
 
+	// Fetch all unique categories from all destinations for the combobox
+	const allDestsStmt = await configDb.prepare('SELECT info FROM app_identifiers').all();
+	const customCategories = new Set();
+	for (const row of allDestsStmt.results || []) {
+		try {
+			const destInfo = JSON.parse(row.info || '{}');
+			if (destInfo.category && typeof destInfo.category === 'string') {
+				customCategories.add(destInfo.category);
+			}
+		} catch {
+			// Ignore parse errors
+		}
+	}
+
 	return {
 		destination: {
 			appId,
@@ -53,7 +67,9 @@ export async function load({ params, platform }) {
 			isComingSoon: info.isComingSoon === true,
 			restrictMerchantAccess: partner.restrictMerchantAccess === true,
 			partnerTokenExpiration: info.partnerTokenExpiration || 3600,
-			disableOrderSaving: info.disableOrderSaving === true
-		}
+			disableOrderSaving: info.disableOrderSaving === true,
+			category: info.category || ''
+		},
+		allCategories: [...customCategories]
 	};
 }

@@ -14,7 +14,7 @@
 		</Button>
 	</DropdownMenu.Trigger>
 	<DropdownMenu.Content class="w-[160px]" align="end">
-		<DropdownMenu.Item on:click={onEdit}>Edit</DropdownMenu.Item>
-		<DropdownMenu.Item on:click={onOpenProducts}>Products</DropdownMenu.Item>
+		<DropdownMenu.Item onclick={onEdit}>Edit</DropdownMenu.Item>
+		<DropdownMenu.Item onclick={onOpenProducts}>Products</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>

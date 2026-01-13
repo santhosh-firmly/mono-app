@@ -1,11 +1,13 @@
 import { json } from '@sveltejs/kit';
-import { getOrCreateUser, createSession, grantMerchantAccess } from '$lib/server/user.js';
+import { getOrCreateUser, createSession } from '$lib/server/user.js';
+import { addTeamMember } from '$lib/server/merchant.js';
 import {
 	checkRateLimit,
 	rateLimitedResponse,
 	resetRateLimit,
 	RATE_LIMIT_PRESETS
 } from '$lib/server/rate-limit.js';
+import { initiateControlPanelOnboarding, normalizeDomain } from '$lib/server/control-panel.js';
 
 /**
  * POST /api/otp/verify
@@ -109,13 +111,41 @@ export async function POST({ request, platform, cookies }) {
 		});
 
 		// Grant access to the domain merchant
-		const merchantDomain = storedData.domain || storedData.email.split('@')[1];
+		const rawDomain = storedData.domain || storedData.email.split('@')[1];
+		const merchantDomain = normalizeDomain(rawDomain);
 		if (merchantDomain) {
-			await grantMerchantAccess({
+			// Add to MerchantDO team table AND DashUserDO merchant_access
+			await addTeamMember({
 				platform,
-				userId: user.userId,
 				merchantDomain,
-				role: 'owner'
+				userId: user.userId,
+				userEmail: user.email,
+				role: 'owner',
+				grantedBy: null // Self-signup
+			});
+
+			// Update D1 with owner_user_id
+			const db = platform?.env?.dashUsers;
+			if (db) {
+				await db
+					.prepare(
+						`UPDATE merchant_dashboards
+						 SET owner_user_id = ?, status = 'active'
+						 WHERE domain = ? AND owner_user_id IS NULL`
+					)
+					.bind(user.userId, merchantDomain)
+					.run();
+			}
+
+			// Initiate merchant onboarding on Control Panel (fire-and-forget)
+			// This creates the merchant in Control Panel and starts the integration workflow
+			initiateControlPanelOnboarding({
+				platform,
+				domain: merchantDomain,
+				name: storedData.company || merchantDomain
+			}).catch((error) => {
+				// Log but don't fail signup if Control Panel call fails
+				console.error('Failed to initiate Control Panel onboarding:', error);
 			});
 		}
 
@@ -135,7 +165,7 @@ export async function POST({ request, platform, cookies }) {
 			email: storedData.email,
 			domain: merchantDomain,
 			userId: user.userId,
-			redirectTo: '/'
+			redirectTo: merchantDomain ? `/merchant/${merchantDomain}` : '/'
 		});
 	} catch (error) {
 		console.error('OTP verify error:', error);

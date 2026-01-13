@@ -30,20 +30,9 @@ This hybrid approach provides:
 
 Minimal user index for email lookups and admin operations.
 
-```sql
-CREATE TABLE IF NOT EXISTS users (
-  id TEXT PRIMARY KEY,                    -- UUID, matches DashUserDO name
-  email TEXT UNIQUE NOT NULL,
-  created_at TEXT DEFAULT (datetime('now')),
-  last_login_at TEXT
-);
-
-CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
-```
-
 | Column | Type | Description |
 |--------|------|-------------|
-| `id` | TEXT | User UUID (primary key, DO identifier) |
+| `id` | TEXT | User UUID (primary key, matches DashUserDO name) |
 | `email` | TEXT | Unique email address |
 | `created_at` | TEXT | Account creation timestamp |
 | `last_login_at` | TEXT | Last login timestamp |
@@ -53,41 +42,15 @@ CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 - Transactional updates within user context
 - Global edge availability
 
-**Usage:**
-```javascript
-// Check if user exists by email
-const user = await db
-  .prepare('SELECT id, email FROM users WHERE email = ?')
-  .bind(email)
-  .first();
-
-// Create user entry (done alongside DashUserDO initialization)
-await db
-  .prepare('INSERT INTO users (id, email) VALUES (?, ?)')
-  .bind(userId, email)
-  .run();
-```
+**Primary use cases:**
+- Look up user by email to find their UUID
+- Create user entry alongside DashUserDO initialization
 
 ---
 
 ### merchant_dashboards
 
 Tracks merchant dashboards created by Firmly admins.
-
-```sql
-CREATE TABLE IF NOT EXISTS merchant_dashboards (
-  domain TEXT PRIMARY KEY,                    -- Merchant domain (e.g., "acme.com")
-  created_at TEXT DEFAULT (datetime('now')),
-  created_by TEXT,                            -- Admin user ID who created it
-  owner_email TEXT,                           -- Email of the first owner (from invite)
-  owner_user_id TEXT,                         -- User ID of owner (populated after invite acceptance)
-  status TEXT DEFAULT 'pending',              -- pending, active, suspended
-  notes TEXT                                  -- Admin notes
-);
-
-CREATE INDEX IF NOT EXISTS idx_merchant_dashboards_status ON merchant_dashboards(status);
-CREATE INDEX IF NOT EXISTS idx_merchant_dashboards_created_at ON merchant_dashboards(created_at);
-```
 
 | Column | Type | Description |
 |--------|------|-------------|
@@ -100,6 +63,7 @@ CREATE INDEX IF NOT EXISTS idx_merchant_dashboards_created_at ON merchant_dashbo
 | `notes` | TEXT | Admin notes |
 
 **Status Lifecycle:**
+
 ```mermaid
 flowchart LR
     A[pending] -->|Owner accepts invite| B[active]
@@ -107,48 +71,16 @@ flowchart LR
     C -->|Admin action| B
 ```
 
-**Usage:**
-```javascript
-// List all dashboards for admin
-const { results } = await db
-  .prepare(`
-    SELECT domain, created_at, owner_email, status
-    FROM merchant_dashboards
-    ORDER BY created_at DESC
-  `)
-  .all();
-
-// Activate dashboard after invite acceptance
-await db
-  .prepare(`
-    UPDATE merchant_dashboards
-    SET owner_user_id = ?, status = 'active'
-    WHERE domain = ? AND owner_user_id IS NULL
-  `)
-  .bind(userId, domain)
-  .run();
-```
+**Primary use cases:**
+- List all dashboards for admin view
+- Check dashboard status before operations
+- Activate dashboard after invite acceptance
 
 ---
 
 ### merchant_team
 
 Tracks team membership for each merchant dashboard.
-
-```sql
-CREATE TABLE IF NOT EXISTS merchant_team (
-  merchant_domain TEXT NOT NULL,              -- Merchant domain
-  user_id TEXT NOT NULL,                      -- User UUID
-  user_email TEXT NOT NULL,                   -- User email (denormalized)
-  role TEXT NOT NULL DEFAULT 'viewer',        -- owner, editor, viewer
-  granted_at TEXT DEFAULT (datetime('now')),
-  granted_by TEXT,                            -- User ID who granted access
-  PRIMARY KEY (merchant_domain, user_id)
-);
-
-CREATE INDEX IF NOT EXISTS idx_merchant_team_domain ON merchant_team(merchant_domain);
-CREATE INDEX IF NOT EXISTS idx_merchant_team_user ON merchant_team(user_id);
-```
 
 | Column | Type | Description |
 |--------|------|-------------|
@@ -161,61 +93,36 @@ CREATE INDEX IF NOT EXISTS idx_merchant_team_user ON merchant_team(user_id);
 
 **Why denormalize email?** Avoids JOIN for common display operations.
 
-**Data Mirroring:**
-This table mirrors data in:
+**Data Mirroring:** This table mirrors data in:
 - `DashUserDO.merchant_access` - user's perspective
 - `MerchantDO.team` - merchant's perspective
 
 All three are updated together for consistency.
 
-**Usage:**
-```javascript
-// Get all team members for a merchant
-const { results } = await db
-  .prepare(`
-    SELECT user_id, user_email, role, granted_at
-    FROM merchant_team
-    WHERE merchant_domain = ?
-    ORDER BY granted_at ASC
-  `)
-  .bind(domain)
-  .all();
-
-// Get all merchants a user has access to
-const { results } = await db
-  .prepare(`
-    SELECT merchant_domain, role
-    FROM merchant_team
-    WHERE user_id = ?
-  `)
-  .bind(userId)
-  .all();
-```
+**Primary use cases:**
+- Get all team members for a merchant
+- Get all merchants a user has access to
+- Admin queries across all merchants
 
 ---
 
 ## Reporting Database
 
-The `reporting` database contains order data:
+The `reporting` database contains order data.
 
 ### orders
 
-```sql
-CREATE TABLE orders (
-  id TEXT PRIMARY KEY,
-  shop_id TEXT NOT NULL,                      -- Merchant domain
-  app_id TEXT NOT NULL,                       -- Destination identifier
-  platform_order_number TEXT,
-  order_total REAL,
-  currency TEXT,
-  status TEXT,
-  created_dt TEXT,
-  order_info TEXT                             -- JSON blob with full order data
-);
-
-CREATE INDEX idx_orders_shop ON orders(shop_id);
-CREATE INDEX idx_orders_created ON orders(created_dt);
-```
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | TEXT | Order ID (primary key) |
+| `shop_id` | TEXT | Merchant domain |
+| `app_id` | TEXT | Destination identifier |
+| `platform_order_number` | TEXT | External order number |
+| `order_total` | REAL | Order total amount |
+| `currency` | TEXT | Currency code |
+| `status` | TEXT | Order status |
+| `created_dt` | TEXT | Order creation timestamp |
+| `order_info` | TEXT | JSON blob with full order data |
 
 **Security:** All queries MUST filter by `shop_id` to prevent cross-merchant data access.
 
@@ -223,16 +130,14 @@ CREATE INDEX idx_orders_created ON orders(created_dt);
 
 ## Configs Database
 
-The `firmlyConfigs` database contains application configuration:
+The `firmlyConfigs` database contains application configuration.
 
 ### app_identifiers
 
-```sql
-CREATE TABLE app_identifiers (
-  key TEXT PRIMARY KEY,                       -- Destination ID (e.g., "amazon")
-  info TEXT                                   -- JSON with destination details
-);
-```
+| Column | Type | Description |
+|--------|------|-------------|
+| `key` | TEXT | Destination ID (primary key) |
+| `info` | TEXT | JSON with destination details |
 
 ---
 
@@ -247,89 +152,21 @@ Located in `packages/dash/migrations/`:
 | `0003_merchant_team.sql` | Create merchant_team table |
 | `0004_merchant_info.sql` | Additional merchant fields |
 
-Run migrations via Wrangler:
-```bash
-npx wrangler d1 migrations apply dashUsers
-```
-
-## Query Patterns
-
-### User Lookup by Email
-
-```javascript
-async function getUserIdByEmail({ platform, email }) {
-  const user = await platform.env.dashUsers
-    .prepare('SELECT id FROM users WHERE email = ?')
-    .bind(email)
-    .first();
-
-  return user ? { userId: user.id } : null;
-}
-```
-
-### Merchant Dashboard List (Admin)
-
-```javascript
-async function listDashboards({ platform }) {
-  const { results } = await platform.env.dashUsers
-    .prepare(`
-      SELECT domain, created_at, owner_email, status
-      FROM merchant_dashboards
-      ORDER BY created_at DESC
-    `)
-    .all();
-
-  return results;
-}
-```
-
-### User's Merchants
-
-```javascript
-async function getUserMerchants({ platform, userId }) {
-  const { results } = await platform.env.dashUsers
-    .prepare(`
-      SELECT merchant_domain, role
-      FROM merchant_team
-      WHERE user_id = ?
-    `)
-    .bind(userId)
-    .all();
-
-  return results;
-}
-```
+Run migrations via Wrangler: `npx wrangler d1 migrations apply dashUsers`
 
 ## Consistency Patterns
 
 ### Dual-Write Pattern
 
-When granting merchant access:
+When granting merchant access, data is written to three locations:
 
-```javascript
-// 1. Update D1 (queryable index)
-await db.prepare(`
-  INSERT INTO merchant_team (merchant_domain, user_id, user_email, role)
-  VALUES (?, ?, ?, ?)
-`).bind(domain, userId, email, role).run();
+1. **D1** `merchant_team` - Queryable index for admin operations
+2. **DashUserDO** `merchant_access` - User's view of their merchants
+3. **MerchantDO** `team` - Merchant's view of their team
 
-// 2. Update DashUserDO (user's view)
-const userDO = getUserDO(platform, userId);
-await userDO.fetch('/merchant-access', {
-  method: 'POST',
-  body: JSON.stringify({ merchantDomain: domain, role })
-});
-
-// 3. Update MerchantDO (merchant's view)
-const merchantDO = getMerchantDO(platform, domain);
-await merchantDO.fetch('/team', {
-  method: 'POST',
-  body: JSON.stringify({ userId, userEmail: email, role })
-});
-```
+All three writes happen atomically within the same request to maintain consistency.
 
 ## Related Documentation
 
 - [Durable Objects](./durable-objects.md) - DO schemas
 - [Storage Architecture](../architecture/storage.md) - Design decisions
-- [API Reference](../api/README.md) - How APIs use storage

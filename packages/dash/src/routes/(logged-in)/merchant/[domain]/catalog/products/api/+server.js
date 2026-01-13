@@ -38,7 +38,9 @@ export async function GET({ locals, params, url, platform }) {
 		console.log('apiUrl', apiUrl);
 		const response = await fetch(apiUrl, {
 			headers: {
-				Authorization: `Basic ${btoa(`admin:!Firmly2025`)}`
+				Authorization: `Basic ${btoa(`admin:!Firmly2025`)}`,
+				'CF-Access-Client-Id': platform.env.CF_ACCESS_CLIENT_ID,
+				'CF-Access-Client-Secret': platform.env.CF_ACCESS_CLIENT_SECRET
 			}
 		});
 

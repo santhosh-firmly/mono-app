@@ -14,9 +14,9 @@
 		"deploy-prod": "npm run build-ci && wrangler deploy --env prod",
 		"format-code": "eslint . --fix",
 		"format-code:check": "eslint . --fix=false",
-		"test": "npm run build-ci && vitest run --silent",
-		"test:watch": "npm run build-ci && vitest",
-		"test:ui": "npm run build-ci && vitest --ui"
+		"test": "vitest run --silent",
+		"test:watch": "vitest",
+		"test:ui": "vitest --ui"
 	},
 	"dependencies": {
 		"foundation": "github:goyalu/foundation#*"

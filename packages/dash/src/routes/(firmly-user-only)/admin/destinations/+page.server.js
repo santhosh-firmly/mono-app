@@ -29,6 +29,9 @@ export async function load({ platform }) {
 		}
 	}
 
+	// Collect all unique categories for the combobox
+	const customCategories = new Set();
+
 	// Map destinations with all config fields
 	const destinations = (appIdentifiers || []).map((row) => {
 		let info = {};
@@ -38,12 +41,18 @@ export async function load({ platform }) {
 			// Use defaults
 		}
 
+		// Collect category if present
+		if (info.category && typeof info.category === 'string') {
+			customCategories.add(info.category);
+		}
+
 		const partner = partnerMap.get(row.key) || {};
 
 		return {
 			appId: row.key,
 			displayName: info.display_name || info.subject || row.key,
 			subject: info.subject || row.key,
+			category: info.category || '',
 			isSystem: info.isSystem === true,
 			isComingSoon: info.isComingSoon === true,
 			restrictMerchantAccess: partner.restrictMerchantAccess === true,
@@ -55,5 +64,5 @@ export async function load({ platform }) {
 	// Sort by display name
 	destinations.sort((a, b) => a.displayName.localeCompare(b.displayName));
 
-	return { destinations };
+	return { destinations, allCategories: [...customCategories] };
 }

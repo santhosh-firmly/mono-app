@@ -92,80 +92,27 @@ flowchart TD
 
 All authentication is handled centrally in `hooks.server.js`:
 
-```javascript
-export async function handle({ event, resolve }) {
-  const { pathname } = event.url;
+- **Admin routes** (`/admin/*`): Check Azure AD cookie, redirect to `/auth/sign-in` if invalid
+- **Azure AD callbacks** (`/auth/*`): Allow without auth
+- **Public auth APIs** (`/api/otp/*`, `/api/magic-link/*`): Allow without auth
+- **Invite routes** (`/invite/*`): Allow without auth
+- **Protected routes** (`/`, `/merchant/*`, `/profile`): Require valid JWT session
+- **Logged-out routes** (`/login/*`, `/signup/*`): Redirect to `/` if already authenticated
 
-  // Admin routes - Azure AD
-  if (pathname.startsWith('/admin')) {
-    return handleAdminAuth(event, resolve);
-  }
+### Hybrid Authentication
 
-  // Azure AD callbacks - public
-  if (pathname.startsWith('/auth/')) {
-    return resolve(event);
-  }
-
-  // Public auth APIs
-  if (pathname.startsWith('/api/otp/') ||
-      pathname.startsWith('/api/magic-link/') ||
-      pathname.startsWith('/api/invite/')) {
-    return resolve(event);
-  }
-
-  // Invite routes - public
-  if (pathname.startsWith('/invite')) {
-    return resolve(event);
-  }
-
-  // Check for Firmly admin (hybrid auth)
-  let userSession = await checkFirmlyAdmin(event);
-
-  // Fall back to JWT session
-  if (!userSession) {
-    userSession = await validateJWTSession(event);
-  }
-
-  event.locals.session = userSession;
-
-  // Protected routes require session
-  if (isProtectedRoute(pathname) && !userSession) {
-    redirect(302, '/login');
-  }
-
-  // Logged-out routes redirect if authenticated
-  if (isLoggedOutRoute(pathname) && userSession) {
-    redirect(302, '/');
-  }
-
-  return resolve(event);
-}
-```
+For `/merchant/*` routes, the system first checks for an Azure AD cookie. If valid, it creates a synthetic session with `isFirmlyAdmin: true`. This allows Firmly admins to view any merchant dashboard.
 
 ## Session in Locals
 
 After authentication, session data is available in `event.locals`:
 
-```typescript
-interface Session {
-  userId: string;
-  email: string;
-  sessionId: string | null;
-  isFirmlyAdmin?: boolean;
-}
-
-// Access in load functions
-export async function load({ locals }) {
-  const { userId, email, isFirmlyAdmin } = locals.session;
-  // ...
-}
-
-// Access in API routes
-export async function POST({ locals }) {
-  const { userId } = locals.session;
-  // ...
-}
-```
+| Property | Type | Description |
+|----------|------|-------------|
+| `userId` | string | User UUID |
+| `email` | string | User's email |
+| `sessionId` | string | Session ID (null for Azure AD) |
+| `isFirmlyAdmin` | boolean | Whether user is Firmly admin |
 
 ## Dynamic Routes
 
@@ -191,56 +138,17 @@ Used for team member operations:
 API routes follow the convention:
 - Located in `api/` directories
 - Use `+server.js` files
-- Export HTTP method handlers (`GET`, `POST`, `PUT`, `DELETE`)
-
-Example:
-```javascript
-// routes/(logged-in)/merchant/[domain]/api/team/+server.js
-export async function GET({ params, platform }) {
-  const team = await getMerchantTeam({
-    platform,
-    merchantDomain: params.domain
-  });
-  return json(team);
-}
-
-export async function POST({ request, params, platform, locals }) {
-  // Invite team member
-}
-```
+- Export HTTP method handlers (GET, POST, PUT, DELETE)
 
 ## Load Functions
 
 ### Server Load (`+page.server.js`)
 
-Runs on server, can access platform bindings:
-
-```javascript
-export async function load({ platform, locals, params }) {
-  const { domain } = params;
-  const { userId } = locals.session;
-
-  const data = await fetchData(platform, domain);
-  return { data };
-}
-```
+Runs on server, can access platform bindings for data fetching.
 
 ### Layout Load (`+layout.server.js`)
 
-Runs for all child routes:
-
-```javascript
-// routes/(logged-in)/merchant/[domain]/+layout.server.js
-export async function load({ platform, locals, params }) {
-  // Load merchant data for all child pages
-  const merchantAccess = await getMerchantAccess({
-    platform,
-    userId: locals.session.userId
-  });
-
-  return { merchantAccess };
-}
-```
+Runs for all child routes, useful for loading shared data like merchant access list.
 
 ## Related Documentation
 

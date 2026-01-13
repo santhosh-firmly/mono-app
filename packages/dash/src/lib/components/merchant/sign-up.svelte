@@ -64,7 +64,9 @@
 			// Check if email domain matches URL domain
 			const urlDomain = extractDomain(url);
 			const emailDomain = getEmailDomain(email);
-			if (urlDomain && emailDomain && urlDomain !== emailDomain) {
+			// Allow @firmly.ai emails to onboard any merchant
+			const isFirmlyEmail = emailDomain === 'firmly.ai';
+			if (urlDomain && emailDomain && urlDomain !== emailDomain && !isFirmlyEmail) {
 				newErrors.email = `Email must be from ${urlDomain}. If you must use a different email, please <a href="mailto:support@firmly.ai" class="underline text-primary">contact support</a>.`;
 				isValid = false;
 			}
@@ -121,7 +123,7 @@
 
 				// Navigate to email verification page
 				const params = new URLSearchParams({ email, domain });
-				goto(`signup/verify-email?${params.toString()}`);
+				goto(`verify-email?${params.toString()}`);
 			} catch {
 				errors = {
 					...errors,

@@ -6,6 +6,8 @@
  * Follows the same patterns as merchant.js for consistency.
  */
 
+import { getProfilesWithAvatarsForUsers } from '$lib/server/user.js';
+
 /**
  * Helper to make requests to the DestinationDO via dash-do service.
  * @param {Object} platform - SvelteKit platform object
@@ -14,7 +16,7 @@
  * @param {Object} options - Fetch options
  * @returns {Promise<Response>}
  */
-export async function fetchDestinationDO(platform, appId, path, options = {}) {
+async function fetchDestinationDO(platform, appId, path, options = {}) {
 	const DASH_DO = platform?.env?.DASH_DO;
 	if (!DASH_DO) {
 		throw new Error('DASH_DO service binding not configured');
@@ -72,46 +74,6 @@ export async function getDestinationAccess({ platform, userId }) {
 		return [];
 	} catch {
 		return [];
-	}
-}
-
-/**
- * Validate that a user has access to a specific destination.
- * @param {Object} params
- * @param {Object} params.platform - SvelteKit platform object
- * @param {string} params.userId - User UUID
- * @param {string} params.appId - Destination app_id
- * @returns {Promise<Object|null>} Access entry if valid, null otherwise
- */
-export async function validateDestinationAccess({ platform, userId, appId }) {
-	try {
-		const access = await getDestinationAccess({ platform, userId });
-		return access.find((a) => a.app_id === appId) || null;
-	} catch {
-		return null;
-	}
-}
-
-/**
- * Grant destination access to a user.
- * Updates the user's DashUserDO destination_access list.
- * @param {Object} params
- * @param {Object} params.platform - SvelteKit platform object
- * @param {string} params.userId - User UUID
- * @param {string} params.appId - Destination app_id
- * @param {string} params.role - Role (owner, editor, viewer)
- * @returns {Promise<boolean>} Success
- */
-export async function grantDestinationAccess({ platform, userId, appId, role = 'owner' }) {
-	try {
-		await fetchDashUserDO(platform, userId, '/destination-access', {
-			method: 'POST',
-			body: JSON.stringify({ appId, role })
-		});
-		return true;
-	} catch (error) {
-		console.error('Error granting destination access:', error);
-		return false;
 	}
 }
 
@@ -189,10 +151,11 @@ export async function updateDestinationProfile({ platform, appId, profile, actor
 
 /**
  * Get all team members for a destination from DestinationDO.
+ * Enriches team data with user profiles (name, avatarDataUrl).
  * @param {Object} params
  * @param {Object} params.platform - SvelteKit platform object
  * @param {string} params.appId - Destination app_id
- * @returns {Promise<Array>} List of team members
+ * @returns {Promise<Array>} List of team members with profile data
  */
 export async function getDestinationTeam({ platform, appId }) {
 	try {
@@ -201,7 +164,23 @@ export async function getDestinationTeam({ platform, appId }) {
 			console.error('Failed to get destination team:', await response.text());
 			return [];
 		}
-		return response.json();
+		const team = await response.json();
+
+		if (team.length === 0) return [];
+
+		// Fetch profiles for all team members in parallel
+		const userIds = team.map((member) => member.user_id);
+		const profilesMap = await getProfilesWithAvatarsForUsers({ platform, userIds });
+
+		// Enrich team data with profile information
+		return team.map((member) => {
+			const profile = profilesMap.get(member.user_id) || {};
+			return {
+				...member,
+				name: profile.name || null,
+				avatarDataUrl: profile.avatarDataUrl || null
+			};
+		});
 	} catch (error) {
 		console.error('Error getting destination team:', error);
 		return [];
@@ -579,25 +558,6 @@ export async function cancelDestinationInvite({ platform, appId, inviteId, actor
 	}
 }
 
-/**
- * Get pending invites for a destination.
- * @param {Object} params
- * @param {Object} params.platform - SvelteKit platform object
- * @param {string} params.appId - Destination app_id
- * @returns {Promise<Array>} List of pending invites
- */
-export async function getDestinationPendingInvites({ platform, appId }) {
-	try {
-		const response = await fetchDestinationDO(platform, appId, '/invites');
-		if (response.ok) {
-			return response.json();
-		}
-		return [];
-	} catch {
-		return [];
-	}
-}
-
 // ============================================================================
 // Audit Log Functions
 // ============================================================================
@@ -796,405 +756,6 @@ export async function getAccessibleMerchants({ platform, appId }) {
 	} catch (error) {
 		console.error('Error getting accessible merchants:', error);
 		return [];
-	}
-}
-
-/**
- * Get consolidated metrics for a destination across all (or filtered) merchants.
- * @param {Object} params
- * @param {Object} params.platform - SvelteKit platform object
- * @param {string} params.appId - Destination app_id
- * @param {string} params.periodStart - Period start date (ISO string)
- * @param {string} params.periodEnd - Period end date (ISO string)
- * @param {Array<string>} params.merchantFilter - Optional list of merchant domains to filter
- * @returns {Promise<Object>} { totalRevenue, totalOrders, aov }
- */
-export async function getConsolidatedMetrics({
-	platform,
-	appId,
-	periodStart,
-	periodEnd,
-	merchantFilter = null
-}) {
-	try {
-		const reporting = platform?.env?.reporting;
-		if (!reporting) {
-			throw new Error('reporting D1 binding not configured');
-		}
-
-		// Get accessible merchants if no filter provided
-		let merchants = merchantFilter;
-		if (!merchants) {
-			const accessible = await getAccessibleMerchants({ platform, appId });
-			merchants = accessible.map((m) => m.domain);
-		}
-
-		if (merchants.length === 0) {
-			return { totalRevenue: 0, totalOrders: 0, aov: 0 };
-		}
-
-		const placeholders = merchants.map(() => '?').join(',');
-
-		const result = await reporting
-			.prepare(
-				`SELECT
-					COALESCE(SUM(order_total), 0) as total_revenue,
-					COUNT(*) as total_orders
-				 FROM orders
-				 WHERE app_id = ?
-				   AND shop_id IN (${placeholders})
-				   AND created_dt >= ?
-				   AND created_dt <= ?`
-			)
-			.bind(appId, ...merchants, periodStart, periodEnd)
-			.first();
-
-		const totalRevenue = result?.total_revenue || 0;
-		const totalOrders = result?.total_orders || 0;
-		const aov = totalOrders > 0 ? totalRevenue / totalOrders : 0;
-
-		return { totalRevenue, totalOrders, aov };
-	} catch (error) {
-		console.error('Error getting consolidated metrics:', error);
-		return { totalRevenue: 0, totalOrders: 0, aov: 0 };
-	}
-}
-
-/**
- * Get top merchants by revenue for a destination.
- * @param {Object} params
- * @param {Object} params.platform - SvelteKit platform object
- * @param {string} params.appId - Destination app_id
- * @param {string} params.periodStart - Period start date
- * @param {string} params.periodEnd - Period end date
- * @param {number} params.limit - Number of top merchants to return (default 5)
- * @returns {Promise<Array>} List of { domain, displayName, revenue, orders }
- */
-export async function getTopMerchants({ platform, appId, periodStart, periodEnd, limit = 5 }) {
-	try {
-		const reporting = platform?.env?.reporting;
-		const firmlyConfigs = platform?.env?.firmlyConfigs;
-		if (!reporting || !firmlyConfigs) {
-			return [];
-		}
-
-		// Get accessible merchants first
-		const accessible = await getAccessibleMerchants({ platform, appId });
-		if (accessible.length === 0) {
-			return [];
-		}
-
-		const merchantMap = new Map(accessible.map((m) => [m.domain, m.displayName]));
-		const merchants = accessible.map((m) => m.domain);
-		const placeholders = merchants.map(() => '?').join(',');
-
-		const result = await reporting
-			.prepare(
-				`SELECT
-					shop_id,
-					COALESCE(SUM(order_total), 0) as revenue,
-					COUNT(*) as orders
-				 FROM orders
-				 WHERE app_id = ?
-				   AND shop_id IN (${placeholders})
-				   AND created_dt >= ?
-				   AND created_dt <= ?
-				 GROUP BY shop_id
-				 ORDER BY revenue DESC
-				 LIMIT ?`
-			)
-			.bind(appId, ...merchants, periodStart, periodEnd, limit)
-			.all();
-
-		return (result.results || []).map((row) => ({
-			domain: row.shop_id,
-			displayName: merchantMap.get(row.shop_id) || row.shop_id,
-			revenue: row.revenue,
-			orders: row.orders,
-			aov: row.orders > 0 ? row.revenue / row.orders : 0
-		}));
-	} catch (error) {
-		console.error('Error getting top merchants:', error);
-		return [];
-	}
-}
-
-/**
- * Get revenue trend data for a destination.
- * @param {Object} params
- * @param {Object} params.platform - SvelteKit platform object
- * @param {string} params.appId - Destination app_id
- * @param {string} params.periodStart - Current period start date
- * @param {string} params.periodEnd - Current period end date
- * @param {string} params.prevPeriodStart - Previous period start date (for comparison)
- * @param {string} params.prevPeriodEnd - Previous period end date
- * @param {Array<string>} params.merchantFilter - Optional merchant filter
- * @returns {Promise<Array>} Array of { date, current, previous }
- */
-export async function getRevenueTrend({
-	platform,
-	appId,
-	periodStart,
-	periodEnd,
-	prevPeriodStart,
-	prevPeriodEnd,
-	merchantFilter = null
-}) {
-	try {
-		const reporting = platform?.env?.reporting;
-		if (!reporting) {
-			return [];
-		}
-
-		// Get accessible merchants if no filter provided
-		let merchants = merchantFilter;
-		if (!merchants) {
-			const accessible = await getAccessibleMerchants({ platform, appId });
-			merchants = accessible.map((m) => m.domain);
-		}
-
-		if (merchants.length === 0) {
-			return [];
-		}
-
-		const placeholders = merchants.map(() => '?').join(',');
-
-		// Get current period daily revenue
-		const currentResult = await reporting
-			.prepare(
-				`SELECT
-					DATE(created_dt) as date,
-					COALESCE(SUM(order_total), 0) as revenue
-				 FROM orders
-				 WHERE app_id = ?
-				   AND shop_id IN (${placeholders})
-				   AND created_dt >= ?
-				   AND created_dt <= ?
-				 GROUP BY DATE(created_dt)
-				 ORDER BY date ASC`
-			)
-			.bind(appId, ...merchants, periodStart, periodEnd)
-			.all();
-
-		// Get previous period daily revenue
-		const prevResult = await reporting
-			.prepare(
-				`SELECT
-					DATE(created_dt) as date,
-					COALESCE(SUM(order_total), 0) as revenue
-				 FROM orders
-				 WHERE app_id = ?
-				   AND shop_id IN (${placeholders})
-				   AND created_dt >= ?
-				   AND created_dt <= ?
-				 GROUP BY DATE(created_dt)
-				 ORDER BY date ASC`
-			)
-			.bind(appId, ...merchants, prevPeriodStart, prevPeriodEnd)
-			.all();
-
-		// Build comparison data
-		const currentMap = new Map((currentResult.results || []).map((r) => [r.date, r.revenue]));
-		const prevArray = prevResult.results || [];
-
-		// Align the periods for comparison
-		const trend = [];
-		const currentDates = Array.from(currentMap.keys()).sort();
-
-		for (let i = 0; i < currentDates.length; i++) {
-			const date = currentDates[i];
-			const current = currentMap.get(date) || 0;
-			const previous = prevArray[i]?.revenue || 0;
-			trend.push({ date, current, previous });
-		}
-
-		return trend;
-	} catch (error) {
-		console.error('Error getting revenue trend:', error);
-		return [];
-	}
-}
-
-/**
- * Get orders for a destination with pagination.
- * @param {Object} params
- * @param {Object} params.platform - SvelteKit platform object
- * @param {string} params.appId - Destination app_id
- * @param {number} params.limit - Number of orders to return
- * @param {number} params.offset - Offset for pagination
- * @param {string} params.merchantFilter - Optional merchant domain filter
- * @param {string} params.search - Optional search term (order number)
- * @param {string} params.periodStart - Optional period start
- * @param {string} params.periodEnd - Optional period end
- * @returns {Promise<Object>} { orders, total, hasMore }
- */
-export async function getDestinationOrders({
-	platform,
-	appId,
-	limit = 20,
-	offset = 0,
-	merchantFilter = null,
-	search = null,
-	periodStart = null,
-	periodEnd = null
-}) {
-	try {
-		const reporting = platform?.env?.reporting;
-		const firmlyConfigs = platform?.env?.firmlyConfigs;
-		if (!reporting || !firmlyConfigs) {
-			return { orders: [], total: 0, hasMore: false };
-		}
-
-		// Get accessible merchants
-		const accessible = await getAccessibleMerchants({ platform, appId });
-		if (accessible.length === 0) {
-			return { orders: [], total: 0, hasMore: false };
-		}
-
-		const merchantMap = new Map(accessible.map((m) => [m.domain, m.displayName]));
-
-		// Apply merchant filter if provided
-		let merchants = accessible.map((m) => m.domain);
-		if (merchantFilter) {
-			merchants = merchants.filter((m) => m === merchantFilter);
-		}
-
-		if (merchants.length === 0) {
-			return { orders: [], total: 0, hasMore: false };
-		}
-
-		const placeholders = merchants.map(() => '?').join(',');
-		let whereClause = `app_id = ? AND shop_id IN (${placeholders})`;
-		const bindParams = [appId, ...merchants];
-
-		// Add search filter
-		if (search) {
-			whereClause += ` AND platform_order_number LIKE ?`;
-			bindParams.push(`%${search}%`);
-		}
-
-		// Add period filter
-		if (periodStart && periodEnd) {
-			whereClause += ` AND created_dt >= ? AND created_dt <= ?`;
-			bindParams.push(periodStart, periodEnd);
-		}
-
-		// Get total count
-		const countResult = await reporting
-			.prepare(`SELECT COUNT(*) as total FROM orders WHERE ${whereClause}`)
-			.bind(...bindParams)
-			.first();
-
-		const total = countResult?.total || 0;
-
-		// Get paginated orders
-		const ordersResult = await reporting
-			.prepare(
-				`SELECT
-					platform_order_number,
-					shop_id,
-					order_total,
-					created_dt,
-					order_info
-				 FROM orders
-				 WHERE ${whereClause}
-				 ORDER BY created_dt DESC
-				 LIMIT ? OFFSET ?`
-			)
-			.bind(...bindParams, limit, offset)
-			.all();
-
-		const orders = (ordersResult.results || []).map((row) => {
-			let orderInfo = {};
-			try {
-				orderInfo = JSON.parse(row.order_info || '{}');
-			} catch {
-				// Use defaults
-			}
-			return {
-				orderId: row.platform_order_number,
-				merchantDomain: row.shop_id,
-				merchantName: merchantMap.get(row.shop_id) || row.shop_id,
-				total: row.order_total,
-				createdAt: row.created_dt,
-				itemsCount: orderInfo.line_items?.length || 0
-			};
-		});
-
-		return {
-			orders,
-			total,
-			hasMore: offset + orders.length < total
-		};
-	} catch (error) {
-		console.error('Error getting destination orders:', error);
-		return { orders: [], total: 0, hasMore: false };
-	}
-}
-
-/**
- * Get order detail for a destination.
- * @param {Object} params
- * @param {Object} params.platform - SvelteKit platform object
- * @param {string} params.appId - Destination app_id
- * @param {string} params.orderId - Order ID (platform_order_number)
- * @returns {Promise<Object|null>} Order detail or null if not found/not accessible
- */
-export async function getOrderDetail({ platform, appId, orderId }) {
-	try {
-		const reporting = platform?.env?.reporting;
-		if (!reporting) {
-			return null;
-		}
-
-		// Get accessible merchants to validate access
-		const accessible = await getAccessibleMerchants({ platform, appId });
-		if (accessible.length === 0) {
-			return null;
-		}
-
-		const merchantMap = new Map(accessible.map((m) => [m.domain, m.displayName]));
-		const merchants = accessible.map((m) => m.domain);
-		const placeholders = merchants.map(() => '?').join(',');
-
-		const result = await reporting
-			.prepare(
-				`SELECT
-					platform_order_number,
-					shop_id,
-					order_total,
-					created_dt,
-					order_info
-				 FROM orders
-				 WHERE platform_order_number = ?
-				   AND app_id = ?
-				   AND shop_id IN (${placeholders})`
-			)
-			.bind(orderId, appId, ...merchants)
-			.first();
-
-		if (!result) {
-			return null;
-		}
-
-		let orderInfo = {};
-		try {
-			orderInfo = JSON.parse(result.order_info || '{}');
-		} catch {
-			// Use defaults
-		}
-
-		return {
-			orderId: result.platform_order_number,
-			merchantDomain: result.shop_id,
-			merchantName: merchantMap.get(result.shop_id) || result.shop_id,
-			total: result.order_total,
-			createdAt: result.created_dt,
-			lineItems: orderInfo.line_items || []
-		};
-	} catch (error) {
-		console.error('Error getting order detail:', error);
-		return null;
 	}
 }
 

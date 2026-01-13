@@ -1,13 +1,20 @@
 <script>
 	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
 	import DestinationNavbar from '$lib/components/destination/destination-navbar.svelte';
 	import DestinationHeader from '$lib/components/destination/destination-header.svelte';
 	import FirmlyAdminBanner from '$lib/components/merchant/firmly-admin-banner.svelte';
 	import ContentContainer from '$lib/components/ui/content-container.svelte';
+	import { adminMode } from '$lib/stores/admin-mode.svelte.js';
 
 	let { data, children } = $props();
 
 	let currentPath = $derived($page.url.pathname);
+
+	// Initialize admin mode from URL param on page load
+	onMount(() => {
+		adminMode.initializeFromUrl();
+	});
 </script>
 
 <div class="flex min-h-screen flex-col bg-background">
@@ -25,6 +32,8 @@
 		merchantAccess={data.merchantAccess}
 		userRole={data.userRole}
 		pendingInvites={data.pendingInvites}
+		isFirmlyAdmin={data.isFirmlyAdmin}
+		hasAzureADAuth={data.hasAzureADAuth}
 		{currentPath}
 	/>
 

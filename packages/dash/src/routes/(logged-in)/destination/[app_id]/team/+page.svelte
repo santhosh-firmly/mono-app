@@ -10,6 +10,7 @@
 		RemoveMemberDialog,
 		TeamMembersTable
 	} from '$lib/components/team/index.js';
+	import { adminFetch } from '$lib/utils/fetch.js';
 
 	let { data } = $props();
 	let appId = $derived($page.params.app_id);
@@ -46,7 +47,7 @@
 		inviteSuccess = '';
 
 		try {
-			const response = await fetch(`/destination/${appId}/api/team/invite`, {
+			const response = await adminFetch(`/destination/${appId}/api/team/invite`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(form)
@@ -90,11 +91,14 @@
 		roleError = '';
 
 		try {
-			const response = await fetch(`/destination/${appId}/api/team/${roleTarget.userId}`, {
-				method: 'PUT',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ role: newRole })
-			});
+			const response = await adminFetch(
+				`/destination/${appId}/api/team/${roleTarget.userId}`,
+				{
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ role: newRole })
+				}
+			);
 
 			const result = await response.json();
 
@@ -126,9 +130,12 @@
 		removeError = '';
 
 		try {
-			const response = await fetch(`/destination/${appId}/api/team/${removeTarget.userId}`, {
-				method: 'DELETE'
-			});
+			const response = await adminFetch(
+				`/destination/${appId}/api/team/${removeTarget.userId}`,
+				{
+					method: 'DELETE'
+				}
+			);
 
 			const result = await response.json();
 

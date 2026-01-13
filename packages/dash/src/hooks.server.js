@@ -88,12 +88,16 @@ async function handleAuth({ event, resolve }) {
 	}
 
 	// ============================================
-	// Check for Firmly admin (Azure AD) FIRST - takes precedence
-	// This enables hybrid auth: admins can access merchant dashboards
+	// Check for Firmly admin (Azure AD) with admin mode URL param
+	// Admin mode requires BOTH valid Azure AD AND ?admin_mode=true URL param
+	// URL param approach enables tab isolation (each tab has its own admin mode state)
 	// ============================================
 	const firmlyAuthCookie = cookies.get(platform?.env?.FIRMLY_AUTH_COOKIE);
+	const adminModeParam = url.searchParams.get('admin_mode') === 'true';
 	let userSession = null;
+	let hasAzureADAuth = false;
 
+	// Check if user has valid Azure AD auth (for toggle visibility)
 	if (firmlyAuthCookie) {
 		try {
 			const { authInfo } = await enforceSSOAuth(firmlyAuthCookie, {
@@ -101,16 +105,21 @@ async function handleAuth({ event, resolve }) {
 				azureClientId: platform?.env?.PUBLIC_AZURE_AD_CLIENT_ID
 			});
 
-			// Create synthetic session for Firmly admin
-			event.locals.authInfo = authInfo;
-			userSession = {
-				userId: authInfo.oid || authInfo.sub,
-				email: authInfo.email || authInfo.preferred_username,
-				sessionId: null,
-				isFirmlyAdmin: true
-			};
+			hasAzureADAuth = true;
+
+			// Only use admin session if URL param requests admin mode
+			if (adminModeParam) {
+				event.locals.authInfo = authInfo;
+				userSession = {
+					userId: authInfo.oid || authInfo.sub,
+					email: authInfo.email || authInfo.preferred_username,
+					sessionId: null,
+					isFirmlyAdmin: true,
+					hasAzureADAuth: true
+				};
+			}
 		} catch {
-			// Azure AD auth failed, fall through to JWT session
+			// Azure AD auth failed
 		}
 	}
 
@@ -123,6 +132,10 @@ async function handleAuth({ event, resolve }) {
 
 		if (sessionToken && jwtSecret) {
 			userSession = await validateUserSession(event, sessionToken, jwtSecret);
+			// Add Azure AD auth flag for toggle visibility in user menu
+			if (userSession && hasAzureADAuth) {
+				userSession.hasAzureADAuth = true;
+			}
 		}
 	}
 

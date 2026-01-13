@@ -18,6 +18,7 @@
 		PartnerInfoCard,
 		OrderNavigation
 	} from '$lib/components/order/index.js';
+	import { adminFetch } from '$lib/utils/fetch.js';
 
 	let appId = $derived($page.params.app_id);
 	let orderId = $derived($page.params.order_id);
@@ -39,7 +40,7 @@
 		error = '';
 
 		try {
-			const response = await fetch(`/destination/${appId}/api/orders/${orderId}`);
+			const response = await adminFetch(`/destination/${appId}/api/orders/${orderId}`);
 			const result = await response.json();
 
 			if (!response.ok) {

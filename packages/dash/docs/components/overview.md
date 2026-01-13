@@ -57,56 +57,16 @@ src/lib/components/
 
 ### Compound Components
 
-Many UI components use the compound component pattern:
-
-```svelte
-<Card.Root>
-  <Card.Header>
-    <Card.Title>Title</Card.Title>
-    <Card.Description>Description</Card.Description>
-  </Card.Header>
-  <Card.Content>
-    Content here
-  </Card.Content>
-  <Card.Footer>
-    <Button>Action</Button>
-  </Card.Footer>
-</Card.Root>
-```
+Many UI components use the compound component pattern with named exports (e.g., `Card.Root`, `Card.Header`, `Card.Content`).
 
 ### Svelte 5 Runes
 
 Components use Svelte 5's runes for reactivity:
-
-```svelte
-<script>
-  // Props with defaults
-  let { variant = 'default', size = 'md' } = $props();
-
-  // Reactive state
-  let count = $state(0);
-
-  // Derived values
-  let doubled = $derived(count * 2);
-
-  // Side effects
-  $effect(() => {
-    console.log('Count changed:', count);
-  });
-</script>
-```
-
-### Two-way Binding
-
-Use `$bindable` for two-way binding:
-
-```svelte
-<script>
-  let { value = $bindable('') } = $props();
-</script>
-
-<input bind:value />
-```
+- `$props()` - Component props with defaults
+- `$state()` - Reactive state
+- `$derived()` - Computed values
+- `$effect()` - Side effects
+- `$bindable()` - Two-way binding
 
 ## Component Categories
 
@@ -143,111 +103,40 @@ Data visualization using Chart.js:
 
 ## Storybook
 
-Components have corresponding Storybook stories using Svelte CSF:
-
-```svelte
-<!-- login-card.stories.svelte -->
-<script module>
-  import { defineMeta } from '@storybook/addon-svelte-csf';
-  import LoginCard from './login-card.svelte';
-
-  const { Story } = defineMeta({
-    title: 'Auth/LoginCard',
-    component: LoginCard,
-    tags: ['autodocs']
-  });
-</script>
-
-{#snippet template(args)}
-  <LoginCard {...args} />
-{/snippet}
-
-<Story name="Default" {template} />
-```
-
-Run Storybook:
-```bash
-npm run storybook --workspace dash
-```
+Components have corresponding Storybook stories using Svelte CSF. Stories use `@storybook/addon-svelte-csf` with `defineMeta` and template snippets.
 
 ## Styling Approach
 
 ### Tailwind Utility Classes
 
-```svelte
-<div class="flex items-center gap-4 p-4 rounded-lg bg-card">
-  <span class="text-sm font-medium text-muted-foreground">
-    Label
-  </span>
-</div>
-```
+Components use Tailwind utility classes for styling with consistent spacing, colors, and typography.
 
 ### CSS Variables
 
-Theme colors use CSS variables:
-
-```css
-:root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --card: 0 0% 100%;
-  --primary: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
-}
-```
+Theme colors use CSS variables for consistent theming across light/dark modes.
 
 ### Class Merging
 
-Use `cn()` utility for conditional classes:
-
-```javascript
-import { cn } from '$lib/utils.js';
-
-<button class={cn(
-  'px-4 py-2 rounded',
-  variant === 'primary' && 'bg-primary text-white',
-  disabled && 'opacity-50 cursor-not-allowed'
-)}>
-```
+The `cn()` utility function merges Tailwind classes conditionally.
 
 ## Icon Usage
 
-Icons from lucide-svelte:
-
-```svelte
-<script>
-  import House from 'lucide-svelte/icons/house';
-  import Settings from 'lucide-svelte/icons/settings';
-</script>
-
-<House class="h-4 w-4" />
-<Settings class="h-4 w-4 text-muted-foreground" />
-```
+Icons are imported from `lucide-svelte` and sized with Tailwind utility classes.
 
 ## Import Conventions
 
 ### Barrel Exports
 
-Feature folders have `index.js` for clean imports:
-
-```javascript
-// components/auth/index.js
-export { default as LoginCard } from './login-card.svelte';
-export { default as OTPInput } from './otp-input.svelte';
-
-// Usage
-import { LoginCard, OTPInput } from '$lib/components/auth';
-```
+Feature folders have `index.js` for clean imports, allowing imports like `import { LoginCard } from '$lib/components/auth'`.
 
 ### Path Aliases
 
-```javascript
-import Button from '$lib/components/ui/button/button.svelte';
-import { getMerchantTeam } from '$lib/server/merchant.js';
-```
+Standard SvelteKit aliases are used:
+- `$lib` - src/lib
+- `$lib/components` - Component library
+- `$lib/server` - Server-side utilities
 
 ## Related Documentation
 
 - [UI Library](./ui-library.md) - UI primitives
 - [Feature Components](./feature-components.md) - Domain components
-- [Patterns](./patterns.md) - Design patterns

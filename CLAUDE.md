@@ -210,24 +210,24 @@ Both packages use `@storybook/addon-svelte-csf` for writing stories in native Sv
 
 ```svelte
 <script module>
-  import { defineMeta } from '@storybook/addon-svelte-csf';
-  import MyComponent from './my-component.svelte';
+	import { defineMeta } from '@storybook/addon-svelte-csf';
+	import MyComponent from './my-component.svelte';
 
-  const { Story } = defineMeta({
-    title: 'Components/Category/MyComponent',
-    component: MyComponent,
-    tags: ['autodocs'],  // Enable auto-generated documentation
-    parameters: {
-      layout: 'padded'   // or 'centered', 'fullscreen'
-    },
-    argTypes: {
-      propName: { control: 'text' }
-    }
-  });
+	const { Story } = defineMeta({
+		title: 'Components/Category/MyComponent',
+		component: MyComponent,
+		tags: ['autodocs'], // Enable auto-generated documentation
+		parameters: {
+			layout: 'padded' // or 'centered', 'fullscreen'
+		},
+		argTypes: {
+			propName: { control: 'text' }
+		}
+	});
 </script>
 
 {#snippet template(args)}
-  <MyComponent {...args} />
+	<MyComponent {...args} />
 {/snippet}
 
 <Story name="Default" args={{ propName: 'value' }} {template} />
@@ -239,7 +239,7 @@ Both packages use `@storybook/addon-svelte-csf` for writing stories in native Sv
 
 ```svelte
 {#snippet template(args)}
-  <MyComponent {...args} />
+	<MyComponent {...args} />
 {/snippet}
 
 <Story name="Default" args={{ variant: 'primary' }} {template} />
@@ -250,13 +250,13 @@ Both packages use `@storybook/addon-svelte-csf` for writing stories in native Sv
 
 ```svelte
 {#snippet template(args)}
-  <MyComponent {...args} />
+	<MyComponent {...args} />
 {/snippet}
 
 {#snippet withIconTemplate(args)}
-  <MyComponent {...args}>
-    <Icon slot="icon" />
-  </MyComponent>
+	<MyComponent {...args}>
+		<Icon slot="icon" />
+	</MyComponent>
 {/snippet}
 
 <Story name="Default" args={{ label: 'Click me' }} {template} />
@@ -267,11 +267,11 @@ Both packages use `@storybook/addon-svelte-csf` for writing stories in native Sv
 
 ```svelte
 <Story name="Custom">
-  {#snippet template(args)}
-    <div class="custom-wrapper">
-      <MyComponent {...args} />
-    </div>
-  {/snippet}
+	{#snippet template(args)}
+		<div class="custom-wrapper">
+			<MyComponent {...args} />
+		</div>
+	{/snippet}
 </Story>
 ```
 
@@ -316,8 +316,10 @@ npm run storybook --workspace dash
 - Shared ESLint/Prettier config is maintained in `@firmly/eslint-config` package
 
 ## Active Technologies
+
 - JavaScript (ES2022), Svelte 5 with runes, SvelteKit 2 + SvelteKit, Tailwind CSS v3, date-fns, shadcn-svelte components (001-destination-dashboard)
 - Cloudflare D1 (firmlyConfigs, dashUsers, reporting), Durable Objects (DashUserDO for user access, new DestinationDO for destination data) (001-destination-dashboard)
 
 ## Recent Changes
+
 - 001-destination-dashboard: Added JavaScript (ES2022), Svelte 5 with runes, SvelteKit 2 + SvelteKit, Tailwind CSS v3, date-fns, shadcn-svelte components

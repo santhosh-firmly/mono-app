@@ -13,8 +13,8 @@
 export const RATE_LIMIT_PRESETS = {
 	// OTP/Magic link send - 3 requests per hour per email
 	otpSend: {
-		maxRequests: 3,
-		windowMs: 60 * 60 * 1000, // 1 hour
+		maxRequests: 20,
+		windowMs: 10 * 60 * 1000, // 10 minutes
 		keyPrefix: 'ratelimit:otp-send:'
 	},
 	// OTP verify - 5 attempts per code

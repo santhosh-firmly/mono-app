@@ -14,17 +14,71 @@
  * - 'pending' if ALL substeps are pending
  */
 
+/**
+ * Mapping from external Control Panel integration points to internal step IDs.
+ * Multiple external points can map to a single internal step.
+ */
+export const EXTERNAL_POINT_TO_STEP_MAP = {
+	// Content integration
+	get_all_products: 'content-integration',
+	get_product_by_url: 'content-integration',
+
+	// Cart integration
+	get_cart: 'cart-integration',
+	add_item: 'cart-integration',
+	update_item: 'cart-integration',
+	clear_cart: 'cart-integration',
+
+	// Shipping integration
+	set_shipping_info: 'shipping-integration',
+	set_shipping_method: 'shipping-integration'
+
+	// Payment integration - skipped for now
+};
+
+/**
+ * Aggregate multiple statuses into a single status.
+ * Used when multiple external integration points map to one internal step.
+ *
+ * Rules:
+ * - completed: ALL must be completed (no pending/in-progress)
+ * - in-progress: ANY has started (completed or in-progress, but not all completed)
+ * - null: ALL are pending (skip, no update needed)
+ *
+ * @param {Array<string|null>} statuses - Array of status values (null = pending)
+ * @returns {string|null} Aggregated status or null if all pending
+ */
+export function aggregateStatuses(statuses) {
+	if (!statuses || statuses.length === 0) return null;
+
+	// Count completed, in-progress, and pending (null)
+	const completedCount = statuses.filter((s) => s === 'completed').length;
+	const inProgressCount = statuses.filter((s) => s === 'in-progress').length;
+	const totalCount = statuses.length;
+
+	// All completed - only if every single point is completed
+	if (completedCount === totalCount) return 'completed';
+
+	// Any work has started (completed or in-progress)
+	if (completedCount > 0 || inProgressCount > 0) return 'in-progress';
+
+	// All pending - skip (no update needed)
+	return null;
+}
+
 // Placeholder steps - to be replaced with actual step definitions
 export const INTEGRATION_STEPS = [
 	{
 		id: 'platform-identification',
 		title: 'Platform identification',
-		substeps: null
+		substeps: null,
+		defaultStatus: 'completed' // Always starts as completed
 	},
 	{
 		id: 'content-integration',
 		title: 'Content integration',
-		substeps: null
+		substeps: null,
+		defaultStatus: 'in-progress' // Starts as in-progress since it's the first active step
 	},
 	{
 		id: 'cart-integration',
@@ -142,7 +196,7 @@ export function buildIntegrationStatus(dbRecords, stepDefinitions = INTEGRATION_
 				id: stepDef.id,
 				title: stepDef.title,
 				order: index + 1,
-				status: record?.status || 'pending',
+				status: record?.status || stepDef.defaultStatus || 'pending',
 				completedAt: record?.completed_at || null,
 				completedBy: record?.completed_by || null,
 				source: record?.source || null,
