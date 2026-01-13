@@ -1,5 +1,5 @@
 <script>
-	import Skeleton from './skeleton.svelte';
+	import Skeleton from '$lib/components/ui/skeleton.svelte';
 </script>
 
 <div>

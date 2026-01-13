@@ -1,6 +1,6 @@
 <script>
 	import { DotsThree } from 'phosphor-svelte';
-	import DropdownMenu from './dropdown-menu.svelte';
+	import DropdownMenu from '$lib/components/ui/dropdown-menu.svelte';
 	import SessionDetails from './session-details.svelte';
 
 	let { session, onPlay, children, class: className, ...rest } = $props();

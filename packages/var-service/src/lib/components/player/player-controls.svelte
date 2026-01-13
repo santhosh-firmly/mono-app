@@ -1,5 +1,5 @@
 <script>
-	import Button from './button.svelte';
+	import Button from '$lib/components/ui/button.svelte';
 
 	let {
 		playing,
