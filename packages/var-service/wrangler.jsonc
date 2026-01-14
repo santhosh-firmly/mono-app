@@ -46,7 +46,7 @@
 				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
 				"PUBLIC_AZURE_REDIRECT_URL": "https://var.firmlyuat.com/auth/callback",
 				"FIRMLY_AUTH_COOKIE": "fuser",
-				"DVR_SERVICE_URL": "https://session-record.firmlyuat.com"
+				"DVR_SERVICE_URL": "https://dvr.firmlyuat.com"
 			}
 		},
 		"prod": {
@@ -63,7 +63,7 @@
 				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
 				"PUBLIC_AZURE_REDIRECT_URL": "https://var.firmly.live/auth/callback",
 				"FIRMLY_AUTH_COOKIE": "fuser",
-				"DVR_SERVICE_URL": "https://session-record.firmly.live"
+				"DVR_SERVICE_URL": "https://dvr.firmly.live"
 			}
 		}
 	}
