@@ -1,6 +1,6 @@
 {
 	"name": "@firmly/session-recorder",
-	"version": "0.39.2",
+	"version": "0.39.3",
 	"description": "Production-ready, GDPR-compliant session recorder for Firmly applications",
 	"type": "module",
 	"main": "src/index.js",
