@@ -163,13 +163,13 @@
 				{
 					"binding": "dashUsers",
 					"database_name": "dash-users",
-					"database_id": "TO_BE_CREATED_CI"
+					"database_id": "de935e9e-5d62-4b74-8f35-caba9cfd3a84"
 				}
 			],
 			"kv_namespaces": [
 				{
 					"binding": "OTP_STORE",
-					"id": "TO_BE_CREATED_CI"
+					"id": "61bb059721ec4629bc7e59f6de55bcf2"
 				}
 			],
 			"r2_buckets": [
@@ -230,13 +230,13 @@
 				{
 					"binding": "dashUsers",
 					"database_name": "dash-users",
-					"database_id": "TO_BE_CREATED_QA"
+					"database_id": "f5c119a9-c2c7-4433-a626-f758b5627e74"
 				}
 			],
 			"kv_namespaces": [
 				{
 					"binding": "OTP_STORE",
-					"id": "TO_BE_CREATED_QA"
+					"id": "a41c438417f54a57af4d01ff8c0da902"
 				}
 			],
 			"r2_buckets": [
