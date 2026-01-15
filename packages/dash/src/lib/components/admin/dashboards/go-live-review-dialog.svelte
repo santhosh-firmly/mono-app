@@ -64,6 +64,7 @@
 		].filter(Boolean).length
 	);
 	let totalTasks = 6;
+	let allTasksComplete = $derived(completedCount === totalTasks);
 </script>
 
 <Dialog.Root {open} onOpenChange={handleOpenChange}>
@@ -260,6 +261,19 @@
 					rows={3}
 				/>
 			</div>
+
+			<!-- Warning when not all tasks are complete -->
+			{#if !allTasksComplete}
+				<div class="rounded-md border border-amber-200 bg-amber-50 p-3">
+					<div class="flex items-center gap-2 text-amber-700">
+						<AlertCircle class="h-4 w-4 shrink-0" />
+						<p class="text-sm">
+							Cannot approve Go Live until all onboarding tasks are completed ({completedCount}/{totalTasks}
+							complete).
+						</p>
+					</div>
+				</div>
+			{/if}
 		</div>
 
 		<Dialog.Footer class="gap-2 sm:gap-0">
@@ -280,7 +294,7 @@
 			</Button>
 			<Button
 				onclick={handleApprove}
-				disabled={isSubmitting}
+				disabled={isSubmitting || !allTasksComplete}
 				class="bg-green-600 hover:bg-green-700"
 			>
 				{#if isSubmitting}

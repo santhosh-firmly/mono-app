@@ -9,15 +9,13 @@
  * The dash SvelteKit app connects to this worker via service binding.
  */
 
-import { initializeLocalStorage } from 'foundation/data-management/strategies/local-storage.js';
 import { cloudflareDurableObjectWrapper } from 'foundation/server/metrics/honeycomb/wrappers/durable-objects-wrapper.js';
 
-import localStorageSource from '../data.json';
 import { name, version } from '../package.json';
 
 import { DashUserDO as DashUserDOClass } from './dash-user-do.js';
-import { MerchantDO as MerchantDOClass } from './merchant-do.js';
 import { DestinationDO as DestinationDOClass } from './destination-do.js';
+import { MerchantDO as MerchantDOClass } from './merchant-do.js';
 
 const metricsConfig = {
     data: {
@@ -26,8 +24,6 @@ const metricsConfig = {
     redactRequestHeaders: ['authorization', 'cookie'],
     serviceName: name,
 };
-
-initializeLocalStorage(localStorageSource);
 
 export const DashUserDO = cloudflareDurableObjectWrapper(metricsConfig, DashUserDOClass, 'dash-user');
 export const MerchantDO = cloudflareDurableObjectWrapper(metricsConfig, MerchantDOClass, 'merchant');

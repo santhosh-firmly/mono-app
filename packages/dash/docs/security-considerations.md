@@ -20,14 +20,10 @@ The dashboard uses a hybrid authentication approach:
 ### Cookie Security Settings
 
 All session cookies use secure defaults:
-```javascript
-{
-  httpOnly: true,    // Prevents XSS from stealing tokens
-  secure: true,      // HTTPS only
-  sameSite: 'lax',   // CSRF protection
-  maxAge: 7 days     // JWT renewed within this window
-}
-```
+- **httpOnly** - Prevents XSS from stealing tokens
+- **secure** - HTTPS only
+- **sameSite: lax** - CSRF protection
+- **maxAge: 7 days** - JWT renewed within this window
 
 ## Known Risks & Mitigations
 
@@ -36,11 +32,6 @@ All session cookies use secure defaults:
 **Status:** Feature kept for onboarding convenience, requires mitigation before production.
 
 **Description:** When a user signs up via OTP with email `user@company.com`, they are automatically granted **owner** access to the `company.com` merchant dashboard.
-
-**Files:**
-- `src/routes/(logged-out)/api/otp/verify/+server.js:85`
-- `src/routes/(logged-out)/api/magic-link/verify/+server.js`
-- `src/routes/(logged-out)/api/login/otp/verify/+server.js`
 
 **Risk:** Any attacker with a corporate email can claim ownership of that domain's merchant dashboard.
 
@@ -55,11 +46,6 @@ All session cookies use secure defaults:
 **Status:** Accepted - relying on Cloudflare service binding security.
 
 **Description:** DashUserDO and MerchantDO accept requests based solely on HTTP headers (`X-User-ID`, `X-Merchant-Domain`) without additional authentication.
-
-**Files:**
-- `packages/dash-do/src/index.js`
-- `packages/dash-do/src/DashUserDO.js`
-- `packages/dash-do/src/MerchantDO.js`
 
 **Security Model:**
 - DOs are only accessible via service binding from the dash app
@@ -111,8 +97,6 @@ All authentication endpoints are rate limited using KV-based counters:
 | Login OTP Verify | 5 attempts | 5 minutes |
 | Invite OTP Send | 3 requests | 1 hour |
 
-Implementation: `src/lib/server/rate-limit.js`
-
 ### OTP Security
 
 - 6-digit codes with 5-minute expiry
@@ -157,17 +141,13 @@ Before going to production, ensure:
 
 ## Security Headers (Recommended)
 
-Add to `hooks.server.js`:
+The following security headers should be set in `hooks.server.js`:
 
-```javascript
-const securityHeaders = {
-  'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'...",
-  'X-Frame-Options': 'DENY',
-  'X-Content-Type-Options': 'nosniff',
-  'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
-};
-```
+- **Content-Security-Policy** - Restrict script and resource loading
+- **X-Frame-Options: DENY** - Prevent clickjacking
+- **X-Content-Type-Options: nosniff** - Prevent MIME sniffing
+- **Referrer-Policy: strict-origin-when-cross-origin** - Control referrer info
+- **Permissions-Policy** - Disable unused browser features (camera, microphone, geolocation)
 
 ## Contact
 

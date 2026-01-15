@@ -10,6 +10,7 @@
 		RevenueChartCard,
 		MerchantFilter
 	} from '$lib/components/destination/dashboard/index.js';
+	import { adminFetch } from '$lib/utils/fetch.js';
 
 	let { data } = $props();
 	let appId = $derived($page.params.app_id);
@@ -36,7 +37,7 @@
 			const queryString = params.toString();
 			const url = `/destination/${appId}/api/dashboard${queryString ? `?${queryString}` : ''}`;
 
-			const response = await fetch(url);
+			const response = await adminFetch(url);
 			const result = await response.json();
 
 			if (!response.ok) {

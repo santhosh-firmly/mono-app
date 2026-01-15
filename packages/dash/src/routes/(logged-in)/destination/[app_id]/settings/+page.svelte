@@ -10,6 +10,7 @@
 	import Globe from 'lucide-svelte/icons/globe';
 	import UserIcon from 'lucide-svelte/icons/user';
 	import Tag from 'lucide-svelte/icons/tag';
+	import { adminFetch } from '$lib/utils/fetch.js';
 
 	let { data } = $props();
 
@@ -101,7 +102,7 @@
 		successMessage = '';
 
 		try {
-			const response = await fetch(`/destination/${appId}/settings/api`, {
+			const response = await adminFetch(`/destination/${appId}/settings/api`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({

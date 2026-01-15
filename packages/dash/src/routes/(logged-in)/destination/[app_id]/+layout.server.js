@@ -95,6 +95,7 @@ export async function load({ locals, params, platform }) {
 			destinationName,
 			userRole: 'owner',
 			isFirmlyAdmin: true,
+			hasAzureADAuth: true, // Admin always has Azure AD auth
 			destinationAccess: allDestinations,
 			merchantAccess: allMerchants,
 			pendingInvites: [],
@@ -160,6 +161,7 @@ export async function load({ locals, params, platform }) {
 		destinationName,
 		userRole,
 		isFirmlyAdmin: false,
+		hasAzureADAuth: locals.session?.hasAzureADAuth || false,
 		destinationAccess: normalizedDestinationAccess,
 		merchantAccess: normalizedMerchantAccess,
 		pendingInvites,

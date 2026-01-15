@@ -1,6 +1,14 @@
 import { json } from '@sveltejs/kit';
-import { getMerchantAccess, getUserIdByEmail, removePendingInvite } from '$lib/server/user.js';
-import { createAuditLog, AuditEventTypes } from '$lib/server/merchant.js';
+import {
+	getMerchantAccess,
+	getUserIdByEmail,
+	removePendingInvite as removePendingInviteFromUser
+} from '$lib/server/user.js';
+import {
+	createAuditLog,
+	AuditEventTypes,
+	removePendingInvite as removePendingInviteFromMerchant
+} from '$lib/server/merchant.js';
 
 /**
  * POST /merchant/[domain]/api/team/invite/cancel
@@ -56,10 +64,13 @@ export async function POST({ locals, params, platform, request }) {
 		// Remove from KV
 		await kv.delete(`invite:${token}`);
 
+		// Remove from MerchantDO
+		await removePendingInviteFromMerchant({ platform, merchantDomain: domain, token });
+
 		// Remove from invitee's DashUserDO if they have an account
 		const inviteeUser = await getUserIdByEmail({ platform, email: inviteData.email });
 		if (inviteeUser) {
-			await removePendingInvite({ platform, userId: inviteeUser.userId, token });
+			await removePendingInviteFromUser({ platform, userId: inviteeUser.userId, token });
 		}
 
 		// Create audit log

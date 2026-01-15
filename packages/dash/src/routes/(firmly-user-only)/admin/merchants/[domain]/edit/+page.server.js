@@ -4,7 +4,8 @@ import {
 	checkDestinationsConfigured,
 	checkCatalogConfigured,
 	checkCDNWhitelistingComplete,
-	getMerchantAgreement
+	getMerchantAgreement,
+	getAgreementConfig
 } from '$lib/server/merchant.js';
 
 /** @type {import('./$types').PageServerLoad} */
@@ -18,7 +19,8 @@ export async function load({ params, platform }) {
 		destinationsConfigured,
 		catalogConfigured,
 		cdnWhitelistingComplete,
-		agreementData
+		agreementData,
+		agreementConfig
 	] = await Promise.all([
 		platform.env.firmlyConfigs
 			.prepare(`SELECT * FROM stores WHERE key = ?`)
@@ -28,7 +30,8 @@ export async function load({ params, platform }) {
 		checkDestinationsConfigured({ platform, merchantDomain: domain }),
 		checkCatalogConfigured({ platform, merchantDomain: domain }),
 		checkCDNWhitelistingComplete({ platform, merchantDomain: domain }),
-		getMerchantAgreement({ platform, merchantDomain: domain })
+		getMerchantAgreement({ platform, merchantDomain: domain }),
+		getAgreementConfig({ platform, merchantDomain: domain })
 	]);
 
 	if (!store) {
@@ -65,6 +68,7 @@ export async function load({ params, platform }) {
 		merchant,
 		domain,
 		integrationComplete,
-		onboardingProgress
+		onboardingProgress,
+		agreementConfig
 	};
 }

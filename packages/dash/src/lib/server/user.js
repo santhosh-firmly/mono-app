@@ -357,6 +357,64 @@ export async function updateProfile({ platform, userId, profile }) {
 }
 
 /**
+ * Get avatar as a base64 data URL for a user.
+ * @param {Object} params
+ * @param {Object} params.platform - SvelteKit platform object
+ * @param {string} params.userId - User UUID
+ * @returns {Promise<string|null>} Base64 data URL or null if no avatar
+ */
+async function getAvatarDataUrl({ platform, userId }) {
+	const AVATARS = platform?.env?.AVATARS;
+	if (!AVATARS) return null;
+
+	try {
+		const object = await AVATARS.get(`avatars/${userId}.webp`);
+		if (!object) return null;
+
+		const arrayBuffer = await object.arrayBuffer();
+		const bytes = new Uint8Array(arrayBuffer);
+		let binary = '';
+		for (let i = 0; i < bytes.length; i++) {
+			binary += String.fromCharCode(bytes[i]);
+		}
+		const base64 = btoa(binary);
+		return `data:image/webp;base64,${base64}`;
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * Get profiles with avatar data URLs for multiple users in parallel.
+ * Useful for team pages where we need to display avatars for all members.
+ * @param {Object} params
+ * @param {Object} params.platform - SvelteKit platform object
+ * @param {Array<string>} params.userIds - Array of user UUIDs
+ * @returns {Promise<Map<string, Object>>} Map of userId to profile data with avatarDataUrl
+ */
+export async function getProfilesWithAvatarsForUsers({ platform, userIds }) {
+	if (!userIds || userIds.length === 0) {
+		return new Map();
+	}
+
+	const promises = userIds.map(async (userId) => {
+		try {
+			const [profileRes, avatarDataUrl] = await Promise.all([
+				fetchDashDO(platform, userId, '/profile'),
+				getAvatarDataUrl({ platform, userId })
+			]);
+			const profile = profileRes.ok ? await profileRes.json() : {};
+			return [userId, { ...profile, avatarDataUrl }];
+		} catch {
+			return [userId, {}];
+		}
+	});
+
+	const results = await Promise.all(promises);
+	return new Map(results);
+}
+
+/**
  * Grant merchant access to a user.
  * Updates the user's DashUserDO merchant_access list.
  * Used for auto-granting access based on email domain during login flows.

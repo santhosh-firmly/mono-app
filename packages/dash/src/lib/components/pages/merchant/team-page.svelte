@@ -8,28 +8,33 @@
 		TeamInviteDialog,
 		ChangeRoleDialog,
 		RemoveMemberDialog,
+		CancelInviteDialog,
 		TeamMembersTable
 	} from '$lib/components/team/index.js';
 
 	/**
 	 * @type {{
 	 *   team: Array<{user_id: string, user_email: string, name?: string, role: string, status: string, joined_at?: string}>,
+	 *   pendingInvites: Array<{token: string, email: string, role: string, invited_by_email: string, expires_at: string, created_at: string}>,
 	 *   currentUserId: string,
 	 *   isOwner: boolean,
 	 *   error: string,
 	 *   onInvite: (form: {email: string, role: string}) => Promise<void>,
 	 *   onChangeRole: (userId: string, newRole: string) => Promise<void>,
-	 *   onRemove: (userId: string) => Promise<void>
+	 *   onRemove: (userId: string) => Promise<void>,
+	 *   onCancelInvite: (token: string) => Promise<void>
 	 * }}
 	 */
 	let {
 		team = [],
+		pendingInvites = [],
 		currentUserId = '',
 		isOwner = false,
 		error = '',
 		onInvite = async () => {},
 		onChangeRole = async () => {},
-		onRemove = async () => {}
+		onRemove = async () => {},
+		onCancelInvite = async () => {}
 	} = $props();
 
 	// Invite dialog state
@@ -49,6 +54,12 @@
 	let removeTarget = $state({ userId: '', email: '' });
 	let isRemoving = $state(false);
 	let removeError = $state('');
+
+	// Cancel invite dialog state
+	let showCancelInviteDialog = $state(false);
+	let cancelInviteTarget = $state({ token: '', email: '' });
+	let isCancellingInvite = $state(false);
+	let cancelInviteError = $state('');
 
 	async function handleSendInvite(form) {
 		if (!form.email) {
@@ -125,6 +136,29 @@
 			isRemoving = false;
 		}
 	}
+
+	function handleOpenCancelInviteDialog(invite) {
+		cancelInviteTarget = {
+			token: invite.token,
+			email: invite.email
+		};
+		cancelInviteError = '';
+		showCancelInviteDialog = true;
+	}
+
+	async function handleConfirmCancelInvite() {
+		isCancellingInvite = true;
+		cancelInviteError = '';
+
+		try {
+			await onCancelInvite(cancelInviteTarget.token);
+			showCancelInviteDialog = false;
+		} catch (err) {
+			cancelInviteError = err.message;
+		} finally {
+			isCancellingInvite = false;
+		}
+	}
 </script>
 
 <div class="space-y-6">
@@ -143,7 +177,7 @@
 				{error}
 			</Card.Content>
 		</Card.Root>
-	{:else if team.length === 0}
+	{:else if team.length === 0 && pendingInvites.length === 0}
 		<Card.Root>
 			<Card.Content class="py-12 text-center">
 				<Users class="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
@@ -162,10 +196,12 @@
 	{:else}
 		<TeamMembersTable
 			members={team}
+			{pendingInvites}
 			{currentUserId}
 			{isOwner}
 			onChangeRole={handleOpenRoleDialog}
 			onRemove={handleOpenRemoveDialog}
+			onCancelInvite={handleOpenCancelInviteDialog}
 		/>
 	{/if}
 </div>
@@ -193,4 +229,12 @@
 	onConfirm={handleConfirmRemove}
 	isSubmitting={isRemoving}
 	error={removeError}
+/>
+
+<CancelInviteDialog
+	bind:open={showCancelInviteDialog}
+	inviteEmail={cancelInviteTarget.email}
+	onConfirm={handleConfirmCancelInvite}
+	isSubmitting={isCancellingInvite}
+	error={cancelInviteError}
 />

@@ -92,9 +92,20 @@
 		}
 	}
 
+	function parseUtcDate(dateString) {
+		if (!dateString) return null;
+		// Ensure the date string is interpreted as UTC by appending 'Z' if no timezone indicator
+		const normalized =
+			dateString.endsWith('Z') || dateString.includes('+') || dateString.includes('-', 10)
+				? dateString
+				: dateString + 'Z';
+		return new Date(normalized);
+	}
+
 	function formatDate(dateString) {
-		if (!dateString) return 'Never';
-		return new Date(dateString).toLocaleDateString(undefined, {
+		const date = parseUtcDate(dateString);
+		if (!date) return 'Never';
+		return date.toLocaleDateString(undefined, {
 			year: 'numeric',
 			month: 'short',
 			day: 'numeric',
@@ -104,8 +115,9 @@
 	}
 
 	function formatRelativeTime(dateString) {
-		if (!dateString) return 'Never';
-		return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+		const date = parseUtcDate(dateString);
+		if (!date) return 'Never';
+		return formatDistanceToNow(date, { addSuffix: true });
 	}
 
 	$effect(() => {

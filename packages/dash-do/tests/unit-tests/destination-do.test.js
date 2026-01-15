@@ -6,6 +6,8 @@ let durable;
 describe('DestinationDO', () => {
     beforeEach(async () => {
         durable = env.DESTINATION_DO.get(env.DESTINATION_DO.idFromName('test-destination-app'));
+        // Reset state between tests
+        await durable.fetch('http://test/reset', { method: 'POST' });
     });
 
     describe('Team', () => {
@@ -186,9 +188,9 @@ describe('DestinationDO', () => {
         });
     });
 
-    describe('Invites', () => {
+    describe('Pending Invites', () => {
         it('should return empty invites initially', async () => {
-            const response = await durable.fetch('http://test/invites', { method: 'GET' });
+            const response = await durable.fetch('http://test/pending-invites', { method: 'GET' });
             const data = await response.json();
 
             expect(response.status).toBe(200);
@@ -196,100 +198,108 @@ describe('DestinationDO', () => {
         });
 
         it('should create an invite', async () => {
+            const token = crypto.randomUUID();
+            const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
             const inviteData = {
+                token,
                 email: 'invited@example.com',
                 role: 'editor',
-                invitedBy: 'owner-123',
+                invitedByUserId: 'owner-123',
                 invitedByEmail: 'owner@example.com',
+                expiresAt,
             };
 
-            const response = await durable.fetch('http://test/invites', {
+            const response = await durable.fetch('http://test/pending-invites', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(inviteData),
             });
 
             expect(response.status).toBe(200);
-            const invite = await response.json();
 
-            expect(invite.email).toBe('invited@example.com');
-            expect(invite.role).toBe('editor');
-            expect(invite.invited_by).toBe('owner-123');
-            expect(invite.id).toBeDefined();
+            // Verify invite was created
+            const listResponse = await durable.fetch('http://test/pending-invites', { method: 'GET' });
+            const invites = await listResponse.json();
+
+            expect(invites.length).toBe(1);
+            expect(invites[0].email).toBe('invited@example.com');
+            expect(invites[0].role).toBe('editor');
+            expect(invites[0].token).toBe(token);
         });
 
-        it('should not allow duplicate invites for same email', async () => {
-            const inviteData = {
-                email: 'invited@example.com',
-                role: 'editor',
-            };
+        it('should update an existing invite with same token', async () => {
+            const token = crypto.randomUUID();
+            const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
-            await durable.fetch('http://test/invites', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(inviteData),
-            });
-
-            const secondResponse = await durable.fetch('http://test/invites', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(inviteData),
-            });
-
-            expect(secondResponse.status).toBe(400);
-        });
-
-        it('should not allow invite for existing team member', async () => {
-            // Add team member
-            await durable.fetch('http://test/team', {
+            // Create first invite
+            await durable.fetch('http://test/pending-invites', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    userId: 'user-123',
-                    userEmail: 'existing@example.com',
-                    role: 'viewer',
-                }),
-            });
-
-            // Try to invite same email
-            const inviteResponse = await durable.fetch('http://test/invites', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: 'existing@example.com',
+                    token,
+                    email: 'invited@example.com',
                     role: 'editor',
+                    invitedByUserId: 'owner-123',
+                    invitedByEmail: 'owner@example.com',
+                    expiresAt,
                 }),
             });
 
-            expect(inviteResponse.status).toBe(400);
+            // Create second invite with same token (should upsert)
+            const secondResponse = await durable.fetch('http://test/pending-invites', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    token,
+                    email: 'invited@example.com',
+                    role: 'admin',
+                    invitedByUserId: 'owner-123',
+                    invitedByEmail: 'owner@example.com',
+                    expiresAt,
+                }),
+            });
+
+            expect(secondResponse.status).toBe(200);
+
+            // Verify only one invite exists with updated role
+            const listResponse = await durable.fetch('http://test/pending-invites', { method: 'GET' });
+            const invites = await listResponse.json();
+
+            expect(invites.length).toBe(1);
+            expect(invites[0].role).toBe('admin');
         });
 
         it('should cancel an invite', async () => {
-            const createResponse = await durable.fetch('http://test/invites', {
+            const token = crypto.randomUUID();
+            const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+
+            await durable.fetch('http://test/pending-invites', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    token,
                     email: 'cancel-me@example.com',
                     role: 'viewer',
+                    invitedByUserId: 'owner-123',
+                    invitedByEmail: 'owner@example.com',
+                    expiresAt,
                 }),
             });
 
-            const invite = await createResponse.json();
-
-            const cancelResponse = await durable.fetch(`http://test/invites/${invite.id}`, {
+            const cancelResponse = await durable.fetch(`http://test/pending-invites/${token}`, {
                 method: 'DELETE',
             });
 
             expect(cancelResponse.status).toBe(200);
 
-            const listResponse = await durable.fetch('http://test/invites', { method: 'GET' });
+            const listResponse = await durable.fetch('http://test/pending-invites', { method: 'GET' });
             const invites = await listResponse.json();
 
-            expect(invites.find((i) => i.id === invite.id)).toBeUndefined();
+            expect(invites.find((i) => i.token === token)).toBeUndefined();
         });
 
         it('should return 404 when canceling non-existent invite', async () => {
-            const response = await durable.fetch('http://test/invites/non-existent-id', {
+            const response = await durable.fetch('http://test/pending-invites/non-existent-token', {
                 method: 'DELETE',
             });
 
@@ -328,12 +338,18 @@ describe('DestinationDO', () => {
                 }),
             });
 
-            await durable.fetch('http://test/invites', {
+            const inviteToken = crypto.randomUUID();
+            const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+            await durable.fetch('http://test/pending-invites', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    token: inviteToken,
                     email: 'invited@example.com',
                     role: 'editor',
+                    invitedByUserId: 'owner-123',
+                    invitedByEmail: 'owner@example.com',
+                    expiresAt,
                 }),
             });
 
@@ -348,6 +364,8 @@ describe('DestinationDO', () => {
             expect(resetData.clearedTeamMembers).toBeDefined();
             expect(resetData.clearedTeamMembers.length).toBe(1);
             expect(resetData.clearedTeamMembers[0].user_id).toBe('user-123');
+            expect(resetData.clearedPendingInvites).toBeDefined();
+            expect(resetData.clearedPendingInvites.length).toBe(1);
 
             // Verify all data is cleared
             const teamResponse = await durable.fetch('http://test/team', { method: 'GET' });
@@ -362,7 +380,7 @@ describe('DestinationDO', () => {
             const profile = await profileResponse.json();
             expect(profile).toEqual({});
 
-            const invitesResponse = await durable.fetch('http://test/invites', { method: 'GET' });
+            const invitesResponse = await durable.fetch('http://test/pending-invites', { method: 'GET' });
             const invites = await invitesResponse.json();
             expect(invites.length).toBe(0);
         });

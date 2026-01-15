@@ -1,5 +1,5 @@
 <script>
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/stores';
 	import MerchantPageHeader from '$lib/components/merchant/merchant-page-header.svelte';
 	import ConfigurationStep from '$lib/components/merchant/configuration-step.svelte';
@@ -12,6 +12,7 @@
 	import Shield from 'lucide-svelte/icons/shield';
 	import CheckCircle from 'lucide-svelte/icons/check-circle-2';
 	import AlertTriangle from 'lucide-svelte/icons/alert-triangle';
+	import { adminFetch } from '$lib/utils/fetch.js';
 
 	let domain = $derived($page.params.domain);
 
@@ -180,7 +181,7 @@
 		error = '';
 
 		try {
-			const response = await fetch(`/merchant/${domain}/settings/cdn/api`);
+			const response = await adminFetch(`/merchant/${domain}/settings/cdn/api`);
 			const result = await response.json();
 
 			if (!response.ok) {
@@ -216,7 +217,7 @@
 		successMessage = '';
 
 		try {
-			const response = await fetch(`/merchant/${domain}/settings/cdn/api`, {
+			const response = await adminFetch(`/merchant/${domain}/settings/cdn/api`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ completed: true })
@@ -231,8 +232,9 @@
 			isCompleted = true;
 
 			if (result.isFirstTimeSave) {
-				// Redirect to dashboard to see onboarding tasks list
-				goto(`/merchant/${domain}`, { invalidateAll: true });
+				// Invalidate all data first, then redirect to dashboard
+				await invalidateAll();
+				goto(`/merchant/${domain}`);
 				return;
 			}
 

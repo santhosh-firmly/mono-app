@@ -157,7 +157,7 @@ export async function POST({ locals, params, platform, request }) {
 					.bind(domain, JSON.stringify(newPresentation))
 					.run();
 			} catch (e) {
-				// If table doesn't exist, try to create it first
+				// If table doesn't exist, skip presentation update
 				if (e.message?.includes('no such table')) {
 					console.warn(
 						'merchant_presentation table does not exist, skipping presentation update'
@@ -223,15 +223,18 @@ export async function POST({ locals, params, platform, request }) {
 					contact: contact || currentInfo.contact || {}
 				};
 
-				// Upsert into merchant_dashboards
-				await dashUsers
-					.prepare(
-						`INSERT INTO merchant_dashboards (domain, info)
-						 VALUES (?, ?)
-						 ON CONFLICT(domain) DO UPDATE SET info = excluded.info`
-					)
-					.bind(domain, JSON.stringify(newInfo))
-					.run();
+				// Upsert into merchant_dashboards (use UPDATE if exists, INSERT if not)
+				if (dashboardRow) {
+					await dashUsers
+						.prepare(`UPDATE merchant_dashboards SET info = ? WHERE domain = ?`)
+						.bind(JSON.stringify(newInfo), domain)
+						.run();
+				} else {
+					await dashUsers
+						.prepare(`INSERT INTO merchant_dashboards (domain, info) VALUES (?, ?)`)
+						.bind(domain, JSON.stringify(newInfo))
+						.run();
+				}
 			} catch (e) {
 				console.warn('Could not save company/contact info:', e.message);
 			}

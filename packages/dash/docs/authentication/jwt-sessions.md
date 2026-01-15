@@ -4,16 +4,6 @@ Sessions use JWT (JSON Web Tokens) with server-side validation for security and 
 
 ## Token Structure
 
-```json
-{
-  "sub": "550e8400-e29b-41d4-a716-446655440000",
-  "email": "user@example.com",
-  "jti": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
-  "iat": 1704067200,
-  "exp": 1704069000
-}
-```
-
 | Claim | Description |
 |-------|-------------|
 | `sub` | User UUID (matches D1 `users.id` and DashUserDO name) |
@@ -54,147 +44,60 @@ flowchart TB
 
 ## JWT Signing
 
-```javascript
-// jwt.js - Uses jose library with HS256
-import * as jose from 'jose';
-
-const ALGORITHM = 'HS256';
-
-export async function createSessionToken({ userId, email, sessionId }, secret) {
-  const secretKey = new TextEncoder().encode(secret);
-  const thirtyMinutes = 30 * 60;
-
-  return new jose.SignJWT({ sub: userId, email, jti: sessionId })
-    .setProtectedHeader({ alg: ALGORITHM })
-    .setIssuedAt()
-    .setExpirationTime(`${thirtyMinutes}s`)
-    .sign(secretKey);
-}
-```
+- Uses the `jose` library with HS256 algorithm
+- Secret key is encoded from environment variable `JWT_SECRET`
+- Token expiration set to 30 minutes from issuance
 
 ## Renewal Logic
 
 The system supports auto-renewal to provide seamless UX while maintaining security:
 
-```javascript
-// hooks.server.js - Token renewal logic
-async function validateUserSession(event, sessionToken, jwtSecret) {
-  // Try to verify the token
-  let payload = await verifyToken(sessionToken, jwtSecret);
-  let needsRenewal = false;
-
-  if (!payload) {
-    // Token verification failed - check if it's renewable
-    const decoded = decodeToken(sessionToken);
-
-    if (!decoded) return null;
-
-    const expired = isTokenExpired(decoded);
-    const renewable = isTokenRenewable(decoded);
-
-    if (!expired) return null; // Invalid signature
-    if (expired && !renewable) return null; // Too old
-
-    // Token is expired but renewable
-    payload = decoded;
-    needsRenewal = true;
-  }
-
-  // Validate session exists in DashUserDO
-  const session = await validateSession({ platform, userId, sessionId });
-  if (!session) return null;
-
-  // Refresh last access time
-  await refreshSession({ platform, userId, sessionId });
-
-  // Renew JWT if needed
-  if (needsRenewal) {
-    const newToken = await createSessionToken({ userId, email, sessionId }, jwtSecret);
-    cookies.set('session', newToken, { /* ... */ });
-  }
-
-  return { userId, email, sessionId };
-}
-```
+- On each request, the JWT signature is verified first
+- If verification fails but the token is expired (not corrupted), check if it's within the 7-day renewal window
+- If renewable, validate that the session still exists in DashUserDO
+- If session exists, issue a new JWT with the same session ID and update the cookie
+- If session was deleted (user logged out), force re-authentication
 
 ### Renewal Window
 
-```javascript
-// jwt.js - Check if token can be renewed
-export function isTokenRenewable(payload) {
-  if (!payload || !payload.exp) return false;
-
-  const expiredAt = payload.exp * 1000;
-  const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
-
-  // Token must be expired but less than 7 days old
-  return Date.now() >= expiredAt && Date.now() < expiredAt + sevenDaysMs;
-}
-```
+A token is considered renewable if:
+- It has expired (past the `exp` claim)
+- It expired less than 7 days ago
 
 ## Session Storage
 
-Sessions are stored in DashUserDO (per-user Durable Object):
+Sessions are stored in DashUserDO (per-user Durable Object) with the following fields:
 
-```sql
-CREATE TABLE sessions (
-  id TEXT PRIMARY KEY,              -- JWT jti claim
-  device_name TEXT,                 -- "Chrome on macOS"
-  device_type TEXT,                 -- "desktop", "mobile", "tablet"
-  ip_address TEXT,
-  user_agent TEXT,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  last_access_at DATETIME,
-  expires_at DATETIME               -- Hard 7-day expiration
-);
-```
+| Column | Description |
+|--------|-------------|
+| `id` | Session ID (matches JWT `jti` claim) |
+| `device_name` | Human-readable device identifier (e.g., "Chrome on macOS") |
+| `device_type` | Device category: desktop, mobile, or tablet |
+| `ip_address` | Client IP address at session creation |
+| `user_agent` | Full user agent string |
+| `created_at` | Session creation timestamp |
+| `last_access_at` | Last activity timestamp (updated on each request) |
+| `expires_at` | Hard 7-day expiration from creation |
 
 ## Creating Sessions
 
-```javascript
-// user.js
-export async function createSession({ platform, userId, email, userAgent, ipAddress, jwtSecret }) {
-  const { deviceName, deviceType } = parseUserAgent(userAgent);
-  const expiresAt = getSessionExpiresAt(); // 7 days from now
+When a user logs in via OTP or magic link:
 
-  // Create session in DashUserDO
-  const response = await fetchDashDO(platform, userId, '/sessions', {
-    method: 'POST',
-    body: JSON.stringify({ deviceName, deviceType, ipAddress, userAgent, expiresAt })
-  });
-
-  const { sessionId } = await response.json();
-  const token = await createSessionToken({ userId, email, sessionId }, jwtSecret);
-
-  return { token, sessionId, expiresAt };
-}
-```
+- Parse user agent to extract browser name, OS, and device type
+- Calculate session expiration (7 days from now)
+- Create session record in DashUserDO via POST to `/sessions` endpoint
+- Generate JWT with user ID, email, and new session ID
+- Return token for cookie storage
 
 ## Device Detection
 
-```javascript
-// user.js
-export function parseUserAgent(userAgent) {
-  let browser = 'Browser';
-  let os = 'Unknown';
-  let deviceType = 'desktop';
+User agent parsing extracts:
 
-  // Detect browser
-  if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) browser = 'Chrome';
-  else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) browser = 'Safari';
-  else if (userAgent.includes('Firefox')) browser = 'Firefox';
-  else if (userAgent.includes('Edg')) browser = 'Edge';
+- **Browser**: Chrome, Safari, Firefox, or Edge
+- **OS**: macOS, Windows, iOS, or Android
+- **Device type**: desktop, mobile, or tablet
 
-  // Detect OS
-  if (userAgent.includes('Mac OS')) os = 'macOS';
-  else if (userAgent.includes('Windows')) os = 'Windows';
-  else if (userAgent.includes('iPhone')) { os = 'iOS'; deviceType = 'mobile'; }
-  else if (userAgent.includes('iPad')) { os = 'iOS'; deviceType = 'tablet'; }
-  else if (userAgent.includes('Android')) { os = 'Android'; deviceType = 'mobile'; }
-
-  return { deviceName: `${browser} on ${os}`, deviceType };
-}
-```
+This information is displayed in the sessions management UI so users can recognize their devices.
 
 ## Security Considerations
 
@@ -212,17 +115,9 @@ export function parseUserAgent(userAgent) {
 
 ### JWT Secret Management
 
-```bash
-# Generate cryptographically secure secret
-openssl rand -base64 32
-
-# Set via Wrangler (different per environment)
-wrangler secret put JWT_SECRET --env prod
-```
-
-- Use different secrets per environment
-- Minimum 256 bits (32 bytes)
-- Never commit to version control
+- Use cryptographically secure random bytes (minimum 256 bits / 32 bytes)
+- Different secrets per environment (dev, ci, qa, uat, prod)
+- Store as Wrangler secret, never commit to version control
 - Rotation requires re-authentication of all users
 
 ## Related Documentation

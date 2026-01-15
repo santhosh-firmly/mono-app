@@ -103,15 +103,12 @@ graph TB
 
 ## Cookie Configuration
 
-```javascript
-cookies.set('session', token, {
-  path: '/',
-  httpOnly: true,    // Not accessible via JavaScript
-  secure: true,      // HTTPS only
-  sameSite: 'lax',   // CSRF protection
-  maxAge: 7 * 24 * 60 * 60  // 7 days
-});
-```
+Session cookies are configured with:
+
+- **httpOnly** - Not accessible via JavaScript (XSS protection)
+- **secure** - HTTPS only
+- **sameSite: lax** - CSRF protection
+- **maxAge: 7 days** - Cookie expiration (JWT renewal window)
 
 ## Route Protection
 

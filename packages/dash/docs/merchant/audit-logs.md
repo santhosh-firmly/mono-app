@@ -13,160 +13,55 @@ Audit logs capture:
 
 ## Event Types
 
-```javascript
-// merchant.js
-export const AuditEventTypes = {
-  // Team events
-  TEAM_MEMBER_INVITED: 'team_member_invited',
-  INVITE_ACCEPTED: 'invite_accepted',
-  INVITE_CANCELLED: 'invite_cancelled',
-  MEMBER_REMOVED: 'member_removed',
-  ROLE_CHANGED: 'role_changed',
+### Team Events
+- `team_member_invited` - User invited to team
+- `invite_accepted` - Invitation accepted
+- `invite_cancelled` - Invitation cancelled
+- `member_removed` - Team member removed
+- `role_changed` - Team member role changed
 
-  // Settings events
-  SETTINGS_UPDATED: 'settings_updated',
+### Settings Events
+- `settings_updated` - Merchant settings changed
 
-  // Destination events
-  DESTINATION_ENABLED: 'destination_enabled',
-  DESTINATION_DISABLED: 'destination_disabled',
+### Destination Events
+- `destination_enabled` - Payment destination enabled
+- `destination_disabled` - Payment destination disabled
 
-  // Agreement events
-  AGREEMENT_SIGNED: 'agreement_signed',
+### Agreement Events
+- `agreement_signed` - Merchant agreement signed
 
-  // Integration events
-  INTEGRATION_COMPLETED: 'integration_completed',
-  INTEGRATION_RESET: 'integration_reset',
-  INTEGRATION_STEP_COMPLETED: 'integration_step_completed',
-  INTEGRATION_STEP_UPDATED: 'integration_step_updated',
-  INTEGRATION_STEPS_SYNCED: 'integration_steps_synced',
+### Integration Events
+- `integration_completed` - Integration fully completed
+- `integration_reset` - Integration reset
+- `integration_step_completed` - Single step completed
+- `integration_step_updated` - Step status changed
+- `integration_steps_synced` - Steps synced from external source
 
-  // Catalog events
-  CATALOG_CONFIGURED: 'catalog_configured',
-
-  // CDN events
-  CDN_WHITELISTING_COMPLETED: 'cdn_whitelisting_completed'
-};
-```
+### Other Events
+- `catalog_configured` - Product catalog configured
+- `cdn_whitelisting_completed` - CDN whitelisting finished
 
 ## Log Structure
 
-```typescript
-interface AuditLog {
-  id: string;              // UUID
-  eventType: string;       // Event type from AuditEventTypes
-  actorId: string;         // User ID who performed action
-  actorEmail: string;      // User email
-  actorType: string;       // 'firmly_admin', 'owner', 'editor', 'viewer', 'system'
-  targetId?: string;       // Target user ID (for team events)
-  targetEmail?: string;    // Target user email
-  details?: object;        // Additional event-specific data
-  isFirmlyAdmin: boolean;  // Whether actor is Firmly admin
-  createdAt: string;       // ISO timestamp
-}
-```
+| Field | Description |
+|-------|-------------|
+| `id` | Unique log ID |
+| `eventType` | Event type from list above |
+| `actorId` | User ID who performed action |
+| `actorEmail` | User email |
+| `actorType` | Role: firmly_admin, owner, editor, viewer, system |
+| `targetId` | Target user ID (for team events) |
+| `targetEmail` | Target user email |
+| `details` | Additional event-specific data (JSON) |
+| `isFirmlyAdmin` | Whether actor is Firmly admin |
+| `createdAt` | ISO timestamp |
 
 ## Storage
 
-Audit logs are stored in MerchantDO:
-
-```sql
-CREATE TABLE audit_logs (
-  id TEXT PRIMARY KEY,
-  event_type TEXT NOT NULL,
-  actor_id TEXT NOT NULL,
-  actor_email TEXT,
-  actor_type TEXT,
-  target_id TEXT,
-  target_email TEXT,
-  details TEXT,
-  is_firmly_admin INTEGER DEFAULT 0,
-  created_at TEXT DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_audit_logs_created_at ON audit_logs(created_at DESC);
-CREATE INDEX idx_audit_logs_event_type ON audit_logs(event_type);
-```
-
-## Creating Audit Logs
-
-```javascript
-// merchant.js
-export async function createAuditLog({
-  platform,
-  merchantDomain,
-  eventType,
-  actorId,
-  actorEmail,
-  targetId = null,
-  targetEmail = null,
-  details = null,
-  isFirmlyAdmin = false,
-  actorType = 'user'
-}) {
-  await fetchMerchantDO(platform, merchantDomain, '/audit-logs', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      eventType,
-      actorId,
-      actorEmail,
-      targetId,
-      targetEmail,
-      details,
-      isFirmlyAdmin,
-      actorType
-    })
-  });
-
-  return true;
-}
-```
-
-## Retrieving Audit Logs
-
-```javascript
-// merchant.js
-export async function getAuditLogs({
-  platform,
-  merchantDomain,
-  limit = 50,
-  offset = 0,
-  includeFirmlyAdmin = false
-}) {
-  const response = await fetchMerchantDO(
-    platform,
-    merchantDomain,
-    `/audit-logs?limit=${limit}&offset=${offset}&includeFirmlyAdmin=${includeFirmlyAdmin}`
-  );
-
-  if (!response.ok) {
-    return { logs: [], total: 0, limit, offset };
-  }
-
-  return response.json();
-}
-
-// Returns:
-{
-  "logs": [
-    {
-      "id": "log-uuid-1",
-      "eventType": "role_changed",
-      "actorId": "user-uuid",
-      "actorEmail": "owner@merchant.com",
-      "actorType": "owner",
-      "targetId": "user-uuid-2",
-      "targetEmail": "editor@merchant.com",
-      "details": { "newRole": "editor" },
-      "isFirmlyAdmin": false,
-      "createdAt": "2024-01-15T10:30:00Z"
-    }
-  ],
-  "total": 150,
-  "limit": 50,
-  "offset": 0
-}
-```
+Audit logs are stored in MerchantDO with:
+- Primary key on log ID
+- Index on created_at for chronological queries
+- Index on event_type for filtering
 
 ## Actor Types
 
@@ -179,84 +74,33 @@ export async function getAuditLogs({
 | `system` | Automated/API actions |
 | `user` | Generic user (fallback) |
 
-Derived automatically:
-
-```javascript
-function getActorType(actor) {
-  if (!actor) return 'system';
-  if (actor.isFirmlyAdmin) return 'firmly_admin';
-  if (actor.role) return actor.role;
-  return 'user';
-}
-```
-
 ## Event Details by Type
 
 ### Team Events
 
-**`invite_accepted`**
-```json
-{ "role": "editor" }
-```
+**`invite_accepted`**: Contains role assigned
 
-**`role_changed`**
-```json
-{ "newRole": "viewer" }
-```
+**`role_changed`**: Contains new role
 
-**`member_removed`**
-```json
-{}  // No additional details
-```
+**`member_removed`**: No additional details
 
 ### Destination Events
 
-**`destination_enabled`** / **`destination_disabled`**
-```json
-{
-  "destinationId": "amazon",
-  "destinationName": "Amazon"
-}
-```
+**`destination_enabled`** / **`destination_disabled`**: Contains destination ID and name
 
 ### Agreement Events
 
-**`agreement_signed`**
-```json
-{
-  "clientIp": "203.0.113.42",
-  "clientLocation": "San Francisco, CA",
-  "browserInfo": "Mozilla/5.0 (Macintosh..."
-}
-```
+**`agreement_signed`**: Contains client IP, location, and browser info
 
 ### Integration Events
 
-**`integration_step_completed`**
-```json
-{
-  "stepId": "api-setup",
-  "substepId": "api-key",
-  "status": "completed",
-  "source": "admin"
-}
-```
+**`integration_step_completed`**: Contains step ID, substep ID, status, and source
 
-**`integration_steps_synced`**
-```json
-{ "updatedSteps": 3 }
-```
+**`integration_steps_synced`**: Contains count of updated steps
 
 ### Settings Events
 
-**`settings_updated`**
-```json
-{
-  "field": "company.name",
-  "oldValue": "Acme Corp",
-  "newValue": "Acme Corporation"
-}
-```
+**`settings_updated`**: Contains field name, old value, and new value
 
 ## Audit Log Page
 
@@ -278,27 +122,11 @@ The audit logs page (`/merchant/{domain}/audit-logs`) displays:
 
 ## Filtering Firmly Admin Actions
 
-By default, Firmly admin actions can be hidden from merchant view:
-
-```javascript
-// Default: hide admin actions
-const logs = await getAuditLogs({
-  platform,
-  merchantDomain,
-  includeFirmlyAdmin: false
-});
-
-// Admin view: show all actions
-const logs = await getAuditLogs({
-  platform,
-  merchantDomain,
-  includeFirmlyAdmin: true
-});
-```
+By default, Firmly admin actions can be hidden from merchant view. Admin view shows all actions including those by Firmly staff.
 
 ## Retention
 
-Audit logs are retained indefinitely in MerchantDO. For compliance:
+Audit logs are retained indefinitely in MerchantDO:
 - Logs are stored per-merchant (isolated)
 - Timestamps are in UTC ISO format
 - Actor information is captured at time of action (not looked up later)
@@ -315,4 +143,3 @@ Audit logs are retained indefinitely in MerchantDO. For compliance:
 - [Dashboard System](./dashboard-system.md) - Dashboard overview
 - [Team Management](./team-management.md) - Team operations
 - [Onboarding](./onboarding.md) - Onboarding events
-- [API: Audit Logs](../api/merchant/audit-logs.md) - API reference

@@ -2,25 +2,11 @@
  * Shared mock data for auth flow stories
  */
 
-export const mockNewUser = {
-	id: 'user-new',
-	name: '',
-	email: 'newuser@example.com',
-	hasAvatar: false
-};
-
 export const mockExistingUser = {
 	id: 'user-123',
 	name: 'John Doe',
 	email: 'john@acme.com',
 	hasAvatar: false
-};
-
-export const mockUserWithAvatar = {
-	id: 'user-456',
-	name: 'Jane Smith',
-	email: 'jane@company.com',
-	hasAvatar: true
 };
 
 // Single merchant access

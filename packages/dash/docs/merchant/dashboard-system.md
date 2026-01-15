@@ -26,32 +26,21 @@ graph TB
 
 Dashboards are created by Firmly admins in the admin panel:
 
-```javascript
-// POST /admin/api/dashboards
-{
-  "domain": "merchant.com",
-  "notes": "Initial setup notes"
-}
-```
-
-This creates a record in D1 `merchant_dashboards` with status `pending`.
+- Admin submits domain and optional notes
+- Record created in D1 `merchant_dashboards` with status `pending`
 
 ### 2. Owner Invitation
 
 After creation, the admin sends an invite to the dashboard owner:
 
-```javascript
-// POST /admin/api/invites/send
-{
-  "email": "owner@merchant.com",
-  "merchantDomain": "merchant.com",
-  "role": "owner"
-}
-```
+- Email sent with invite token
+- Token stored in KV with 7-day TTL
+- Contains email, role, and merchant domain
 
 ### 3. Activation
 
 When the owner accepts the invite:
+
 1. Dashboard status changes to `active`
 2. Owner is added to team with `owner` role
 3. Owner can now invite additional team members
@@ -89,33 +78,17 @@ Dashboard data is distributed across multiple storage systems:
 
 ## D1 Schema
 
-```sql
-CREATE TABLE merchant_dashboards (
-  domain TEXT PRIMARY KEY,
-  created_at TEXT,
-  created_by TEXT,           -- Admin user ID
-  owner_user_id TEXT,        -- Owner after invite acceptance
-  status TEXT,               -- pending, active, suspended
-  notes TEXT,
-  info TEXT                  -- JSON: company info, contact details
-);
-```
+The `merchant_dashboards` table stores:
 
-The `info` column stores structured merchant information:
-
-```json
-{
-  "company": {
-    "name": "Acme Corp",
-    "address": "123 Main St",
-    "country": "US"
-  },
-  "contact": {
-    "email": "contact@merchant.com",
-    "phone": "+1-555-0100"
-  }
-}
-```
+| Column | Description |
+|--------|-------------|
+| `domain` | Merchant domain (primary key) |
+| `created_at` | Creation timestamp |
+| `created_by` | Admin user ID |
+| `owner_user_id` | Owner after invite acceptance |
+| `status` | pending, active, suspended |
+| `notes` | Admin notes |
+| `info` | JSON with company info, contact details |
 
 ## Multi-Dashboard Access
 
@@ -129,96 +102,31 @@ graph LR
     User -->|viewer| Dashboard3[merchant3.com]
 ```
 
-The home page (`/`) shows a dashboard selector when a user has multiple dashboards:
-
-```javascript
-// routes/(logged-in)/+page.server.js
-export async function load({ platform, locals }) {
-  const { userId } = locals.session;
-
-  // Get user's merchant access
-  const merchantAccess = await getMerchantAccess({ platform, userId });
-
-  // Smart redirect for single dashboard
-  if (merchantAccess.length === 1) {
-    redirect(302, `/merchant/${merchantAccess[0].merchantDomain}`);
-  }
-
-  return { merchantAccess };
-}
-```
+The home page (`/`) shows a dashboard selector when a user has multiple dashboards. If a user has only one dashboard, they are automatically redirected to it.
 
 ## Creating Dashboards
 
 Dashboards are created via the admin API:
 
-```javascript
-// routes/(firmly-user-only)/admin/api/dashboards/+server.js
-export async function POST({ request, platform, locals }) {
-  const { domain, notes } = await request.json();
-
-  // Check if domain already exists
-  const existing = await db
-    .prepare('SELECT domain FROM merchant_dashboards WHERE domain = ?')
-    .bind(domain)
-    .first();
-
-  if (existing) {
-    return json({ error: 'Dashboard already exists' }, { status: 400 });
-  }
-
-  // Create dashboard
-  await db
-    .prepare(`
-      INSERT INTO merchant_dashboards (domain, created_at, created_by, status, notes)
-      VALUES (?, datetime('now'), ?, 'pending', ?)
-    `)
-    .bind(domain, locals.authInfo.oid, notes)
-    .run();
-
-  return json({ success: true, domain });
-}
-```
+1. Check if domain already exists
+2. Create record in D1 with `pending` status
+3. Return success
 
 ## Admin View of Dashboards
 
-Admins can view all dashboards in a table:
-
-```javascript
-// routes/(firmly-user-only)/admin/dashboards/+page.server.js
-export async function load({ platform }) {
-  const dashboards = await db
-    .prepare(`
-      SELECT
-        d.*,
-        (SELECT COUNT(*) FROM merchant_team WHERE merchant_domain = d.domain) as team_size
-      FROM merchant_dashboards d
-      ORDER BY d.created_at DESC
-    `)
-    .all();
-
-  return { dashboards: dashboards.results };
-}
-```
+Admins can view all dashboards in a table showing:
+- Domain
+- Status
+- Team size
+- Created date
+- Actions
 
 ## Hybrid Admin Access
 
 Firmly admins can access any merchant dashboard while logged in with Azure AD:
 
-```javascript
-// hooks.server.js - Hybrid auth check
-if (firmlyAuthCookie) {
-  const { authInfo } = await enforceSSOAuth(firmlyAuthCookie, config);
-
-  // Create synthetic session with admin flag
-  userSession = {
-    userId: authInfo.oid,
-    email: authInfo.email,
-    sessionId: null,
-    isFirmlyAdmin: true  // Grants access to all dashboards
-  };
-}
-```
+- System creates a synthetic session with `isFirmlyAdmin: true`
+- Grants access to all dashboards regardless of team membership
 
 When an admin views a merchant dashboard:
 - They see an "Admin Mode" banner

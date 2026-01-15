@@ -23,7 +23,7 @@
 				'relative justify-start',
 				isActive ? 'bg-muted font-medium' : 'hover:bg-muted/50'
 			)}
-			on:click={() => onSectionChange(item.id)}
+			onclick={() => onSectionChange(item.id)}
 		>
 			{#if isActive}
 				<div

@@ -21,7 +21,9 @@
 		destinationAccess = [],
 		currentPath,
 		userRole = 'viewer',
-		pendingInvites = []
+		pendingInvites = [],
+		isFirmlyAdmin = false,
+		hasAzureADAuth = false
 	} = $props();
 
 	// Show account selector when user has access to multiple dashboards (either type)
@@ -138,6 +140,6 @@
 	<!-- Right side: Notifications + User menu -->
 	<div class="flex items-center gap-2">
 		<PendingInvitesPopover {pendingInvites} />
-		<MerchantUserMenu {user} {domain} />
+		<MerchantUserMenu {user} {isFirmlyAdmin} {hasAzureADAuth} />
 	</div>
 </header>

@@ -1,13 +1,17 @@
 import { BaseDurableObject } from 'foundation/durable-objects/durable-object-base.js';
 import { getLogger } from 'foundation/utils/log.js';
-import { matchRoute, handleRoutes } from './shared/route-utils.js';
+
+import { handleRoutes } from './shared/route-utils.js';
 import {
     teamRoutes,
     auditLogRoutes,
+    pendingInviteRoutes,
     initializeTeamSchema,
     initializeAuditLogSchema,
+    initializePendingInvitesSchema,
     teamHandlers,
     auditLogHandlers,
+    pendingInviteHandlers,
     clearTeamAndAuditLogs,
 } from './shared/team-audit-mixin.js';
 
@@ -25,17 +29,15 @@ export class DestinationDO extends BaseDurableObject {
         // Team endpoints (from shared)
         ...teamRoutes,
 
+        // Pending invite endpoints (from shared)
+        ...pendingInviteRoutes,
+
         // Audit log endpoints (from shared)
         ...auditLogRoutes,
 
         // Profile endpoints
         { path: '/profile', method: 'GET', handler: 'handleGetProfile' },
         { path: '/profile', method: 'PUT', handler: 'handleUpdateProfile', needsJson: true },
-
-        // Invite endpoints
-        { path: '/invites', method: 'GET', handler: 'handleGetInvites' },
-        { path: '/invites', method: 'POST', handler: 'handleCreateInvite', needsJson: true },
-        { path: '/invites/:inviteId', method: 'DELETE', handler: 'handleCancelInvite' },
     ];
 
     constructor(ctx, env) {
@@ -52,6 +54,9 @@ export class DestinationDO extends BaseDurableObject {
         // Team membership table (shared)
         initializeTeamSchema(this.sql);
 
+        // Pending invites table (shared)
+        initializePendingInvitesSchema(this.sql);
+
         // Audit logs table (shared)
         initializeAuditLogSchema(this.sql);
 
@@ -65,24 +70,6 @@ export class DestinationDO extends BaseDurableObject {
 
         // Initialize profile row if not exists
         this.sql.exec(`INSERT OR IGNORE INTO profile (id, data) VALUES (1, '{}')`);
-
-        // Invites table (pending team invites)
-        this.sql.exec(`
-            CREATE TABLE IF NOT EXISTS invites (
-                id TEXT PRIMARY KEY,
-                email TEXT NOT NULL,
-                role TEXT NOT NULL DEFAULT 'viewer',
-                invited_by TEXT,
-                invited_by_email TEXT,
-                created_at TEXT DEFAULT (datetime('now')),
-                expires_at TEXT
-            )
-        `);
-
-        // Index for efficient invite lookups
-        this.sql.exec(`
-            CREATE INDEX IF NOT EXISTS idx_invites_email ON invites(email)
-        `);
     }
 
     async fetch(request) {
@@ -178,70 +165,27 @@ export class DestinationDO extends BaseDurableObject {
     }
 
     // ============================================================================
-    // Invite methods
+    // Pending invite methods (delegating to shared handlers)
     // ============================================================================
 
-    handleGetInvites() {
-        // Clean up expired invites first (garbage collection)
-        this.sql.exec(`DELETE FROM invites WHERE datetime(expires_at) <= datetime('now')`);
-
-        const invites = this.sql
-            .exec(
-                `SELECT id, email, role, invited_by, invited_by_email, created_at, expires_at
-                 FROM invites
-                 ORDER BY created_at DESC`,
-            )
-            .toArray();
-        return Response.json(invites);
+    handleGetPendingInvites() {
+        return pendingInviteHandlers.getPendingInvites(this.sql);
     }
 
-    handleCreateInvite({ email, role, invitedBy, invitedByEmail }) {
-        // Clean up expired invites first
-        this.sql.exec(`DELETE FROM invites WHERE datetime(expires_at) <= datetime('now')`);
-
-        // Check if invite already exists for this email
-        const existing = this.sql.exec('SELECT id FROM invites WHERE email = ?', email).toArray();
-
-        if (existing.length > 0) {
-            return Response.json({ error: 'Invite already exists for this email' }, { status: 400 });
-        }
-
-        // Check if user is already a team member
-        const teamMember = this.sql.exec('SELECT user_id FROM team WHERE user_email = ?', email).toArray();
-
-        if (teamMember.length > 0) {
-            return Response.json({ error: 'User is already a team member' }, { status: 400 });
-        }
-
-        const inviteId = crypto.randomUUID();
-        // Invites expire in 7 days
-        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-
-        this.sql.exec(
-            `INSERT INTO invites (id, email, role, invited_by, invited_by_email, expires_at)
-             VALUES (?, ?, ?, ?, ?, ?)`,
-            inviteId,
-            email,
-            role || 'viewer',
-            invitedBy || null,
-            invitedByEmail || null,
-            expiresAt,
-        );
-
-        const invite = this.sql.exec('SELECT * FROM invites WHERE id = ?', inviteId).toArray()[0];
-
-        return Response.json(invite);
+    handleAddPendingInvite(data) {
+        return pendingInviteHandlers.addPendingInvite(this.sql, data);
     }
 
-    handleCancelInvite(inviteId) {
-        const result = this.sql.exec(`DELETE FROM invites WHERE id = ? RETURNING *`, inviteId);
+    handleGetPendingInviteByEmail(email) {
+        return pendingInviteHandlers.getPendingInviteByEmail(this.sql, email);
+    }
 
-        const deleted = result.toArray();
-        if (deleted.length === 0) {
-            return Response.json({ error: 'Invite not found' }, { status: 404 });
-        }
+    handleUpdatePendingInvite(token, data) {
+        return pendingInviteHandlers.updatePendingInvite(this.sql, token, data);
+    }
 
-        return Response.json({ success: true });
+    handleRemovePendingInvite(token) {
+        return pendingInviteHandlers.removePendingInvite(this.sql, token);
     }
 
     // ============================================================================
@@ -249,16 +193,16 @@ export class DestinationDO extends BaseDurableObject {
     // ============================================================================
 
     handleReset() {
-        // Get team members before deletion (for returning affected users)
-        const clearedTeamMembers = clearTeamAndAuditLogs(this.sql);
+        // Get team members and pending invites before deletion (for returning affected users)
+        const { teamMembers, pendingInvites } = clearTeamAndAuditLogs(this.sql);
 
         // Clear destination-specific tables
-        this.sql.exec('DELETE FROM invites');
         this.sql.exec(`UPDATE profile SET data = '{}' WHERE id = 1`);
 
         return Response.json({
             success: true,
-            clearedTeamMembers,
+            clearedTeamMembers: teamMembers,
+            clearedPendingInvites: pendingInvites,
         });
     }
 }

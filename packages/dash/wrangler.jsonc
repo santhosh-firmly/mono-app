@@ -32,14 +32,22 @@
 	"kv_namespaces": [
 		{
 			"binding": "OTP_STORE",
-			"id": "c44dfcb6c5404854b82b9023ff1d4d39"
+			"id": "c44dfcb6c5404854b82b9023ff1d4d39",
+			"preview_id": "c44dfcb6c5404854b82b9023ff1d4d39"
 		}
 	],
 	// R2 bucket for avatar storage - create with: wrangler r2 bucket create dash-avatars
+	// R2 bucket for agreement PDFs - create with: wrangler r2 bucket create dash-agreements
 	"r2_buckets": [
 		{
 			"binding": "AVATARS",
-			"bucket_name": "dash-avatars-dev"
+			"bucket_name": "dash-avatars-dev",
+			"preview_bucket_name": "dash-avatars-dev"
+		},
+		{
+			"binding": "AGREEMENTS",
+			"bucket_name": "dash-agreements-dev",
+			"preview_bucket_name": "dash-agreements-dev"
 		}
 	],
 	"services": [
@@ -53,7 +61,8 @@
 		"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
 		"PUBLIC_AZURE_REDIRECT_URL": "http://localhost:5173/auth/callback",
 		"FIRMLY_AUTH_COOKIE": "fuser",
-		"HONEYCOMB_DATASET": "requests-dev"
+		"HONEYCOMB_DATASET": "requests-dev",
+		"CONTROL_PANEL_URL": "https://control.firmlyai.com"
 	},
 	"env": {
 		"dev": {
@@ -99,6 +108,11 @@
 					"binding": "AVATARS",
 					"bucket_name": "dash-avatars-dev",
 					"preview_bucket_name": "dash-avatars-dev"
+				},
+				{
+					"binding": "AGREEMENTS",
+					"bucket_name": "dash-agreements-dev",
+					"preview_bucket_name": "dash-agreements-dev"
 				}
 			],
 			"services": [
@@ -116,7 +130,9 @@
 				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
 				"PUBLIC_AZURE_REDIRECT_URL": "https://dash.firmly.dev/auth/callback",
 				"FIRMLY_AUTH_COOKIE": "fuser",
-				"HONEYCOMB_DATASET": "requests-dev"
+				"HONEYCOMB_DATASET": "requests-dev",
+				"CONTROL_PANEL_URL": "https://control.firmlyai.com",
+				"FIRMLY_ENV": "dev"
 			}
 		},
 		"ci": {
@@ -160,6 +176,10 @@
 				{
 					"binding": "AVATARS",
 					"bucket_name": "dash-avatars-ci"
+				},
+				{
+					"binding": "AGREEMENTS",
+					"bucket_name": "dash-agreements-ci"
 				}
 			],
 			"services": [
@@ -177,7 +197,9 @@
 				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
 				"PUBLIC_AZURE_REDIRECT_URL": "https://dash.firmlyci.com/auth/callback",
 				"FIRMLY_AUTH_COOKIE": "fuser",
-				"HONEYCOMB_DATASET": "requests-ci"
+				"HONEYCOMB_DATASET": "requests-ci",
+				"CONTROL_PANEL_URL": "https://control.firmlyai.com",
+				"FIRMLY_ENV": "ci"
 			}
 		},
 		"qa": {
@@ -221,6 +243,10 @@
 				{
 					"binding": "AVATARS",
 					"bucket_name": "dash-avatars-qa"
+				},
+				{
+					"binding": "AGREEMENTS",
+					"bucket_name": "dash-agreements-qa"
 				}
 			],
 			"services": [
@@ -238,7 +264,9 @@
 				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
 				"PUBLIC_AZURE_REDIRECT_URL": "https://dash.amarood.art/auth/callback",
 				"FIRMLY_AUTH_COOKIE": "fuser",
-				"HONEYCOMB_DATASET": "requests-qa"
+				"HONEYCOMB_DATASET": "requests-qa",
+				"CONTROL_PANEL_URL": "https://control.firmlyai.com",
+				"FIRMLY_ENV": "qa"
 			}
 		},
 		"uat": {
@@ -263,19 +291,23 @@
 				{
 					"binding": "dashUsers",
 					"database_name": "dash-users",
-					"database_id": "TO_BE_CREATED_UAT"
+					"database_id": "b6f90e4b-62e4-4570-83d9-51fd7fe4949d"
 				}
 			],
 			"kv_namespaces": [
 				{
 					"binding": "OTP_STORE",
-					"id": "TO_BE_CREATED_UAT"
+					"id": "6c0e11bd525345b0bcd0804935088a3f"
 				}
 			],
 			"r2_buckets": [
 				{
 					"binding": "AVATARS",
 					"bucket_name": "dash-avatars-uat"
+				},
+				{
+					"binding": "AGREEMENTS",
+					"bucket_name": "dash-agreements-uat"
 				}
 			],
 			"services": [
@@ -299,7 +331,11 @@
 				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
 				"PUBLIC_AZURE_REDIRECT_URL": "https://dash.firmlyuat.com/auth/callback",
 				"FIRMLY_AUTH_COOKIE": "fuser",
-				"HONEYCOMB_DATASET": "requests-uat"
+				"HONEYCOMB_DATASET": "requests-uat",
+				"CONTROL_PANEL_URL": "https://control.firmlyai.com",
+				"FIRMLY_BASE_URL": "https://api.firmly.work",
+				"FIRMLY_APP_ID": "d34d27f4-8bfc-4bde-bd60-68918da95f2e",
+				"FIRMLY_ENV": "uat"
 			}
 		},
 		"prod": {
@@ -324,19 +360,23 @@
 				{
 					"binding": "dashUsers",
 					"database_name": "dash-users",
-					"database_id": "TO_BE_CREATED_PROD"
+					"database_id": "2ad35d9d-9a87-40b3-b1e0-b3d85310bfe8"
 				}
 			],
 			"kv_namespaces": [
 				{
 					"binding": "OTP_STORE",
-					"id": "TO_BE_CREATED_PROD"
+					"id": "14e016dc26174923803a53178a9f9439"
 				}
 			],
 			"r2_buckets": [
 				{
 					"binding": "AVATARS",
 					"bucket_name": "dash-avatars-prod"
+				},
+				{
+					"binding": "AGREEMENTS",
+					"bucket_name": "dash-agreements-prod"
 				}
 			],
 			"services": [
@@ -360,7 +400,9 @@
 				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
 				"PUBLIC_AZURE_REDIRECT_URL": "https://dash.firmly.live/auth/callback",
 				"FIRMLY_AUTH_COOKIE": "fuser",
-				"HONEYCOMB_DATASET": "requests-prod"
+				"HONEYCOMB_DATASET": "requests-prod",
+				"CONTROL_PANEL_URL": "https://control.firmlyinc.com",
+				"FIRMLY_ENV": "prod"
 			}
 		}
 	}

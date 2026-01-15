@@ -8,12 +8,14 @@
 	import Loader2 from 'lucide-svelte/icons/loader-2';
 	import StoreIcon from 'lucide-svelte/icons/store';
 	import Save from 'lucide-svelte/icons/save';
+	import ChevronDown from 'lucide-svelte/icons/chevron-down';
+	import ChevronRight from 'lucide-svelte/icons/chevron-right';
 	import { formatCurrency } from '$lib/currency.js';
 
 	/**
 	 * @type {{
 	 *   domain: string,
-	 *   destinations: Array<{id: string, name: string, orders: number, aov: number|null, disputeRate: number|null, reputationScore: number|null, isActive: boolean, isComingSoon: boolean, canToggle: boolean}>,
+	 *   destinations: Array<{id: string, name: string, category: string|null, orders: number, aov: number|null, disputeRate: number|null, reputationScore: number|null, isActive: boolean, isComingSoon: boolean, canToggle: boolean}>,
 	 *   loading: boolean,
 	 *   saving: boolean,
 	 *   error: string,
@@ -49,6 +51,49 @@
 		if (withAov.length === 0) return 0;
 		return withAov.reduce((sum, d) => sum + d.aov, 0) / withAov.length;
 	});
+
+	// Group destinations by category
+	let groupedDestinations = $derived(() => {
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity -- Map is temporary, converted to array before return
+		const groups = new Map();
+
+		for (const dest of destinations) {
+			const cat = dest.category || 'Other';
+			if (!groups.has(cat)) {
+				groups.set(cat, []);
+			}
+			groups.get(cat).push(dest);
+		}
+
+		// Sort destinations alphabetically within each group
+		for (const [, dests] of groups) {
+			dests.sort((a, b) => a.name.localeCompare(b.name));
+		}
+
+		// Convert to array and sort groups alphabetically, "Other" last
+		return [...groups.entries()].sort((a, b) => {
+			if (a[0] === 'Other') return 1;
+			if (b[0] === 'Other') return -1;
+			return a[0].localeCompare(b[0]);
+		});
+	});
+
+	// Track which groups are expanded (all expanded by default)
+	let expandedGroups = $state(new Set());
+
+	// Initialize expanded groups when destinations change
+	$effect(() => {
+		const categories = groupedDestinations().map(([cat]) => cat);
+		expandedGroups = new Set(categories);
+	});
+
+	function toggleGroup(category) {
+		if (expandedGroups.has(category)) {
+			expandedGroups = new Set([...expandedGroups].filter((c) => c !== category));
+		} else {
+			expandedGroups = new Set([...expandedGroups, category]);
+		}
+	}
 
 	// Allow saving on first visit to complete onboarding, even without changes
 	let canSave = $derived(() => {
@@ -138,93 +183,117 @@
 						</p>
 					</div>
 				{:else}
-					<div class="rounded-lg border border-border overflow-hidden">
-						<Table.Root>
-							<Table.Header>
-								<Table.Row class="bg-muted/50">
-									<Table.Head>Destination / Agent</Table.Head>
-									<Table.Head class="text-right hidden sm:table-cell"
-										>Orders</Table.Head
-									>
-									<Table.Head class="text-right hidden md:table-cell"
-										>AOV</Table.Head
-									>
-									<Table.Head class="text-right hidden lg:table-cell"
-										>Dispute Rate</Table.Head
-									>
-									<Table.Head class="text-right hidden lg:table-cell"
-										>Reputation Score</Table.Head
-									>
-									<Table.Head class="text-center">Status</Table.Head>
-								</Table.Row>
-							</Table.Header>
-							<Table.Body>
-								{#each destinations as destination (destination.id)}
-									<Table.Row class="hover:bg-muted/50">
-										<Table.Cell>
-											<div class="flex items-center gap-2">
-												<span class="font-medium">{destination.name}</span>
-												{#if destination.isComingSoon}
-													<Badge variant="outline" class="text-xs"
-														>Coming Soon</Badge
-													>
-												{/if}
-											</div>
-										</Table.Cell>
-										<Table.Cell class="text-right hidden sm:table-cell">
-											{#if destination.isComingSoon}
-												<span class="text-muted-foreground">-</span>
-											{:else}
-												{typeof destination.orders === 'number'
-													? destination.orders.toLocaleString()
-													: destination.orders}
-											{/if}
-										</Table.Cell>
-										<Table.Cell class="text-right hidden md:table-cell">
-											{destination.aov !== null
-												? formatCurrency(destination.aov)
-												: '-'}
-										</Table.Cell>
-										<Table.Cell class="text-right hidden lg:table-cell">
-											{#if destination.disputeRate !== null}
-												<span
-													class={getDisputeRateColor(
-														destination.disputeRate
-													)}
-												>
-													{destination.disputeRate.toFixed(1)}%
-												</span>
-											{:else}
-												<span class="text-muted-foreground">-</span>
-											{/if}
-										</Table.Cell>
-										<Table.Cell class="text-right hidden lg:table-cell">
-											{#if destination.reputationScore !== null}
-												<span
-													class={getReputationColor(
-														destination.reputationScore
-													)}
-												>
-													{destination.reputationScore.toFixed(1)} / 5.0
-												</span>
-											{:else}
-												<span class="text-muted-foreground">-</span>
-											{/if}
-										</Table.Cell>
-										<Table.Cell class="text-center">
-											<div class="flex items-center justify-center gap-2">
-												<Switch
-													checked={destination.isActive}
-													disabled={!destination.canToggle}
-													on:click={() => onToggle(destination.id)}
+					<Table.Root>
+						<Table.Header>
+							<Table.Row class="bg-muted/50">
+								<Table.Head>Destination / Agent</Table.Head>
+								<Table.Head class="text-right hidden sm:table-cell"
+									>Orders</Table.Head
+								>
+								<Table.Head class="text-right hidden md:table-cell">AOV</Table.Head>
+								<Table.Head class="text-right hidden lg:table-cell"
+									>Dispute Rate</Table.Head
+								>
+								<Table.Head class="text-right hidden lg:table-cell"
+									>Reputation Score</Table.Head
+								>
+								<Table.Head class="text-center">Status</Table.Head>
+							</Table.Row>
+						</Table.Header>
+						<Table.Body>
+							{#each groupedDestinations() as [category, categoryDestinations] (category)}
+								<Table.Row
+									class="bg-muted/30 hover:bg-muted/50 cursor-pointer"
+									onclick={() => toggleGroup(category)}
+								>
+									<Table.Cell colspan="6">
+										<div class="flex items-center gap-2">
+											{#if expandedGroups.has(category)}
+												<ChevronDown
+													class="h-4 w-4 text-muted-foreground"
 												/>
-											</div>
-										</Table.Cell>
-									</Table.Row>
-								{/each}
-							</Table.Body>
-						</Table.Root>
-					</div>
+											{:else}
+												<ChevronRight
+													class="h-4 w-4 text-muted-foreground"
+												/>
+											{/if}
+											<span class="font-medium">{category}</span>
+											<Badge variant="secondary" class="text-xs">
+												{categoryDestinations.length}
+											</Badge>
+										</div>
+									</Table.Cell>
+								</Table.Row>
+								{#if expandedGroups.has(category)}
+									{#each categoryDestinations as destination (destination.id)}
+										<Table.Row class="hover:bg-muted/50">
+											<Table.Cell>
+												<div class="flex items-center gap-2 pl-6">
+													<span class="font-medium"
+														>{destination.name}</span
+													>
+													{#if destination.isComingSoon}
+														<Badge variant="outline" class="text-xs"
+															>Coming Soon</Badge
+														>
+													{/if}
+												</div>
+											</Table.Cell>
+											<Table.Cell class="text-right hidden sm:table-cell">
+												{#if destination.isComingSoon}
+													<span class="text-muted-foreground">-</span>
+												{:else}
+													{typeof destination.orders === 'number'
+														? destination.orders.toLocaleString()
+														: destination.orders}
+												{/if}
+											</Table.Cell>
+											<Table.Cell class="text-right hidden md:table-cell">
+												{destination.aov !== null
+													? formatCurrency(destination.aov)
+													: '-'}
+											</Table.Cell>
+											<Table.Cell class="text-right hidden lg:table-cell">
+												{#if destination.disputeRate !== null}
+													<span
+														class={getDisputeRateColor(
+															destination.disputeRate
+														)}
+													>
+														{destination.disputeRate.toFixed(1)}%
+													</span>
+												{:else}
+													<span class="text-muted-foreground">-</span>
+												{/if}
+											</Table.Cell>
+											<Table.Cell class="text-right hidden lg:table-cell">
+												{#if destination.reputationScore !== null}
+													<span
+														class={getReputationColor(
+															destination.reputationScore
+														)}
+													>
+														{destination.reputationScore.toFixed(1)} / 5.0
+													</span>
+												{:else}
+													<span class="text-muted-foreground">-</span>
+												{/if}
+											</Table.Cell>
+											<Table.Cell class="text-center">
+												<div class="flex items-center justify-center gap-2">
+													<Switch
+														checked={destination.isActive}
+														disabled={!destination.canToggle}
+														on:click={() => onToggle(destination.id)}
+													/>
+												</div>
+											</Table.Cell>
+										</Table.Row>
+									{/each}
+								{/if}
+							{/each}
+						</Table.Body>
+					</Table.Root>
 				{/if}
 
 				{#if error}

@@ -30,13 +30,13 @@
 	function getActions(destination) {
 		const actions = [];
 
-		// Primary action: View Dashboard
+		// Primary action: View Dashboard (opens in admin mode)
 		actions.push({
 			id: 'view',
 			icon: ExternalLink,
 			label: 'View Dashboard',
 			variant: 'default',
-			href: `/destination/${destination.appId}`,
+			href: `/destination/${destination.appId}?admin_mode=true`,
 			target: '_blank'
 		});
 

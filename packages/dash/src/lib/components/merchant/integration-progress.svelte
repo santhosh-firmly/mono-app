@@ -1,31 +1,63 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import BrandedProgress from './branded-progress.svelte';
 	import CheckCircle from 'lucide-svelte/icons/check-circle';
 	import Circle from 'lucide-svelte/icons/circle';
 	import Loader from 'lucide-svelte/icons/loader-2';
 	import Clock from 'lucide-svelte/icons/clock';
+	import { adminFetch } from '$lib/utils/fetch.js';
 
 	let { domain = '', isFirmlyAdmin = false } = $props();
 
 	let steps = $state([]);
 	let loading = $state(true);
 	let error = $state(null);
+	let refreshInterval = null;
 
 	let completedSteps = $derived(steps.filter((step) => step.status === 'completed').length);
 	let totalSteps = $derived(steps.length);
 	let progressPercentage = $derived(totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0);
+	let isComplete = $derived(totalSteps > 0 && completedSteps === totalSteps);
 
 	onMount(async () => {
-		await fetchIntegrationStatus();
+		await fetchIntegrationStatus(true);
+
+		// Start polling every 10 seconds
+		refreshInterval = setInterval(async () => {
+			// Stop polling if integration is complete
+			if (isComplete) {
+				clearInterval(refreshInterval);
+				refreshInterval = null;
+				return;
+			}
+			await fetchIntegrationStatus(false);
+		}, 10000);
 	});
 
-	async function fetchIntegrationStatus() {
+	onDestroy(() => {
+		if (refreshInterval) {
+			clearInterval(refreshInterval);
+			refreshInterval = null;
+		}
+	});
+
+	async function fetchIntegrationStatus(isInitialLoad = false) {
 		try {
-			loading = true;
+			// Only show loading spinner on initial load
+			if (isInitialLoad) {
+				loading = true;
+			}
 			error = null;
-			const response = await fetch(`/merchant/${domain}/api/integration-status`);
+
+			// When isFirmlyAdmin is true (called from admin pages), always include admin_mode
+			// Otherwise, use adminFetch which checks sessionStorage
+			let url = `/merchant/${domain}/api/integration-status`;
+			if (isFirmlyAdmin) {
+				url += '?admin_mode=true';
+			}
+
+			const response = isFirmlyAdmin ? await fetch(url) : await adminFetch(url);
 
 			if (!response.ok) {
 				throw new Error('Failed to fetch integration status');

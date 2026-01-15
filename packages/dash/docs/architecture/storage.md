@@ -53,16 +53,13 @@ See [D1 Schema](../database/d1-schema.md) for full schema.
 
 ### D1 Bindings
 
-```jsonc
-// wrangler.jsonc
-{
-  "d1_databases": [
-    { "binding": "firmlyConfigs", "database_name": "firmly-configs" },
-    { "binding": "reporting", "database_name": "reporting" },
-    { "binding": "dashUsers", "database_name": "dash-users" }
-  ]
-}
-```
+Three D1 databases are bound to the dash worker:
+
+| Binding | Database | Purpose |
+|---------|----------|---------|
+| `firmlyConfigs` | firmly-configs | App configuration |
+| `reporting` | reporting | Order data |
+| `dashUsers` | dash-users | User and merchant data |
 
 ## Durable Objects
 
@@ -87,7 +84,7 @@ Each user has one DashUserDO instance identified by their UUID.
 - Destination access
 - User preferences
 
-See [DashUserDO Schema](../database/durable-objects.md#dashuserdoschema) for details.
+See [DashUserDO Schema](../database/durable-objects.md) for details.
 
 ### MerchantDO
 
@@ -102,31 +99,7 @@ Each merchant has one MerchantDO instance identified by domain.
 
 ### Service Binding Communication
 
-```javascript
-// In dash: Call dash-do via service binding
-async function fetchDashDO(platform, userId, path, options = {}) {
-  const DASH_DO = platform.env.DASH_DO;
-  const headers = new Headers(options.headers || {});
-  headers.set('X-User-ID', userId);  // Routes to correct DO
-
-  return DASH_DO.fetch(new Request(`https://dash-do${path}`, {
-    ...options,
-    headers
-  }));
-}
-
-// Example: Get user profile
-const response = await fetchDashDO(platform, userId, '/profile');
-const profile = await response.json();
-```
-
-```javascript
-// In dash-do: Route to user's DO
-const userId = request.headers.get('X-User-ID');
-const doId = env.DASH_USER_DO.idFromName(userId);
-const stub = env.DASH_USER_DO.get(doId);
-return stub.fetch(request);
-```
+The dash worker communicates with dash-do via service binding. Requests include a `X-User-ID` header to route to the correct Durable Object instance. The dash-do worker extracts this header and forwards the request to the appropriate DO.
 
 ## KV Store
 
@@ -142,36 +115,14 @@ KV stores short-lived authentication tokens with automatic expiration.
 
 | Key Pattern | Value | TTL | Purpose |
 |-------------|-------|-----|---------|
-| `otp:{email}` | `{ code, attempts }` | 5 min | OTP verification |
-| `magic:{token}` | `{ email, domain }` | 15 min | Magic link login |
-| `invite:{token}` | `{ email, merchantDomain, role, ... }` | 7 days | Team invites |
-| `invite-domain:{domain}` | `token` | 7 days | Track pending invites |
-
-### KV Binding
-
-```jsonc
-// wrangler.jsonc
-{
-  "kv_namespaces": [
-    { "binding": "OTP_STORE", "id": "..." }
-  ]
-}
-```
+| `otp:{email}` | Code and attempts | 5 min | OTP verification |
+| `magic:{token}` | Email and domain | 15 min | Magic link login |
+| `invite:{token}` | Email, merchant, role, etc. | 7 days | Team invites |
+| `invite-domain:{domain}` | Token reference | 7 days | Track pending invites |
 
 ## R2 Storage
 
-R2 stores user avatar images.
-
-### R2 Binding
-
-```jsonc
-// wrangler.jsonc
-{
-  "r2_buckets": [
-    { "binding": "AVATARS", "bucket_name": "dash-avatars-dev" }
-  ]
-}
-```
+R2 stores user avatar images. Each environment has a dedicated bucket (e.g., `dash-avatars-dev`, `dash-avatars-prod`).
 
 ## Dual-Write Pattern
 

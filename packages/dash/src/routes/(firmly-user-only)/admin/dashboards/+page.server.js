@@ -28,8 +28,9 @@ export async function load({ platform }) {
 			)
 			.all();
 
-		// Create a map for quick lookup
+		// Create maps for quick lookup
 		const dashboardMap = new Map((dashboardMeta || []).map((d) => [d.domain, d]));
+		const storesMap = new Map((merchants || []).map((m) => [m.key, m]));
 
 		// Merge: all merchants get a dashboard entry
 		const dashboards = (merchants || []).map((m) => {
@@ -50,6 +51,7 @@ export async function load({ platform }) {
 				domain: m.key,
 				display_name: storeInfo.display_name,
 				is_disabled: storeInfo.is_disabled || false,
+				not_in_config: false,
 				// Dashboard-specific fields from merchant_dashboards (if exists)
 				owner_user_id: meta.owner_user_id || null,
 				status: meta.status || 'not_configured',
@@ -73,6 +75,49 @@ export async function load({ platform }) {
 				pendingInvite: null // Will be populated below
 			};
 		});
+
+		// Add dashboards that exist in merchant_dashboards but not in stores (orphaned dashboards)
+		for (const meta of dashboardMeta || []) {
+			if (!storesMap.has(meta.domain)) {
+				// Parse dashboard info (company/contact)
+				let dashboardInfo = {};
+				if (meta.info) {
+					try {
+						dashboardInfo = JSON.parse(meta.info);
+					} catch {
+						dashboardInfo = {};
+					}
+				}
+
+				dashboards.push({
+					domain: meta.domain,
+					display_name: null,
+					is_disabled: false,
+					not_in_config: true, // Flag to indicate this is not in firmlyConfigs
+					// Dashboard-specific fields from merchant_dashboards
+					owner_user_id: meta.owner_user_id || null,
+					status: meta.status || 'pending',
+					created_at: meta.created_at || null,
+					notes: meta.notes || null,
+					// Company/contact info from dashboard info
+					contact: dashboardInfo.contact || null,
+					company: dashboardInfo.company || null,
+					// KYB fields
+					kyb_status: meta.kyb_status || null,
+					kyb_submitted_at: meta.kyb_submitted_at || null,
+					kyb_reviewed_at: meta.kyb_reviewed_at || null,
+					kyb_reviewed_by: meta.kyb_reviewed_by || null,
+					kyb_rejection_notes: meta.kyb_rejection_notes || null,
+					// Go Live fields
+					go_live_status: meta.go_live_status || null,
+					go_live_submitted_at: meta.go_live_submitted_at || null,
+					go_live_reviewed_at: meta.go_live_reviewed_at || null,
+					go_live_reviewed_by: meta.go_live_reviewed_by || null,
+					go_live_rejection_notes: meta.go_live_rejection_notes || null,
+					pendingInvite: null // Will be populated below
+				});
+			}
+		}
 
 		// Sort by status (active first, then pending, then not_configured) and then by domain
 		dashboards.sort((a, b) => {

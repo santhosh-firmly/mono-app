@@ -17,6 +17,7 @@
 		CompanyInfoCard,
 		MainContactCard
 	} from '$lib/components/merchant-settings/index.js';
+	import { adminFetch } from '$lib/utils/fetch.js';
 
 	let { data } = $props();
 
@@ -113,6 +114,18 @@
 			contactEmail?.trim()
 	);
 
+	// Combined save+submit mode for onboarding users who haven't submitted KYB
+	let useCombinedSubmit = $derived(
+		fromOnboarding &&
+			data.kybStatus?.kyb_status !== 'pending' &&
+			data.kybStatus?.kyb_status !== 'approved'
+	);
+
+	// For combined mode: button enabled when required KYB fields are filled
+	let canSubmitKybFromOnboarding = $derived(
+		data.canEdit && companyName?.trim() && contactName?.trim() && contactEmail?.trim()
+	);
+
 	// Unsaved changes warning - browser close/refresh
 	$effect(() => {
 		function handleBeforeUnload(event) {
@@ -146,7 +159,7 @@
 		successMessage = '';
 
 		try {
-			const response = await fetch(`/merchant/${domain}/settings/api`, {
+			const response = await adminFetch(`/merchant/${domain}/settings/api`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -210,8 +223,10 @@
 				contactEmail,
 				contactPhone
 			};
+			return true;
 		} catch (err) {
 			error = err.message;
+			return false;
 		} finally {
 			saving = false;
 		}
@@ -225,7 +240,7 @@
 		kybSuccessMessage = '';
 
 		try {
-			const response = await fetch(`/merchant/${domain}/api/kyb`, {
+			const response = await adminFetch(`/merchant/${domain}/api/kyb`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' }
 			});
@@ -236,9 +251,10 @@
 				throw new Error(result.error || 'Failed to submit KYB');
 			}
 
-			// If user came from onboarding, redirect back to merchant home
+			// If user came from onboarding, invalidate all data first, then redirect
 			if (fromOnboarding) {
-				await goto(`/merchant/${domain}`);
+				await invalidateAll();
+				goto(`/merchant/${domain}`);
 				return;
 			}
 
@@ -251,6 +267,16 @@
 		} finally {
 			submittingKyb = false;
 		}
+	}
+
+	async function saveAndSubmitKYB() {
+		// First save settings if there are changes
+		if (hasChanges) {
+			const saveSuccess = await saveSettings();
+			if (!saveSuccess) return;
+		}
+		// Then submit KYB (will redirect back to onboarding)
+		await submitKYB();
 	}
 </script>
 
@@ -310,8 +336,8 @@
 				disabled={!data.canEdit}
 			/>
 
-			<!-- KYB Submit Button -->
-			{#if data.canEdit && data.kybStatus?.kyb_status !== 'approved' && data.kybStatus?.kyb_status !== 'pending'}
+			<!-- KYB Submit Button (hidden in combined mode when coming from onboarding) -->
+			{#if data.canEdit && !useCombinedSubmit && data.kybStatus?.kyb_status !== 'approved' && data.kybStatus?.kyb_status !== 'pending'}
 				<Card.Root>
 					<Card.Header>
 						<Card.Title class="text-lg">Submit for Business Verification</Card.Title>
@@ -370,5 +396,11 @@
 
 <!-- Sticky Save Button -->
 {#if data.canEdit}
-	<StickyFormFooter onSave={saveSettings} disabled={!hasChanges} loading={saving} />
+	<StickyFormFooter
+		onSave={useCombinedSubmit ? saveAndSubmitKYB : saveSettings}
+		disabled={useCombinedSubmit ? !canSubmitKybFromOnboarding : !hasChanges}
+		loading={saving || submittingKyb}
+		label={useCombinedSubmit ? 'Submit for Review' : 'Save Changes'}
+		loadingLabel={useCombinedSubmit ? 'Submitting...' : 'Saving...'}
+	/>
 {/if}

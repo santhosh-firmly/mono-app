@@ -16,7 +16,7 @@ export async function load({ locals, params, platform, request, parent }) {
 		redirect(303, `/merchant/${domain}`);
 	}
 
-	// Get current agreement status
+	// Get current agreement status (includes config data)
 	const agreementData = await getMerchantAgreement({ platform, merchantDomain: domain });
 
 	// Get client info from Cloudflare headers for signing
@@ -26,6 +26,12 @@ export async function load({ locals, params, platform, request, parent }) {
 	const clientLocation =
 		cfData.city && cfData.country ? `${cfData.city}, ${cfData.country}` : null;
 
+	// Build PDF URL if applicable
+	const pdfUrl =
+		agreementData.contentType === 'pdf' && agreementData.pdfKey
+			? `/merchant/${domain}/agreement/pdf`
+			: null;
+
 	return {
 		domain,
 		userId,
@@ -33,6 +39,11 @@ export async function load({ locals, params, platform, request, parent }) {
 		isSigned: agreementData.signed,
 		signedInfo: agreementData.agreement,
 		clientIp,
-		clientLocation
+		clientLocation,
+		// Agreement config data
+		contentType: agreementData.contentType || 'default',
+		markdownContent: agreementData.markdownContent || null,
+		pdfUrl,
+		externallySigned: agreementData.externallySigned || false
 	};
 }

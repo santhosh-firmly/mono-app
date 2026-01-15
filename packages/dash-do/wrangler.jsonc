@@ -40,6 +40,9 @@
 			"account_id": "edefa8570f305f587d4a564abd8bdc80",
 			"name": "dash-do",
 			"workers_dev": true,
+			"vars": {
+				"FIRMLY_ENV": "dev"
+			},
 			"services": [
 				{
 					"binding": "envLoader",
@@ -72,6 +75,9 @@
 			"account_id": "4e6de22bab2c64884e178b0be7559230",
 			"name": "dash-do",
 			"workers_dev": false,
+			"vars": {
+				"FIRMLY_ENV": "ci"
+			},
 			"services": [
 				{
 					"binding": "envLoader",
@@ -104,6 +110,9 @@
 			"account_id": "c90aa8c275f60c00fc3844f2ecbb84a1",
 			"name": "dash-do",
 			"workers_dev": false,
+			"vars": {
+				"FIRMLY_ENV": "qa"
+			},
 			"services": [
 				{
 					"binding": "envLoader",
@@ -136,6 +145,9 @@
 			"account_id": "e7638306f2807c7feef461c785b712c1",
 			"name": "dash-do",
 			"workers_dev": false,
+			"vars": {
+				"FIRMLY_ENV": "uat"
+			},
 			"services": [
 				{
 					"binding": "envLoader",
@@ -168,6 +180,9 @@
 			"account_id": "71f2b81ee4789578e28a5fbf03a935e8",
 			"name": "dash-do",
 			"workers_dev": false,
+			"vars": {
+				"FIRMLY_ENV": "prod"
+			},
 			"services": [
 				{
 					"binding": "envLoader",

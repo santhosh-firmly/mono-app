@@ -1,6 +1,14 @@
 import { json } from '@sveltejs/kit';
-import { getOrCreateUser, getUser, createSession, removePendingInvite } from '$lib/server/user.js';
-import { addTeamMember } from '$lib/server/merchant.js';
+import {
+	getOrCreateUser,
+	getUser,
+	createSession,
+	removePendingInvite as removePendingInviteFromUser
+} from '$lib/server/user.js';
+import {
+	addTeamMember,
+	removePendingInvite as removePendingInviteFromMerchant
+} from '$lib/server/merchant.js';
 
 /**
  * POST /api/invite/accept
@@ -154,8 +162,11 @@ export async function POST({ request, platform, cookies }) {
 		// Delete the invite token (single use)
 		await kv.delete(`invite:${token}`);
 
+		// Remove from MerchantDO pending invites
+		await removePendingInviteFromMerchant({ platform, merchantDomain, token });
+
 		// Remove from user's pending invites (if it was stored there)
-		await removePendingInvite({ platform, userId: user.userId, token });
+		await removePendingInviteFromUser({ platform, userId: user.userId, token });
 
 		// Set session cookie
 		cookies.set('session', sessionToken, {

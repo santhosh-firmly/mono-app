@@ -10,30 +10,10 @@ All user routes are under the `(logged-in)` route group, requiring JWT session a
 
 The home page handles users with multiple dashboards:
 
-```javascript
-// routes/(logged-in)/+page.server.js
-export async function load({ platform, locals }) {
-  const { userId } = locals.session;
-
-  // Get user's merchant access
-  const merchantAccess = await getMerchantAccess({ platform, userId });
-
-  // Smart redirect for single dashboard
-  if (merchantAccess.length === 1) {
-    redirect(302, `/merchant/${merchantAccess[0].merchantDomain}`);
-  }
-
-  // Get pending invites
-  const pendingInvites = await getPendingInvites({ platform, userId });
-
-  return { merchantAccess, pendingInvites };
-}
-```
-
-The page shows:
-- Dashboard cards with merchant name and role
-- Pending invitations that can be accepted/declined
-- Create account prompt if no dashboards
+**Behavior:**
+- Single dashboard: Automatically redirect to `/merchant/{domain}`
+- Zero or multiple dashboards: Show selection grid
+- Also displays pending invitations that can be accepted/declined
 
 ## Profile (`/profile`)
 
@@ -42,24 +22,15 @@ User profile management:
 | Feature | Description |
 |---------|-------------|
 | Edit profile | Name, company, title, location |
-| Avatar upload | Profile picture |
-| Active sessions | View/terminate devices |
+| Avatar upload | Profile picture stored in R2 |
+| Active sessions | View and terminate devices |
 
-```javascript
-// routes/(logged-in)/profile/+page.server.js
-export async function load({ platform, locals }) {
-  const { userId, sessionId } = locals.session;
-
-  const profile = await getProfile({ platform, userId });
-  const sessions = await listSessions({ platform, userId });
-
-  return {
-    profile,
-    sessions,
-    currentSessionId: sessionId
-  };
-}
-```
+The sessions list shows:
+- Device name and type
+- IP address
+- Last access time
+- Option to terminate session
+- Current session is highlighted
 
 ## Merchant Dashboard (`/merchant/[domain]`)
 
@@ -81,93 +52,24 @@ export async function load({ platform, locals }) {
 
 ### Layout
 
-The merchant layout provides common elements:
+The merchant layout provides:
+- **Header**: Merchant selector dropdown, user menu
+- **Sidebar**: Navigation links (Orders, Destinations, Team, etc.)
+- **Main content**: Child page content
+- **Integration progress**: Sidebar showing onboarding status (if not complete)
+- **Admin banner**: Visible when Firmly admin is viewing merchant dashboard
 
-```svelte
-<!-- routes/(logged-in)/merchant/[domain]/+layout.svelte -->
-<script>
-  let { data, children } = $props();
-  const { merchantAccess, onboardingStatus, isFirmlyAdmin } = data;
-</script>
+### Authorization
 
-<div class="merchant-layout">
-  <!-- Header with merchant selector -->
-  <MerchantHeader
-    {merchantAccess}
-    currentDomain={data.domain}
-    {isFirmlyAdmin}
-  />
+The layout server checks:
+1. User has access to this merchant (from DashUserDO `merchant_access`)
+2. Or user is a Firmly admin (Azure AD session)
 
-  <div class="content">
-    <!-- Sidebar navigation -->
-    <MerchantNavbar domain={data.domain} />
+If neither, redirect to `/`.
 
-    <!-- Main content -->
-    <main>
-      {@render children()}
-    </main>
-
-    <!-- Onboarding sidebar (if not complete) -->
-    {#if !onboardingStatus.integration?.completed}
-      <IntegrationProgress status={onboardingStatus} />
-    {/if}
-  </div>
-
-  <!-- Admin banner for Firmly admins -->
-  {#if isFirmlyAdmin}
-    <FirmlyAdminBanner />
-  {/if}
-</div>
-```
-
-### Layout Server
-
-```javascript
-// routes/(logged-in)/merchant/[domain]/+layout.server.js
-export async function load({ platform, locals, params }) {
-  const { domain } = params;
-  const { userId, isFirmlyAdmin } = locals.session;
-
-  // Get user's access to this merchant
-  const merchantAccess = await getMerchantAccess({ platform, userId });
-  const currentAccess = merchantAccess.find(a => a.merchantDomain === domain);
-
-  // Check authorization
-  if (!currentAccess && !isFirmlyAdmin) {
-    redirect(302, '/');
-  }
-
-  // Get onboarding status
-  const onboardingStatus = await getOnboardingStatus({ platform, merchantDomain: domain });
-
-  return {
-    domain,
-    role: currentAccess?.role || (isFirmlyAdmin ? 'admin' : null),
-    merchantAccess,
-    onboardingStatus,
-    isFirmlyAdmin
-  };
-}
-```
-
-## Orders (`/merchant/[domain]/orders`)
+## Orders
 
 ### List Page
-
-```javascript
-// routes/(logged-in)/merchant/[domain]/orders/+page.svelte
-<script>
-  let { data } = $props();
-  let orders = $state([]);
-  let loading = $state(true);
-
-  onMount(async () => {
-    const response = await fetch(`/merchant/${data.domain}/api/orders`);
-    orders = await response.json();
-    loading = false;
-  });
-</script>
-```
 
 Features:
 - Filterable by status, date, partner
@@ -177,10 +79,6 @@ Features:
 
 ### Detail Page
 
-```javascript
-// routes/(logged-in)/merchant/[domain]/orders/[order_id]/+page.svelte
-```
-
 Shows:
 - Order header (ID, status, date)
 - Order items
@@ -189,72 +87,27 @@ Shows:
 - Payment info
 - Navigation between orders
 
-## Destinations (`/merchant/[domain]/destinations`)
+## Destinations
 
-Configure which payment destinations are enabled:
+Configure which payment destinations are enabled for the merchant. Changes are logged in audit logs.
 
-```javascript
-// Page loads current state
-const { destinations } = await getMerchantDestinations({
-  platform,
-  merchantDomain: domain
-});
+## Team
 
-// User toggles destinations
-await updateMerchantDestinations({
-  platform,
-  merchantDomain: domain,
-  enabledDestinations: ['amazon', 'walmart'],
-  actor: { id: userId, email }
-});
-```
+Team management page (modifications require owner role):
 
-## Team (`/merchant/[domain]/team`)
+| Action | Required Role |
+|--------|---------------|
+| View team | Any |
+| Invite new members | Owner |
+| Change roles | Owner |
+| Remove members | Owner |
 
-Team management (owner only for modifications):
-
-```javascript
-// routes/(logged-in)/merchant/[domain]/team/+page.server.js
-export async function load({ platform, params }) {
-  const team = await getMerchantTeam({
-    platform,
-    merchantDomain: params.domain
-  });
-
-  return { team };
-}
-```
-
-Features:
-- Team member list with roles
-- Invite new members (owner only)
-- Change roles (owner only)
-- Remove members (owner only)
-
-## Agreement (`/merchant/[domain]/agreement`)
+## Agreement
 
 Service agreement signing (owner only):
-
-```javascript
-// routes/(logged-in)/merchant/[domain]/agreement/+page.svelte
-<script>
-  let scrolledToBottom = $state(false);
-
-  function handleScroll(e) {
-    const { scrollTop, scrollHeight, clientHeight } = e.target;
-    scrolledToBottom = scrollTop + clientHeight >= scrollHeight - 50;
-  }
-
-  async function signAgreement() {
-    await fetch(`/merchant/${domain}/api/agreement`, {
-      method: 'POST',
-      body: JSON.stringify({
-        browserInfo: navigator.userAgent
-      })
-    });
-  }
-</script>
-```
+- User must scroll to bottom before "Sign" button is enabled
+- Captures browser info, IP, and location
+- Stored in MerchantDO with timestamp
 
 ## API Routes
 
@@ -285,24 +138,10 @@ Service agreement signing (owner only):
 ## Authorization Checks
 
 Each API verifies the user has access:
-
-```javascript
-// Example: Team invite (owner only)
-export async function POST({ request, platform, locals, params }) {
-  const { userId, isFirmlyAdmin } = locals.session;
-
-  if (!isFirmlyAdmin) {
-    const access = await getMerchantAccess({ platform, userId });
-    const current = access.find(a => a.merchantDomain === params.domain);
-
-    if (!current || current.role !== 'owner') {
-      return json({ error: 'Not authorized' }, { status: 403 });
-    }
-  }
-
-  // Process invite...
-}
-```
+1. Get user's merchant access from DashUserDO
+2. Check if user has access to the requested merchant domain
+3. For owner-only actions, verify role is `owner`
+4. Firmly admins bypass these checks
 
 ## Related Documentation
 
@@ -310,4 +149,3 @@ export async function POST({ request, platform, locals, params }) {
 - [JWT Sessions](../authentication/jwt-sessions.md) - Session handling
 - [Dashboard System](../merchant/dashboard-system.md) - Dashboard concept
 - [Team Management](../merchant/team-management.md) - Team operations
-- [API Reference](../api/README.md) - All API endpoints
