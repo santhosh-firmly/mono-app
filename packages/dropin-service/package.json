@@ -1,7 +1,7 @@
 {
 	"name": "dropin-service",
 	"private": true,
-	"version": "0.39.3",
+	"version": "0.39.4",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
@@ -25,7 +25,7 @@
 	"devDependencies": {
 		"@chromatic-com/storybook": "^3.2.5",
 		"@cloudflare/vite-plugin": "^0.1.17",
-		"@firmly/eslint-config": "^0.39.3",
+		"@firmly/eslint-config": "^0.39.4",
 		"@iconify/svelte": "^4.2.0",
 		"@storybook/addon-essentials": "^8.6.4",
 		"@storybook/addon-interactions": "^8.6.4",
@@ -52,7 +52,7 @@
 		"wrangler": "*"
 	},
 	"dependencies": {
-		"@firmly/session-recorder": "^0.39.3",
+		"@firmly/session-recorder": "^0.39.4",
 		"@inlang/paraglide-sveltekit": "^0.15.5",
 		"@lottiefiles/svelte-lottie-player": "^0.3.1",
 		"@storybook/jest": "^0.2.3",
