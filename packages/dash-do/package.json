@@ -6,17 +6,17 @@
 	"main": "src/index.js",
 	"scripts": {
 		"dev": "wrangler dev",
-		"deploy-dev": "wrangler deploy --env dev",
-		"deploy-ci": "wrangler deploy --env ci",
-		"deploy-qa": "wrangler deploy --env qa",
-		"deploy-uat": "wrangler deploy --env uat",
-		"deploy-prod": "wrangler deploy --env prod",
+		"build-ci": "echo '{}' > data.json",
+		"deploy-dev": "npm run build-ci && wrangler deploy --env dev",
+		"deploy-ci": "npm run build-ci && wrangler deploy --env ci",
+		"deploy-qa": "npm run build-ci && wrangler deploy --env qa",
+		"deploy-uat": "npm run build-ci && wrangler deploy --env uat",
+		"deploy-prod": "npm run build-ci && wrangler deploy --env prod",
 		"format-code": "eslint . --fix",
 		"format-code:check": "eslint . --fix=false",
-		"build-ci": "echo '{}' > data.json",
-		"test": "npm run build && vitest run --silent",
-		"test:watch": "npm run build && vitest",
-		"test:ui": "npm run build && vitest --ui"
+		"test": "npm run build-ci && vitest run --silent",
+		"test:watch": "npm run build-ci && vitest",
+		"test:ui": "npm run build-ci && vitest --ui"
 	},
 	"dependencies": {
 		"foundation": "github:goyalu/foundation#*"
