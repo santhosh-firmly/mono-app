@@ -1,6 +1,6 @@
 {
 	"name": "@firmly/dash-do",
-	"version": "0.39.4",
+	"version": "0.39.5",
 	"private": true,
 	"type": "module",
 	"main": "src/index.js",
