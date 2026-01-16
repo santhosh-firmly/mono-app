@@ -16,7 +16,9 @@
 		"test:static": "vitest run",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
-		"deploy-dev": "npm run build && wrangler deploy --env dev"
+		"deploy-dev": "npm run build && wrangler deploy --env dev",
+		"deploy-uat": "npm run build && wrangler deploy --env uat",
+		"deploy-prod": "npm run build && wrangler deploy --env prod"
 	},
 	"devDependencies": {
 		"@chromatic-com/storybook": "^3.2.5",
