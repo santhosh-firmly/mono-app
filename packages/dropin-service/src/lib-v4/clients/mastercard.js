@@ -159,7 +159,7 @@ function parseSupportedValidationChannels(supportedValidationChannels = []) {
 	);
 }
 
-export async function unlockStart(email, requestedValidationChannelId = 'EMAIL') {
+export async function unlockStart(email, requestedValidationChannelId) {
 	requestedValidationChannelId = requestedValidationChannelId?.toUpperCase();
 
 	return await trackPerformance(
@@ -180,9 +180,9 @@ export async function unlockStart(email, requestedValidationChannelId = 'EMAIL')
 				return;
 			}
 
-			const validation = await window.mcCheckoutService.initiateValidation({
+			const validation = await window.mcCheckoutService.initiateValidation(requestedValidationChannelId ? {
 				requestedValidationChannelId
-			});
+			} : undefined);
 
 			const network = validation.network?.toLowerCase();
 			let emails = [];

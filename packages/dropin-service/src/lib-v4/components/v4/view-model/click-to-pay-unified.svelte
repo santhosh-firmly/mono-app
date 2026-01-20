@@ -151,7 +151,7 @@
 		};
 	}
 
-	export async function c2pUnlockStart(email, requestedChannelId = 'EMAIL') {
+	export async function c2pUnlockStart(email, requestedChannelId) {
 		const parentContext = trackUXEvent('c2p_unlock_start', {
 			email: email?.replace(/(.{3}).*(@.*)/, '$1***$2')
 		});
