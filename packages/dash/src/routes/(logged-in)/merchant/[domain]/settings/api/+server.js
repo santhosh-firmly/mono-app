@@ -80,8 +80,9 @@ export async function POST({ locals, params, platform, request }) {
 
 		// Fetch current presentation data
 		let currentPresentation = {};
+		let presentationRow = null;
 		try {
-			const presentationRow = await firmlyConfigs
+			presentationRow = await firmlyConfigs
 				.prepare('SELECT info FROM merchant_presentation WHERE key = ?')
 				.bind(domain)
 				.first();
@@ -146,16 +147,19 @@ export async function POST({ locals, params, platform, request }) {
 				termsOfUse: presentation.termsOfUse || ''
 			};
 
-			// Upsert presentation data
+			// Save presentation data (use UPDATE if exists, INSERT if not)
 			try {
-				await firmlyConfigs
-					.prepare(
-						`INSERT INTO merchant_presentation (key, info)
-						 VALUES (?, ?)
-						 ON CONFLICT(key) DO UPDATE SET info = excluded.info`
-					)
-					.bind(domain, JSON.stringify(newPresentation))
-					.run();
+				if (presentationRow) {
+					await firmlyConfigs
+						.prepare('UPDATE merchant_presentation SET info = ? WHERE key = ?')
+						.bind(JSON.stringify(newPresentation), domain)
+						.run();
+				} else {
+					await firmlyConfigs
+						.prepare('INSERT INTO merchant_presentation (key, info) VALUES (?, ?)')
+						.bind(domain, JSON.stringify(newPresentation))
+						.run();
+				}
 			} catch (e) {
 				// If table doesn't exist, skip presentation update
 				if (e.message?.includes('no such table')) {
