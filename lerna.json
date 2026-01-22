@@ -1,6 +1,6 @@
 {
 	"$schema": "node_modules/lerna/schemas/lerna-schema.json",
-	"version": "0.39.5",
+	"version": "0.40.0",
 	"command": {
 		"list": {
 			"ignore": ["@firmly/eslint-config", "dash"]
