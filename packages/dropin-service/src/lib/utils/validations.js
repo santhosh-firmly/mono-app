@@ -1,6 +1,19 @@
+/**
+ * Validation Utilities
+ *
+ * Form field validation functions with i18n error messages.
+ * Each function throws an Error with a localized message on invalid input.
+ */
+
 import { string } from 'superstruct';
 import * as m from '$lib/paraglide/messages';
 
+/**
+ * Validates a full name (first and last name required).
+ * @param {string} value - The name to validate
+ * @returns {boolean} True if valid
+ * @throws {Error} Localized error message if invalid
+ */
 export function isValidName(value) {
 	const Name = string();
 	if (!value) {
@@ -19,6 +32,12 @@ export function isValidName(value) {
 	}
 }
 
+/**
+ * Validates an email address format.
+ * @param {string} value - The email to validate
+ * @returns {boolean} True if valid
+ * @throws {Error} Localized error message if invalid
+ */
 export function isValidEmail(value) {
 	const Email = string();
 	if (!value) {
@@ -36,6 +55,14 @@ export function isValidEmail(value) {
 	}
 }
 
+/**
+ * Validates a phone number based on locale.
+ * @param {string} value - The phone number to validate
+ * @param {Object} [options] - Validation options
+ * @param {string} [options.locale='en-US'] - Locale for phone format
+ * @returns {boolean} True if valid
+ * @throws {Error} Localized error message if invalid
+ */
 export function isValidPhone(value, { locale = 'en-US' } = {}) {
 	const Phone = string();
 	if (!value) {
@@ -43,7 +70,7 @@ export function isValidPhone(value, { locale = 'en-US' } = {}) {
 	}
 	let phoneRegex;
 	if (locale === 'en-US') {
-		phoneRegex = /^\(?([0-9]{3})\)?[-.●]?([0-9]{3})[-.●]?([0-9]{4})$/;
+		phoneRegex = /^(\+?1)?\s*\(?([0-9]{3})\)?\s?[-.●]?([0-9]{3})[-.●]?([0-9]{4})$/;
 	} else {
 		phoneRegex = /^\+?[1-9]\d{1,14}$/;
 	}
@@ -58,6 +85,14 @@ export function isValidPhone(value, { locale = 'en-US' } = {}) {
 	}
 }
 
+/**
+ * Validates a ZIP/postal code based on locale.
+ * @param {string} value - The ZIP code to validate
+ * @param {Object} [options] - Validation options
+ * @param {string} [options.locale='en-US'] - Locale for ZIP format
+ * @returns {boolean} True if valid
+ * @throws {Error} Localized error message if invalid
+ */
 export function isValidZipCode(value, { locale = 'en-US' } = {}) {
 	const ZipCode = string();
 	if (!value) {
@@ -87,6 +122,12 @@ export function isValidZipCode(value, { locale = 'en-US' } = {}) {
 	}
 }
 
+/**
+ * Validates that a field is not empty.
+ * @param {string} value - The value to check
+ * @returns {boolean} True if valid
+ * @throws {Error} Localized error message if empty
+ */
 export function isRequired(value) {
 	if (!value) {
 		throw new Error(m.validation_field_required());
@@ -94,6 +135,15 @@ export function isRequired(value) {
 	return true;
 }
 
+/**
+ * Validates a street address format.
+ * @param {string} value - The address to validate
+ * @param {Object} [options] - Validation options
+ * @param {string} [options.locale='en-US'] - Locale for address format
+ * @param {boolean} [options.isOptional=false] - Skip validation if empty
+ * @returns {boolean} True if valid
+ * @throws {Error} Localized error message if invalid
+ */
 export function isAddress(value, { locale = 'en-US', isOptional = false } = {}) {
 	const Address = string();
 	if (isOptional && !value) {
@@ -119,6 +169,12 @@ export function isAddress(value, { locale = 'en-US', isOptional = false } = {}) 
 	}
 }
 
+/**
+ * Validates a credit card number format (13-19 digits).
+ * @param {string} value - The card number to validate
+ * @returns {boolean} True if valid
+ * @throws {Error} Localized error message if invalid
+ */
 export function isValidCreditCard(value) {
 	const CreditCard = string();
 	const digits = value.replace(/\D/g, '');
@@ -140,6 +196,12 @@ export function isValidCreditCard(value) {
 	}
 }
 
+/**
+ * Validates a card expiration date (MM/YY format).
+ * @param {string} value - The expiration date to validate
+ * @returns {boolean} True if valid
+ * @throws {Error} Localized error message if invalid or expired
+ */
 export function isValidExpirationDate(value) {
 	const ExpirationDate = string();
 	if (!value) {
@@ -177,6 +239,12 @@ export function isValidExpirationDate(value) {
 	}
 }
 
+/**
+ * Validates a card CVC/CVV code (3-4 digits).
+ * @param {string} value - The CVC to validate
+ * @returns {boolean} True if valid
+ * @throws {Error} Localized error message if invalid
+ */
 export function isValidCVC(value) {
 	const CVC = string();
 	if (!value) {

@@ -13,7 +13,7 @@
 {#if visible}
 	<div
 		transition:fade={{ duration: 300, easing: cubicInOut }}
-		class="bg-opacity-50 fixed inset-0 z-40 flex h-full w-full items-center justify-center bg-black"
+		class="bg-opacity-50 fixed inset-0 z-40 flex size-full items-center justify-center bg-black"
 	>
 		<!-- Backdrop is handled by the bg-black bg-opacity-50 classes above -->
 		<div

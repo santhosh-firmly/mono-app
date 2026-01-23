@@ -38,8 +38,5 @@
 	"prettier": "@firmly/eslint-config/prettier",
 	"resolutions": {
 		"svelte-headless-table/svelte": "^5.27.0"
-	},
-	"dependencies": {
-		"foundation": "github:goyalu/foundation#v1.12.23"
 	}
 }
