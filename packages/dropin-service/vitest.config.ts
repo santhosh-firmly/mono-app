@@ -61,7 +61,10 @@ export default defineConfig({
 				// Configurator: Development-only tool for testing checkout flow with mocked requests
 				'src/lib/components/configurator/**',
 				'src/lib/states/configurator.svelte.js',
-				'src/lib/utils/mocks/**'
+				'src/lib/states/flow-player.svelte.js',
+				'src/lib/utils/mocks/**',
+				'src/lib/utils/dom-automation.js',
+				'src/lib/utils/checkout-flows.js'
 			],
 			thresholds: {
 				statements: 95,
