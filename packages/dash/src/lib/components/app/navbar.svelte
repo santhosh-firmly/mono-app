@@ -8,6 +8,7 @@
 	import PanelLeft from 'lucide-svelte/icons/panel-left';
 	import Search from 'lucide-svelte/icons/search';
 	import Send from 'lucide-svelte/icons/send';
+	import Database from 'lucide-svelte/icons/database';
 
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
@@ -67,6 +68,11 @@
 			icon: Users,
 			label: 'Users',
 			href: '/admin/users'
+		},
+		{
+			icon: Database,
+			label: 'Catalog',
+			href: '/admin/catalog'
 		}
 	];
 </script>
