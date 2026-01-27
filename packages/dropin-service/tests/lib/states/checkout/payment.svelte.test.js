@@ -200,6 +200,53 @@ describe('checkout state - payment and order', () => {
 				});
 				checkout.useBillingAddress = true;
 				checkout.storage.credit_cards = [
+					{
+						id: 'c2p123',
+						pan: 'pan123',
+						fromC2P: true,
+						network: 'visa',
+						art: 'https://example.com/card-art.png'
+					}
+				];
+				checkout.selectedCardId = 'c2p123';
+				flushSync();
+
+				testPromise = checkout.placeOrder().then((result) => {
+					expect(placeOrderWithC2P).toHaveBeenCalledWith(
+						'test.com',
+						{
+							wallet: 'visa',
+							credit_card_id: 'c2p123',
+							card_art: 'https://example.com/card-art.png'
+						},
+						null
+					);
+					expect(result.success).toBe(true);
+				});
+			});
+			await testPromise;
+			cleanup();
+		});
+
+		it('places order with C2P card without art', async () => {
+			let testPromise;
+			const cleanup = $effect.root(() => {
+				const checkout = initializeCheckout({
+					cart: { total: { value: 100 }, shipping_method: 'standard' },
+					domain: 'test.com'
+				});
+				checkout.initializeForms({
+					first_name: 'John',
+					last_name: 'Doe',
+					address1: '123 Main',
+					city: 'City',
+					state_or_province: 'ST',
+					postal_code: '12345',
+					phone: '5551234567',
+					email: 'test@example.com'
+				});
+				checkout.useBillingAddress = true;
+				checkout.storage.credit_cards = [
 					{ id: 'c2p123', pan: 'pan123', fromC2P: true, network: 'visa' }
 				];
 				checkout.selectedCardId = 'c2p123';
@@ -210,7 +257,8 @@ describe('checkout state - payment and order', () => {
 						'test.com',
 						{
 							wallet: 'visa',
-							credit_card_id: 'c2p123'
+							credit_card_id: 'c2p123',
+							card_art: ''
 						},
 						null
 					);
@@ -246,7 +294,13 @@ describe('checkout state - payment and order', () => {
 				});
 				checkout.useBillingAddress = true;
 				checkout.storage.credit_cards = [
-					{ id: 'c2p123', pan: 'pan123', fromC2P: true, network: 'visa' }
+					{
+						id: 'c2p123',
+						pan: 'pan123',
+						fromC2P: true,
+						network: 'visa',
+						art: 'https://example.com/card-art.png'
+					}
 				];
 				checkout.selectedCardId = 'c2p123';
 				flushSync();
@@ -281,7 +335,13 @@ describe('checkout state - payment and order', () => {
 				});
 				checkout.useBillingAddress = true;
 				checkout.storage.credit_cards = [
-					{ id: 'c2p123', pan: 'pan123', fromC2P: true, network: 'visa' }
+					{
+						id: 'c2p123',
+						pan: 'pan123',
+						fromC2P: true,
+						network: 'visa',
+						art: 'https://example.com/card-art.png'
+					}
 				];
 				checkout.selectedCardId = 'c2p123';
 				checkout.cvvValue = '123';
@@ -292,7 +352,8 @@ describe('checkout state - payment and order', () => {
 						'test.com',
 						{
 							wallet: 'visa',
-							credit_card_id: 'c2p123'
+							credit_card_id: 'c2p123',
+							card_art: 'https://example.com/card-art.png'
 						},
 						'123'
 					);
@@ -333,7 +394,13 @@ describe('checkout state - payment and order', () => {
 				});
 				checkout.useBillingAddress = true;
 				checkout.storage.credit_cards = [
-					{ id: 'c2p123', pan: 'pan123', fromC2P: true, network: 'visa' }
+					{
+						id: 'c2p123',
+						pan: 'pan123',
+						fromC2P: true,
+						network: 'visa',
+						art: 'https://example.com/card-art.png'
+					}
 				];
 				checkout.selectedCardId = 'c2p123';
 				flushSync();
@@ -351,7 +418,8 @@ describe('checkout state - payment and order', () => {
 						'test.com',
 						{
 							wallet: 'visa',
-							credit_card_id: 'c2p123'
+							credit_card_id: 'c2p123',
+							card_art: 'https://example.com/card-art.png'
 						},
 						'456'
 					);
