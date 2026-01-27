@@ -656,4 +656,369 @@ describe('checkout state - payment and order', () => {
 			cleanup();
 		});
 	});
+
+	describe('submitCvv', () => {
+		it('returns error when CVV is too short', async () => {
+			const cleanup = $effect.root(async () => {
+				const checkout = initializeCheckout({ domain: 'test.com' });
+				checkout.cvvValue = '12';
+				flushSync();
+
+				const result = await checkout.submitCvv();
+
+				expect(result.success).toBe(false);
+				expect(result.error).toBe('Please enter a valid CVV');
+				expect(checkout.cvvError).toBe('Please enter a valid CVV');
+			});
+			cleanup();
+		});
+
+		it('sets cvvError when placeOrder fails without cvvRequired', async () => {
+			placeOrderWithC2P.mockResolvedValueOnce({
+				success: false,
+				error: 'Card declined'
+			});
+
+			const cleanup = $effect.root(async () => {
+				const checkout = initializeCheckout({
+					cart: { total: { value: 100 }, shipping_method: 'standard' },
+					domain: 'test.com'
+				});
+				checkout.initializeForms({
+					first_name: 'John',
+					last_name: 'Doe',
+					address1: '123 Main',
+					city: 'City',
+					state_or_province: 'ST',
+					postal_code: '12345',
+					phone: '5551234567',
+					email: 'test@example.com'
+				});
+				checkout.useBillingAddress = true;
+				checkout.storage.credit_cards = [
+					{ id: 'c2p123', pan: 'pan123', fromC2P: true, network: 'visa' }
+				];
+				checkout.selectedCardId = 'c2p123';
+				checkout.cvvValue = '123';
+				flushSync();
+
+				const result = await checkout.submitCvv();
+
+				expect(result.success).toBe(false);
+				expect(checkout.cvvError).toBe('Card declined');
+				expect(checkout.cvvLoading).toBe(false);
+			});
+			cleanup();
+		});
+
+		it('uses default error message when placeOrder fails without error', async () => {
+			placeOrderWithC2P.mockResolvedValueOnce({
+				success: false
+			});
+
+			const cleanup = $effect.root(async () => {
+				const checkout = initializeCheckout({
+					cart: { total: { value: 100 }, shipping_method: 'standard' },
+					domain: 'test.com'
+				});
+				checkout.initializeForms({
+					first_name: 'John',
+					last_name: 'Doe',
+					address1: '123 Main',
+					city: 'City',
+					state_or_province: 'ST',
+					postal_code: '12345',
+					phone: '5551234567',
+					email: 'test@example.com'
+				});
+				checkout.useBillingAddress = true;
+				checkout.storage.credit_cards = [
+					{ id: 'c2p123', pan: 'pan123', fromC2P: true, network: 'visa' }
+				];
+				checkout.selectedCardId = 'c2p123';
+				checkout.cvvValue = '123';
+				flushSync();
+
+				const result = await checkout.submitCvv();
+
+				expect(result.success).toBe(false);
+				expect(checkout.cvvError).toBe('CVV verification failed');
+			});
+			cleanup();
+		});
+	});
+
+	describe('cancelCvvConfirmation', () => {
+		it('clears CVV state and returns true', () => {
+			const cleanup = $effect.root(() => {
+				const checkout = initializeCheckout({ domain: 'test.com' });
+				checkout.cvvValue = '123';
+				checkout.setCvvRequired(true);
+				flushSync();
+
+				const result = checkout.cancelCvvConfirmation();
+
+				expect(result).toBe(true);
+				expect(checkout.cvvValue).toBe('');
+				expect(checkout.cvvRequired).toBe(false);
+			});
+			cleanup();
+		});
+	});
+
+	describe('cardRequiresCvv', () => {
+		it('returns true for cards that previously required CVV', async () => {
+			placeOrderWithC2P.mockResolvedValueOnce({
+				success: false,
+				cvvRequired: true
+			});
+
+			const cleanup = $effect.root(async () => {
+				const checkout = initializeCheckout({
+					cart: { total: { value: 100 }, shipping_method: 'standard' },
+					domain: 'test.com'
+				});
+				checkout.initializeForms({
+					first_name: 'John',
+					last_name: 'Doe',
+					address1: '123 Main',
+					city: 'City',
+					state_or_province: 'ST',
+					postal_code: '12345',
+					phone: '5551234567',
+					email: 'test@example.com'
+				});
+				checkout.useBillingAddress = true;
+				checkout.storage.credit_cards = [
+					{ id: 'c2p123', pan: 'pan123', fromC2P: true, network: 'visa' }
+				];
+				checkout.selectedCardId = 'c2p123';
+				flushSync();
+
+				await checkout.placeOrder();
+
+				expect(checkout.cardRequiresCvv('c2p123')).toBe(true);
+				expect(checkout.cardRequiresCvv('other-card')).toBe(false);
+			});
+			cleanup();
+		});
+	});
+
+	describe('clearCvv with clearTracking', () => {
+		it('clears cardsRequiringCvv when clearTracking is true', async () => {
+			placeOrderWithC2P.mockResolvedValueOnce({
+				success: false,
+				cvvRequired: true
+			});
+
+			const cleanup = $effect.root(async () => {
+				const checkout = initializeCheckout({
+					cart: { total: { value: 100 }, shipping_method: 'standard' },
+					domain: 'test.com'
+				});
+				checkout.initializeForms({
+					first_name: 'John',
+					last_name: 'Doe',
+					address1: '123 Main',
+					city: 'City',
+					state_or_province: 'ST',
+					postal_code: '12345',
+					phone: '5551234567',
+					email: 'test@example.com'
+				});
+				checkout.useBillingAddress = true;
+				checkout.storage.credit_cards = [
+					{ id: 'c2p123', pan: 'pan123', fromC2P: true, network: 'visa' }
+				];
+				checkout.selectedCardId = 'c2p123';
+				flushSync();
+
+				await checkout.placeOrder();
+				expect(checkout.cardRequiresCvv('c2p123')).toBe(true);
+
+				checkout.clearCvv(true);
+				flushSync();
+
+				expect(checkout.cardRequiresCvv('c2p123')).toBe(false);
+			});
+			cleanup();
+		});
+	});
+
+	describe('placeOrder uses card.provider when available', () => {
+		it('uses provider as wallet when present on C2P card', async () => {
+			const cleanup = $effect.root(async () => {
+				const checkout = initializeCheckout({
+					cart: { total: { value: 100 }, shipping_method: 'standard' },
+					domain: 'test.com'
+				});
+				checkout.initializeForms({
+					first_name: 'John',
+					last_name: 'Doe',
+					address1: '123 Main',
+					city: 'City',
+					state_or_province: 'ST',
+					postal_code: '12345',
+					phone: '5551234567',
+					email: 'test@example.com'
+				});
+				checkout.useBillingAddress = true;
+				checkout.storage.credit_cards = [
+					{ id: 'c2p123', pan: 'pan123', fromC2P: true, provider: 'amex' }
+				];
+				checkout.selectedCardId = 'c2p123';
+				flushSync();
+
+				await checkout.placeOrder();
+
+				expect(placeOrderWithC2P).toHaveBeenCalledWith(
+					'test.com',
+					{
+						wallet: 'amex',
+						credit_card_id: 'c2p123'
+					},
+					null
+				);
+			});
+			cleanup();
+		});
+
+		it('uses pan as credit_card_id when id is missing', async () => {
+			const cleanup = $effect.root(async () => {
+				const checkout = initializeCheckout({
+					cart: { total: { value: 100 }, shipping_method: 'standard' },
+					domain: 'test.com'
+				});
+				checkout.initializeForms({
+					first_name: 'John',
+					last_name: 'Doe',
+					address1: '123 Main',
+					city: 'City',
+					state_or_province: 'ST',
+					postal_code: '12345',
+					phone: '5551234567',
+					email: 'test@example.com'
+				});
+				checkout.useBillingAddress = true;
+				checkout.storage.credit_cards = [
+					{ pan: 'pan456', fromC2P: true, network: 'discover' }
+				];
+				checkout.selectedCardId = 'pan456';
+				flushSync();
+
+				await checkout.placeOrder();
+
+				expect(placeOrderWithC2P).toHaveBeenCalledWith(
+					'test.com',
+					{
+						wallet: 'discover',
+						credit_card_id: 'pan456'
+					},
+					null
+				);
+			});
+			cleanup();
+		});
+
+		it('falls back to mastercard when no provider or network', async () => {
+			const cleanup = $effect.root(async () => {
+				const checkout = initializeCheckout({
+					cart: { total: { value: 100 }, shipping_method: 'standard' },
+					domain: 'test.com'
+				});
+				checkout.initializeForms({
+					first_name: 'John',
+					last_name: 'Doe',
+					address1: '123 Main',
+					city: 'City',
+					state_or_province: 'ST',
+					postal_code: '12345',
+					phone: '5551234567',
+					email: 'test@example.com'
+				});
+				checkout.useBillingAddress = true;
+				checkout.storage.credit_cards = [{ id: 'c2p789', fromC2P: true }];
+				checkout.selectedCardId = 'c2p789';
+				flushSync();
+
+				await checkout.placeOrder();
+
+				expect(placeOrderWithC2P).toHaveBeenCalledWith(
+					'test.com',
+					{
+						wallet: 'mastercard',
+						credit_card_id: 'c2p789'
+					},
+					null
+				);
+			});
+			cleanup();
+		});
+	});
+
+	describe('placeOrder error handling', () => {
+		it('uses default error message when result has no error', async () => {
+			placeOrderWithSavedCard.mockResolvedValueOnce({
+				success: false
+			});
+
+			const cleanup = $effect.root(async () => {
+				const checkout = initializeCheckout({
+					cart: { total: { value: 100 }, shipping_method: 'standard' },
+					domain: 'test.com'
+				});
+				checkout.initializeForms({
+					first_name: 'John',
+					last_name: 'Doe',
+					address1: '123 Main',
+					city: 'City',
+					state_or_province: 'ST',
+					postal_code: '12345',
+					phone: '5551234567',
+					email: 'test@example.com'
+				});
+				checkout.useBillingAddress = true;
+				checkout.storage.credit_cards = [{ id: 'card123' }];
+				checkout.selectedCardId = 'card123';
+				flushSync();
+
+				const result = await checkout.placeOrder();
+
+				expect(result.success).toBe(false);
+				expect(checkout.placeOrderError).toBe('Failed to place order');
+			});
+			cleanup();
+		});
+
+		it('uses default error message when exception has no message', async () => {
+			placeOrderWithSavedCard.mockRejectedValueOnce({});
+
+			const cleanup = $effect.root(async () => {
+				const checkout = initializeCheckout({
+					cart: { total: { value: 100 }, shipping_method: 'standard' },
+					domain: 'test.com'
+				});
+				checkout.initializeForms({
+					first_name: 'John',
+					last_name: 'Doe',
+					address1: '123 Main',
+					city: 'City',
+					state_or_province: 'ST',
+					postal_code: '12345',
+					phone: '5551234567',
+					email: 'test@example.com'
+				});
+				checkout.useBillingAddress = true;
+				checkout.storage.credit_cards = [{ id: 'card123' }];
+				checkout.selectedCardId = 'card123';
+				flushSync();
+
+				const result = await checkout.placeOrder();
+
+				expect(result.success).toBe(false);
+				expect(checkout.placeOrderError).toBe('An unexpected error occurred');
+			});
+			cleanup();
+		});
+	});
 });

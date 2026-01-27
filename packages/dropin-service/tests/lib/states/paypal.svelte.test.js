@@ -204,6 +204,100 @@ describe('paypal state', () => {
 
 			expect(container.id).toBeTruthy();
 		});
+
+		it('should not render same container twice', async () => {
+			loadPayPalSdk.mockResolvedValue({ Buttons: vi.fn() });
+			renderPayPalButton.mockResolvedValue();
+			document.body.contains = vi.fn().mockReturnValue(true);
+
+			const paypal = initializePayPal();
+			await paypal.initialize({ clientId: 'test' });
+
+			const container = document.createElement('div');
+			container.id = 'paypal-btn';
+
+			paypal.renderButton(container, vi.fn());
+			await new Promise((r) => setTimeout(r, 0));
+
+			renderPayPalButton.mockClear();
+			paypal.renderButton(container, vi.fn());
+
+			expect(renderPayPalButton).not.toHaveBeenCalled();
+		});
+
+		it('should handle render button rejection when container removed', async () => {
+			const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+			loadPayPalSdk.mockResolvedValue({ Buttons: vi.fn() });
+
+			let containsReturnValue = true;
+			document.body.contains = vi.fn().mockImplementation(() => containsReturnValue);
+
+			renderPayPalButton.mockImplementation(() => {
+				containsReturnValue = false;
+				return Promise.reject(new Error('Container removed'));
+			});
+
+			const paypal = initializePayPal();
+			await paypal.initialize({ clientId: 'test' });
+
+			const container = document.createElement('div');
+			paypal.renderButton(container, vi.fn());
+
+			await new Promise((r) => setTimeout(r, 0));
+
+			expect(consoleErrorSpy).not.toHaveBeenCalledWith(
+				'[PayPal]: Failed to render button',
+				expect.any(Error)
+			);
+
+			consoleErrorSpy.mockRestore();
+		});
+
+		it('should log error when render button rejects and container still in DOM', async () => {
+			const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+			loadPayPalSdk.mockResolvedValue({ Buttons: vi.fn() });
+			document.body.contains = vi.fn().mockReturnValue(true);
+
+			renderPayPalButton.mockRejectedValue(new Error('Render failed'));
+
+			const paypal = initializePayPal();
+			await paypal.initialize({ clientId: 'test' });
+
+			const container = document.createElement('div');
+			paypal.renderButton(container, vi.fn());
+
+			await new Promise((r) => setTimeout(r, 0));
+
+			expect(consoleErrorSpy).toHaveBeenCalledWith(
+				'[PayPal]: Failed to render button',
+				expect.any(Error)
+			);
+
+			consoleErrorSpy.mockRestore();
+		});
+
+		it('should handle synchronous render button error', async () => {
+			const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+			loadPayPalSdk.mockResolvedValue({ Buttons: vi.fn() });
+			document.body.contains = vi.fn().mockReturnValue(true);
+
+			renderPayPalButton.mockImplementation(() => {
+				throw new Error('Sync error');
+			});
+
+			const paypal = initializePayPal();
+			await paypal.initialize({ clientId: 'test' });
+
+			const container = document.createElement('div');
+			paypal.renderButton(container, vi.fn());
+
+			expect(consoleErrorSpy).toHaveBeenCalledWith(
+				'[PayPal]: Failed to render button',
+				expect.any(Error)
+			);
+
+			consoleErrorSpy.mockRestore();
+		});
 	});
 
 	describe('completeOrder', () => {

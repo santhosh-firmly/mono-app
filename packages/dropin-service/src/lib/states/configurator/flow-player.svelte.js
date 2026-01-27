@@ -1,5 +1,5 @@
 import { tick } from 'svelte';
-import { CHECKOUT_FLOWS, getAvailableFlows } from '$lib/utils/checkout-flows.js';
+import { CHECKOUT_FLOWS, getAvailableFlows } from '$lib/utils/configurator/checkout-flows.js';
 import {
 	sleep,
 	typeIntoElement,
@@ -7,7 +7,7 @@ import {
 	waitForElement,
 	waitForText,
 	findElementByText
-} from '$lib/utils/dom-automation.js';
+} from '$lib/utils/configurator/dom-automation.js';
 
 class FlowPlayer {
 	isPlaying = $state(false);
@@ -20,6 +20,7 @@ class FlowPlayer {
 	#containerRef = null;
 	#configurator = null;
 	#onReload = null;
+	#onCartStateChange = null;
 
 	currentFlow = $derived(this.currentFlowId ? CHECKOUT_FLOWS[this.currentFlowId] : null);
 
@@ -41,6 +42,10 @@ class FlowPlayer {
 		this.#onReload = onReload;
 	}
 
+	setOnCartStateChange(onCartStateChange) {
+		this.#onCartStateChange = onCartStateChange;
+	}
+
 	async selectFlow(flowId) {
 		if (this.isPlaying) return;
 		this.currentFlowId = flowId;
@@ -55,6 +60,10 @@ class FlowPlayer {
 			});
 			await tick();
 			this.isConfiguringFeatures = false;
+		}
+
+		if (this.#onCartStateChange) {
+			this.#onCartStateChange(flow?.cartState || null);
 		}
 
 		if (flowId && this.#onReload) {

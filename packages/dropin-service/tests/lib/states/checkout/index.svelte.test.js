@@ -693,4 +693,161 @@ describe('checkout state - initialization', () => {
 			cleanup();
 		});
 	});
+
+	describe('initializeForms with existing forms', () => {
+		it('updates existing shipping form with new data when not already full filled', () => {
+			const cleanup = $effect.root(() => {
+				const checkout = initializeCheckout({ domain: 'test.com' });
+				checkout.initializeForms({}, {});
+				flushSync();
+
+				const originalForm = checkout.shippingForm;
+				checkout.initializeForms({ email: 'updated@example.com' }, {});
+				flushSync();
+
+				expect(checkout.shippingForm).toBe(originalForm);
+				expect(checkout.shippingForm.email.value).toBe('updated@example.com');
+			});
+			cleanup();
+		});
+
+		it('updates existing billing form with new data when not already full filled', () => {
+			const cleanup = $effect.root(() => {
+				const checkout = initializeCheckout({ domain: 'test.com' });
+				checkout.initializeForms({}, {});
+				flushSync();
+
+				const originalForm = checkout.billingForm;
+				checkout.initializeForms({}, { email: 'billing@example.com' });
+				flushSync();
+
+				expect(checkout.billingForm).toBe(originalForm);
+				expect(checkout.billingForm.email.value).toBe('billing@example.com');
+			});
+			cleanup();
+		});
+
+		it('does not update existing form when already started full filled', () => {
+			const cleanup = $effect.root(() => {
+				const checkout = initializeCheckout({ domain: 'test.com' });
+				checkout.initializeForms({ email: 'original@example.com', first_name: 'John' }, {});
+				flushSync();
+
+				checkout.initializeForms({ email: 'new@example.com' }, {});
+				flushSync();
+
+				expect(checkout.shippingForm.email.value).toBe('original@example.com');
+			});
+			cleanup();
+		});
+
+		it('does not update existing form when no new info provided', () => {
+			const cleanup = $effect.root(() => {
+				const checkout = initializeCheckout({ domain: 'test.com' });
+				checkout.initializeForms({ email: 'test@example.com' }, {});
+				flushSync();
+
+				const originalEmail = checkout.shippingForm.email.value;
+				checkout.initializeForms({}, {});
+				flushSync();
+
+				expect(checkout.shippingForm.email.value).toBe(originalEmail);
+			});
+			cleanup();
+		});
+	});
+
+	describe('hadInitialCard', () => {
+		it('returns true when storage has credit cards on init', () => {
+			const cleanup = $effect.root(() => {
+				const checkout = initializeCheckout({ domain: 'test.com' });
+				checkout.addC2PCards([{ id: 'card1', last4: '1234' }]);
+				flushSync();
+
+				expect(checkout.hadInitialCard).toBe(true);
+			});
+			cleanup();
+		});
+
+		it('returns false when storage has no credit cards', () => {
+			const cleanup = $effect.root(() => {
+				const checkout = initializeCheckout({ domain: 'test.com' });
+				flushSync();
+
+				expect(checkout.hadInitialCard).toBe(false);
+			});
+			cleanup();
+		});
+
+		it('caches the initial card value', () => {
+			const cleanup = $effect.root(() => {
+				const checkout = initializeCheckout({ domain: 'test.com' });
+				checkout.addC2PCards([{ id: 'card1', last4: '1234' }]);
+				flushSync();
+
+				const firstValue = checkout.hadInitialCard;
+				checkout.storage = { shipping_addresses: [], credit_cards: [] };
+				flushSync();
+				const secondValue = checkout.hadInitialCard;
+
+				expect(firstValue).toBe(true);
+				expect(secondValue).toBe(true);
+			});
+			cleanup();
+		});
+	});
+
+	describe('features derived', () => {
+		it('returns default promoCodes true when not in cart', () => {
+			const cleanup = $effect.root(() => {
+				const checkout = initializeCheckout({ domain: 'test.com' });
+				expect(checkout.features.promoCodes).toBe(true);
+			});
+			cleanup();
+		});
+
+		it('returns promoCodes from cart features', () => {
+			const cleanup = $effect.root(() => {
+				const checkout = initializeCheckout({
+					cart: { features: { promo_codes: false } },
+					domain: 'test.com'
+				});
+				expect(checkout.features.promoCodes).toBe(false);
+			});
+			cleanup();
+		});
+
+		it('returns paypal true when clientId exists', () => {
+			const cleanup = $effect.root(() => {
+				const checkout = initializeCheckout({
+					cart: { shop_properties: { paypal: { clientId: 'test-client-id' } } },
+					domain: 'test.com'
+				});
+				expect(checkout.features.paypal).toBe(true);
+			});
+			cleanup();
+		});
+
+		it('returns paypal false when no clientId', () => {
+			const cleanup = $effect.root(() => {
+				const checkout = initializeCheckout({
+					cart: { shop_properties: {} },
+					domain: 'test.com'
+				});
+				expect(checkout.features.paypal).toBe(false);
+			});
+			cleanup();
+		});
+
+		it('returns paypal from cart features when explicitly set', () => {
+			const cleanup = $effect.root(() => {
+				const checkout = initializeCheckout({
+					cart: { features: { paypal: true } },
+					domain: 'test.com'
+				});
+				expect(checkout.features.paypal).toBe(true);
+			});
+			cleanup();
+		});
+	});
 });

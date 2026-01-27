@@ -60,11 +60,9 @@ export default defineConfig({
 				'src/lib/composables/animated-value.svelte.js',
 				// Configurator: Development-only tool for testing checkout flow with mocked requests
 				'src/lib/components/configurator/**',
-				'src/lib/states/configurator.svelte.js',
-				'src/lib/states/flow-player.svelte.js',
-				'src/lib/utils/mocks/**',
-				'src/lib/utils/dom-automation.js',
-				'src/lib/utils/checkout-flows.js'
+				'src/lib/states/configurator/**',
+				'src/lib/utils/configurator/**',
+				'src/lib/utils/mocks/**'
 			],
 			thresholds: {
 				statements: 95,

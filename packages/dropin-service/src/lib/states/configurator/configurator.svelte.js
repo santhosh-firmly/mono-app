@@ -107,7 +107,6 @@ class Configurator {
 
 		const duration = ((Date.now() - request.timestamp) / 1000).toFixed(1);
 
-		// Add to history with success status
 		this.requestHistory = [
 			...this.requestHistory,
 			{
@@ -132,7 +131,6 @@ class Configurator {
 
 		const duration = ((Date.now() - request.timestamp) / 1000).toFixed(1);
 
-		// Add to history with rejected status
 		this.requestHistory = [
 			...this.requestHistory,
 			{

@@ -264,6 +264,31 @@ export const CHECKOUT_FLOWS = {
 			{ action: 'click', selector: 'button[type="submit"]' },
 			{ action: 'waitForText', text: 'Thank You!', timeout: 5000 }
 		]
+	},
+
+	prefilledShipping: {
+		id: 'prefilledShipping',
+		name: 'Pre-filled Shipping',
+		description: 'Cart with shipping info already filled (collapsed view)',
+		featureConfig: {
+			promoCodes: false,
+			paypal: false,
+			clickToPay: false
+		},
+		cartState: 'prefilledShipping',
+		steps: [
+			{ action: 'wait', ms: 1000 },
+			{
+				action: 'type',
+				selector: '[placeholder="4111 4111 4111 4111"]',
+				value: MOCK_CARD.number
+			},
+			{ action: 'type', selector: '[placeholder="MM / YY"]', value: MOCK_CARD.expiration },
+			{ action: 'type', selector: '[placeholder="CVC"]', value: MOCK_CARD.cvv },
+			{ action: 'wait', ms: 500 },
+			{ action: 'click', selector: 'button[type="submit"]' },
+			{ action: 'waitForText', text: 'Thank You!', timeout: 5000 }
+		]
 	}
 };
 

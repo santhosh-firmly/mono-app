@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { CHECKOUT_FLOWS, getAvailableFlows } from '$lib/utils/checkout-flows.js';
+import { CHECKOUT_FLOWS, getAvailableFlows } from '$lib/utils/configurator/checkout-flows.js';
 
 describe('checkout-flows', () => {
 	describe('CHECKOUT_FLOWS', () => {
@@ -31,6 +31,12 @@ describe('checkout-flows', () => {
 			expect(CHECKOUT_FLOWS.paypal).toBeDefined();
 			expect(CHECKOUT_FLOWS.paypal.id).toBe('paypal');
 			expect(CHECKOUT_FLOWS.paypal.featureConfig.paypal).toBe(true);
+		});
+
+		it('has prefilledShipping flow defined', () => {
+			expect(CHECKOUT_FLOWS.prefilledShipping).toBeDefined();
+			expect(CHECKOUT_FLOWS.prefilledShipping.id).toBe('prefilledShipping');
+			expect(CHECKOUT_FLOWS.prefilledShipping.cartState).toBe('prefilledShipping');
 		});
 	});
 

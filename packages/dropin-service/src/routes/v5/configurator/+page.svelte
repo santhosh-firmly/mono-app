@@ -1,13 +1,19 @@
 <script>
 	import { onMount, untrack } from 'svelte';
-	import { initializeConfigurator, resetConfigurator } from '$lib/states/configurator.svelte.js';
+	import {
+		initializeConfigurator,
+		resetConfigurator
+	} from '$lib/states/configurator/configurator.svelte.js';
+	import {
+		initializeFlowPlayer,
+		resetFlowPlayer
+	} from '$lib/states/configurator/flow-player.svelte.js';
 	import { initializeCheckout, resetCheckout } from '$lib/states/checkout/index.svelte.js';
 	import { initializeMerchant, resetMerchant } from '$lib/states/merchant.svelte.js';
 	import { initializeNotices, resetNotices } from '$lib/states/notices.svelte.js';
 	import { initializeClickToPay, resetClickToPay } from '$lib/states/click-to-pay.svelte.js';
 	import { initializeBuyNow, resetBuyNow } from '$lib/states/buy-now.svelte.js';
-	import { initializeFlowPlayer, resetFlowPlayer } from '$lib/states/flow-player.svelte.js';
-	import { getCartForState } from '$lib/utils/mocks/mock-data.js';
+	import { getCartForState, mockCartWithShipping } from '$lib/utils/mocks/mock-data.js';
 	import { config } from '$lib/utils/config.js';
 	import {
 		enableC2PMock,
@@ -36,7 +42,12 @@
 	let mounted = $state(false);
 	let error = $state(null);
 
-	let prevFeatures = $state({ promoCodes: true, paypal: true, clickToPay: true });
+	let prevFeatures = $state({
+		promoCodes: true,
+		paypal: true,
+		clickToPay: true
+	});
+	let currentCartState = $state(null);
 	let prevTheme = $state(null);
 
 	function reloadCheckout() {
@@ -51,9 +62,12 @@
 			pending: { cart: false }
 		});
 
-		const cart = getCartForState('Blank');
-		checkout.setCart({
-			...cart,
+		const baseCart =
+			currentCartState === 'prefilledShipping'
+				? mockCartWithShipping
+				: getCartForState('Blank');
+		const cart = {
+			...baseCart,
 			features: {
 				promo_codes: configurator.features.promoCodes,
 				paypal: configurator.features.paypal
@@ -63,8 +77,9 @@
 					? { sandbox: true, payment_enabled: true }
 					: null
 			}
-		});
-		checkout.initializeForms({}, {});
+		};
+		checkout.setCart(cart);
+		checkout.initializeForms(cart.shipping_info || {}, cart.billing_info || {});
 
 		c2p = initializeClickToPay();
 		if (configurator.features.clickToPay) {
@@ -206,9 +221,12 @@
 				pending: { cart: false }
 			});
 
-			const cart = getCartForState('Blank');
-			checkout.setCart({
-				...cart,
+			const baseCart =
+				currentCartState === 'prefilledShipping'
+					? mockCartWithShipping
+					: getCartForState('Blank');
+			const cart = {
+				...baseCart,
 				features: {
 					promo_codes: configurator.features.promoCodes,
 					paypal: configurator.features.paypal
@@ -218,8 +236,9 @@
 						? { sandbox: true, payment_enabled: true }
 						: null
 				}
-			});
-			checkout.initializeForms({}, {});
+			};
+			checkout.setCart(cart);
+			checkout.initializeForms(cart.shipping_info || {}, cart.billing_info || {});
 
 			merchant = initializeMerchant({
 				theme: {
@@ -249,6 +268,9 @@
 			flowPlayer = initializeFlowPlayer();
 			flowPlayer.setConfigurator(configurator);
 			flowPlayer.setOnReload(reloadCheckout);
+			flowPlayer.setOnCartStateChange((state) => {
+				currentCartState = state;
+			});
 
 			mounted = true;
 		} catch (e) {

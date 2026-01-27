@@ -1,4 +1,5 @@
 <script>
+	import { tick } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import Icon from '$lib/components/ui/icons/icon.svelte';
 	import RequestList from './request-list.svelte';
@@ -209,9 +210,10 @@
 									{:else}
 										<button
 											type="button"
-											onclick={() => {
+											onclick={async () => {
 												editingName = true;
-												setTimeout(() => nameInputRef?.focus(), 0);
+												await tick();
+												nameInputRef?.focus();
 											}}
 											class="text-xs text-gray-900 hover:text-gray-600"
 										>
