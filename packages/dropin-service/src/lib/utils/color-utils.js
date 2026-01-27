@@ -1,6 +1,15 @@
-// Calculate relative luminance using sRGB coefficients
+/**
+ * Color Utilities
+ *
+ * Functions for color calculations and transformations.
+ */
+
+/**
+ * Calculates the relative luminance of a hex color.
+ * @param {string} hex - Hex color code (e.g., #ffffff)
+ * @returns {number} Luminance value (0-1) where 0 is dark and 1 is light
+ */
 export function getLuminance(hex) {
-	// Convert hex to RGB
 	const r = parseInt(hex.slice(1, 3), 16) / 255;
 	const g = parseInt(hex.slice(3, 5), 16) / 255;
 	const b = parseInt(hex.slice(5, 7), 16) / 255;

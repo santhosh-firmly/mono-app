@@ -44,16 +44,12 @@
 				requires_shipping: true,
 				image: {
 					url: 'http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_large.jpg?v=1565574386',
-					large:
-						'http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_large.jpg?v=1565574386',
-					grande:
-						'http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_grande.jpg?v=1565574386',
-					medium:
-						'http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_medium.jpg?v=1565574386',
+					large: 'http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_large.jpg?v=1565574386',
+					grande: 'http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_grande.jpg?v=1565574386',
+					medium: 'http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_medium.jpg?v=1565574386',
 					compact:
 						'http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_compact.jpg?v=1565574386',
-					small:
-						'http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_small.jpg?v=1565574386'
+					small: 'http://cdn.shopify.com/s/files/1/0065/5812/2036/products/Tank-Top-Women-White-Front_small.jpg?v=1565574386'
 				},
 				platform_line_item_id: '310b03b0be9f37edb3ae55631fdb8c0a',
 				description: 'Plant 5 : Do not order'
@@ -95,7 +91,7 @@
 </script>
 
 <Meta
-	title="Components/Layout/Bottom Sheet"
+	title="Checkout V4/Layout/Bottom Sheet"
 	component={BottomSheet}
 	parameters={{
 		layout: 'fullscreen'
@@ -105,15 +101,17 @@
 <Template let:args>
 	<div class="h-screen w-full bg-gray-100 p-4">
 		<BottomSheet {...args} class="p-4">
-			<button slot="trigger" class="rounded bg-blue-500 px-4 py-2 text-white">Open Sheet</button>
+			<button slot="trigger" class="rounded bg-blue-500 px-4 py-2 text-white"
+				>Open Sheet</button
+			>
 
 			<button slot="close" class="absolute top-4 right-4"> ✕ </button>
 
 			<h2 slot="title">Bottom Sheet Title</h2>
 
 			<p slot="description">
-				This is a responsive bottom sheet component that renders as a dialog on desktop and a drawer
-				on mobile viewports.
+				This is a responsive bottom sheet component that renders as a dialog on desktop and
+				a drawer on mobile viewports.
 			</p>
 
 			<div class="py-4">

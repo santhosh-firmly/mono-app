@@ -731,14 +731,14 @@
 {/if}
 
 <!-- The following div helps detecting if the iframe is visible or not and correctly showing the contents. -->
-<div class="bottom-0 left-0 h-px w-px"></div>
+<div class="bottom-0 left-0 size-px"></div>
 {#if error}
 	{error}
 {:else}
 	{@const Layout = layout}
 	<div class="theme-provider">
 		<Layout onClose={handlePostCheckoutClose} visible={isLayoutActive}>
-			<div class="h-full w-full transition-all duration-300">
+			<div class="size-full transition-all duration-300">
 				<!-- {#if !multipleVariants && !order}
 					<div
 						class="w-full h-full flex flex-col items-center mt-10 gap-4"
@@ -754,7 +754,7 @@
 				{/if} -->
 
 				{#if multipleVariants && !skipPdp && !showCheckout}
-					<div class="flex h-full w-full flex-col">
+					<div class="flex size-full flex-col">
 						<div class="z-10 shadow-(--fy-surface-box-shadow)">
 							<Header
 								merchantInfo={partnerPresentation}
@@ -779,7 +779,7 @@
 				{/if}
 
 				{#if sessionTransferError}
-					<div class="absolute top-0 left-0 h-full w-full">
+					<div class="absolute top-0 left-0 size-full">
 						<SimpleError
 							errorMessage="We encountered an issue loading your cart. Please try again."
 							errorDetails={sessionTransferErrorMessage}
@@ -787,7 +787,7 @@
 						/>
 					</div>
 				{:else if order}
-					<div class="absolute top-0 left-0 h-full w-full">
+					<div class="absolute top-0 left-0 size-full">
 						<ThankYouPage
 							merchantInfo={{
 								largeLogo,
@@ -800,7 +800,7 @@
 						></ThankYouPage>
 					</div>
 				{:else if showCheckout}
-					<div class="absolute top-0 left-0 z-999 h-full w-full">
+					<div class="absolute top-0 left-0 z-999 size-full">
 						<FlowSinglePage
 							redirectOnPlaceOrder={false}
 							{cart}

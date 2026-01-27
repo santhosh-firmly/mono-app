@@ -1,3 +1,16 @@
+/**
+ * Input Masking Utilities
+ *
+ * Functions to format and unformat input values for display and submission.
+ */
+
+/**
+ * Formats a phone number for display.
+ * @param {string} value - Raw phone number input
+ * @param {Object} [options] - Mask options
+ * @param {string} [options.locale='en-US'] - Locale for phone format
+ * @returns {string} Formatted phone number
+ */
 export function phoneMask(value, { locale = 'en-US' } = {}) {
 	if (locale === 'en-US') {
 		// Remove any non-digit characters from the input
@@ -29,6 +42,13 @@ export function phoneMask(value, { locale = 'en-US' } = {}) {
 	return value;
 }
 
+/**
+ * Removes phone number formatting for submission.
+ * @param {string} value - Formatted phone number
+ * @param {Object} [options] - Mask options
+ * @param {string} [options.locale='en-US'] - Locale for phone format
+ * @returns {string} Raw digits only
+ */
 export function phoneUnmask(value, { locale = 'en-US' } = {}) {
 	if (locale === 'en-US') {
 		return value.replace(/\D/g, '');
@@ -37,6 +57,13 @@ export function phoneUnmask(value, { locale = 'en-US' } = {}) {
 	return value;
 }
 
+/**
+ * Formats a ZIP/postal code for display.
+ * @param {string} value - Raw ZIP code input
+ * @param {Object} [options] - Mask options
+ * @param {string} [options.locale='en-US'] - Locale for ZIP format
+ * @returns {string} Formatted ZIP code (e.g., 12345-1234)
+ */
 export function zipCodeMask(value, { locale = 'en-US' } = {}) {
 	// example: 12345-1234, 12345
 	if (locale === 'en-US') {
@@ -52,6 +79,13 @@ export function zipCodeMask(value, { locale = 'en-US' } = {}) {
 	return value;
 }
 
+/**
+ * Removes ZIP code formatting for submission.
+ * @param {string} value - Formatted ZIP code
+ * @param {Object} [options] - Mask options
+ * @param {string} [options.locale='en-US'] - Locale for ZIP format
+ * @returns {string} Raw digits only
+ */
 export function zipCodeUnmask(value, { locale = 'en-US' } = {}) {
 	if (locale === 'en-US') {
 		return value.replace(/\D/g, '');
@@ -60,6 +94,13 @@ export function zipCodeUnmask(value, { locale = 'en-US' } = {}) {
 	return value;
 }
 
+/**
+ * Formats a credit card number for display (groups of 4).
+ * @param {string} value - Raw card number input
+ * @param {Object} [options] - Mask options
+ * @param {string} [options.locale='en-US'] - Locale for card format
+ * @returns {string} Formatted card number (e.g., 1234 5678 9012 3456)
+ */
 export function creditCardMask(value, { locale = 'en-US' } = {}) {
 	// example: 1234, 1234 5678, 1234 5678 9012, 1234 5678 9012 3456
 	if (locale === 'en-US') {
@@ -73,6 +114,13 @@ export function creditCardMask(value, { locale = 'en-US' } = {}) {
 	return value;
 }
 
+/**
+ * Removes credit card formatting for submission.
+ * @param {string} value - Formatted card number
+ * @param {Object} [options] - Mask options
+ * @param {string} [options.locale='en-US'] - Locale for card format
+ * @returns {string} Raw digits only
+ */
 export function creditCardUnmask(value, { locale = 'en-US' } = {}) {
 	if (locale === 'en-US') {
 		return value.replace(/\D/g, '');
@@ -81,6 +129,13 @@ export function creditCardUnmask(value, { locale = 'en-US' } = {}) {
 	return value;
 }
 
+/**
+ * Formats an expiration date for display (MM / YY).
+ * @param {string} value - Raw date input
+ * @param {Object} [options] - Mask options
+ * @param {string} [options.locale='en-US'] - Locale for date format
+ * @returns {string} Formatted date (e.g., 12 / 28)
+ */
 export function monthYearMask(value, { locale = 'en-US' } = {}) {
 	if (locale === 'en-US') {
 		const digits = value.replace(/\D/g, '');
@@ -92,6 +147,13 @@ export function monthYearMask(value, { locale = 'en-US' } = {}) {
 	return value;
 }
 
+/**
+ * Removes expiration date formatting for submission.
+ * @param {string} value - Formatted date
+ * @param {Object} [options] - Mask options
+ * @param {string} [options.locale='en-US'] - Locale for date format
+ * @returns {string} Raw digits only (MMYY)
+ */
 export function monthYearUnmask(value, { locale = 'en-US' } = {}) {
 	if (locale === 'en-US') {
 		return value.replace(/\D/g, '');

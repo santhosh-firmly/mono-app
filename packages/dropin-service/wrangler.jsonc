@@ -37,7 +37,8 @@
 		{
 			"binding": "firmlyConfigs",
 			"database_name": "firmly-configs",
-			"database_id": "f1e42435-758a-4abf-842d-2303131a96a1"
+			"database_id": "f1e42435-758a-4abf-842d-2303131a96a1",
+			"remote": true
 		}
 	],
 	"env": {

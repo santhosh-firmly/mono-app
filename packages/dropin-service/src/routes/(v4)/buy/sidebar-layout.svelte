@@ -19,12 +19,12 @@
 	});
 </script>
 
-<div class="fixed inset-0 z-40 flex h-full w-full justify-end">
+<div class="fixed inset-0 z-40 flex size-full justify-end">
 	{#if visible}
 		<div
 			transition:fade={{ duration: TRANSITION_DURATION, easing: cubicInOut }}
 			onoutroend={onClose}
-			class="fixed inset-0 z-40 flex h-full w-full justify-end bg-black/50"
+			class="fixed inset-0 z-40 flex size-full justify-end bg-black/50"
 		>
 			<div
 				class="relative h-full overflow-y-auto bg-white shadow-xl max-sm:w-full sm:w-[440px]"

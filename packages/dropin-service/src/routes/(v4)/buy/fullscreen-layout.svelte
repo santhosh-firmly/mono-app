@@ -13,7 +13,7 @@
 {#if visible}
 	<div
 		transition:fade={{ duration: 300, easing: cubicInOut }}
-		class="fixed inset-0 z-40 flex h-full w-full overflow-scroll"
+		class="fixed inset-0 z-40 flex size-full overflow-scroll"
 	>
 		<slot></slot>
 	</div>

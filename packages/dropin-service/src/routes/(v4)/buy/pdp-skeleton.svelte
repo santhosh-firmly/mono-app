@@ -2,7 +2,7 @@
 	<!-- Product Image Skeleton -->
 	<div class="flex w-full flex-row justify-end p-8">
 		<div
-			class="bg-fy-on-primary-subtle2 aspect-square max-h-128 w-full max-w-128 animate-pulse rounded-lg"
+			class="bg-fy-on-primary-subtle2 aspect-square max-h-128 w-full max-w-lg animate-pulse rounded-lg"
 		></div>
 	</div>
 	<div class="flex flex-col gap-4 @md:gap-10 @md:p-12">
