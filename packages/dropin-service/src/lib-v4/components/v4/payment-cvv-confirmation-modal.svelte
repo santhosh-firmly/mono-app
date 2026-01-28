@@ -84,7 +84,12 @@
 					aria-describedby={error ? 'cvv-error' : null}
 				/>
 				<div class="absolute top-0 right-0 z-10 mr-3 flex h-full flex-col justify-center">
-					<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 44 44">
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="24"
+						height="24"
+						viewBox="0 0 44 44"
+					>
 						<g fill="none" fill-rule="evenodd">
 							<path d="M0 0h44v44H0z" />
 							<path
@@ -96,9 +101,12 @@
 							<circle cx="27.5" cy="27.5" r="1" class="stroke-fy-on-surface-subtle" />
 							<circle cx="31.5" cy="27.5" r="1" class="stroke-fy-on-surface-subtle" />
 							<circle cx="35.5" cy="27.5" r="1" class="stroke-fy-on-surface-subtle" />
-							<path class="fill-fy-on-surface-subtle" d="M1 11h42v1H1zM1 15h42v1H1z" />
 							<path
-								stroke="#904EBA"
+								class="fill-fy-on-surface-subtle"
+								d="M1 11h42v1H1zM1 15h42v1H1z"
+							/>
+							<path
+								class="stroke-fy-action"
 								stroke-linecap="round"
 								stroke-linejoin="round"
 								d="M33.497 21.5a6.006 6.006 0 0 1 6.003 6c0 3.314-2.678 6-6.003 6h-3.994a6.006 6.006 0 0 1-6.003-6c0-3.314 2.678-6 6.003-6h3.994z"

@@ -1049,12 +1049,8 @@
 		cvvConfirmationError = '';
 
 		try {
-			const selectedCard = savedCreditCards.find(
-				(c) => (c.id || c.pan) === selectedCardOption
-			);
-
-			if (selectedCard) {
-				const orderResponse = await placeOrderC2P(selectedCard);
+			if (cardRequiringCvvForModal) {
+				const orderResponse = await placeOrderC2P(cardRequiringCvvForModal);
 
 				if (orderResponse) {
 					showCvvConfirmationModal = false;
