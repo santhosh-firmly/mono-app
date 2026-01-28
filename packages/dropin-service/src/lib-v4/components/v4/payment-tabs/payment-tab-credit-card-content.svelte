@@ -26,9 +26,6 @@
 
 	const dispatch = createEventDispatcher();
 
-	export let cardsRequiringCvv = [];
-	export let cvvConfirmationValue = '';
-
 	export let number;
 	export let expiryDate = '';
 	export let verification_value;
@@ -257,26 +254,6 @@
 						number={savedCard.last_four}
 						customArtUrl={savedCard.art}
 					/>
-					{#if cardsRequiringCvv && cardsRequiringCvv.includes(savedCard.id || savedCard.pan)}
-						<div class="flex flex-col gap-2">
-							<span class="text-fy-alert text-xs"> Please confirm your CVV </span>
-							<input
-								class="border-fy-on-primary-subtle placeholder:text-fy-on-primary-subtle sensitive-data w-full rounded border p-2 disabled:bg-gray-100"
-								class:error
-								{disabled}
-								bind:value={cvvConfirmationValue}
-								on:focus={() => onFieldFocus('card_cvv')}
-								on:blur={() =>
-									onFieldBlur('card_cvv', cvvConfirmationValue, !!error)}
-								data-testid="cvvConfirmationValue"
-								data-sensitive
-								placeholder="CVV"
-								autocomplete="cc-csc"
-								maxlength="4"
-								inputmode="numeric"
-							/>
-						</div>
-					{/if}
 				</label>
 			{/each}
 			<label

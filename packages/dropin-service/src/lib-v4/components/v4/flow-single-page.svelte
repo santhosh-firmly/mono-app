@@ -28,6 +28,7 @@
 	import ExistingCreditCard from './existing-credit-card.svelte';
 	import Notices from './notices.svelte';
 	import TermsPopup from './terms-popup.svelte';
+	import PaymentCvvConfirmationModal from './payment-cvv-confirmation-modal.svelte';
 	import { getRandonPassword } from '$lib-v4/browser/api-manager.js';
 	import { createEventDispatcher } from 'svelte';
 	import Header from './header.svelte';
@@ -221,11 +222,21 @@
 	// Array to track cards that require CVV
 	let cardsRequiringCvv = [];
 	let cvvConfirmationValue = '';
+	let showCvvConfirmationModal = false;
+	let cvvConfirmationError = '';
+	let cvvConfirmationLoading = false;
+
+	// Get the selected card that requires CVV for the modal
+	$: cardRequiringCvvForModal = savedCreditCards.find(
+		(c) => (c.id || c.pan) === selectedCardOption && cardsRequiringCvv.includes(c.id || c.pan)
+	);
 
 	// Clear CVV input when switching to a card that doesn't require CVV
 	$: {
 		if (!cardsRequiringCvv.includes(selectedCardOption)) {
 			cvvConfirmationValue = '';
+			showCvvConfirmationModal = false;
+			cvvConfirmationError = '';
 		}
 	}
 
@@ -998,16 +1009,24 @@
 			if (!cardsRequiringCvv.includes(selectedCardOption)) {
 				cardsRequiringCvv = [...cardsRequiringCvv, selectedCardOption];
 			}
+			showCvvConfirmationModal = true;
+			cvvConfirmationError = '';
 			return;
 		}
 
 		if (checkoutResponse && !checkoutResponse.place_order_error) {
 			cardsRequiringCvv = cardsRequiringCvv.filter((card) => card !== selectedCardOption);
 			cvvConfirmationValue = '';
+			showCvvConfirmationModal = false;
+			cvvConfirmationError = '';
 
 			return checkoutResponse;
 		} else if (checkoutResponse.place_order_error) {
-			place_order_error = checkoutResponse.place_order_error;
+			if (showCvvConfirmationModal) {
+				cvvConfirmationError = checkoutResponse.place_order_error;
+			} else {
+				place_order_error = checkoutResponse.place_order_error;
+			}
 		}
 	}
 
@@ -1021,6 +1040,49 @@
 			// Shipping info already exists in cart.
 			return !!$cart.shipping_info;
 		}
+	}
+
+	async function handleCvvConfirmationSubmit(event) {
+		const { cvv } = event.detail;
+		cvvConfirmationValue = cvv;
+		cvvConfirmationLoading = true;
+		cvvConfirmationError = '';
+
+		try {
+			const selectedCard = savedCreditCards.find(
+				(c) => (c.id || c.pan) === selectedCardOption
+			);
+
+			if (selectedCard) {
+				const orderResponse = await placeOrderC2P(selectedCard);
+
+				if (orderResponse) {
+					showCvvConfirmationModal = false;
+					isOrderPlaced = true;
+
+					if (
+						redirectOnPlaceOrder &&
+						orderResponse.urls?.thank_you_page &&
+						!isParentIframed
+					) {
+						postOrderPlaced(orderResponse.urls.thank_you_page, orderResponse.session);
+					} else {
+						dispatch('orderPlacedEvent', {
+							order: orderResponse
+						});
+					}
+				}
+			}
+		} finally {
+			cvvConfirmationLoading = false;
+		}
+	}
+
+	function handleCvvConfirmationCancel() {
+		showCvvConfirmationModal = false;
+		cvvConfirmationValue = '';
+		cvvConfirmationError = '';
+		collapsedStatePayment = false;
 	}
 
 	async function placeOrderCreditCard(additionalData) {
@@ -2063,9 +2125,7 @@
 									{onPaypalHandler}
 									{savedCreditCards}
 									{shouldTryFocusOnPaymentTab}
-									{cardsRequiringCvv}
 									bind:paypalPayerId
-									bind:cvvConfirmationValue
 									bind:validateCreditCard
 									bind:selectedPaymentMethod
 									bind:selectedCardOption
@@ -2198,9 +2258,7 @@
 							disabled={shippingInfoInProgress ||
 								shippingMethodInProgress ||
 								(selectedPaymentMethod === PAYMENT_METHODS.PAYPAL &&
-									!paypalConnected) ||
-								(cardsRequiringCvv.includes(selectedCardOption) &&
-									!cvvConfirmationValue)}
+									!paypalConnected)}
 							inProgress={placeOrderInProgress}
 							total={$cart?.total}
 							{isOrderPlaced}
@@ -2258,6 +2316,17 @@
 		{/if}
 
 		<TermsPopup bind:isModalOpen={isTermsPopupOpen} title={$cart?.display_name} />
+
+		<PaymentCvvConfirmationModal
+			bind:isModalOpen={showCvvConfirmationModal}
+			card={cardRequiringCvvForModal}
+			bind:cvvValue={cvvConfirmationValue}
+			error={cvvConfirmationError}
+			loading={cvvConfirmationLoading}
+			{buttonText}
+			on:submit={handleCvvConfirmationSubmit}
+			on:cancel={handleCvvConfirmationCancel}
+		/>
 	</div>
 </div>
 
