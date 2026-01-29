@@ -276,7 +276,8 @@ export async function checkoutWithCard({
 	rememberMe = false,
 	cvv,
 	additionalData = {},
-	cardBrand = 'mastercard'
+	cardBrand = 'mastercard',
+	cardArt
 } = {}) {
 	return await trackPerformance(
 		async () => {
@@ -322,7 +323,8 @@ export async function checkoutWithCard({
 					...additionalData,
 					flowId: withCardResponse.headers['x-src-cx-flow-id'],
 					merchantTransactionId: withCardResponse.headers['merchant-transaction-id'],
-					correlationId: withCardResponse.checkoutResponseData.srcCorrelationId
+					correlationId: withCardResponse.checkoutResponseData.srcCorrelationId,
+					card_art: cardArt || ''
 				};
 
 				// Prepare wallet data for complete-order

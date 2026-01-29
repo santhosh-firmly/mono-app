@@ -238,7 +238,8 @@
 				value: cart.total.value,
 				currency: cart.total.currency
 			},
-			cardBrand: selectedCard.provider
+			cardBrand: selectedCard.provider,
+			cardArt: selectedCard.art
 		});
 
 		if (tokenizeResponse.status !== 200) {

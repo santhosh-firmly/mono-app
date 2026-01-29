@@ -164,14 +164,13 @@ export function createPaymentMixin() {
 				} else if (selectedCardId) {
 					const card = this.selectedCard;
 					if (card?.fromC2P) {
-						result = await placeOrderWithC2P(
-							this.domain,
-							{
-								wallet: card.provider || card.network || 'mastercard',
-								credit_card_id: card.id || card.pan
-							},
-							cvvValue || null
-						);
+						const c2pPayload = {
+							wallet: card.provider || card.network || 'mastercard',
+							credit_card_id: card.id || card.pan,
+							card_art: card.art || ''
+						};
+
+						result = await placeOrderWithC2P(this.domain, c2pPayload, cvvValue || null);
 
 						if (result.cvvRequired) {
 							const cardId = card.id || card.pan;
