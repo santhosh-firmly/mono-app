@@ -1,7 +1,7 @@
 {
 	"name": "dropin-service",
 	"private": true,
-	"version": "0.41.0",
+	"version": "0.41.1",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
@@ -26,7 +26,7 @@
 	"devDependencies": {
 		"@chromatic-com/storybook": "^3.2.5",
 		"@cloudflare/vite-plugin": "^0.1.17",
-		"@firmly/eslint-config": "^0.41.0",
+		"@firmly/eslint-config": "^0.41.1",
 		"@storybook/addon-essentials": "^8.6.4",
 		"@storybook/addon-interactions": "^8.6.4",
 		"@storybook/addon-postcss": "^2.0.0",
@@ -55,7 +55,7 @@
 		"wrangler": "*"
 	},
 	"dependencies": {
-		"@firmly/session-recorder": "^0.41.0",
+		"@firmly/session-recorder": "^0.41.1",
 		"@iconify-icons/eos-icons": "^1.2.5",
 		"@iconify-icons/fa6-brands": "^1.2.1",
 		"@iconify-icons/fluent-mdl2": "^1.2.1",
