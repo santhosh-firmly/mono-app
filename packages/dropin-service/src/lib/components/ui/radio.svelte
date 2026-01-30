@@ -37,7 +37,7 @@
 			></div>
 		{/if}
 	</div>
-	<label class="w-full" for={id}>
+	<label class="w-full cursor-pointer" for={id}>
 		{@render children?.()}
 	</label>
 </div>
