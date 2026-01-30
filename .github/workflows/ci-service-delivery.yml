@@ -37,3 +37,26 @@ jobs:
             GH_TOKEN: ${{ secrets.GH_TOKEN }}
             CF_API_TOKEN_QA: ${{ secrets.CF_API_TOKEN_QA }}
             TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL_QA }}
+
+    # ============================================================================
+    # INTEGRATION TEST SUITE
+    # Runs API V1, API V2, MCP, Identity, and Vault tests via reusable workflow
+    # ============================================================================
+    integration-test-suite:
+        name: '🧪 Integration Test Suite'
+        needs: [service-delivery]
+        if: ${{ needs.service-delivery.result == 'success' }}
+        uses: goyalu/.github/.github/workflows/integration-test-suite.yml@main
+        with:
+            environment: 'qa'
+            commit_info: ${{ github.sha }}
+            run_service_tests: true
+            run_vault_tests: true
+        secrets:
+            GH_TOKEN: ${{ secrets.GH_TOKEN }}
+            TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL_QA }}
+            APP_ID: ${{ secrets.QA_APP_ID }}
+            CF_API_TOKEN_QA: ${{ secrets.CF_API_TOKEN_QA }}
+            CF_ACC_ID_QA: ${{ secrets.CF_ACC_ID_QA }}
+            CF_R2_TOKEN_CORP: ${{ secrets.CF_R2_TOKEN_CORP }}
+            CF_ACC_ID_CORP: ${{ secrets.CF_ACC_ID_CORP }}

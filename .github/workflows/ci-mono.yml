@@ -62,21 +62,15 @@ jobs:
 
     # Run package-specific CI for each changed package
     build-test-packages:
-        name: '🏗️ Build & Test '
+        name: '🏗️ Build & Test'
         needs: [get-changed-packages]
         if: ${{ needs.get-changed-packages.outputs.packages != '[]' && needs.get-changed-packages.outputs.packages != '' }}
-        uses: goyalu/.github/.github/workflows/ci-package.yml@main
+        uses: goyalu/.github/.github/workflows/ci-build-test-suite.yml@main
         with:
-            package_name: ${{ matrix.package }}
+            packages: ${{ needs.get-changed-packages.outputs.packages }}
         secrets:
             GH_TOKEN: ${{ secrets.GH_TOKEN }}
             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-            SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        strategy:
-            fail-fast: false
-            max-parallel: 8
-            matrix:
-                package: ${{fromJSON(needs.get-changed-packages.outputs.packages)}}
 
     ci-service-deployment:
         name: 📦 CI Service Deployment
@@ -89,3 +83,26 @@ jobs:
             GH_TOKEN: ${{ secrets.GH_TOKEN }}
             CF_API_TOKEN_CI: ${{ secrets.CF_API_TOKEN_CI }}
             TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL_CI }}
+
+    # ============================================================================
+    # INTEGRATION TEST SUITE
+    # Runs API V1, API V2, MCP, Identity, and Vault tests via reusable workflow
+    # ============================================================================
+    integration-test-suite:
+        name: '🧪 Integration Test Suite'
+        needs: [ci-service-deployment]
+        if: ${{ needs.ci-service-deployment.result == 'success' }}
+        uses: goyalu/.github/.github/workflows/integration-test-suite.yml@main
+        with:
+            environment: 'ci'
+            commit_info: ${{ github.sha }}
+            run_service_tests: true
+            run_vault_tests: true
+        secrets:
+            GH_TOKEN: ${{ secrets.GH_TOKEN }}
+            TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL_CI }}
+            APP_ID: ${{ secrets.CI_APP_ID }}
+            CF_API_TOKEN_QA: ${{ secrets.CF_API_TOKEN_QA }}
+            CF_ACC_ID_QA: ${{ secrets.CF_ACC_ID_QA }}
+            CF_R2_TOKEN_CORP: ${{ secrets.CF_R2_TOKEN_CORP }}
+            CF_ACC_ID_CORP: ${{ secrets.CF_ACC_ID_CORP }}
