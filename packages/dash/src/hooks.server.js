@@ -223,6 +223,12 @@ async function handleAdminAuth(event, resolve, resolveWithHeaders) {
 		maxAge: 7 * 24 * 60 * 60 // 7 days
 	};
 
+	function clearAdminCookiesAndRedirect() {
+		cookies.delete(adminCookieName, { path: '/' });
+		cookies.delete('fuser_refresh', { path: '/' });
+		redirect(302, '/auth/sign-in');
+	}
+
 	// Try to verify as custom HS256 JWT
 	const payload = await verifyToken(token, jwtSecret);
 
@@ -250,10 +256,7 @@ async function handleAdminAuth(event, resolve, resolveWithHeaders) {
 		});
 
 		if (!refreshed) {
-			// Refresh failed — clear cookies and redirect
-			cookies.delete(adminCookieName, { path: '/' });
-			cookies.delete('fuser_refresh', { path: '/' });
-			redirect(302, '/auth/sign-in');
+			clearAdminCookiesAndRedirect();
 		}
 
 		// Verify the new id_token from Microsoft
@@ -288,10 +291,7 @@ async function handleAdminAuth(event, resolve, resolveWithHeaders) {
 
 			return resolveWithHeaders(event);
 		} catch {
-			// Microsoft token verification failed
-			cookies.delete(adminCookieName, { path: '/' });
-			cookies.delete('fuser_refresh', { path: '/' });
-			redirect(302, '/auth/sign-in');
+			clearAdminCookiesAndRedirect();
 		}
 	}
 
