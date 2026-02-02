@@ -28,7 +28,8 @@
 			goLive: 'pending'
 		},
 		kybStatus = null,
-		goLiveStatus = null
+		goLiveStatus = null,
+		canSkip = false
 	} = $props();
 
 	// Check if KYB is approved (allows access to post-KYB steps)
@@ -365,6 +366,18 @@
 						</p>
 					</div>
 				</div>
+			</div>
+		{/if}
+
+		{#if canSkip}
+			<div class="border-t pt-4 mt-4">
+				<a
+					href="?skip=true"
+					class="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
+				>
+					Skip for now
+					<ChevronRight class="h-4 w-4" />
+				</a>
 			</div>
 		{/if}
 	</Card.Content>

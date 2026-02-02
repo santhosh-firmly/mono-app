@@ -9,12 +9,21 @@
 	let { data } = $props();
 	let domain = $derived($page.params.domain);
 
+	// Check if skip param is present (temporary skip for this page load)
+	let skipOnboarding = $derived($page.url.searchParams.get('skip') === 'true');
+
+	// Determine if user can skip: either admin or merchant has allowSkipOnboarding enabled
+	let canSkip = $derived(data.isFirmlyAdmin || data.allowSkipOnboarding);
+
+	// Show dashboard if not onboarding or if skip param is set
+	let showDashboard = $derived(!data.isOnboarding || skipOnboarding);
+
 	let dashboardData = $state(null);
 	let loading = $state(true);
 	let error = $state('');
 
 	$effect(() => {
-		if (!data.isOnboarding) {
+		if (showDashboard) {
 			fetchDashboardData();
 		}
 	});
@@ -40,13 +49,14 @@
 	}
 </script>
 
-{#if data.isOnboarding}
+{#if !showDashboard}
 	<div class="max-w-2xl mx-auto">
 		<OnboardingTasks
 			domain={data.domain}
 			statuses={data.onboardingProgress}
 			kybStatus={data.kybStatus}
 			goLiveStatus={data.goLiveStatus}
+			{canSkip}
 		/>
 	</div>
 {:else if loading}

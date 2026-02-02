@@ -8,7 +8,7 @@
  * - pd-jobs/* -> /api/v1/product-details-jobs
  * - workflows/* -> /api/v1/workflows
  * - enrichment/* -> /api/v1/enrichment
- * - enrichment-analytics/* -> /api/v1/enrichment-analytics
+ * - enrichment-analytics/* -> /api/v1/analytics/enrichment
  * - admin/* -> /api/v1/admin
  * - export/* -> /api/v1/export
  * - export-jobs/* -> /api/v1/export-jobs
@@ -24,7 +24,7 @@ const SERVICE_ROUTES = {
 	'pd-jobs': '/api/v1/product-details-jobs',
 	workflows: '/api/v1/workflows',
 	enrichment: '/api/v1/enrichment',
-	'enrichment-analytics': '/api/v1/enrichment-analytics',
+	'enrichment-analytics': '/api/v1/analytics/enrichment',
 	admin: '/api/v1/admin',
 	// Export routes
 	export: '/api/v1/export',

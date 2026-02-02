@@ -63,6 +63,9 @@
 	let isGoLiveSubmitting = $state(false);
 	let goLiveError = $state('');
 
+	// Skip onboarding toggle state
+	let isTogglingSkip = $state(false);
+
 	// ============================================================
 	// MERCHANT HANDLERS
 	// ============================================================
@@ -261,6 +264,39 @@
 			goLiveError = error.message;
 		} finally {
 			isGoLiveSubmitting = false;
+		}
+	}
+
+	async function handleToggleSkipOnboarding(domain, currentValue) {
+		if (isTogglingSkip) return;
+
+		isTogglingSkip = true;
+
+		try {
+			const response = await fetch(
+				`/admin/api/dashboards/${encodeURIComponent(domain)}/skip-onboarding`,
+				{
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' }
+				}
+			);
+
+			const result = await response.json();
+
+			if (!response.ok) {
+				throw new Error(result.error || 'Failed to toggle skip onboarding');
+			}
+
+			// Update local state
+			dashboards = dashboards.map((d) =>
+				d.domain === domain
+					? { ...d, allow_skip_onboarding: result.allow_skip_onboarding }
+					: d
+			);
+		} catch (error) {
+			console.error('Error toggling skip onboarding:', error);
+		} finally {
+			isTogglingSkip = false;
 		}
 	}
 
@@ -547,6 +583,7 @@
 						onReset={handleOpenResetMerchant}
 						onReviewKyb={handleOpenKybReview}
 						onReviewGoLive={handleOpenGoLiveReview}
+						onToggleSkipOnboarding={handleToggleSkipOnboarding}
 					/>
 				{/if}
 			</Tabs.Content>

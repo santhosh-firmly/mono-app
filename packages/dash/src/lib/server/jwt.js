@@ -93,6 +93,27 @@ export async function createSessionToken({ userId, email, sessionId }, secret) {
 }
 
 /**
+ * Create a compact admin JWT from verified Microsoft id_token claims.
+ * @param {Object} params - Admin claims
+ * @param {string} params.email - Admin email
+ * @param {string} params.name - Admin display name
+ * @param {string} params.oid - Azure AD object ID
+ * @param {string} params.preferred_username - Azure AD preferred username
+ * @param {string} secret - The signing secret (JWT_SECRET)
+ * @returns {Promise<string>} The compact JWT token
+ */
+export async function createAdminToken({ email, name, oid, preferred_username }, secret) {
+	const secretKey = new TextEncoder().encode(secret);
+	const oneHour = 60 * 60;
+
+	return new jose.SignJWT({ email, name, oid, preferred_username, type: 'admin' })
+		.setProtectedHeader({ alg: ALGORITHM })
+		.setIssuedAt()
+		.setExpirationTime(`${oneHour}s`)
+		.sign(secretKey);
+}
+
+/**
  * Session expiration time (7 days from now) as ISO string.
  * @returns {string} ISO date string
  */

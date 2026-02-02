@@ -8,7 +8,7 @@
 			`https://login.microsoftonline.com/${azureAdTenantId}/oauth2/v2.0/authorize`
 		);
 		url.searchParams.set('client_id', azureAdClientId);
-		url.searchParams.set('scope', 'openid profile email');
+		url.searchParams.set('scope', 'openid profile email offline_access');
 		url.searchParams.set('response_type', 'code');
 		url.searchParams.set('redirect_uri', azureAdRedirectUrl);
 

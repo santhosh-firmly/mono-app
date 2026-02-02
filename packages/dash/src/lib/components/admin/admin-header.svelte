@@ -14,7 +14,7 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Sheet from '$lib/components/ui/sheet/index.js';
 
-	let { user, merchants = [], currentPath } = $props();
+	let { user, merchants = [], currentPath, env = null } = $props();
 
 	// Check if catalog section is expanded
 	let isCatalogActive = $derived(currentPath.startsWith('/admin/catalog'));
@@ -36,8 +36,8 @@
 	// Catalog sub-items
 	let catalogItems = [
 		{ label: 'All Products', href: '/admin/catalog/all-products' },
-		{ label: 'Enrichment', href: '/admin/catalog/enrichment' },
 		{ label: 'Product Details', href: '/admin/catalog/product-details' },
+		{ label: 'Enrichment', href: '/admin/catalog/enrichment' },
 		{ label: 'Export', href: '/admin/catalog/export' },
 		{ label: 'Downloads', href: '/admin/catalog/downloads' },
 		{ label: 'Publish', href: '/admin/catalog/publish' },
@@ -68,7 +68,7 @@
 			<Sheet.Content side="left" class="w-72">
 				<nav class="grid gap-2 py-4">
 					<a href="/admin" class="mb-4 flex items-center gap-2 px-2">
-						<FirmlyLogo size="sm" />
+						<FirmlyLogo size="sm" {env} />
 					</a>
 
 					<!-- Main Section -->
@@ -157,7 +157,7 @@
 
 		<!-- Logo - always visible -->
 		<a href="/admin" class="flex items-center gap-2">
-			<FirmlyLogo size="sm" />
+			<FirmlyLogo size="sm" {env} />
 		</a>
 
 		<!-- Merchant quick access - desktop only -->
@@ -168,8 +168,11 @@
 		{/if}
 	</div>
 
-	<!-- Right side: User menu -->
+	<!-- Right side: Admin badge + User menu -->
 	<div class="flex items-center gap-2">
+		<span class="rounded-full bg-primary px-2 py-0.5 text-xs font-bold uppercase leading-none text-primary-foreground">
+			admin
+		</span>
 		<AdminUserMenu {user} />
 	</div>
 </header>

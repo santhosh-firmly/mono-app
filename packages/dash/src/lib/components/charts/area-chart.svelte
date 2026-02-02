@@ -187,25 +187,17 @@
 	}
 
 	$effect(() => {
-		if (chart && data.length) {
-			// Use comparison data for labels if available (full month), otherwise use current data
-			const labelsSource =
-				hasComparisonData() && comparisonData.length > data.length ? comparisonData : data;
-			chart.data.labels = labelsSource.map((d) => d.day || d.date);
-			chart.data.datasets[0].data = data.map((d) => d.revenue);
+		// Track reactive data props so the effect re-runs when they change
+		const currentData = data;
+		const currentComparison = comparisonData;
 
-			// Update comparison dataset if it exists and has actual revenue
-			if (chart.data.datasets[1] && hasComparisonData()) {
-				chart.data.datasets[1].data = comparisonData.map((d) => d.revenue);
-			}
+		if (!currentData.length || !chart) return;
 
-			// Update Y-axis scale based on both series
-			const maxValue = getMaxValue();
-			chart.options.scales.y.suggestedMax =
-				maxValue > 0 ? Math.ceil(maxValue * 1.1) : undefined;
-
-			chart.update('none');
-		}
+		// Destroy and recreate the chart so that the comparison dataset
+		// is correctly added, removed, or updated for the new data.
+		chart.destroy();
+		chart = null;
+		createChart();
 	});
 </script>
 

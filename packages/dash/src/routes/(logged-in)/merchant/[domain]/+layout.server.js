@@ -132,7 +132,8 @@ export async function load({ locals, params, platform }) {
 			isOnboarding,
 			onboardingProgress,
 			kybStatus,
-			goLiveStatus
+			goLiveStatus,
+			allowSkipOnboarding: true // Admins can always skip
 		};
 	}
 
@@ -151,7 +152,8 @@ export async function load({ locals, params, platform }) {
 		redirect(302, '/');
 	}
 
-	// Get user profile, destination access, agreement status, destinations config, catalog config, CDN status, integration status, KYB status, Go Live status, and pending invites in parallel
+	// Get user profile, destination access, agreement status, destinations config, catalog config, CDN status, integration status, KYB status, Go Live status, pending invites, and skip setting in parallel
+	const db = platform?.env?.dashUsers;
 	const [
 		profile,
 		destinationAccessData,
@@ -162,7 +164,8 @@ export async function load({ locals, params, platform }) {
 		integrationComplete,
 		kybStatus,
 		goLiveStatus,
-		pendingInvites
+		pendingInvites,
+		skipOnboardingResult
 	] = await Promise.all([
 		getProfile({ platform, userId }),
 		getDestinationAccess({ platform, userId }),
@@ -173,8 +176,18 @@ export async function load({ locals, params, platform }) {
 		checkIntegrationComplete({ platform, merchantDomain: params.domain }),
 		getKYBStatus({ platform, merchantDomain: params.domain }),
 		getGoLiveStatus({ platform, merchantDomain: params.domain }),
-		getPendingInvites({ platform, userId })
+		getPendingInvites({ platform, userId }),
+		db
+			? db
+					.prepare(
+						'SELECT allow_skip_onboarding FROM merchant_dashboards WHERE domain = ?'
+					)
+					.bind(params.domain)
+					.first()
+			: Promise.resolve(null)
 	]);
+
+	const allowSkipOnboarding = skipOnboardingResult?.allow_skip_onboarding === 1;
 
 	// Normalize merchant access data
 	const normalizedMerchantAccess = merchantAccess.map((access) => ({
@@ -250,6 +263,7 @@ export async function load({ locals, params, platform }) {
 		isOnboarding,
 		onboardingProgress,
 		kybStatus,
-		goLiveStatus
+		goLiveStatus,
+		allowSkipOnboarding
 	};
 }

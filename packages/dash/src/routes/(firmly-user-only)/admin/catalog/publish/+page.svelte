@@ -849,7 +849,7 @@
 									</td>
 									<td class="p-3 text-xs text-muted-foreground">
 										{#if exportInfo}
-											{exportInfo.versionId.substring(0, 8)}...
+											{exportInfo.versionId?.substring(0, 8) ?? '-'}...
 										{:else}
 											-
 										{/if}
@@ -865,7 +865,7 @@
 										class="p-3 text-right text-xs text-muted-foreground tabular-nums"
 									>
 										{#if exportInfo}
-											{exportInfo.products.toLocaleString()}
+											{exportInfo.products?.toLocaleString() ?? '-'}
 										{:else}
 											-
 										{/if}

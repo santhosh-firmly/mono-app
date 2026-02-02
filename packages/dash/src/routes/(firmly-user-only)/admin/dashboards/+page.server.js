@@ -23,7 +23,8 @@ export async function load({ platform }) {
 			.prepare(
 				`SELECT domain, created_at, created_by, owner_user_id, status, notes, info,
 				        kyb_status, kyb_submitted_at, kyb_reviewed_at, kyb_reviewed_by, kyb_rejection_notes,
-				        go_live_status, go_live_submitted_at, go_live_reviewed_at, go_live_reviewed_by, go_live_rejection_notes
+				        go_live_status, go_live_submitted_at, go_live_reviewed_at, go_live_reviewed_by, go_live_rejection_notes,
+				        allow_skip_onboarding
 				 FROM merchant_dashboards`
 			)
 			.all();
@@ -72,6 +73,8 @@ export async function load({ platform }) {
 				go_live_reviewed_at: meta.go_live_reviewed_at || null,
 				go_live_reviewed_by: meta.go_live_reviewed_by || null,
 				go_live_rejection_notes: meta.go_live_rejection_notes || null,
+				// Skip onboarding setting
+				allow_skip_onboarding: meta.allow_skip_onboarding || 0,
 				pendingInvite: null // Will be populated below
 			};
 		});
@@ -114,6 +117,8 @@ export async function load({ platform }) {
 					go_live_reviewed_at: meta.go_live_reviewed_at || null,
 					go_live_reviewed_by: meta.go_live_reviewed_by || null,
 					go_live_rejection_notes: meta.go_live_rejection_notes || null,
+					// Skip onboarding setting
+					allow_skip_onboarding: meta.allow_skip_onboarding || 0,
 					pendingInvite: null // Will be populated below
 				});
 			}
