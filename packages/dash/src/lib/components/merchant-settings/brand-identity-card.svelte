@@ -9,6 +9,7 @@
 	import CheckCircle from 'lucide-svelte/icons/check-circle-2';
 	import X from 'lucide-svelte/icons/x';
 	import Image from 'lucide-svelte/icons/image';
+	import { adminFetch } from '$lib/utils/fetch.js';
 
 	let {
 		displayName = $bindable(''),
@@ -58,7 +59,7 @@
 			throw new Error('Logo proxy URL not configured');
 		}
 
-		const response = await fetch(`${logoProxyUrl}?url=${encodeURIComponent(url)}`);
+		const response = await adminFetch(`${logoProxyUrl}?url=${encodeURIComponent(url)}`);
 
 		if (!response.ok) {
 			const result = await response.json();

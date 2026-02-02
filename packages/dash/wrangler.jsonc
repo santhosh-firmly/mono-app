@@ -54,6 +54,10 @@
 		{
 			"binding": "DASH_DO",
 			"service": "dash-do"
+		},
+		{
+			"binding": "DOMAINS_SERVICE",
+			"service": "domains"
 		}
 	],
 	"vars": {
@@ -123,6 +127,10 @@
 				{
 					"binding": "DASH_DO",
 					"service": "dash-do"
+				},
+				{
+					"binding": "DOMAINS_SERVICE",
+					"service": "domains"
 				}
 			],
 			"vars": {
@@ -190,6 +198,10 @@
 				{
 					"binding": "DASH_DO",
 					"service": "dash-do"
+				},
+				{
+					"binding": "DOMAINS_SERVICE",
+					"service": "domains"
 				}
 			],
 			"vars": {
@@ -257,6 +269,10 @@
 				{
 					"binding": "DASH_DO",
 					"service": "dash-do"
+				},
+				{
+					"binding": "DOMAINS_SERVICE",
+					"service": "domains"
 				}
 			],
 			"vars": {
@@ -318,6 +334,10 @@
 				{
 					"binding": "DASH_DO",
 					"service": "dash-do"
+				},
+				{
+					"binding": "DOMAINS_SERVICE",
+					"service": "domains"
 				}
 			],
 			"routes": [
@@ -387,6 +407,10 @@
 				{
 					"binding": "DASH_DO",
 					"service": "dash-do"
+				},
+				{
+					"binding": "DOMAINS_SERVICE",
+					"service": "domains"
 				}
 			],
 			"routes": [

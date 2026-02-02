@@ -12,6 +12,7 @@
 	import ExternalLink from 'lucide-svelte/icons/external-link';
 	import ClipboardCheck from 'lucide-svelte/icons/clipboard-check';
 	import Rocket from 'lucide-svelte/icons/rocket';
+	import SkipForward from 'lucide-svelte/icons/skip-forward';
 
 	let {
 		dashboards = [],
@@ -20,7 +21,8 @@
 		onCancelInvite = () => {},
 		onReset = () => {},
 		onReviewKyb = () => {},
-		onReviewGoLive = () => {}
+		onReviewGoLive = () => {},
+		onToggleSkipOnboarding = () => {}
 	} = $props();
 
 	function getActions(dashboard) {
@@ -85,6 +87,16 @@
 				onclick: () => onInvite(dashboard.domain)
 			});
 		}
+
+		// Toggle skip onboarding
+		actions.push({
+			id: 'skip',
+			icon: SkipForward,
+			label: dashboard.allow_skip_onboarding ? 'Disable Skip Onboarding' : 'Enable Skip Onboarding',
+			variant: 'ghost',
+			class: dashboard.allow_skip_onboarding ? 'text-amber-600' : '',
+			onclick: () => onToggleSkipOnboarding(dashboard.domain, dashboard.allow_skip_onboarding)
+		});
 
 		// Reset action
 		actions.push({

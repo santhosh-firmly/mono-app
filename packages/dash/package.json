@@ -69,7 +69,8 @@
 		"svelte-headless-table": "^0.18.2",
 		"svelte-radix": "^3.0.2",
 		"tailwind-merge": "^2.5.2",
-		"tailwind-variants": "^0.2.1"
+		"tailwind-variants": "^0.2.1",
+		"xlsx": "^0.18.5"
 	},
 	"prettier": "./.prettierrc.js"
 }

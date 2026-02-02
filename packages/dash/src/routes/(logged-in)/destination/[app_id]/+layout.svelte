@@ -34,6 +34,7 @@
 		pendingInvites={data.pendingInvites}
 		isFirmlyAdmin={data.isFirmlyAdmin}
 		hasAzureADAuth={data.hasAzureADAuth}
+		env={data.firmlyEnv}
 		{currentPath}
 	/>
 

@@ -7,7 +7,8 @@ export async function load({ locals, platform }) {
 
 	if (!session?.userId) {
 		return {
-			preferences: { theme: 'system' }
+			preferences: { theme: 'system' },
+			firmlyEnv: platform?.env?.FIRMLY_ENV ?? null
 		};
 	}
 
@@ -15,7 +16,8 @@ export async function load({ locals, platform }) {
 	// since they don't have preferences stored in DashUserDO
 	if (session.isFirmlyAdmin) {
 		return {
-			preferences: { theme: 'system' }
+			preferences: { theme: 'system' },
+			firmlyEnv: platform?.env?.FIRMLY_ENV ?? null
 		};
 	}
 
@@ -26,6 +28,7 @@ export async function load({ locals, platform }) {
 		preferences: {
 			theme: preferences.theme || 'system',
 			...preferences
-		}
+		},
+		firmlyEnv: platform?.env?.FIRMLY_ENV ?? null
 	};
 }

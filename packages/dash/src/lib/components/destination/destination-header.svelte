@@ -22,7 +22,8 @@
 		userRole = 'viewer',
 		pendingInvites = [],
 		isFirmlyAdmin = false,
-		hasAzureADAuth = false
+		hasAzureADAuth = false,
+		env = null
 	} = $props();
 
 	// Show dashboard selector when user has access to multiple dashboards (either type)
@@ -68,7 +69,7 @@
 			<Sheet.Content side="left" class="w-72">
 				<nav class="grid gap-2 py-4">
 					<a href={`/destination/${appId}`} class="mb-4 flex items-center gap-2 px-2">
-						<FirmlyLogo size="sm" />
+						<FirmlyLogo size="sm" {env} />
 					</a>
 					{#if showSelector}
 						<div class="mb-4 px-2">
@@ -124,7 +125,7 @@
 
 		<!-- Logo - always visible -->
 		<a href={`/destination/${appId}`} class="flex items-center gap-2">
-			<FirmlyLogo size="sm" />
+			<FirmlyLogo size="sm" {env} />
 		</a>
 
 		<!-- Destination selector - shown when user has multiple dashboards -->
@@ -135,8 +136,13 @@
 		{/if}
 	</div>
 
-	<!-- Right side: Notifications + User menu -->
+	<!-- Right side: Admin badge + Notifications + User menu -->
 	<div class="flex items-center gap-2">
+		{#if isFirmlyAdmin}
+			<span class="rounded-full bg-primary px-2 py-0.5 text-xs font-bold uppercase leading-none text-primary-foreground">
+				admin
+			</span>
+		{/if}
 		<PendingInvitesPopover {pendingInvites} />
 		<DestinationUserMenu {user} {isFirmlyAdmin} {hasAzureADAuth} />
 	</div>

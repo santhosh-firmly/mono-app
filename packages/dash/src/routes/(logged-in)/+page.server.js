@@ -9,6 +9,12 @@ import { getDestinationAccess } from '$lib/server/destination.js';
  * Firmly admins see all merchant and destination dashboards.
  */
 export async function load({ locals, platform }) {
+	// Temporary: in production, redirect all users to /admin
+	const firmlyEnv = platform?.env?.FIRMLY_ENV;
+	if (firmlyEnv === 'prod') {
+		redirect(302, '/admin');
+	}
+
 	const { userId, email, isFirmlyAdmin } = locals.session;
 
 	// Firmly admins see all merchant and destination dashboards

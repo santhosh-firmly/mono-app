@@ -34,6 +34,9 @@ export async function GET({ cookies, platform }) {
 		cookies.delete(adminCookieName, { path: '/' });
 	}
 
+	// Clear admin refresh token cookie
+	cookies.delete('fuser_refresh', { path: '/' });
+
 	// Redirect to login page
 	redirect(302, '/');
 }
