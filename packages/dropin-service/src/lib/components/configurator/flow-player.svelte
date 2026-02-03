@@ -9,11 +9,16 @@
 	/** @type {FlowPlayerProps} */
 	let { flowPlayer } = $props();
 
-	let flowOptions = $derived(
-		flowPlayer.availableFlows.map((flow) => ({
-			value: flow.id,
-			label: flow.name
-		}))
+	let checkoutFlows = $derived(
+		flowPlayer.availableFlows
+			.filter((flow) => flow.type !== 'buyNow')
+			.map((flow) => ({ value: flow.id, label: flow.name }))
+	);
+
+	let buyNowFlows = $derived(
+		flowPlayer.availableFlows
+			.filter((flow) => flow.type === 'buyNow')
+			.map((flow) => ({ value: flow.id, label: flow.name }))
 	);
 
 	function handleSelect(event) {
@@ -31,15 +36,22 @@
 
 <div class="flex items-center gap-2">
 	<select
-		class="h-7 w-36 cursor-pointer rounded-md border border-gray-200 bg-white px-2 text-xs text-gray-700 transition-colors hover:border-gray-300 focus:ring-2 focus:ring-black/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+		class="h-7 w-44 cursor-pointer rounded-md border border-gray-200 bg-white px-2 text-xs text-gray-700 transition-colors hover:border-gray-300 focus:ring-2 focus:ring-black/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
 		value={flowPlayer.currentFlowId || ''}
 		onchange={handleSelect}
 		disabled={flowPlayer.isPlaying}
 	>
 		<option value="" disabled>Select flow...</option>
-		{#each flowOptions as option (option.value)}
-			<option value={option.value}>{option.label}</option>
-		{/each}
+		<optgroup label="Checkout">
+			{#each checkoutFlows as option (option.value)}
+				<option value={option.value}>{option.label}</option>
+			{/each}
+		</optgroup>
+		<optgroup label="Buy Now">
+			{#each buyNowFlows as option (option.value)}
+				<option value={option.value}>{option.label}</option>
+			{/each}
+		</optgroup>
 	</select>
 
 	<button

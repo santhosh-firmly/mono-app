@@ -1,5 +1,9 @@
 import { tick } from 'svelte';
-import { CHECKOUT_FLOWS, getAvailableFlows } from '$lib/utils/configurator/checkout-flows.js';
+import {
+	CHECKOUT_FLOWS,
+	BUY_NOW_FLOWS,
+	getAllFlows
+} from '$lib/utils/configurator/checkout-flows.js';
 import {
 	sleep,
 	typeIntoElement,
@@ -21,14 +25,19 @@ class FlowPlayer {
 	#configurator = null;
 	#onReload = null;
 	#onCartStateChange = null;
+	#onPdpEnabledChange = null;
 
-	currentFlow = $derived(this.currentFlowId ? CHECKOUT_FLOWS[this.currentFlowId] : null);
+	#allFlows = { ...CHECKOUT_FLOWS, ...BUY_NOW_FLOWS };
+
+	currentFlow = $derived(this.currentFlowId ? this.#allFlows[this.currentFlowId] : null);
 
 	totalSteps = $derived(this.currentFlow?.steps?.length || 0);
 
 	progress = $derived(this.totalSteps > 0 ? (this.currentStepIndex / this.totalSteps) * 100 : 0);
 
-	availableFlows = $derived(getAvailableFlows());
+	availableFlows = $derived(getAllFlows());
+
+	isBuyNowFlow = $derived(this.currentFlow?.type === 'buyNow');
 
 	setContainer(container) {
 		this.#containerRef = container;
@@ -46,20 +55,36 @@ class FlowPlayer {
 		this.#onCartStateChange = onCartStateChange;
 	}
 
+	setOnPdpEnabledChange(onPdpEnabledChange) {
+		this.#onPdpEnabledChange = onPdpEnabledChange;
+	}
+
 	async selectFlow(flowId) {
 		if (this.isPlaying) return;
 		this.currentFlowId = flowId;
 		this.currentStepIndex = 0;
 		this.error = null;
 
-		const flow = flowId ? CHECKOUT_FLOWS[flowId] : null;
-		if (flow?.featureConfig && this.#configurator) {
-			this.isConfiguringFeatures = true;
-			Object.entries(flow.featureConfig).forEach(([key, value]) => {
-				this.#configurator.setFeature(key, value);
-			});
-			await tick();
-			this.isConfiguringFeatures = false;
+		const flow = flowId ? this.#allFlows[flowId] : null;
+
+		if (flow && this.#configurator) {
+			const targetProduct = flow.type === 'buyNow' ? 'buyNow' : 'checkout';
+			if (this.#configurator.product !== targetProduct) {
+				this.#configurator.setProduct(targetProduct);
+			}
+
+			if (flow.featureConfig) {
+				this.isConfiguringFeatures = true;
+				Object.entries(flow.featureConfig).forEach(([key, value]) => {
+					this.#configurator.setFeature(key, value);
+				});
+				await tick();
+				this.isConfiguringFeatures = false;
+			}
+		}
+
+		if (this.#onPdpEnabledChange) {
+			this.#onPdpEnabledChange(flow?.pdpEnabled || false);
 		}
 
 		if (this.#onCartStateChange) {

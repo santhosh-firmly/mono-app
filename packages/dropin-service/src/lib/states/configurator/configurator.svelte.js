@@ -1,10 +1,13 @@
 import { availableLanguageTags, languageTag, setLanguageTag } from '$lib/paraglide/runtime.js';
 
+const VALID_LAYOUT_TYPES = ['sidebar', 'popup', 'bottomsheet', 'fullscreen'];
+const VALID_PRODUCTS = ['checkout', 'buyNow'];
+
 const THEME_PRESETS = {
 	default: {
 		id: 'default',
 		name: 'Default',
-		merchantName: 'Demo Store',
+		merchantName: 'The Firmly Store',
 		largeLogo: null,
 		smallLogo: null,
 		primaryColor: '#ffffff',
@@ -22,11 +25,14 @@ const THEME_PRESETS = {
 };
 
 class Configurator {
+	product = $state('buyNow');
+	pdpEnabled = $state(true);
 	pendingRequests = $state([]);
 	requestHistory = $state([]);
 	defaultDelay = $state(1000);
 	autoAccept = $state(true);
 	viewportWidth = $state(1200);
+	layoutType = $state('sidebar');
 	language = $state(languageTag());
 	features = $state({
 		promoCodes: true,
@@ -157,6 +163,22 @@ class Configurator {
 
 	setDelay(ms) {
 		this.defaultDelay = Math.max(1000, Math.min(30000, ms));
+	}
+
+	setProduct(product) {
+		if (VALID_PRODUCTS.includes(product)) {
+			this.product = product;
+		}
+	}
+
+	setPdpEnabled(enabled) {
+		this.pdpEnabled = enabled;
+	}
+
+	setLayoutType(type) {
+		if (VALID_LAYOUT_TYPES.includes(type)) {
+			this.layoutType = type;
+		}
 	}
 
 	setFeature(feature, enabled) {

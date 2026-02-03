@@ -7,13 +7,6 @@
 	import PanelSelect from './panel-select.svelte';
 	import PanelColorPicker from './panel-color-picker.svelte';
 
-	/**
-	 * @typedef {Object} ConfiguratorSidebarProps
-	 * @property {Object} configurator - Configurator state with theme, features, requests
-	 * @property {boolean} [disabled] - Hide the sidebar
-	 */
-
-	/** @type {ConfiguratorSidebarProps} */
 	let { configurator, disabled = false } = $props();
 
 	let editingName = $state(false);
@@ -27,9 +20,16 @@
 		{ id: 'requests', icon: 'mdi:swap-horizontal', label: 'Requests' }
 	];
 
+	const productOptions = [
+		{ value: 'checkout', label: 'Checkout' },
+		{ value: 'buyNow', label: 'Buy Now' }
+	];
+
+	let isBuyNow = $derived(configurator.product === 'buyNow');
+
 	const panelDescriptions = {
 		theme: 'Customize the checkout appearance with colors and branding.',
-		settings: 'Configure language and feature availability.',
+		settings: 'Configure mode, layout and feature availability.',
 		requests: 'Interact with the checkout to see the requests.'
 	};
 
@@ -37,6 +37,13 @@
 		en: 'English',
 		'pt-br': 'Português (BR)'
 	};
+
+	const layoutOptions = [
+		{ value: 'sidebar', label: 'Sidebar' },
+		{ value: 'popup', label: 'Popup' },
+		{ value: 'bottomsheet', label: 'Bottom Sheet' },
+		{ value: 'fullscreen', label: 'Fullscreen' }
+	];
 
 	let languageOptions = $derived(
 		configurator.availableLanguages.map((lang) => ({
@@ -110,44 +117,101 @@
 					{:else if activePanel === 'settings'}
 						<div class="flex flex-col gap-4">
 							<section class="flex flex-col gap-2">
-								<h3 class="text-xs font-semibold text-gray-900">Language</h3>
+								<div
+									class="flex items-center gap-1.5 text-[10px] font-semibold tracking-wide text-gray-400"
+								>
+									<Icon icon="mdi:tune" class="text-xs" />
+									<span>GENERAL</span>
+								</div>
+								<h3 class="text-xs font-semibold text-gray-900">Mode</h3>
 								<PanelSelect
-									value={configurator.language}
-									options={languageOptions}
-									onchange={(lang) => configurator.setLanguage(lang)}
+									value={configurator.product}
+									options={productOptions}
+									onchange={(product) => configurator.setProduct(product)}
 								/>
 							</section>
-							<section class="flex flex-col gap-2">
-								<h3 class="text-xs font-semibold text-gray-900">Features</h3>
-								<div
-									class="flex flex-col gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3"
-								>
-									<div class="flex items-center justify-between">
-										<span class="text-xs text-gray-700">Promo Codes</span>
-										<PanelToggle
-											checked={configurator.features.promoCodes}
-											onchange={(val) =>
-												configurator.setFeature('promoCodes', val)}
-										/>
+
+							<div class="h-px bg-gray-200"></div>
+
+							{#if isBuyNow}
+								<div class="flex flex-col gap-3">
+									<div
+										class="flex items-center gap-1.5 text-[10px] font-semibold tracking-wide text-gray-400"
+									>
+										<Icon icon="mdi:shopping-outline" class="text-xs" />
+										<span>BUY NOW</span>
 									</div>
-									<div class="flex items-center justify-between">
-										<span class="text-xs text-gray-700">PayPal</span>
-										<PanelToggle
-											checked={configurator.features.paypal}
-											onchange={(val) =>
-												configurator.setFeature('paypal', val)}
+									<section class="flex flex-col gap-2">
+										<h3 class="text-xs font-semibold text-gray-900">
+											Layout Type
+										</h3>
+										<PanelSelect
+											value={configurator.layoutType}
+											options={layoutOptions}
+											onchange={(type) => configurator.setLayoutType(type)}
 										/>
-									</div>
-									<div class="flex items-center justify-between">
-										<span class="text-xs text-gray-700">Click to Pay</span>
+									</section>
+									<div
+										class="flex items-center justify-between rounded-lg border border-gray-100 bg-gray-50 p-3"
+									>
+										<span class="text-xs text-gray-700">Product Page</span>
 										<PanelToggle
-											checked={configurator.features.clickToPay}
-											onchange={(val) =>
-												configurator.setFeature('clickToPay', val)}
+											checked={configurator.pdpEnabled}
+											onchange={(val) => configurator.setPdpEnabled(val)}
 										/>
 									</div>
 								</div>
-							</section>
+
+								<div class="h-px bg-gray-200"></div>
+							{/if}
+
+							<div class="flex flex-col gap-3">
+								<div
+									class="flex items-center gap-1.5 text-[10px] font-semibold tracking-wide text-gray-400"
+								>
+									<Icon icon="mdi:credit-card-outline" class="text-xs" />
+									<span>CHECKOUT</span>
+								</div>
+								<section class="flex flex-col gap-2">
+									<h3 class="text-xs font-semibold text-gray-900">Language</h3>
+									<PanelSelect
+										value={configurator.language}
+										options={languageOptions}
+										onchange={(lang) => configurator.setLanguage(lang)}
+									/>
+								</section>
+								<section class="flex flex-col gap-2">
+									<h3 class="text-xs font-semibold text-gray-900">Features</h3>
+									<div
+										class="flex flex-col gap-3 rounded-lg border border-gray-100 bg-gray-50 p-3"
+									>
+										<div class="flex items-center justify-between">
+											<span class="text-xs text-gray-700">Promo Codes</span>
+											<PanelToggle
+												checked={configurator.features.promoCodes}
+												onchange={(val) =>
+													configurator.setFeature('promoCodes', val)}
+											/>
+										</div>
+										<div class="flex items-center justify-between">
+											<span class="text-xs text-gray-700">PayPal</span>
+											<PanelToggle
+												checked={configurator.features.paypal}
+												onchange={(val) =>
+													configurator.setFeature('paypal', val)}
+											/>
+										</div>
+										<div class="flex items-center justify-between">
+											<span class="text-xs text-gray-700">Click to Pay</span>
+											<PanelToggle
+												checked={configurator.features.clickToPay}
+												onchange={(val) =>
+													configurator.setFeature('clickToPay', val)}
+											/>
+										</div>
+									</div>
+								</section>
+							</div>
 						</div>
 					{:else if activePanel === 'theme'}
 						<div class="flex flex-col gap-4">

@@ -19,6 +19,7 @@
 		onReload,
 		flowPlayer = null,
 		browserContentRef = $bindable(null),
+		browserUrl = 'checkout.firmly.ai',
 		children
 	} = $props();
 
@@ -120,6 +121,7 @@
 				{width}
 				height={frameHeight}
 				{onReload}
+				url={browserUrl}
 				bind:contentRef={browserContentRef}
 			>
 				<div class="size-full" style="pointer-events: {dragging ? 'none' : 'auto'};">

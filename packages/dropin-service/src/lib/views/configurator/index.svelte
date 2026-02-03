@@ -7,6 +7,7 @@
 		flowPlayer = null,
 		onReload,
 		browserContentRef = $bindable(null),
+		browserUrl = 'checkout.firmly.ai',
 		children
 	} = $props();
 
@@ -21,6 +22,7 @@
 			bind:width={configurator.viewportWidth}
 			{flowPlayer}
 			{onReload}
+			{browserUrl}
 			bind:browserContentRef
 		>
 			<div class="size-full overflow-auto">
