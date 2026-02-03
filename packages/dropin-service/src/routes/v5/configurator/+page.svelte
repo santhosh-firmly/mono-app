@@ -216,7 +216,7 @@
 
 	$effect(() => {
 		const enabled = configurator?.pdpEnabled;
-		if (enabled === undefined || !mounted) return;
+		if (enabled == null || !mounted) return;
 
 		untrack(() => {
 			if (isBuyNow) {
@@ -340,6 +340,7 @@
 					merchantName={configurator.theme.merchantName}
 					{pdpEnabled}
 					resetKey={storeResetKey}
+					language={configurator.language}
 				>
 					{#if pdpEnabled}
 						<BuyNow
@@ -355,7 +356,10 @@
 							useAbsoluteModalPosition={true}
 						>
 							{#snippet pdpContent()}
-								<MockPdpPage onBuyNow={() => getBuyNow().goToCheckout()} />
+								<MockPdpPage
+									language={configurator.language}
+									onBuyNow={() => getBuyNow().goToCheckout()}
+								/>
 							{/snippet}
 						</BuyNow>
 					{:else}

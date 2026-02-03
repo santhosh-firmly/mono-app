@@ -41,16 +41,18 @@
 		</div>
 	</div>
 {:else if buyNow.mode === 'checkout'}
-	<Checkout
-		{checkout}
-		{c2p}
-		{paypal}
-		{merchant}
-		{notices}
-		{onGoBack}
-		onClose={() => buyNow.close()}
-		{onDismissNotice}
-		{isFullscreen}
-		{useAbsoluteModalPosition}
-	/>
+	<div class="flex min-h-0 flex-1 flex-col">
+		<Checkout
+			{checkout}
+			{c2p}
+			{paypal}
+			{merchant}
+			{notices}
+			{onGoBack}
+			onClose={() => buyNow.close()}
+			{onDismissNotice}
+			{isFullscreen}
+			{useAbsoluteModalPosition}
+		/>
+	</div>
 {/if}

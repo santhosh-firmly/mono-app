@@ -55,6 +55,7 @@
 		"wrangler": "*"
 	},
 	"dependencies": {
+		"bits-ui": "^2.15.5",
 		"@firmly/session-recorder": "^0.41.1",
 		"@iconify-icons/eos-icons": "^1.2.5",
 		"@iconify-icons/fa6-brands": "^1.2.1",

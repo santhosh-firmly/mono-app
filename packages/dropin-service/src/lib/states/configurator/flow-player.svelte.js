@@ -238,13 +238,6 @@ export function initializeFlowPlayer() {
 	return instance;
 }
 
-export function getFlowPlayer() {
-	if (!instance) {
-		throw new Error('FlowPlayer not initialized');
-	}
-	return instance;
-}
-
 export function resetFlowPlayer() {
 	if (instance) {
 		instance.reset();

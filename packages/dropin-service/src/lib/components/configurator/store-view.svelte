@@ -12,20 +12,24 @@
 		fullscreen: FullscreenLayout
 	};
 
-	let { buyNow, merchantName, pdpEnabled = true, resetKey = 0, children } = $props();
+	let {
+		buyNow,
+		merchantName,
+		pdpEnabled = true,
+		resetKey = 0,
+		language = 'en',
+		children
+	} = $props();
 
 	let layoutOpen = $state(false);
-	let prevResetKey = $state(0);
 
 	let LayoutComponent = $derived(LAYOUT_MAP[buyNow.layoutType] || FullscreenLayout);
 
 	$effect(() => {
-		if (resetKey !== prevResetKey) {
-			prevResetKey = resetKey;
-			layoutOpen = false;
-			buyNow.goToPdp();
-			buyNow.isLayoutActive = true;
-		}
+		resetKey;
+		layoutOpen = false;
+		buyNow.goToPdp();
+		buyNow.isLayoutActive = true;
 	});
 
 	function handleBuyNow() {
@@ -49,7 +53,7 @@
 </script>
 
 <div class="relative size-full overflow-hidden">
-	<MockArticlePage {merchantName} {pdpEnabled} onBuyNow={handleBuyNow} />
+	<MockArticlePage {merchantName} {pdpEnabled} {language} onBuyNow={handleBuyNow} />
 
 	{#if layoutOpen}
 		<LayoutComponent

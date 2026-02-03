@@ -57,7 +57,7 @@
 	});
 </script>
 
-<div class="@container relative min-h-full w-full">
+<div class="@container relative flex min-h-full w-full flex-col @3xl:block">
 	<div
 		class="bg-background absolute inset-0 z-[-2] hidden w-1/2 @3xl:block"
 		style="--color-background: {colors.background};"
@@ -65,17 +65,22 @@
 	<div class="absolute inset-0 left-1/2 z-[-1] hidden w-1/2 bg-white @3xl:block"></div>
 
 	{#if mobileHeader && !isLoading}
-		<div class="sticky top-0 z-120 w-full @3xl:hidden">
+		<div class="sticky top-0 z-120 w-full shrink-0 @3xl:hidden">
 			{@render mobileHeader()}
 		</div>
 	{/if}
 
-	<main class="relative @3xl:mx-auto @3xl:max-w-250 @3xl:py-12">
+	<main
+		class="relative flex min-h-0 flex-1 flex-col @3xl:mx-auto @3xl:block @3xl:max-w-250 @3xl:py-12"
+	>
 		<div class="absolute inset-y-0 left-1/2 hidden w-px bg-gray-200 @3xl:block"></div>
-		<form onsubmit={(e) => e.preventDefault()} class="flex h-full flex-col @3xl:flex-row">
+		<form
+			onsubmit={(e) => e.preventDefault()}
+			class="flex min-h-0 flex-1 flex-col @3xl:h-full @3xl:flex-row"
+		>
 			<section
 				bind:this={sectionA}
-				class="bg-background @3xl:sticky @3xl:top-12 @3xl:h-fit @3xl:w-1/2 @3xl:bg-transparent @3xl:px-4 @3xl:py-8 @4xl:px-14"
+				class="bg-background shrink-0 @3xl:sticky @3xl:top-12 @3xl:h-fit @3xl:w-1/2 @3xl:bg-transparent @3xl:px-4 @3xl:py-8 @4xl:px-14"
 			>
 				{#if isLoading}
 					<LayoutSkeleton variant="left" />
@@ -85,7 +90,7 @@
 			</section>
 			<section
 				bind:this={sectionB}
-				class="flex flex-col px-4 pt-6 @3xl:w-1/2 @3xl:py-8 @4xl:px-12"
+				class="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pt-6 @3xl:w-1/2 @3xl:overflow-y-visible @3xl:py-8 @4xl:px-12"
 			>
 				{#if isLoading}
 					<LayoutSkeleton variant="right" />

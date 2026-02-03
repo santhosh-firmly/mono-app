@@ -12,6 +12,12 @@ export function getMockProduct() {
 	};
 }
 
-export function formatPrice(value, currency) {
-	return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(value);
+const LANGUAGE_TAG_TO_LOCALE = {
+	en: 'en-US',
+	'pt-br': 'pt-BR'
+};
+
+export function formatPrice(value, currency, languageTag = 'en') {
+	const locale = LANGUAGE_TAG_TO_LOCALE[languageTag] || 'en-US';
+	return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(value);
 }

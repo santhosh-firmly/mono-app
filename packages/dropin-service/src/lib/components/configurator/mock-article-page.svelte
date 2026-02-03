@@ -1,7 +1,12 @@
 <script>
 	import { getMockProduct, formatPrice } from '$lib/utils/configurator/mock-product.js';
 
-	let { onBuyNow = () => {}, merchantName = 'Demo Store', pdpEnabled = true } = $props();
+	let {
+		onBuyNow = () => {},
+		merchantName = 'Demo Store',
+		pdpEnabled = true,
+		language = 'en'
+	} = $props();
 
 	const product = getMockProduct();
 </script>
@@ -67,7 +72,7 @@
 								<p class="mt-0.5 text-xs text-gray-500">{product.variant}</p>
 							{/if}
 							<p class="mt-2 text-base font-bold text-gray-900">
-								{formatPrice(product.price, product.currency)}
+								{formatPrice(product.price, product.currency, language)}
 							</p>
 						</div>
 						<button

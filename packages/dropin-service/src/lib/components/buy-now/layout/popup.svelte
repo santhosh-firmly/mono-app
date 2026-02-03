@@ -28,22 +28,27 @@
 	function handleBackdropClick() {
 		visible = false;
 	}
+
+	function handleKeydown(event) {
+		if (event.key === 'Escape') {
+			visible = false;
+		}
+	}
 </script>
 
 {#if visible}
 	<div
 		transition:fade={{ duration: 300, easing: cubicInOut }}
 		onoutroend={onClose}
-		class="bg-opacity-50 {positionClass} inset-0 z-40 flex size-full items-center justify-center bg-black"
+		class="{positionClass} inset-0 z-40 flex size-full items-center justify-center bg-black/50 backdrop-blur-sm"
 		onclick={handleBackdropClick}
-		onkeydown={() => {}}
+		onkeydown={handleKeydown}
 		role="button"
 		tabindex="-1"
 	>
 		<div
-			class="relative m-4 max-h-[90vh] min-h-[75vh] overflow-auto rounded-lg bg-white shadow-xl max-md:w-[100vh] md:w-[85vh]"
+			class="relative m-4 flex max-h-[90vh] min-h-[75vh] flex-col overflow-hidden rounded-lg bg-white shadow-xl max-md:w-[100vh] md:w-[85vh]"
 			onclick={(e) => e.stopPropagation()}
-			onkeydown={() => {}}
 			role="dialog"
 			tabindex="-1"
 		>

@@ -230,13 +230,6 @@ export function initializeConfigurator() {
 	return instance;
 }
 
-export function getConfigurator() {
-	if (!instance) {
-		throw new Error('Configurator not initialized');
-	}
-	return instance;
-}
-
 export function resetConfigurator() {
 	if (instance) {
 		instance.reset();

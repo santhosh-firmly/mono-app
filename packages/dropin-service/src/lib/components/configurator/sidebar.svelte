@@ -7,6 +7,13 @@
 	import PanelSelect from './panel-select.svelte';
 	import PanelColorPicker from './panel-color-picker.svelte';
 
+	/**
+	 * @typedef {Object} ConfiguratorSidebarProps
+	 * @property {Object} configurator - Configurator state with theme, features, requests
+	 * @property {boolean} [disabled] - Hide the sidebar
+	 */
+
+	/** @type {ConfiguratorSidebarProps} */
 	let { configurator, disabled = false } = $props();
 
 	let editingName = $state(false);

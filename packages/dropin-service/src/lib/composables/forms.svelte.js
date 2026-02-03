@@ -32,8 +32,6 @@ export function useCheckoutForm(form = {}) {
 	let zipCode = useValidator(form.postal_code, isValidZipCode);
 	let phoneNumber = useValidator(form.phone, isValidPhone);
 
-	let startedFullFilled = $state(Object.keys(form).length > 0);
-
 	let isFullFilled = $derived(
 		[
 			email.filled,
@@ -110,7 +108,7 @@ export function useCheckoutForm(form = {}) {
 	}
 
 	/**
-	 * Sets form values from external data (e.g., PayPal shipping info)
+	 * Sets form values from external data.
 	 * @param {Object} data - The data to populate the form with
 	 * @param {string} [data.email] - Email address
 	 * @param {string} [data.first_name] - First name
@@ -133,7 +131,6 @@ export function useCheckoutForm(form = {}) {
 		if (data.state_or_province) stateOrProvince.value = data.state_or_province;
 		if (data.postal_code) zipCode.value = data.postal_code;
 		if (data.phone) phoneNumber.value = data.phone;
-		startedFullFilled = true;
 	}
 
 	return {
@@ -169,9 +166,6 @@ export function useCheckoutForm(form = {}) {
 		},
 		get errors() {
 			return errors;
-		},
-		get startedFullFilled() {
-			return startedFullFilled;
 		},
 		resetAddress,
 		validate,

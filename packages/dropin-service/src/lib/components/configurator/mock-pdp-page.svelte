@@ -1,7 +1,7 @@
 <script>
 	import { getMockProduct, formatPrice } from '$lib/utils/configurator/mock-product.js';
 
-	let { onBuyNow = () => {} } = $props();
+	let { onBuyNow = () => {}, language = 'en' } = $props();
 
 	const sizes = ['S', 'M', 'L', 'XL'];
 	const colors = [
@@ -49,7 +49,7 @@
 							<p class="mt-1 text-sm text-gray-500">{product.variant}</p>
 						{/if}
 						<p class="mt-3 text-xl font-bold text-gray-900">
-							{formatPrice(product.price, product.currency)}
+							{formatPrice(product.price, product.currency, language)}
 						</p>
 					</div>
 
