@@ -75,13 +75,13 @@
 						{#if number.length === 0}
 							<div class="hidden items-center gap-2 @3xl:flex">
 								<!-- Show all card icons when input is empty -->
-								<Icon icon="fa6-brands:cc-visa" />
-								<Icon icon="fa6-brands:cc-mastercard" />
-								<Icon icon="fa6-brands:cc-jcb" />
-								<Icon icon="fa6-brands:cc-amex" />
+								<Icon class="text-border" icon="fa6-brands:cc-visa" />
+								<Icon class="text-border" icon="fa6-brands:cc-mastercard" />
+								<Icon class="text-border" icon="fa6-brands:cc-jcb" />
+								<Icon class="text-border" icon="fa6-brands:cc-amex" />
 							</div>
 						{:else}
-							<IconCcBrand first4={number.slice(0, 4)} />
+							<IconCcBrand class="text-border" first4={number.slice(0, 4)} />
 						{/if}
 					</div>
 				{/snippet}
@@ -107,7 +107,7 @@
 					bind:value={verificationCode}
 				>
 					{#snippet suffix()}
-						<Icon icon="ph:credit-card-duotone" class="text-muted text-3xl" />
+						<Icon icon="ph:credit-card-duotone" class="text-border text-3xl" />
 					{/snippet}
 				</UiInput>
 			</UiGroup>

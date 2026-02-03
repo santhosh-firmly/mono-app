@@ -72,11 +72,18 @@
 					isSelected={selectedShippingMethod === method.sku ||
 						selectedShippingMethod?.sku === method.sku}
 					onSelect={() => handleSelect(method.sku)}
-					class="min-h-10 px-3 py-2.5"
+					class="min-h-10 px-2.5 py-2"
 					disabled={isUpdating}
 				>
-					<span class="flex w-full items-center justify-between text-sm font-bold">
-						<p>{method.description}</p>
+					<span
+						class="flex min-h-8.75 w-full items-center justify-between text-sm font-bold"
+					>
+						<span>
+							<p>{method.description}</p>
+							{#if method.estimated_delivery}
+								<p class="text-muted text-xs">{method.estimated_delivery}</p>
+							{/if}
+						</span>
 						<p>{formatShippingPrice(method.price)}</p>
 					</span>
 				</UiRadio>

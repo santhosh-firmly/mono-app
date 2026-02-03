@@ -20,11 +20,11 @@
 	@reference '../../../app.css';
 
 	.input-group:not(.horizontal) {
-		@apply grid grid-cols-1 flex-col gap-y-px rounded-lg border border-gray-300 bg-gray-300 p-0;
+		@apply grid grid-cols-1 flex-col gap-y-px rounded-lg border border-gray-300 bg-gray-300 p-0 shadow-sm;
 	}
 
 	.input-group.horizontal {
-		@apply grid grid-cols-2 gap-x-px bg-gray-300;
+		@apply grid grid-cols-2 gap-x-px rounded-lg bg-gray-300;
 	}
 
 	.input-group :global(> *) {

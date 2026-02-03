@@ -29,6 +29,7 @@
 				errorMessage={form.email?.error}
 				disabled={isValidating}
 				autocomplete="shipping email"
+				class="shadow-sm"
 			/>
 			{#if isValidating}
 				<div class="absolute top-1/2 right-3 -translate-y-1/2 transform">

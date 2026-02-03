@@ -80,7 +80,7 @@
 
 <div
 	use:clickOutside={{ callback: clickoutside }}
-	class={['input-container', { 'input-container--error': errorMessage }]}
+	class={['input-container', { 'input-container--error': errorMessage }, props.class]}
 >
 	{#if prefix}
 		<div class="mr-0.5 ml-2">

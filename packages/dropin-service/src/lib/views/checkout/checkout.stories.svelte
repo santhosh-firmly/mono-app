@@ -44,13 +44,14 @@
 	const SHIPPING_METHOD_OPTIONS = [
 		{
 			sku: 'standard',
-			description: 'Standard Shipping (5-7 days)',
-			price: { currency: 'USD', value: 5.99, number: 599, symbol: '$' }
+			name: 'Standard Shipping',
+			description: '3-5 business days',
+			price: { value: 5.99, formatted: '$5.99' }
 		},
 		{
 			sku: 'express',
-			description: 'Express Shipping (2-3 days)',
-			price: { currency: 'USD', value: 12.99, number: 1299, symbol: '$' }
+			name: 'Express Shipping',
+			price: { value: 12.99, formatted: '$12.99' }
 		}
 	];
 

@@ -241,13 +241,18 @@ class Checkout {
 		this.pending = { ...this.pending, [action]: value };
 	}
 
+	#initializeOrUpdateForm(existingForm, info) {
+		if (!existingForm) return useCheckoutForm(info);
+		const hasInfo = Object.keys(info).length > 0;
+		if (hasInfo && !existingForm.startedFullFilled) {
+			existingForm.setValues(info);
+		}
+		return existingForm;
+	}
+
 	initializeForms(shippingInfo = {}, billingInfo = {}) {
-		if (!this.#shippingForm) {
-			this.#shippingForm = useCheckoutForm(shippingInfo);
-		}
-		if (!this.#billingForm) {
-			this.#billingForm = useCheckoutForm(billingInfo);
-		}
+		this.#shippingForm = this.#initializeOrUpdateForm(this.#shippingForm, shippingInfo);
+		this.#billingForm = this.#initializeOrUpdateForm(this.#billingForm, billingInfo);
 	}
 
 	addC2PCards(cards) {
@@ -279,12 +284,6 @@ class Checkout {
 
 	goToThankYou() {
 		this.view = 'thankyou';
-	}
-
-	setError(message, code = '') {
-		this.view = 'error';
-		this.errorMessage = message;
-		this.errorCode = code;
 	}
 }
 
