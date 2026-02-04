@@ -1,9 +1,10 @@
 <script>
 	let {
-		currentPage = $bindable(1),
+		currentPage = 1,
 		totalItems,
 		itemsPerPage = 10,
 		siblingCount = 1,
+		onPageChange,
 		class: className,
 		...rest
 	} = $props();
@@ -45,7 +46,7 @@
 
 	function goToPage(page) {
 		if (page >= 1 && page <= totalPages) {
-			currentPage = page;
+			onPageChange?.(page);
 		}
 	}
 </script>
