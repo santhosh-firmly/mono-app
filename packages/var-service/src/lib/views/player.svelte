@@ -24,7 +24,7 @@
 						>← Back</Button
 					>
 					<h1 class="mb-1 font-serif text-2xl">{sessionData.metadata.sessionId}</h1>
-					<p class="text-muted mb-3 text-sm" title={sessionData.metadata.url}>
+					<p class="text-muted mb-3 truncate text-sm" title={sessionData.metadata.url}>
 						{sessionData.metadata.url}
 					</p>
 					<SessionDetails session={sessionData.metadata} />
