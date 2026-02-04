@@ -49,10 +49,14 @@
 	{/if}
 	<span>
 		{session.appName || 'Unknown'}
-		{#if session.status !== 'buffered' && session.status !== 'recording'}
-			· {session.eventCount} events · {formatSize(session.eventCount)} · {formatDuration(
-				session.duration
-			)} · {formatDate(session.timestamp)}
+		{#if session.eventCount}
+			· {session.eventCount} events · {formatSize(session.eventCount)}
+		{/if}
+		{#if session.duration}
+			· {formatDuration(session.duration)}
+		{/if}
+		{#if session.timestamp}
+			· {formatDate(session.timestamp)}
 		{/if}
 	</span>
 </div>

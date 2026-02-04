@@ -37,11 +37,13 @@ export async function GET({ url, cookies, platform }) {
 	if (response.ok) {
 		const userDetails = await response.json();
 
+		const isSecure = url.hostname !== 'localhost';
+
 		cookies.set(platform.env.FIRMLY_AUTH_COOKIE, userDetails.id_token, {
 			path: '/',
 			maxAge: 60 * 60 * 8, // 8 hours
 			httpOnly: true,
-			secure: url.protocol === 'https:',
+			secure: isSecure,
 			sameSite: 'lax'
 		});
 
