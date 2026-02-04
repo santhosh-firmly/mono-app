@@ -727,10 +727,22 @@ describe('checkout state - initialization', () => {
 			cleanup();
 		});
 
-		it('does not update existing form when already started full filled', () => {
+		it('does not update existing form when already fully filled', () => {
 			const cleanup = $effect.root(() => {
 				const checkout = initializeCheckout({ domain: 'test.com' });
-				checkout.initializeForms({ email: 'original@example.com', first_name: 'John' }, {});
+				checkout.initializeForms(
+					{
+						email: 'original@example.com',
+						first_name: 'John',
+						last_name: 'Doe',
+						address1: '123 Main St',
+						city: 'New York',
+						state_or_province: 'NY',
+						postal_code: '10001',
+						phone: '5551234567'
+					},
+					{}
+				);
 				flushSync();
 
 				checkout.initializeForms({ email: 'new@example.com' }, {});
@@ -752,6 +764,56 @@ describe('checkout state - initialization', () => {
 				flushSync();
 
 				expect(checkout.shippingForm.email.value).toBe(originalEmail);
+			});
+			cleanup();
+		});
+	});
+
+	describe('shippingPreFilled', () => {
+		it('is false when no shipping info is provided', () => {
+			const cleanup = $effect.root(() => {
+				const checkout = initializeCheckout({ domain: 'test.com' });
+				checkout.initializeForms({}, {});
+				flushSync();
+
+				expect(checkout.shippingPreFilled).toBe(false);
+			});
+			cleanup();
+		});
+
+		it('is true when shipping info is provided on initialization', () => {
+			const cleanup = $effect.root(() => {
+				const checkout = initializeCheckout({ domain: 'test.com' });
+				checkout.initializeForms({ email: 'test@example.com' }, {});
+				flushSync();
+
+				expect(checkout.shippingPreFilled).toBe(true);
+			});
+			cleanup();
+		});
+
+		it('does not set shippingPreFilled when user already filled the form', () => {
+			const cleanup = $effect.root(() => {
+				const checkout = initializeCheckout({ domain: 'test.com' });
+				checkout.initializeForms({}, {});
+				flushSync();
+
+				checkout.shippingForm.setValues({
+					email: 'user@example.com',
+					first_name: 'John',
+					last_name: 'Doe',
+					address1: '123 Main St',
+					city: 'New York',
+					state_or_province: 'NY',
+					postal_code: '10001',
+					phone: '5551234567'
+				});
+				flushSync();
+
+				checkout.initializeForms({ email: 'user@example.com' }, {});
+				flushSync();
+
+				expect(checkout.shippingPreFilled).toBe(false);
 			});
 			cleanup();
 		});

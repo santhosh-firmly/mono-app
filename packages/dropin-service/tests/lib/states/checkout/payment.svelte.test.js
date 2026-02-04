@@ -875,7 +875,8 @@ describe('checkout state - payment and order', () => {
 					'test.com',
 					{
 						wallet: 'amex',
-						credit_card_id: 'c2p123'
+						credit_card_id: 'c2p123',
+						card_art: ''
 					},
 					null
 				);
@@ -912,7 +913,8 @@ describe('checkout state - payment and order', () => {
 					'test.com',
 					{
 						wallet: 'discover',
-						credit_card_id: 'pan456'
+						credit_card_id: 'pan456',
+						card_art: ''
 					},
 					null
 				);
@@ -947,7 +949,8 @@ describe('checkout state - payment and order', () => {
 					'test.com',
 					{
 						wallet: 'mastercard',
-						credit_card_id: 'c2p789'
+						credit_card_id: 'c2p789',
+						card_art: ''
 					},
 					null
 				);

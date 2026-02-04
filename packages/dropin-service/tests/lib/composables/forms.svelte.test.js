@@ -54,17 +54,6 @@ describe('useCheckoutForm', () => {
 			});
 			cleanup();
 		});
-
-		it('sets startedFullFilled when form data is provided', () => {
-			const cleanup = $effect.root(() => {
-				const emptyForm = useCheckoutForm();
-				expect(emptyForm.startedFullFilled).toBe(false);
-
-				const filledForm = useCheckoutForm({ email: 'test@test.com' });
-				expect(filledForm.startedFullFilled).toBe(true);
-			});
-			cleanup();
-		});
 	});
 
 	describe('isFullFilled', () => {
@@ -225,23 +214,6 @@ describe('useCheckoutForm', () => {
 				expect(form.stateOrProvince.value).toBe('MA');
 				expect(form.zipCode.value).toBe('02101');
 				expect(form.phoneNumber.value).toBe('5559876543');
-			});
-			cleanup();
-		});
-
-		it('sets startedFullFilled to true', () => {
-			const cleanup = $effect.root(() => {
-				const form = useCheckoutForm();
-
-				expect(form.startedFullFilled).toBe(false);
-
-				form.setValues({
-					email: 'test@example.com'
-				});
-
-				flushSync();
-
-				expect(form.startedFullFilled).toBe(true);
 			});
 			cleanup();
 		});

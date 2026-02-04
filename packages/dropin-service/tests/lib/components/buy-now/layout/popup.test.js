@@ -33,7 +33,7 @@ describe('BuyNow Popup Layout', () => {
 		});
 	});
 
-	it('has semi-transparent background overlay', async () => {
+	it('has semi-transparent background overlay with blur', async () => {
 		const { container } = render(Popup, {
 			props: {
 				children: () => {}
@@ -41,8 +41,9 @@ describe('BuyNow Popup Layout', () => {
 		});
 
 		await waitFor(() => {
-			const overlayDiv = container.querySelector('.bg-black');
+			const overlayDiv = container.querySelector('.bg-black\\/50');
 			expect(overlayDiv).toBeInTheDocument();
+			expect(overlayDiv).toHaveClass('backdrop-blur-sm');
 		});
 	});
 
@@ -98,7 +99,7 @@ describe('BuyNow Popup Layout', () => {
 		});
 	});
 
-	it('has overflow auto for scrollable content', async () => {
+	it('has overflow hidden with flex layout for content containment', async () => {
 		const { container } = render(Popup, {
 			props: {
 				children: () => {}
@@ -106,8 +107,11 @@ describe('BuyNow Popup Layout', () => {
 		});
 
 		await waitFor(() => {
-			const scrollDiv = container.querySelector('.overflow-auto');
-			expect(scrollDiv).toBeInTheDocument();
+			const dialogDiv = container.querySelector('[role="dialog"]');
+			expect(dialogDiv).toBeInTheDocument();
+			expect(dialogDiv).toHaveClass('overflow-hidden');
+			expect(dialogDiv).toHaveClass('flex');
+			expect(dialogDiv).toHaveClass('flex-col');
 		});
 	});
 });

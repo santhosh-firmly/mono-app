@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { CHECKOUT_FLOWS, getAvailableFlows } from '$lib/utils/configurator/checkout-flows.js';
+import {
+	CHECKOUT_FLOWS,
+	BUY_NOW_FLOWS,
+	getAvailableCheckoutFlows,
+	getAvailableBuyNowFlows,
+	getAllFlows
+} from '$lib/utils/configurator/checkout-flows.js';
 
 describe('checkout-flows', () => {
 	describe('CHECKOUT_FLOWS', () => {
@@ -112,6 +118,15 @@ describe('checkout-flows', () => {
 
 			expect(lastStep.action).toBe('waitForText');
 			expect(lastStep.text).toBe('Thank You!');
+		});
+
+		it.each(flowIds)('%s does not start with a buy-now button click', (flowId) => {
+			const { steps } = CHECKOUT_FLOWS[flowId];
+			const firstStep = steps[0];
+
+			const hasBuyNowSelector =
+				firstStep.selector && firstStep.selector.includes('buy-now-button');
+			expect(hasBuyNowSelector).toBeFalsy();
 		});
 	});
 
@@ -234,16 +249,16 @@ describe('checkout-flows', () => {
 		});
 	});
 
-	describe('getAvailableFlows', () => {
-		it('returns array of all flows', () => {
-			const flows = getAvailableFlows();
+	describe('getAvailableCheckoutFlows', () => {
+		it('returns array of all checkout flows', () => {
+			const flows = getAvailableCheckoutFlows();
 
 			expect(Array.isArray(flows)).toBe(true);
 			expect(flows.length).toBe(Object.keys(CHECKOUT_FLOWS).length);
 		});
 
 		it('returns flows with correct structure', () => {
-			const flows = getAvailableFlows();
+			const flows = getAvailableCheckoutFlows();
 
 			flows.forEach((flow) => {
 				expect(flow.id).toBeDefined();
@@ -254,8 +269,8 @@ describe('checkout-flows', () => {
 			});
 		});
 
-		it('includes all defined flows', () => {
-			const flows = getAvailableFlows();
+		it('includes all defined checkout flows', () => {
+			const flows = getAvailableCheckoutFlows();
 			const flowIds = flows.map((f) => f.id);
 
 			expect(flowIds).toContain('simple');
@@ -263,6 +278,160 @@ describe('checkout-flows', () => {
 			expect(flowIds).toContain('clickToPay');
 			expect(flowIds).toContain('clickToPayWithCvv');
 			expect(flowIds).toContain('paypal');
+		});
+	});
+});
+
+describe('buy-now-flows', () => {
+	describe('BUY_NOW_FLOWS', () => {
+		it('has simpleBuyNow flow defined', () => {
+			expect(BUY_NOW_FLOWS.simpleBuyNow).toBeDefined();
+			expect(BUY_NOW_FLOWS.simpleBuyNow.id).toBe('simpleBuyNow');
+			expect(BUY_NOW_FLOWS.simpleBuyNow.type).toBe('buyNow');
+			expect(BUY_NOW_FLOWS.simpleBuyNow.pdpEnabled).toBe(false);
+		});
+
+		it('has buyNowWithPdp flow defined', () => {
+			expect(BUY_NOW_FLOWS.buyNowWithPdp).toBeDefined();
+			expect(BUY_NOW_FLOWS.buyNowWithPdp.id).toBe('buyNowWithPdp');
+			expect(BUY_NOW_FLOWS.buyNowWithPdp.type).toBe('buyNow');
+			expect(BUY_NOW_FLOWS.buyNowWithPdp.pdpEnabled).toBe(true);
+		});
+	});
+
+	describe('flow structure', () => {
+		const flowIds = Object.keys(BUY_NOW_FLOWS);
+
+		it.each(flowIds)('%s has required properties', (flowId) => {
+			const flow = BUY_NOW_FLOWS[flowId];
+
+			expect(flow.id).toBe(flowId);
+			expect(flow.name).toBeDefined();
+			expect(flow.description).toBeDefined();
+			expect(flow.type).toBe('buyNow');
+			expect(typeof flow.pdpEnabled).toBe('boolean');
+			expect(flow.featureConfig).toBeDefined();
+			expect(Array.isArray(flow.steps)).toBe(true);
+		});
+
+		it.each(flowIds)('%s has valid feature config', (flowId) => {
+			const { featureConfig } = BUY_NOW_FLOWS[flowId];
+
+			expect(typeof featureConfig.promoCodes).toBe('boolean');
+			expect(typeof featureConfig.paypal).toBe('boolean');
+			expect(typeof featureConfig.clickToPay).toBe('boolean');
+		});
+
+		it.each(flowIds)('%s starts with article button click', (flowId) => {
+			const flow = BUY_NOW_FLOWS[flowId];
+			const firstStep = flow.steps[0];
+			const expectedTestId = flow.pdpEnabled ? 'see-product-button' : 'buy-now-button';
+
+			expect(firstStep.action).toBe('click');
+			expect(firstStep.selector).toContain(expectedTestId);
+		});
+
+		it.each(flowIds)('%s ends with waitForText for Thank You', (flowId) => {
+			const { steps } = BUY_NOW_FLOWS[flowId];
+			const lastStep = steps[steps.length - 1];
+
+			expect(lastStep.action).toBe('waitForText');
+			expect(lastStep.text).toBe('Thank You!');
+		});
+	});
+
+	describe('simpleBuyNow flow', () => {
+		const flow = BUY_NOW_FLOWS.simpleBuyNow;
+
+		it('does not have PDP enabled', () => {
+			expect(flow.pdpEnabled).toBe(false);
+		});
+
+		it('does not navigate to PDP', () => {
+			const pdpSteps = flow.steps.filter((s) => s.selector?.includes('see-product-button'));
+			expect(pdpSteps).toHaveLength(0);
+		});
+
+		it('goes directly to checkout after article button click', () => {
+			const shippingFields = flow.steps.filter(
+				(s) => s.action === 'type' && s.selector?.includes('shipping')
+			);
+			const cardNumber = flow.steps.find((s) => s.selector?.includes('4111'));
+
+			expect(shippingFields.length).toBeGreaterThan(0);
+			expect(cardNumber).toBeDefined();
+		});
+	});
+
+	describe('buyNowWithPdp flow', () => {
+		const flow = BUY_NOW_FLOWS.buyNowWithPdp;
+
+		it('has PDP enabled', () => {
+			expect(flow.pdpEnabled).toBe(true);
+		});
+
+		it('clicks PDP buy-now button after seeing product', () => {
+			const pdpBuyNowStep = flow.steps.find(
+				(s) => s.action === 'click' && s.selector?.includes('buy-now-button')
+			);
+			expect(pdpBuyNowStep).toBeDefined();
+		});
+
+		it('waits for PDP page before clicking buy-now', () => {
+			const waitForPdp = flow.steps.find(
+				(s) => s.action === 'waitForElement' && s.selector?.includes('buy-now-button')
+			);
+			const buyNowIndex = flow.steps.findIndex(
+				(s) => s.action === 'click' && s.selector?.includes('buy-now-button')
+			);
+			const waitForPdpIndex = flow.steps.indexOf(waitForPdp);
+
+			expect(waitForPdp).toBeDefined();
+			expect(waitForPdpIndex).toBeLessThan(buyNowIndex);
+		});
+	});
+
+	describe('getAvailableBuyNowFlows', () => {
+		it('returns array of all buy-now flows', () => {
+			const flows = getAvailableBuyNowFlows();
+
+			expect(Array.isArray(flows)).toBe(true);
+			expect(flows.length).toBe(Object.keys(BUY_NOW_FLOWS).length);
+		});
+
+		it('returns only buy-now typed flows', () => {
+			const flows = getAvailableBuyNowFlows();
+
+			flows.forEach((flow) => {
+				expect(flow.type).toBe('buyNow');
+			});
+		});
+
+		it('includes all defined buy-now flows', () => {
+			const flows = getAvailableBuyNowFlows();
+			const flowIds = flows.map((f) => f.id);
+
+			expect(flowIds).toContain('simpleBuyNow');
+			expect(flowIds).toContain('buyNowWithPdp');
+		});
+	});
+
+	describe('getAllFlows', () => {
+		it('returns combined checkout and buy-now flows', () => {
+			const all = getAllFlows();
+			const checkoutCount = Object.keys(CHECKOUT_FLOWS).length;
+			const buyNowCount = Object.keys(BUY_NOW_FLOWS).length;
+
+			expect(all.length).toBe(checkoutCount + buyNowCount);
+		});
+
+		it('contains both checkout and buy-now flow ids', () => {
+			const all = getAllFlows();
+			const ids = all.map((f) => f.id);
+
+			expect(ids).toContain('simple');
+			expect(ids).toContain('simpleBuyNow');
+			expect(ids).toContain('buyNowWithPdp');
 		});
 	});
 });

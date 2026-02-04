@@ -10,10 +10,8 @@
 	import { initializeMerchant } from '$lib/states/merchant.svelte.js';
 	import { getNotices } from '$lib/states/notices.svelte.js';
 
-	import Checkout from '$lib/views/checkout/index.svelte';
-	import ErrorView from '$lib/views/error.svelte';
+	import BuyNow from '$lib/views/buy-now/index.svelte';
 	import PdpSkeleton from '$lib/components/buy-now/skeleton.svelte';
-	import PdpHeader from '$lib/components/buy-now/header.svelte';
 
 	let { data } = $props();
 
@@ -30,11 +28,6 @@
 	let pdp = initializePdp();
 	let merchant = initializeMerchant(untrack(() => data.merchantPresentation));
 	let notices = getNotices();
-
-	let layoutColors = $derived({
-		primary: merchant?.primaryColor || '#ffffff',
-		action: merchant?.actionColor || '#333333'
-	});
 
 	onMount(() => {
 		pdp.initialize(data, version, $page.url.searchParams);
@@ -53,19 +46,18 @@
 	});
 </script>
 
-{#if buyNow.mode === 'error'}
-	<ErrorView
-		message={buyNow.errorMessage}
-		errorCode={buyNow.errorCode}
-		colors={layoutColors}
-		onClose={() => buyNow.close()}
-	/>
-{:else if buyNow.mode === 'pdp'}
-	<div class="flex h-full flex-col">
-		<PdpHeader
-			partnerPresentation={data.partnerPresentation}
-			onBackClick={() => buyNow.close()}
-		/>
+<BuyNow
+	{checkout}
+	{c2p}
+	{paypal}
+	{merchant}
+	notices={notices.notices}
+	partnerPresentation={data.partnerPresentation}
+	onGoBack={() => pdp.goBack()}
+	onDismissNotice={(id) => notices.dismiss(id)}
+	isFullscreen={buyNow.layoutType === 'fullscreen'}
+>
+	{#snippet pdpContent()}
 		{#if !pdp.showIframe || pdp.iframeVisibility === 'hidden'}
 			<PdpSkeleton />
 		{/if}
@@ -79,17 +71,5 @@
 				]}
 			></iframe>
 		{/if}
-	</div>
-{:else if buyNow.mode === 'checkout'}
-	<Checkout
-		{checkout}
-		{c2p}
-		{paypal}
-		{merchant}
-		notices={notices.notices}
-		onGoBack={() => pdp.goBack()}
-		onClose={() => buyNow.close()}
-		onDismissNotice={(id) => notices.dismiss(id)}
-		isFullscreen={buyNow.layoutType === 'fullscreen'}
-	/>
-{/if}
+	{/snippet}
+</BuyNow>

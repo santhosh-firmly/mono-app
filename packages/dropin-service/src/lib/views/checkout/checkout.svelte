@@ -79,9 +79,7 @@
 		background: merchant?.primaryColor || '#ffffff'
 	});
 
-	let isShippingCollapsed = $derived(
-		!forceExpandShipping && checkout.shippingForm?.startedFullFilled
-	);
+	let isShippingCollapsed = $derived(!forceExpandShipping && checkout.shippingPreFilled);
 	let isShippingMethodCollapsed = $derived(
 		!forceExpandShippingMethod && checkout.hadInitialShippingMethod
 	);
@@ -153,6 +151,7 @@
 	$effect(() => {
 		if (paypal?.isAuthorized && checkout.cart?.shipping_info) {
 			checkout.shippingForm?.setValues(checkout.cart.shipping_info);
+			checkout.shippingPreFilled = true;
 			if (checkout.cart?.billing_info) {
 				checkout.billingForm?.setValues(checkout.cart.billing_info);
 			}
@@ -609,7 +608,7 @@
 
 <div
 	bind:this={layoutContainerRef}
-	class="relative flex h-full flex-col overflow-hidden"
+	class="relative flex min-h-0 flex-1 flex-col overflow-hidden"
 	class:overflow-hidden={(c2p?.showModal || checkout.showPaymentCvvConfirmation) &&
 		useAbsoluteModalPosition}
 >

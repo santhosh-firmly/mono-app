@@ -13,10 +13,18 @@
 	 * @property {import('svelte').Snippet} [children] - Sidebar content
 	 * @property {Function} [onClose] - Called when sidebar closes
 	 * @property {boolean} [visible] - Two-way bindable visibility state
+	 * @property {boolean} [useAbsolutePosition] - Use absolute instead of fixed positioning
 	 */
 
 	/** @type {SidebarLayoutProps} */
-	let { children, onClose = () => {}, visible = $bindable(true) } = $props();
+	let {
+		children,
+		onClose = () => {},
+		visible = $bindable(true),
+		useAbsolutePosition = false
+	} = $props();
+
+	let positionClass = $derived(useAbsolutePosition ? 'absolute' : 'fixed');
 
 	function handleOutsideClick() {
 		visible = false;
@@ -27,12 +35,12 @@
 	});
 </script>
 
-<div class="fixed inset-0 z-40 flex size-full justify-end">
+<div class="{positionClass} inset-0 z-40 flex size-full justify-end">
 	{#if visible}
 		<div
 			transition:fade={{ duration: TRANSITION_DURATION, easing: cubicInOut }}
 			onoutroend={onClose}
-			class="fixed inset-0 z-40 flex size-full justify-end bg-black/50"
+			class="{positionClass} inset-0 z-40 flex size-full justify-end bg-black/50"
 		>
 			<div
 				class="relative h-full overflow-y-auto bg-white shadow-xl max-sm:w-full sm:w-110"

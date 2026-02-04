@@ -104,6 +104,7 @@ class Checkout {
 
 	#shippingForm = null;
 	#billingForm = null;
+	#shippingPreFilled = $state(false);
 	#initialShippingMethodChecked = false;
 	#hadInitialShippingMethod = false;
 	#initialCardChecked = false;
@@ -115,6 +116,14 @@ class Checkout {
 
 	get billingForm() {
 		return this.#billingForm;
+	}
+
+	get shippingPreFilled() {
+		return this.#shippingPreFilled;
+	}
+
+	set shippingPreFilled(value) {
+		this.#shippingPreFilled = value;
 	}
 
 	totalPrice = $derived(this.cart?.total?.value || 0);
@@ -244,15 +253,22 @@ class Checkout {
 	#initializeOrUpdateForm(existingForm, info) {
 		if (!existingForm) return useCheckoutForm(info);
 		const hasInfo = Object.keys(info).length > 0;
-		if (hasInfo && !existingForm.startedFullFilled) {
+		if (hasInfo && !existingForm.isFullFilled) {
 			existingForm.setValues(info);
 		}
 		return existingForm;
 	}
 
 	initializeForms(shippingInfo = {}, billingInfo = {}) {
+		const hasShippingInfo = Object.keys(shippingInfo).length > 0;
+		const wasAlreadyFilled = this.#shippingForm?.isFullFilled;
+
 		this.#shippingForm = this.#initializeOrUpdateForm(this.#shippingForm, shippingInfo);
 		this.#billingForm = this.#initializeOrUpdateForm(this.#billingForm, billingInfo);
+
+		if (hasShippingInfo && !this.#shippingPreFilled && !wasAlreadyFilled) {
+			this.#shippingPreFilled = true;
+		}
 	}
 
 	addC2PCards(cards) {

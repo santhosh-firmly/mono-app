@@ -12,7 +12,7 @@
 	import { initializeMerchant, resetMerchant } from '$lib/states/merchant.svelte.js';
 	import { initializeNotices, resetNotices } from '$lib/states/notices.svelte.js';
 	import { initializeClickToPay, resetClickToPay } from '$lib/states/click-to-pay.svelte.js';
-	import { initializeBuyNow, resetBuyNow } from '$lib/states/buy-now.svelte.js';
+	import { initializeBuyNow, getBuyNow, resetBuyNow } from '$lib/states/buy-now.svelte.js';
 	import { getCartForState, mockCartWithShipping } from '$lib/utils/mocks/mock-data.js';
 	import { config } from '$lib/utils/config.js';
 	import {
@@ -30,6 +30,9 @@
 
 	import Configurator from '$lib/views/configurator/index.svelte';
 	import Checkout from '$lib/views/checkout/index.svelte';
+	import BuyNow from '$lib/views/buy-now/index.svelte';
+	import StoreView from '$lib/components/configurator/store-view.svelte';
+	import MockPdpPage from '$lib/components/configurator/mock-pdp-page.svelte';
 
 	let configurator = $state(null);
 	let checkout = $state(null);
@@ -50,7 +53,18 @@
 	let currentCartState = $state(null);
 	let prevTheme = $state(null);
 
-	function reloadCheckout() {
+	let storeResetKey = $state(0);
+
+	let pdpEnabled = $derived(configurator?.pdpEnabled ?? false);
+
+	let isBuyNow = $derived(configurator?.product === 'buyNow');
+	let browserUrl = $derived(isBuyNow ? 'merchant-store.com/article' : 'checkout.firmly.ai');
+	let partnerPresentation = $derived({
+		displayName: configurator?.theme?.merchantName,
+		largeLogo: configurator?.theme?.largeLogo
+	});
+
+	function reloadCheckoutState() {
 		resetCheckout();
 		resetClickToPay();
 		resetPayPal();
@@ -98,13 +112,19 @@
 		}
 	}
 
-	function resetCheckoutFlow() {
+	function handleReload() {
 		if (flowPlayer) {
 			flowPlayer.stop();
 		}
 
 		configurator.reset();
-		reloadCheckout();
+
+		if (isBuyNow) {
+			getBuyNow().setupLayout(configurator.layoutType);
+			storeResetKey++;
+		}
+
+		reloadCheckoutState();
 	}
 
 	$effect(() => {
@@ -182,6 +202,30 @@
 	});
 
 	$effect(() => {
+		const layoutType = configurator?.layoutType;
+		if (!layoutType || !mounted) return;
+
+		untrack(() => {
+			const buyNow = getBuyNow();
+			buyNow.setupLayout(layoutType);
+			if (buyNow.mode === 'checkout' || buyNow.mode === 'pdp') {
+				storeResetKey++;
+			}
+		});
+	});
+
+	$effect(() => {
+		const enabled = configurator?.pdpEnabled;
+		if (enabled == null || !mounted) return;
+
+		untrack(() => {
+			if (isBuyNow) {
+				storeResetKey++;
+			}
+		});
+	});
+
+	$effect(() => {
 		if (flowPlayer && browserContentRef) {
 			flowPlayer.setContainer(browserContentRef);
 		}
@@ -212,33 +256,9 @@
 			resetNotices();
 			resetMerchant();
 
-			initializeBuyNow('checkout');
+			const buyNow = initializeBuyNow('pdp');
+			buyNow.setupLayout(configurator.layoutType);
 			notices = initializeNotices();
-
-			checkout = initializeCheckout({
-				domain: 'demo-store.com',
-				store: { logoUrl: null },
-				pending: { cart: false }
-			});
-
-			const baseCart =
-				currentCartState === 'prefilledShipping'
-					? mockCartWithShipping
-					: getCartForState('Blank');
-			const cart = {
-				...baseCart,
-				features: {
-					promo_codes: configurator.features.promoCodes,
-					paypal: configurator.features.paypal
-				},
-				shop_properties: {
-					paypal: configurator.features.paypal
-						? { sandbox: true, payment_enabled: true }
-						: null
-				}
-			};
-			checkout.setCart(cart);
-			checkout.initializeForms(cart.shipping_info || {}, cart.billing_info || {});
 
 			merchant = initializeMerchant({
 				theme: {
@@ -251,25 +271,24 @@
 				}
 			});
 
-			c2p = initializeClickToPay();
 			setConfiguratorForC2PMock(configurator);
-			if (configurator.features.clickToPay) {
-				enableC2PMock();
-				c2p.initialized = true;
-			}
-
-			paypal = initializePayPal();
 			setConfiguratorForPayPalMock(configurator);
-			if (configurator.features.paypal) {
-				enablePayPalMock();
-				paypal.initialized = true;
-			}
+			reloadCheckoutState();
 
 			flowPlayer = initializeFlowPlayer();
 			flowPlayer.setConfigurator(configurator);
-			flowPlayer.setOnReload(reloadCheckout);
+			flowPlayer.setOnReload(() => {
+				if (configurator.product === 'buyNow') {
+					getBuyNow().setupLayout(configurator.layoutType);
+					storeResetKey++;
+				}
+				reloadCheckoutState();
+			});
 			flowPlayer.setOnCartStateChange((state) => {
 				currentCartState = state;
+			});
+			flowPlayer.setOnPdpEnabledChange((enabled) => {
+				configurator.setPdpEnabled(enabled);
 			});
 
 			mounted = true;
@@ -307,19 +326,68 @@
 		<p class="text-sm">{error}</p>
 	</div>
 {:else if mounted && configurator && checkout && merchant}
-	<Configurator {configurator} {flowPlayer} onReload={resetCheckoutFlow} bind:browserContentRef>
+	<Configurator
+		{configurator}
+		{flowPlayer}
+		onReload={handleReload}
+		bind:browserContentRef
+		{browserUrl}
+	>
 		{#key configurator.language}
-			<Checkout
-				{checkout}
-				{c2p}
-				{paypal}
-				{merchant}
-				notices={notices?.notices}
-				isFullscreen={false}
-				onClose={() => resetCheckoutFlow()}
-				onDismissNotice={(id) => notices?.dismiss(id)}
-				useAbsoluteModalPosition={true}
-			/>
+			{#if isBuyNow}
+				<StoreView
+					buyNow={getBuyNow()}
+					merchantName={configurator.theme.merchantName}
+					{pdpEnabled}
+					resetKey={storeResetKey}
+					language={configurator.language}
+				>
+					{#if pdpEnabled}
+						<BuyNow
+							{checkout}
+							{c2p}
+							{paypal}
+							{merchant}
+							notices={notices?.notices}
+							{partnerPresentation}
+							isFullscreen={false}
+							onGoBack={() => getBuyNow().goToPdp()}
+							onDismissNotice={(id) => notices?.dismiss(id)}
+							useAbsoluteModalPosition={true}
+						>
+							{#snippet pdpContent()}
+								<MockPdpPage
+									language={configurator.language}
+									onBuyNow={() => getBuyNow().goToCheckout()}
+								/>
+							{/snippet}
+						</BuyNow>
+					{:else}
+						<Checkout
+							{checkout}
+							{c2p}
+							{paypal}
+							{merchant}
+							notices={notices?.notices}
+							isFullscreen={false}
+							onGoBack={() => getBuyNow().close()}
+							onClose={() => storeResetKey++}
+							onDismissNotice={(id) => notices?.dismiss(id)}
+							useAbsoluteModalPosition={true}
+						/>
+					{/if}
+				</StoreView>
+			{:else}
+				<Checkout
+					{checkout}
+					{c2p}
+					{paypal}
+					{merchant}
+					notices={notices?.notices}
+					isFullscreen={true}
+					onDismissNotice={(id) => notices?.dismiss(id)}
+				/>
+			{/if}
 		{/key}
 	</Configurator>
 {:else}
