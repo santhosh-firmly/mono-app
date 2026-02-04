@@ -1,3 +1,6 @@
+/**
+ * Sessions service for handling API requests to DVR service
+ */
 export default class SessionsService {
 	#dvrServiceUrl;
 	#authHeaders;

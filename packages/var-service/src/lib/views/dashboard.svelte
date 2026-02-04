@@ -6,7 +6,8 @@
 	import { DropdownMenu as DropdownMenuPrimitive } from 'bits-ui';
 	import { goto } from '$app/navigation';
 
-	let { sessions, totalItems, loading, error, auth, onSearch, onPageChange } = $props();
+	let { sessions, totalItems, currentPage, loading, error, auth, onSearch, onPageChange } =
+		$props();
 
 	function goToExample() {
 		goto('/example');
@@ -41,7 +42,7 @@
 		{/if}
 	</header>
 
-	<SessionList {sessions} {totalItems} {loading} {error} {onSearch} {onPageChange}>
+	<SessionList {sessions} {totalItems} {currentPage} {loading} {error} {onSearch} {onPageChange}>
 		{#snippet emptyState()}
 			<div>
 				<p class="text-muted mb-4 text-sm">No sessions yet</p>

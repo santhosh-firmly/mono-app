@@ -57,6 +57,7 @@
 <Dashboard
 	{sessions}
 	{totalItems}
+	{currentPage}
 	{loading}
 	{error}
 	auth={data.auth}

@@ -9,6 +9,7 @@
 	let {
 		sessions = [],
 		totalItems = 0,
+		currentPage = 1,
 		loading = false,
 		error = null,
 		searchable = true,
@@ -25,7 +26,6 @@
 	const DEBOUNCE_DELAY = 300;
 
 	let searchQuery = $state('');
-	let currentPage = $state(1);
 	let initialized = false;
 
 	const startIndex = $derived((currentPage - 1) * itemsPerPage);
@@ -40,7 +40,6 @@
 		}
 
 		const timer = setTimeout(() => {
-			currentPage = 1;
 			onSearch?.(searchQuery);
 		}, DEBOUNCE_DELAY);
 
@@ -48,7 +47,6 @@
 	});
 
 	function handlePageChange(page) {
-		currentPage = page;
 		onPageChange?.(page);
 	}
 
