@@ -1,7 +1,7 @@
 {
 	"name": "dash",
 	"private": true,
-	"version": "0.41.1",
+	"version": "0.42.0",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
@@ -28,7 +28,7 @@
 		"test": "npm run build-storybook && npm run test:storybook:run"
 	},
 	"devDependencies": {
-		"@firmly/eslint-config": "^0.41.1",
+		"@firmly/eslint-config": "^0.42.0",
 		"@storybook/addon-docs": "^8.0.0",
 		"@storybook/addon-links": "^8.0.0",
 		"@storybook/addon-svelte-csf": "^5.0.10",

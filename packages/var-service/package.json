@@ -1,7 +1,7 @@
 {
 	"name": "var-service",
 	"private": true,
-	"version": "0.41.1",
+	"version": "0.42.0",
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
@@ -23,7 +23,7 @@
 	"devDependencies": {
 		"@chromatic-com/storybook": "^3.2.5",
 		"@cloudflare/vite-plugin": "^0.1.17",
-		"@firmly/eslint-config": "^0.41.1",
+		"@firmly/eslint-config": "^0.42.0",
 		"@storybook/addon-essentials": "^8.6.4",
 		"@storybook/addon-interactions": "^8.6.4",
 		"@storybook/addon-postcss": "^2.0.0",
@@ -46,7 +46,7 @@
 		"wrangler": "*"
 	},
 	"dependencies": {
-		"@firmly/session-recorder": "^0.41.1",
+		"@firmly/session-recorder": "^0.42.0",
 		"bits-ui": "^2.14.2",
 		"jose": "^5.10.0",
 		"phosphor-svelte": "^3.0.1",
