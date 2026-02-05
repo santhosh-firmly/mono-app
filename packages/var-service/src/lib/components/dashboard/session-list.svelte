@@ -8,6 +8,8 @@
 
 	let {
 		sessions = [],
+		totalItems = 0,
+		currentPage = 1,
 		loading = false,
 		error = null,
 		searchable = true,
@@ -15,28 +17,38 @@
 		itemsPerPage = DEFAULT_ITEMS_PER_PAGE,
 		itemContent,
 		emptyState,
+		onSearch,
+		onPageChange,
 		class: className,
 		...rest
 	} = $props();
 
+	const DEBOUNCE_DELAY = 300;
+
 	let searchQuery = $state('');
-	let currentPage = $state(1);
+	let initialized = false;
 
-	const filteredSessions = $derived(() => {
-		if (!searchQuery) return sessions;
+	const startIndex = $derived((currentPage - 1) * itemsPerPage);
+	const endIndex = $derived(Math.min(startIndex + itemsPerPage, totalItems));
 
-		const query = searchQuery.toLowerCase();
-		return sessions.filter(
-			(session) =>
-				session.url.toLowerCase().includes(query) ||
-				session.sessionId.toLowerCase().includes(query)
-		);
+	$effect(() => {
+		searchQuery;
+
+		if (!initialized) {
+			initialized = true;
+			return;
+		}
+
+		const timer = setTimeout(() => {
+			onSearch?.(searchQuery);
+		}, DEBOUNCE_DELAY);
+
+		return () => clearTimeout(timer);
 	});
 
-	const totalItems = $derived(filteredSessions().length);
-	const startIndex = $derived((currentPage - 1) * itemsPerPage);
-	const endIndex = $derived(startIndex + itemsPerPage);
-	const currentSessions = $derived(filteredSessions().slice(startIndex, endIndex));
+	function handlePageChange(page) {
+		onPageChange?.(page);
+	}
 
 	function handlePlay(sessionId) {
 		goto(`/player/${sessionId}`);
@@ -67,7 +79,7 @@
 		<div class="flex flex-1 items-center justify-center py-12">
 			<p class="text-muted text-sm">{error}</p>
 		</div>
-	{:else if filteredSessions().length === 0}
+	{:else if sessions.length === 0}
 		<div class="flex flex-1 items-center justify-center py-24 text-center">
 			{#if searchQuery}
 				<p class="text-muted text-sm">No sessions found matching "{searchQuery}"</p>
@@ -80,7 +92,7 @@
 	{:else}
 		<div class="flex flex-1 flex-col">
 			<div class="flex-1 space-y-1">
-				{#each currentSessions as session (session.sessionId)}
+				{#each sessions as session (session.sessionId)}
 					{#if itemContent}
 						<SessionListItem {session} onPlay={handlePlay}>
 							{@render itemContent(session)}
@@ -94,9 +106,14 @@
 			{#if totalItems > PAGINATION_THRESHOLD}
 				<div class="border-border mt-6 flex items-center justify-between border-t pt-4">
 					<div class="text-muted text-xs">
-						Showing {startIndex + 1}–{Math.min(endIndex, totalItems)} of {totalItems}
+						Showing {startIndex + 1}–{endIndex} of {totalItems}
 					</div>
-					<Pagination bind:currentPage {totalItems} {itemsPerPage} />
+					<Pagination
+						{currentPage}
+						onPageChange={handlePageChange}
+						{totalItems}
+						{itemsPerPage}
+					/>
 				</div>
 			{/if}
 		</div>

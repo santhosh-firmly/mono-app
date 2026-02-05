@@ -25,13 +25,13 @@
 		type="button"
 		onclick={handlePlayRecord}
 		disabled={playerDisabled}
-		class={['block flex-1 text-left', { 'cursor-not-allowed': playerDisabled }]}
+		class={['block min-w-0 flex-1 text-left', { 'cursor-not-allowed': playerDisabled }]}
 	>
 		{#if children}
 			{@render children()}
 		{:else}
 			<h2 class="text-foreground mb-0.5 font-serif text-base">{session.sessionId}</h2>
-			<p class="text-muted mb-2 text-sm" title={session.url}>{session.url}</p>
+			<p class="text-muted mb-2 truncate text-sm" title={session.url}>{session.url}</p>
 			<SessionDetails {session} />
 		{/if}
 	</button>

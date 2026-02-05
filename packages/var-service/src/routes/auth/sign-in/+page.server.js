@@ -1,11 +1,13 @@
 export async function load({ platform, url, cookies }) {
 	const state = crypto.randomUUID();
 
+	const isSecure = url.hostname !== 'localhost';
+
 	cookies.set('oauth_state', state, {
 		path: '/',
 		maxAge: 60 * 10,
 		httpOnly: true,
-		secure: url.protocol === 'https:',
+		secure: isSecure,
 		sameSite: 'lax'
 	});
 

@@ -2,35 +2,31 @@
  * Sessions service for handling API requests to DVR service
  */
 export default class SessionsService {
+	#dvrServiceUrl;
+	#authHeaders;
+
 	constructor(dvrServiceUrl, authToken) {
-		this.dvrServiceUrl = dvrServiceUrl;
-		this.authToken = authToken;
+		this.#dvrServiceUrl = dvrServiceUrl;
+		this.#authHeaders = { Authorization: `Bearer ${authToken}` };
 	}
 
-	async fetchSessions() {
-		const response = await fetch(`${this.dvrServiceUrl}/api/sessions`, {
-			headers: {
-				Authorization: `Bearer ${this.authToken}`
-			}
-		});
+	async fetchSessions({ limit, offset, sessionId } = {}) {
+		const params = new URLSearchParams(
+			Object.entries({ limit, offset, sessionId }).filter(([, value]) => value != null)
+		);
+
+		const query = params.toString();
+		const response = await this.#fetch(`/api/sessions${query ? `?${query}` : ''}`);
 
 		if (!response.ok) {
 			throw new Error(`Failed to fetch sessions: ${response.status}`);
 		}
 
-		const data = await response.json();
-		return data.sessions;
+		return response.json();
 	}
 
 	async fetchSessionById(sessionId) {
-		const response = await fetch(
-			`${this.dvrServiceUrl}/api/sessions/${encodeURIComponent(sessionId)}`,
-			{
-				headers: {
-					Authorization: `Bearer ${this.authToken}`
-				}
-			}
-		);
+		const response = await this.#fetch(`/api/sessions/${encodeURIComponent(sessionId)}`);
 
 		if (!response.ok) {
 			if (response.status === 404) {
@@ -41,5 +37,9 @@ export default class SessionsService {
 		}
 
 		return response.json();
+	}
+
+	#fetch(path) {
+		return fetch(`${this.#dvrServiceUrl}${path}`, { headers: this.#authHeaders });
 	}
 }
