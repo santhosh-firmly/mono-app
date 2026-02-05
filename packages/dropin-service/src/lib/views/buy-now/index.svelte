@@ -1,6 +1,6 @@
 <script>
 	import { getBuyNow } from '$lib/states/buy-now.svelte.js';
-	import PdpHeader from '$lib/components/buy-now/header.svelte';
+	import PdpWrapper from '$lib/components/buy-now/pdp-wrapper.svelte';
 	import ErrorView from '$lib/views/error.svelte';
 	import Checkout from '$lib/views/checkout/index.svelte';
 
@@ -10,7 +10,7 @@
 		paypal = null,
 		merchant = null,
 		notices = null,
-		partner = null,
+		presentation = null,
 		isFullscreen = false,
 		onGoBack = () => {},
 		onDismissNotice = () => {},
@@ -34,12 +34,9 @@
 		onClose={() => buyNow.close()}
 	/>
 {:else if buyNow.mode === 'pdp'}
-	<div class="flex h-full w-full flex-col">
-		<PdpHeader {partner} onBackClick={() => buyNow.close()} />
-		<div class="flex-1 overflow-auto">
-			{@render pdpContent?.()}
-		</div>
-	</div>
+	<PdpWrapper {presentation} onBackClick={() => buyNow.close()}>
+		{@render pdpContent?.()}
+	</PdpWrapper>
 {:else if buyNow.mode === 'checkout'}
 	<div class="flex min-h-0 flex-1 flex-col">
 		<Checkout

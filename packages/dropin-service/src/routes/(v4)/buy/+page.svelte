@@ -17,7 +17,6 @@
 	import { isActionDark, isPrimaryDark } from '$lib-v4/components/v4/theme-context';
 	import { colord } from 'colord';
 	import { bindEvent } from '$lib-v4/browser/dash';
-	import Header from '$lib-v4/components/v4/header.svelte';
 	import { updateUrlWithFirmlyDomain } from '$lib-v4/utils/domain-utils.js';
 	import SidebarLayout, {
 		TRANSITION_DURATION as SIDEBAR_TRANSITION_DURATION
@@ -26,6 +25,7 @@
 	import PopupLayout from './popup-layout.svelte';
 	import BottomsheetLayout from './bottom-sheet-layout.svelte';
 	import PdpSkeleton from './pdp-skeleton.svelte';
+	import PdpWrapper from '$lib/components/buy-now/pdp-wrapper.svelte';
 	import { startMasterCardUnifiedSolution } from '$lib-v4/clients/mastercard';
 	import Visa from '$lib-v4/clients/visa.svelte';
 	import { initializationState } from '$lib-v4/utils/initialization-state.js';
@@ -65,7 +65,10 @@
 
 	const bypassCatalogApiMerchants = ['test.victoriassecret.com', 'dermstore.com'];
 
-	let partnerPresentation = $derived(data.partnerPresentation);
+	let presentation = $derived({
+		...data.partnerPresentation,
+		largeLogo: data.merchantPresentation?.largeLogo || data.partnerPresentation?.largeLogo
+	});
 	let partnerDisclaimer = $derived(data.partnerPresentation?.disclaimer);
 	let partnerButtonText = $derived(data.partnerPresentation?.buttonText);
 	let partnerShowTerms = $derived(data.partnerPresentation?.showTerms ?? true);
@@ -755,15 +758,7 @@
 				{/if} -->
 
 				{#if multipleVariants && !skipPdp && !showCheckout}
-					<div class="flex size-full flex-col">
-						<div class="z-10 shadow-(--fy-surface-box-shadow)">
-							<Header
-								merchantInfo={partnerPresentation}
-								doNotExpand={true}
-								usePoweredBy={pageState === 'pdp'}
-								on:back-click={onBackClick}
-							/>
-						</div>
+					<PdpWrapper {presentation} onBackClick={onBackClick}>
 						{#if iframeVisibility === 'hidden'}
 							<PdpSkeleton />
 						{/if}
@@ -771,12 +766,12 @@
 							<iframe
 								title="Product Details"
 								id="firmly-pdp-frame"
-								class="grow"
-								style={`height: ${iframeHeight}px; visibility: ${iframeVisibility}`}
+								class="h-full w-full"
+								style={`visibility: ${iframeVisibility}`}
 								src={ecsUrl}
 							></iframe>
 						{/if}
-					</div>
+					</PdpWrapper>
 				{/if}
 
 				{#if sessionTransferError}
