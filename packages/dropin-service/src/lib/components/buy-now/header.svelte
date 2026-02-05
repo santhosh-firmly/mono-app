@@ -8,7 +8,7 @@
 </script>
 
 <div class="relative z-10 flex flex-col bg-white">
-	<div class="flex flex-col items-center border-b border-gray-200 py-3">
+	<div class="flex flex-col items-center border-b border-border py-3">
 		{#if largeLogo}
 			<img src={largeLogo} alt={displayName} class="h-8" />
 		{:else}
@@ -18,7 +18,7 @@
 	<div class="relative px-4 pt-4 pb-1">
 		<button
 			type="button"
-			class="inline-flex cursor-pointer items-center gap-1 rounded-full bg-gray-100 px-4 py-2.5 text-xs font-semibold tracking-wide text-black uppercase transition-colors hover:bg-gray-200"
+			class="inline-flex cursor-pointer items-center gap-1 rounded-full bg-surface-alt px-4 py-2.5 text-xs font-semibold tracking-wide text-black uppercase transition-colors hover:bg-border/30"
 			onclick={onBackClick}
 			aria-label={m.return_to({ partner: displayName })}
 		>
