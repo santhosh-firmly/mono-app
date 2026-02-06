@@ -43,3 +43,82 @@
 	}}
 	{template}
 />
+
+<Story
+	name="With Delivered Status"
+	args={{
+		items: orderData.order.order_info.line_items.map((item) => ({
+			...item,
+			platform_status: 'Delivered'
+		}))
+	}}
+	{template}
+/>
+
+<Story
+	name="With Shipped Status"
+	args={{
+		items: orderData.order.order_info.line_items.map((item) => ({
+			...item,
+			platform_status: 'Shipped'
+		}))
+	}}
+	{template}
+/>
+
+<Story
+	name="With Cancelled Status"
+	args={{
+		items: orderData.order.order_info.line_items.map((item) => ({
+			...item,
+			platform_status: 'Cancelled'
+		}))
+	}}
+	{template}
+/>
+
+<Story
+	name="With Returned Status"
+	args={{
+		items: orderData.order.order_info.line_items.map((item) => ({
+			...item,
+			platform_status: 'Returned'
+		}))
+	}}
+	{template}
+/>
+
+<Story
+	name="With Pending Status"
+	args={{
+		items: orderData.order.order_info.line_items.map((item) => ({
+			...item,
+			platform_status: 'Pending'
+		}))
+	}}
+	{template}
+/>
+
+<Story
+	name="With Mixed Statuses"
+	args={{
+		items: [
+			{ ...orderData.order.order_info.line_items[0], platform_status: 'Delivered' },
+			{ ...orderData.order.order_info.line_items[0], description: 'Second Item', platform_status: 'Shipped' },
+			{ ...orderData.order.order_info.line_items[0], description: 'Third Item', platform_status: 'Cancelled' },
+			{ ...orderData.order.order_info.line_items[0], description: 'Fourth Item', platform_status: null }
+		]
+	}}
+	{template}
+/>
+
+<Story
+	name="Without Status (No Badge)"
+	args={{
+		items: orderData.order.order_info.line_items.map((item) => ({
+			...item,
+			platform_status: null
+		}))
+	}}
+	{template}
+/>

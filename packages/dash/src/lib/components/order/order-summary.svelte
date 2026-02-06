@@ -2,7 +2,7 @@
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import { formatCurrency } from '$lib/currency.js';
 
-	let { subtotal = 0, discount = 0, shipping = 0, tax = 0, total = 0 } = $props();
+	let { subtotal = 0, discount = 0, shipping = 0, tax = 0, total = 0, refund = null } = $props();
 </script>
 
 <div class="space-y-2">
@@ -31,4 +31,11 @@
 		<span>Total</span>
 		<span>{formatCurrency(total)}</span>
 	</div>
+	{#if refund?.value > 0}
+		<Separator class="my-2" />
+		<div class="flex justify-between font-semibold">
+			<span>Refund Total</span>
+			<span class="text-red-600">{formatCurrency(refund)}</span>
+		</div>
+	{/if}
 </div>

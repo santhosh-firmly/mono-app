@@ -1,4 +1,5 @@
 import { error } from '@sveltejs/kit';
+import { fetchOrderStatus, enhanceOrderInfo } from '$lib/server/orders.js';
 
 /** @type {import('./$types').PageServerLoad} */
 export async function load({ params, platform }) {
@@ -30,6 +31,10 @@ export async function load({ params, platform }) {
 	} catch {
 		throw error(500, 'Failed to parse order data');
 	}
+
+	// Fetch order status from orders-service and enhance order_info
+	const orderStatusData = await fetchOrderStatus(platform, orderId, orderResult.shop_id, orderResult.app_id);
+	enhanceOrderInfo(orderInfo, orderStatusData);
 
 	// Build merchant map
 	const merchantMap = new Map();

@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import { getDestinationAccess, getAccessibleMerchants } from '$lib/server/destination.js';
+import { fetchOrderStatus, enhanceOrderInfo } from '$lib/server/orders.js';
 
 /**
  * GET /destination/[app_id]/api/orders/[order_id]
@@ -58,6 +59,10 @@ export async function GET({ locals, params, platform }) {
 		} catch {
 			return json({ error: 'Failed to parse order data' }, { status: 500 });
 		}
+
+		// Fetch order status from orders-service and enhance order_info
+		const orderStatusData = await fetchOrderStatus(platform, orderId, orderResult.shop_id, appId);
+		enhanceOrderInfo(orderInfo, orderStatusData);
 
 		const order = {
 			...orderResult,

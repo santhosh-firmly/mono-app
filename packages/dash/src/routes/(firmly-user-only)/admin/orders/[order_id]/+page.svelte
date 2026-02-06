@@ -66,6 +66,7 @@
 						shipping={order?.order_info?.shipping_total || 0}
 						tax={order?.order_info?.tax || 0}
 						total={order?.order_info?.total || order?.order_total || 0}
+						refund={order?.order_info?.refund_total}
 					/>
 				</Card.Content>
 			</Card.Root>

@@ -58,6 +58,10 @@
 		{
 			"binding": "DOMAINS_SERVICE",
 			"service": "domains"
+		},
+		{
+			"binding": "ORDERS_SERVICE",
+			"service": "orders"
 		}
 	],
 	"vars": {
@@ -131,6 +135,10 @@
 				{
 					"binding": "DOMAINS_SERVICE",
 					"service": "domains"
+				},
+				{
+					"binding": "ORDERS_SERVICE",
+					"service": "orders"
 				}
 			],
 			"vars": {
@@ -202,6 +210,10 @@
 				{
 					"binding": "DOMAINS_SERVICE",
 					"service": "domains"
+				},
+				{
+					"binding": "ORDERS_SERVICE",
+					"service": "orders"
 				}
 			],
 			"vars": {
@@ -273,6 +285,10 @@
 				{
 					"binding": "DOMAINS_SERVICE",
 					"service": "domains"
+				},
+				{
+					"binding": "ORDERS_SERVICE",
+					"service": "orders"
 				}
 			],
 			"vars": {
@@ -338,6 +354,10 @@
 				{
 					"binding": "DOMAINS_SERVICE",
 					"service": "domains"
+				},
+				{
+					"binding": "ORDERS_SERVICE",
+					"service": "orders"
 				}
 			],
 			"routes": [
@@ -411,6 +431,10 @@
 				{
 					"binding": "DOMAINS_SERVICE",
 					"service": "domains"
+				},
+				{
+					"binding": "ORDERS_SERVICE",
+					"service": "orders"
 				}
 			],
 			"routes": [
