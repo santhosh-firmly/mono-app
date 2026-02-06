@@ -1,6 +1,7 @@
 <script>
 	import Package from 'lucide-svelte/icons/package';
 	import * as Card from '$lib/components/ui/card/index.js';
+	import { Badge } from '$lib/components/ui/badge/index.js';
 	import { formatCurrency } from '$lib/currency.js';
 	import { getProductImage } from '$lib/order-utils.js';
 	import { SvelteSet } from 'svelte/reactivity';
@@ -12,6 +13,25 @@
 	function handleImageError(index) {
 		imageErrors.add(index);
 		imageErrors = new SvelteSet(imageErrors);
+	}
+
+	/**
+	 * Map platform status to badge variant
+	 * @param {string} status
+	 * @returns {'default' | 'secondary' | 'destructive' | 'outline'}
+	 */
+	function getStatusVariant(status) {
+		const lowerStatus = status?.toLowerCase() || '';
+		if (lowerStatus.includes('delivered') || lowerStatus.includes('complete')) {
+			return 'default';
+		}
+		if (lowerStatus.includes('cancel') || lowerStatus.includes('return')) {
+			return 'destructive';
+		}
+		if (lowerStatus.includes('ship') || lowerStatus.includes('transit')) {
+			return 'secondary';
+		}
+		return 'outline';
 	}
 </script>
 
@@ -46,9 +66,16 @@
 
 					<!-- Product details -->
 					<div class="min-w-0 flex-1">
-						<h4 class="truncate text-sm font-medium">
-							{item.description || item.name || 'Item'}
-						</h4>
+						<div class="flex items-start justify-between gap-2">
+							<h4 class="truncate text-sm font-medium">
+								{item.description || item.name || 'Item'}
+							</h4>
+							{#if item.platform_status}
+								<Badge class="flex-shrink-0" variant={getStatusVariant(item.platform_status)}>
+									{item.platform_status}
+								</Badge>
+							{/if}
+						</div>
 						{#if item.sku}
 							<p class="mt-1 text-xs text-muted-foreground">
 								SKU: {item.sku}

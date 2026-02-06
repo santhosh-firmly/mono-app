@@ -24,7 +24,8 @@
 			discount: { control: 'number', description: 'Discount amount (shown in green if > 0)' },
 			shipping: { control: 'number', description: 'Shipping cost' },
 			tax: { control: 'number', description: 'Tax amount' },
-			total: { control: 'number', description: 'Order total' }
+			total: { control: 'number', description: 'Order total' },
+			refund: { control: 'object', description: 'Refund total (currency object with value, shown in red if > 0)' }
 		}
 	});
 </script>
@@ -69,6 +70,32 @@
 		shipping: 0,
 		tax: 98.99,
 		total: 1198.98
+	}}
+	{template}
+/>
+
+<Story
+	name="With Partial Refund"
+	args={{
+		subtotal: 100,
+		discount: 0,
+		shipping: 10,
+		tax: 8,
+		total: 118,
+		refund: { currency: 'USD', value: 27.53, number: 2753, symbol: '$' }
+	}}
+	{template}
+/>
+
+<Story
+	name="With Full Refund"
+	args={{
+		subtotal: 100,
+		discount: 0,
+		shipping: 10,
+		tax: 8,
+		total: 118,
+		refund: { currency: 'USD', value: 118, number: 11800, symbol: '$' }
 	}}
 	{template}
 />
