@@ -46,7 +46,7 @@
 				params.delete('search');
 			}
 			params.set('page', '1');
-			goto(`orders?${params.toString()}`);
+			goto(`/admin/orders?${params.toString()}`);
 		}
 	}
 
@@ -58,13 +58,13 @@
 			params.delete('partner');
 		}
 		params.set('page', '1');
-		goto(`orders?${params.toString()}`);
+		goto(`/admin/orders?${params.toString()}`);
 	}
 
 	function goToPage(pageNum) {
 		const params = new SvelteURLSearchParams($page.url.searchParams);
 		params.set('page', pageNum.toString());
-		goto(`orders?${params.toString()}`);
+		goto(`/admin/orders?${params.toString()}`);
 	}
 </script>
 
@@ -169,7 +169,7 @@
 						size="sm"
 						class="h-8 w-8 p-0"
 						disabled={pagination.page <= 1}
-						on:click={() => goToPage(pagination.page - 1)}
+						onclick={() => goToPage(pagination.page - 1)}
 					>
 						<ChevronLeft class="h-4 w-4" />
 						<span class="sr-only">Previous page</span>
@@ -182,7 +182,7 @@
 						size="sm"
 						class="h-8 w-8 p-0"
 						disabled={pagination.page >= pagination.totalPages}
-						on:click={() => goToPage(pagination.page + 1)}
+						onclick={() => goToPage(pagination.page + 1)}
 					>
 						<ChevronRight class="h-4 w-4" />
 						<span class="sr-only">Next page</span>

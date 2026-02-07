@@ -10,6 +10,9 @@ export async function fetchOrderStatus(platform, orderId, shopId, appId) {
 	// Service bindings only work in Cloudflare Workers runtime
 	const ordersService = platform?.env?.ORDERS_SERVICE;
 	if (!ordersService || typeof ordersService.fetch !== 'function') {
+		console.warn(
+			`[fetchOrderStatus] ORDERS_SERVICE binding not available for orderId=${orderId}`
+		);
 		return null;
 	}
 
@@ -20,11 +23,19 @@ export async function fetchOrderStatus(platform, orderId, shopId, appId) {
 		);
 
 		if (!response.ok) {
+			const body = await response.text().catch(() => '');
+			console.warn(
+				`[fetchOrderStatus] ORDERS_SERVICE returned ${response.status} for orderId=${orderId}: ${body}`
+			);
 			return null;
 		}
 
 		const orderStatus = await response.json();
 		if (!orderStatus?.line_items) {
+			console.warn(
+				`[fetchOrderStatus] Response missing line_items for orderId=${orderId}:`,
+				JSON.stringify(orderStatus)
+			);
 			return null;
 		}
 
@@ -33,7 +44,7 @@ export async function fetchOrderStatus(platform, orderId, shopId, appId) {
 			refundTotal: orderStatus.refund_total || null
 		};
 	} catch (e) {
-		console.warn('Failed to fetch order status:', e);
+		console.warn(`[fetchOrderStatus] Exception for orderId=${orderId}:`, e);
 		return null;
 	}
 }
