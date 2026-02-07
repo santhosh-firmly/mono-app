@@ -17,7 +17,6 @@
 	import { postOrderPlaced, postQuantityUpdated, postSignIn } from '$lib-v4/browser/cross.js';
 	import LoginButton from './login-button.svelte';
 	import ClickToPayUnified from './view-model/click-to-pay-unified.svelte';
-	import ClickToPay from './view-model/click-to-pay.svelte';
 	import { BASE_LOGIN_STEPS, NEW_CARD_OPTION, NEW_SHIPPING_ADDRESS } from '$lib-v4/constants.js';
 	import MerchantLogin from './view-model/merchant-login.svelte';
 	import Checkbox from './checkbox.svelte';
@@ -86,7 +85,6 @@
 	export let termsOfUse;
 	export let privacyPolicy;
 	export let isProduction;
-	export let shouldUseVisa = isProduction;
 	export let isC2PSDKInitialized = false;
 	export let partnerDisclaimer = null;
 	export let buttonText = 'Place Order';
@@ -2282,34 +2280,20 @@
 			bind:canCloseModal={canCloseMechantLoginModal}
 			on:login-successful={onMerchantLoginSuccess}
 		/>
-		{#if shouldUseVisa}
-			<ClickToPay
-				on:login-c2p-successful={onC2PLoginSuccess}
-				on:authenticate-c2p-successful={handleC2PAuthenticate}
-				on:not-you-clicked={handleNotYouClicked}
-				{c2pOTPDestination}
-				bind:isModalOpen={isC2POpen}
-				bind:processC2PCheckout
-				bind:c2pUnlockStart
-				bind:isUserLoggedInC2p
-				bind:isC2PInProgress
-			/>
-		{:else}
-			<ClickToPayUnified
-				cart={$cart}
-				on:login-c2p-successful={onC2PLoginSuccess}
-				on:authenticate-c2p-successful={handleC2PAuthenticate}
-				on:not-you-clicked={handleNotYouClicked}
-				on:retries-exceeded={handleRetriesExceeded}
-				{c2pOTPDestination}
-				bind:isModalOpen={isC2POpen}
-				bind:processC2PCheckout
-				bind:c2pUnlockStart
-				bind:isUserLoggedInC2p
-				bind:isC2PInProgress
-				disabled={c2pSignOutInProgress}
-			/>
-		{/if}
+		<ClickToPayUnified
+			cart={$cart}
+			on:login-c2p-successful={onC2PLoginSuccess}
+			on:authenticate-c2p-successful={handleC2PAuthenticate}
+			on:not-you-clicked={handleNotYouClicked}
+			on:retries-exceeded={handleRetriesExceeded}
+			{c2pOTPDestination}
+			bind:isModalOpen={isC2POpen}
+			bind:processC2PCheckout
+			bind:c2pUnlockStart
+			bind:isUserLoggedInC2p
+			bind:isC2PInProgress
+			disabled={c2pSignOutInProgress}
+		/>
 
 		<TermsPopup bind:isModalOpen={isTermsPopupOpen} title={$cart?.display_name} />
 
