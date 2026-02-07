@@ -145,10 +145,17 @@
 
 	async function triggerSync(domain) {
 		try {
-			await productDetailsApi.domainManagement.sync(domain.domain, domain.countryCode);
+			const result = await productDetailsApi.domainManagement.syncWorkflow(
+				domain.domain,
+				domain.countryCode
+			);
+			// Show the job ID so users can track progress
+			if (result.jobId) {
+				alert(`Sync workflow started: ${result.jobId}`);
+			}
 			await loadDomains();
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to trigger sync';
+			error = e instanceof Error ? e.message : 'Failed to trigger sync workflow';
 		}
 	}
 

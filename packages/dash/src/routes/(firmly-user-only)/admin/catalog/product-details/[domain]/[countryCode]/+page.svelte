@@ -124,7 +124,11 @@
 	async function syncDomain() {
 		syncing = true;
 		try {
-			await productDetailsApi.domainManagement.sync(domain, countryCode);
+			const result = await productDetailsApi.domainManagement.syncWorkflow(domain, countryCode);
+			// Show the job ID so users can track progress
+			if (result.jobId) {
+				alert(`Sync workflow started: ${result.jobId}`);
+			}
 			await loadData();
 		} catch (e) {
 			error = e instanceof Error ? e.message : 'Failed to sync domain';

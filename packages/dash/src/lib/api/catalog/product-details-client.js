@@ -94,7 +94,24 @@ export const crossDomainStats = {
 // === Domain Management ===
 
 export const domainManagement = {
+	/**
+	 * Sync products from catalog to DO (legacy - may timeout for large catalogs)
+	 * @deprecated Use syncWorkflow for large catalogs (>50k products)
+	 */
 	sync: (domain, countryCode) => post(`${BASE_URL}/${domain}/${countryCode}/sync`),
+
+	/**
+	 * Sync products using Cloudflare Workflow (recommended for large catalogs)
+	 * Processes catalog chunks one at a time to avoid CPU time limits
+	 */
+	syncWorkflow: (domain, countryCode, options) => {
+		const params = new URLSearchParams();
+		if (options?.syncBatchSize) params.set('syncBatchSize', String(options.syncBatchSize));
+		if (options?.markInactive !== undefined)
+			params.set('markInactive', String(options.markInactive));
+		const query = params.toString();
+		return post(`${BASE_URL}/${domain}/${countryCode}/sync-workflow${query ? `?${query}` : ''}`);
+	},
 
 	getStats: (domain, countryCode) => get(`${BASE_URL}/${domain}/${countryCode}/stats`),
 
