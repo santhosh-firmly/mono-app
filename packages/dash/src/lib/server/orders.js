@@ -25,7 +25,7 @@ export async function fetchOrderStatus(platform, orderId, shopId, appId) {
 		if (!response.ok) {
 			const body = await response.text().catch(() => '');
 			console.warn(
-				`[fetchOrderStatus] ORDERS_SERVICE returned ${response.status} for orderId=${orderId}: ${body}`
+				`[fetchOrderStatus] ORDERS_SERVICE returned ${response.status} for orderId=${orderId}`
 			);
 			return null;
 		}
