@@ -33,8 +33,7 @@ export async function fetchOrderStatus(platform, orderId, shopId, appId) {
 		const orderStatus = await response.json();
 		if (!orderStatus?.line_items) {
 			console.warn(
-				`[fetchOrderStatus] Response missing line_items for orderId=${orderId}:`,
-				JSON.stringify(orderStatus)
+				`[fetchOrderStatus] Response missing line_items for orderId=${orderId}`
 			);
 			return null;
 		}
