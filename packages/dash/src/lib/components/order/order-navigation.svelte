@@ -27,7 +27,7 @@
 		<span class="sr-only">Back to orders</span>
 	</Button>
 	<div class="flex-1">
-		<h1 class="text-2xl font-semibold text-gray-900">{title}</h1>
+		<h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{title}</h1>
 		{#if displaySubtitle}
 			<p class="text-sm text-muted-foreground">
 				{displaySubtitle}
