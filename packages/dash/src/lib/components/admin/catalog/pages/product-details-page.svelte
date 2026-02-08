@@ -39,7 +39,12 @@
 	// Filtering
 	let searchQuery = $state('');
 	let minSuccessPercent = $state(0);
+	let maxSuccessPercent = $state(100);
 	let workflowStatusFilter = $state('all');
+
+	// Sorting
+	let sortColumn = $state('domain');
+	let sortDirection = $state('asc');
 
 	// Selection
 	let selectedDomains = new SvelteSet();
@@ -122,6 +127,9 @@
 		if (minSuccessPercent > 0) {
 			domains = domains.filter((d) => d.completion_percent >= minSuccessPercent);
 		}
+		if (maxSuccessPercent < 100) {
+			domains = domains.filter((d) => d.completion_percent <= maxSuccessPercent);
+		}
 
 		// Filter by search query
 		if (searchQuery.trim()) {
@@ -133,29 +141,44 @@
 			);
 		}
 
-		// Sort: running first, then by last run date, then never run
+		// Sort by selected column
 		domains.sort((a, b) => {
 			const aKey = `${a.domain}/${a.countryCode}`;
 			const bKey = `${b.domain}/${b.countryCode}`;
 
 			const aRunning = activeJobs.has(aKey);
 			const bRunning = activeJobs.has(bKey);
-			const aLastRun = lastRunDates.get(aKey);
-			const bLastRun = lastRunDates.get(bKey);
 
-			// Running jobs first
+			// Running jobs always first regardless of sort
 			if (aRunning && !bRunning) return -1;
 			if (!aRunning && bRunning) return 1;
 
-			// Then by last run date (most recent first)
-			if (aLastRun && bLastRun) {
-				return new Date(bLastRun).getTime() - new Date(aLastRun).getTime();
-			}
-			if (aLastRun && !bLastRun) return -1;
-			if (!aLastRun && bLastRun) return 1;
+			let comparison = 0;
 
-			// Never run last (alphabetically)
-			return a.domain.localeCompare(b.domain);
+			switch (sortColumn) {
+				case 'domain':
+					comparison = a.domain.localeCompare(b.domain);
+					break;
+				case 'total':
+					comparison = a.total - b.total;
+					break;
+				case 'success':
+					comparison = a.success - b.success;
+					break;
+				case 'pending':
+					comparison = a.pending - b.pending;
+					break;
+				case 'failed':
+					comparison = (a.failed + a.permanently_failed) - (b.failed + b.permanently_failed);
+					break;
+				case 'progress':
+					comparison = a.completion_percent - b.completion_percent;
+					break;
+				default:
+					comparison = a.domain.localeCompare(b.domain);
+			}
+
+			return sortDirection === 'asc' ? comparison : -comparison;
 		});
 
 		return domains;
@@ -302,6 +325,20 @@
 			default:
 				return 'bg-gray-400';
 		}
+	}
+
+	function handleSort(column) {
+		if (sortColumn === column) {
+			sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+		} else {
+			sortColumn = column;
+			sortDirection = 'asc';
+		}
+	}
+
+	function getSortIcon(column) {
+		if (sortColumn !== column) return '↕';
+		return sortDirection === 'asc' ? '↑' : '↓';
 	}
 
 	// Computed indeterminate state for select-all checkbox
@@ -537,6 +574,16 @@
 							class="w-20"
 						/>
 					</div>
+					<div class="flex items-center gap-2">
+						<span class="text-sm text-muted-foreground">Max %:</span>
+						<Input
+							type="number"
+							min={0}
+							max={100}
+							bind:value={maxSuccessPercent}
+							class="w-20"
+						/>
+					</div>
 					<div class="relative">
 						<Search
 							class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
@@ -637,13 +684,67 @@
 											}}
 										/>
 									</th>
-									<th class="p-3 text-left font-medium">Domain</th>
+									<th class="p-3 text-left font-medium">
+										<button
+											type="button"
+											class="flex items-center gap-1 hover:text-primary transition-colors"
+											onclick={() => handleSort('domain')}
+										>
+											Domain
+											<span class="text-xs text-muted-foreground">{getSortIcon('domain')}</span>
+										</button>
+									</th>
 									<th class="p-3 text-left font-medium">Workflow Status</th>
-									<th class="p-3 text-left font-medium">Progress</th>
-									<th class="p-3 text-right font-medium">Total</th>
-									<th class="p-3 text-right font-medium">Success</th>
-									<th class="p-3 text-right font-medium">Pending</th>
-									<th class="p-3 text-right font-medium">Failed</th>
+									<th class="p-3 text-left font-medium">
+										<button
+											type="button"
+											class="flex items-center gap-1 hover:text-primary transition-colors"
+											onclick={() => handleSort('progress')}
+										>
+											Progress
+											<span class="text-xs text-muted-foreground">{getSortIcon('progress')}</span>
+										</button>
+									</th>
+									<th class="p-3 text-right font-medium">
+										<button
+											type="button"
+											class="flex items-center gap-1 hover:text-primary transition-colors ml-auto"
+											onclick={() => handleSort('total')}
+										>
+											Total
+											<span class="text-xs text-muted-foreground">{getSortIcon('total')}</span>
+										</button>
+									</th>
+									<th class="p-3 text-right font-medium">
+										<button
+											type="button"
+											class="flex items-center gap-1 hover:text-primary transition-colors ml-auto"
+											onclick={() => handleSort('success')}
+										>
+											Success
+											<span class="text-xs text-muted-foreground">{getSortIcon('success')}</span>
+										</button>
+									</th>
+									<th class="p-3 text-right font-medium">
+										<button
+											type="button"
+											class="flex items-center gap-1 hover:text-primary transition-colors ml-auto"
+											onclick={() => handleSort('pending')}
+										>
+											Pending
+											<span class="text-xs text-muted-foreground">{getSortIcon('pending')}</span>
+										</button>
+									</th>
+									<th class="p-3 text-right font-medium">
+										<button
+											type="button"
+											class="flex items-center gap-1 hover:text-primary transition-colors ml-auto"
+											onclick={() => handleSort('failed')}
+										>
+											Failed
+											<span class="text-xs text-muted-foreground">{getSortIcon('failed')}</span>
+										</button>
+									</th>
 								</tr>
 							</thead>
 							<tbody>
