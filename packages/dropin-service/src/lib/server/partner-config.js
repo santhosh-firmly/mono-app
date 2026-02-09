@@ -32,7 +32,9 @@ export async function getPartnerPresentation(appId, env) {
 					smallLogo: presentation.smallLogo,
 					displayName: presentation.name,
 					disclaimer: presentation.disclaimer,
-					buttonText: presentation.buttonText
+					buttonText: presentation.buttonText,
+					termsOfUse: presentation.termsOfUse || null,
+					privacyPolicy: presentation.privacyPolicy || null
 				}
 			};
 		}
@@ -51,7 +53,9 @@ function getDefaultPartnerPresentation() {
 			smallLogo: null,
 			displayName: 'Firmly',
 			disclaimer: null,
-			buttonText: 'Place Order'
+			buttonText: 'Place Order',
+			termsOfUse: null,
+			privacyPolicy: null
 		}
 	};
 }

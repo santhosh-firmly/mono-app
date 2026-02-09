@@ -91,3 +91,32 @@
 		}
 	}}
 />
+
+<Story
+	name="USA Today - Expandable Terms"
+	args={{
+		terms: {
+			partnerName: 'USA Today',
+			merchantName: 'Allbirds',
+			anchors: [
+				{ label: 'USA Today Terms of Service', url: 'https://www.usatoday.com/terms' },
+				{
+					label: 'USA Today Privacy Policy',
+					url: 'https://www.usatoday.com/privacy-policy'
+				},
+				{
+					label: 'Allbirds Terms of Service',
+					url: 'https://www.allbirds.com/pages/terms-of-use'
+				},
+				{
+					label: 'Allbirds Privacy Policy',
+					url: 'https://www.allbirds.com/pages/privacy-policy'
+				}
+			]
+		},
+		total: {
+			currency: 'USD',
+			value: 133.33
+		}
+	}}
+/>

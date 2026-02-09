@@ -216,6 +216,16 @@
 													configurator.setFeature('clickToPay', val)}
 											/>
 										</div>
+										<div class="flex items-center justify-between">
+											<span class="text-xs text-gray-700"
+												>Terms & Privacy</span
+											>
+											<PanelToggle
+												checked={configurator.features.terms}
+												onchange={(val) =>
+													configurator.setFeature('terms', val)}
+											/>
+										</div>
 									</div>
 								</section>
 							</div>

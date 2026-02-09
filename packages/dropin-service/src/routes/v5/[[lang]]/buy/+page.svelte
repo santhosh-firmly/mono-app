@@ -52,7 +52,7 @@
 	{paypal}
 	{merchant}
 	notices={notices.notices}
-	partnerPresentation={data.partnerPresentation}
+	partner={data.partnerPresentation}
 	onGoBack={() => pdp.goBack()}
 	onDismissNotice={(id) => notices.dismiss(id)}
 	isFullscreen={buyNow.layoutType === 'fullscreen'}

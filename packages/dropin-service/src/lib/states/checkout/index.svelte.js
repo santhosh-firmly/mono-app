@@ -223,7 +223,8 @@ class Checkout {
 	get features() {
 		return {
 			promoCodes: this.cart?.features?.promo_codes ?? true,
-			paypal: this.cart?.features?.paypal ?? !!this.cart?.shop_properties?.paypal?.clientId
+			paypal: this.cart?.features?.paypal ?? !!this.cart?.shop_properties?.paypal?.clientId,
+			terms: this.cart?.features?.terms ?? false
 		};
 	}
 

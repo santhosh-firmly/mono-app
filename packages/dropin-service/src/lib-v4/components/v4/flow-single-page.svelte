@@ -89,30 +89,26 @@
 	export let partnerDisclaimer = null;
 	export let buttonText = 'Place Order';
 
-	/**
-	 * Creates array of terms/disclaimers for footer
-	 * @returns {Array} Array of term objects
-	 */
 	function createTermsArray() {
-		const terms = [];
-
-		// Add partner disclaimer if present
-		if (partnerDisclaimer) {
-			terms.push(partnerDisclaimer);
-		}
-
-		// Add merchant terms if present
-		if (termsOfUse && privacyPolicy) {
-			terms.push({
-				text: 'By tapping "Buy Now", you agree to the seller`s Terms of Service, and Privacy Policy',
-				links: {
-					termsOfUse: termsOfUse,
-					privacyPolicy: privacyPolicy
+		return {
+			partnerName: 'USA Today',
+			merchantName: 'Allbirds',
+			anchors: [
+				{ label: 'USA Today Terms of Service', url: 'https://www.usatoday.com/terms' },
+				{
+					label: 'USA Today Privacy Policy',
+					url: 'https://www.usatoday.com/privacy-policy'
+				},
+				{
+					label: 'Allbirds Terms of Service',
+					url: 'https://www.allbirds.com/pages/terms-of-use'
+				},
+				{
+					label: 'Allbirds Privacy Policy',
+					url: 'https://www.allbirds.com/pages/privacy-policy'
 				}
-			});
-		}
-
-		return terms;
+			]
+		};
 	}
 
 	// Controls the express payment buttons
