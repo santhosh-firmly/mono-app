@@ -284,7 +284,9 @@
 						primary: configurator.theme.primaryColor,
 						action: configurator.theme.actionColor
 					}
-				}
+				},
+				termsOfUse: configurator.features.terms ? 'https://demo-store.com/terms' : null,
+				privacyPolicy: configurator.features.terms ? 'https://demo-store.com/privacy' : null
 			});
 
 			setConfiguratorForC2PMock(configurator);

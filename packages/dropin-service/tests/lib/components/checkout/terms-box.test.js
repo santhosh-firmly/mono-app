@@ -143,6 +143,47 @@ describe('TermsBox', () => {
 		});
 	});
 
+	describe('merchant-only mode', () => {
+		const merchantOnlyProps = {
+			merchantName: 'Merchant Inc',
+			anchors: [
+				{ label: 'Merchant Inc Terms of Service', url: 'https://merchant.com/terms' },
+				{ label: 'Merchant Inc Privacy Policy', url: 'https://merchant.com/privacy' }
+			]
+		};
+
+		it('renders only merchant name when partnerName is not provided', () => {
+			const { container } = render(TermsBox, { props: merchantOnlyProps });
+
+			const boldElements = container.querySelectorAll('.font-bold');
+			expect(boldElements).toHaveLength(1);
+			expect(boldElements[0].textContent).toBe('Merchant Inc');
+		});
+
+		it('renders only merchant name when partnerName is empty', () => {
+			const { container } = render(TermsBox, {
+				props: { ...merchantOnlyProps, partnerName: '' }
+			});
+
+			const boldElements = container.querySelectorAll('.font-bold');
+			expect(boldElements).toHaveLength(1);
+			expect(boldElements[0].textContent).toBe('Merchant Inc');
+		});
+
+		it('shows only merchant anchors when expanded', async () => {
+			const user = userEvent.setup();
+			const { container } = render(TermsBox, { props: merchantOnlyProps });
+
+			const button = container.querySelector('button[aria-expanded]');
+			await user.click(button);
+
+			const links = container.querySelectorAll('a[target="_blank"]');
+			expect(links).toHaveLength(2);
+			expect(links[0]).toHaveAttribute('href', 'https://merchant.com/terms');
+			expect(links[1]).toHaveAttribute('href', 'https://merchant.com/privacy');
+		});
+	});
+
 	describe('URL sanitization', () => {
 		it('filters out anchors with null URLs', async () => {
 			const user = userEvent.setup();

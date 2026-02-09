@@ -4,7 +4,7 @@
 	import UiAlert from '$lib/components/ui/alert.svelte';
 	import * as m from '$lib/paraglide/messages';
 
-	let { partnerName, merchantName, anchors = [] } = $props();
+	let { partnerName = '', merchantName, anchors = [] } = $props();
 
 	let expanded = $state(false);
 
@@ -27,8 +27,10 @@
 	<div class="relative text-sm">
 		<span class={['inline-block leading-normal', safeAnchors.length > 0 && 'pr-6']}>
 			By placing this order, you agree to the Terms of Service and Privacy Policy of
-			<span class="font-bold">{partnerName}</span>
-			and
+			{#if partnerName}
+				<span class="font-bold">{partnerName}</span>
+				and
+			{/if}
 			<span class="font-bold">{merchantName}</span>.
 			{#if expanded && safeAnchors.length > 0}
 				<div
