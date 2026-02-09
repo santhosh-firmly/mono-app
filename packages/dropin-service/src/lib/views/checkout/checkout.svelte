@@ -88,19 +88,33 @@
 	let isBuyFlow = $derived(!isFullscreen);
 
 	let termsAnchors = $derived.by(() => {
-		const merchantAnchors = [
-			{ label: `${resolvedMerchantName} Terms of Service`, url: merchant?.termsOfUse },
-			{ label: `${resolvedMerchantName} Privacy Policy`, url: merchant?.privacyPolicy }
-		];
+		const anchors = [];
 
-		if (!isBuyFlow) return merchantAnchors;
+		if (isBuyFlow) {
+			if (partner?.termsOfUse)
+				anchors.push({
+					label: `${resolvedPartnerName} Terms of Service`,
+					url: partner.termsOfUse
+				});
+			if (partner?.privacyPolicy)
+				anchors.push({
+					label: `${resolvedPartnerName} Privacy Policy`,
+					url: partner.privacyPolicy
+				});
+		}
 
-		const partnerAnchors = [
-			{ label: `${resolvedPartnerName} Terms of Service`, url: partner?.termsOfUse },
-			{ label: `${resolvedPartnerName} Privacy Policy`, url: partner?.privacyPolicy }
-		];
+		if (merchant?.termsOfUse)
+			anchors.push({
+				label: `${resolvedMerchantName} Terms of Service`,
+				url: merchant.termsOfUse
+			});
+		if (merchant?.privacyPolicy)
+			anchors.push({
+				label: `${resolvedMerchantName} Privacy Policy`,
+				url: merchant.privacyPolicy
+			});
 
-		return [...partnerAnchors, ...merchantAnchors];
+		return anchors;
 	});
 
 	let isShippingCollapsed = $derived(!forceExpandShipping && checkout.shippingPreFilled);

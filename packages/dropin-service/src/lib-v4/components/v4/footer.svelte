@@ -20,7 +20,7 @@
 
 <div class="flex flex-col gap-4 pt-4 text-center">
 	{#if terms}
-		<div class="rounded-lg bg-[#F7F7F7] p-3">
+		<div class="bg-fy-surface-subtle rounded-lg p-3">
 			<button
 				type="button"
 				class="flex w-full items-start justify-between gap-2 text-left"
