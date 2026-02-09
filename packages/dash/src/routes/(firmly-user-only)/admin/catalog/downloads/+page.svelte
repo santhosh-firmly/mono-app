@@ -20,7 +20,7 @@
 	let exportFormat = $state('jsonl.gz');
 
 	// Per-domain exports
-	let domainExports = new SvelteMap();
+	let domainExports = $state(new SvelteMap());
 
 	const formatOptions = [
 		{ value: 'jsonl.gz', label: 'JSONL (gzipped)' },

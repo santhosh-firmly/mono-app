@@ -36,9 +36,9 @@
 	let gcsEnvironment = $state('wizard');
 
 	// Job tracking
-	let activeJobs = new SvelteMap();
-	let lastPublishDates = new SvelteMap();
-	let exportVersions = new SvelteMap();
+	let activeJobs = $state(new SvelteMap());
+	let lastPublishDates = $state(new SvelteMap());
+	let exportVersions = $state(new SvelteMap());
 	let publishProgress = $state([]);
 	let publishing = $state(false);
 
