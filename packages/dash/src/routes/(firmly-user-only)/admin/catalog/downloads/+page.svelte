@@ -45,18 +45,21 @@
 	}
 
 	async function loadExports() {
-		domainExports.clear();
+		const newExports = new SvelteMap();
 
 		await Promise.all(
 			domains.map(async (d) => {
 				try {
 					const manifest = await catalogApi.exports.getLatest(d.domain);
-					domainExports.set(d.domain, manifest);
+					newExports.set(d.domain, manifest);
 				} catch {
 					// No export available
 				}
 			})
 		);
+
+		// Reassign to trigger reactivity in $derived computations
+		domainExports = newExports;
 	}
 
 	function toggleDomain(domain) {
