@@ -403,6 +403,7 @@
 					{partner}
 					notices={notices?.notices}
 					isFullscreen={true}
+					onClose={() => storeResetKey++}
 					onDismissNotice={(id) => notices?.dismiss(id)}
 				/>
 			{/if}

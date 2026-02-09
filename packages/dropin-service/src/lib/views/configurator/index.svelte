@@ -25,7 +25,7 @@
 			{browserUrl}
 			bind:browserContentRef
 		>
-			<div class="size-full overflow-auto">
+			<div class="flex size-full flex-col">
 				{@render children()}
 			</div>
 		</ResponsiveWrapper>
