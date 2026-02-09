@@ -16,17 +16,6 @@
 	} = $props();
 
 	let expanded = $state(false);
-
-	function isValidUrl(url) {
-		if (!url || typeof url !== 'string') return false;
-
-		try {
-			const urlObj = new URL(url);
-			return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
-		} catch {
-			return false;
-		}
-	}
 </script>
 
 <div class="flex flex-col gap-4 pt-4 text-center">
@@ -66,16 +55,14 @@
 					class="mt-2 flex flex-col gap-1.5 border-t border-gray-200 pt-2"
 				>
 					{#each terms.anchors as anchor}
-						{#if isValidUrl(anchor.url)}
-							<a
-								class="text-fy-on-surface-subtle text-xs underline"
-								target="_blank"
-								rel="noopener noreferrer"
-								href={anchor.url}
-							>
-								{anchor.label}
-							</a>
-						{/if}
+						<a
+							class="text-fy-on-surface-subtle text-xs underline"
+							target="_blank"
+							rel="noopener noreferrer"
+							href={anchor.url}
+						>
+							{anchor.label}
+						</a>
 					{/each}
 				</div>
 			{/if}

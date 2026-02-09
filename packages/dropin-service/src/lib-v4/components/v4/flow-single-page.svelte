@@ -90,25 +90,32 @@
 	export let buttonText = 'Place Order';
 
 	function createTermsArray() {
-		return {
-			partnerName: 'USA Today',
-			merchantName: 'Allbirds',
-			anchors: [
-				{ label: 'USA Today Terms of Service', url: 'https://www.usatoday.com/terms' },
-				{
-					label: 'USA Today Privacy Policy',
-					url: 'https://www.usatoday.com/privacy-policy'
-				},
-				{
-					label: 'Allbirds Terms of Service',
-					url: 'https://www.allbirds.com/pages/terms-of-use'
-				},
-				{
-					label: 'Allbirds Privacy Policy',
-					url: 'https://www.allbirds.com/pages/privacy-policy'
-				}
-			]
-		};
+		const partnerName = partnerDisclaimer?.displayName || 'Partner';
+		const merchantName = $cart?.display_name || 'Merchant';
+		const anchors = [];
+
+		if (partnerDisclaimer?.termsOfUse) {
+			anchors.push({
+				label: `${partnerName} Terms of Service`,
+				url: partnerDisclaimer.termsOfUse
+			});
+		}
+		if (partnerDisclaimer?.privacyPolicy) {
+			anchors.push({
+				label: `${partnerName} Privacy Policy`,
+				url: partnerDisclaimer.privacyPolicy
+			});
+		}
+		if (termsOfUse) {
+			anchors.push({ label: `${merchantName} Terms of Service`, url: termsOfUse });
+		}
+		if (privacyPolicy) {
+			anchors.push({ label: `${merchantName} Privacy Policy`, url: privacyPolicy });
+		}
+
+		if (anchors.length === 0) return null;
+
+		return { partnerName, merchantName, anchors };
 	}
 
 	// Controls the express payment buttons
