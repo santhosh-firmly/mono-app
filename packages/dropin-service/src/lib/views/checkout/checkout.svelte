@@ -82,8 +82,9 @@
 		background: merchant?.primaryColor || '#ffffff'
 	});
 
-	let resolvedPartnerName = $derived(partner?.displayName || 'Partner');
-	let resolvedMerchantName = $derived(checkout.cart?.display_name || 'Merchant');
+	let resolvedPartnerName = $derived(partner?.displayName);
+	let resolvedMerchantName = $derived(checkout.cart?.display_name);
+	// Fullscreen is the standalone checkout; non-fullscreen is embedded in a buy-now flow
 	let isBuyFlow = $derived(!isFullscreen);
 
 	let termsAnchors = $derived.by(() => {
