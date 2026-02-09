@@ -259,7 +259,8 @@
 			}
 
 			// Update exportVersions progressively so UI updates as we go
-			exportVersions = versions;
+			// Create a new SvelteMap to trigger reactivity in $derived computations
+			exportVersions = new SvelteMap(versions);
 		}
 
 		loadingExports = false;
