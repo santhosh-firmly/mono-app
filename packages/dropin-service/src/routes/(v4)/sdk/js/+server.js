@@ -17,6 +17,9 @@ function getAPIServer(hostname) {
 	} else if (hostname === '.firmly.dev') {
 		// Dev.
 		return 'https://api.firmly.tools';
+	} else if (hostname === '.amarood.art') {
+		// QA.
+		return 'https://api.goiaba.art';
 	} else if (hostname === '.firmlyuat.com') {
 		// UAT.
 		return 'https://api.firmly.work';

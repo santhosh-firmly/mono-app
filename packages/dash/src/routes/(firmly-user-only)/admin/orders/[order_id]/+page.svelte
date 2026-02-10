@@ -34,7 +34,7 @@
 			order?.shop_id}"
 		hasPrev={!!navigation?.prevOrder}
 		hasNext={!!navigation?.nextOrder}
-		onBack={() => goto('orders')}
+		onBack={() => goto('/admin/orders')}
 		onPrev={() => navigateToOrder(navigation?.prevOrder?.platform_order_number)}
 		onNext={() => navigateToOrder(navigation?.nextOrder?.platform_order_number)}
 	/>

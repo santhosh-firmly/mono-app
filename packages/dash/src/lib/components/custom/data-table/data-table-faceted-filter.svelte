@@ -55,7 +55,7 @@
 							{selectedOptions?.length} Selected
 						</Badge>
 					{:else}
-						{#each selectedOptions as option (option)}
+						{#each selectedOptions as option, i (i)}
 							<Badge variant="secondary" class="rounded-sm px-1 font-normal">
 								{option}
 							</Badge>
@@ -72,7 +72,7 @@
 				<Command.Empty>No results found.</Command.Empty>
 				{#key searchCriteria}
 					<Command.Group>
-						{#each filteredOptions as value (value)}
+						{#each filteredOptions as value, i (i)}
 							<Command.Item
 								{value}
 								onSelect={(currentValue) => {
