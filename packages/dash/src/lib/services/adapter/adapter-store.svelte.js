@@ -165,7 +165,7 @@ async function deleteFile(path) {
 /**
  * Run the adapter test suite.
  */
-async function runTestsSuite() {
+async function runTests() {
 	isTestRunning = true;
 	isTestStale = false;
 	error = null;
@@ -194,7 +194,7 @@ async function runTestsSuite() {
  * Publish the adapter.
  * @param {boolean} force - Force publish even if tests failed
  */
-async function publishAdapter(force = false) {
+async function publish(force = false) {
 	isPublishing = true;
 	error = null;
 
@@ -223,7 +223,7 @@ async function publishAdapter(force = false) {
 /**
  * Rollback to the previous version.
  */
-async function rollbackAdapter() {
+async function rollback() {
 	isPublishing = true;
 	error = null;
 
@@ -324,7 +324,7 @@ export const adapterStore = {
 	saveCurrentFile,
 	createFile,
 	deleteFile,
-	runTests: runTestsSuite,
-	publish: publishAdapter,
-	rollback: rollbackAdapter
+	runTests,
+	publish,
+	rollback
 };

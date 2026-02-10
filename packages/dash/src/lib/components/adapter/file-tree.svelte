@@ -81,7 +81,6 @@
 				placeholder="lib/my-file.js"
 				bind:value={newFilePath}
 				onkeydown={handleNewFileKeydown}
-				onblur={cancelNewFile}
 				autofocus
 			/>
 			{#if newFileError}

@@ -37,15 +37,17 @@
 	}
 </script>
 
-<div>
+<div
+	class="relative flex items-center"
+	onmouseenter={() => (showDelete = true)}
+	onmouseleave={() => (showDelete = false)}
+>
 	<button
 		class="flex w-full items-center gap-1 rounded-sm px-1.5 py-0.5 text-left text-sm hover:bg-muted/50 {isSelected
 			? 'bg-muted font-medium text-foreground'
 			: 'text-muted-foreground'}"
 		style="padding-left: {depth * 16 + 6}px"
 		onclick={handleClick}
-		onmouseenter={() => (showDelete = true)}
-		onmouseleave={() => (showDelete = false)}
 	>
 		{#if isDirectory}
 			<span class="flex-shrink-0 text-muted-foreground">
@@ -70,22 +72,23 @@
 		{#if node.isRequired && node.type === 'file'}
 			<Lock class="ml-auto h-3 w-3 flex-shrink-0 text-muted-foreground/50" />
 		{/if}
-		{#if !node.isRequired && node.type === 'file' && showDelete}
-			<button
-				class="ml-auto flex-shrink-0 rounded p-0.5 text-muted-foreground/50 hover:text-destructive"
-				onclick={handleDelete}
-				title="Delete file"
-			>
-				<Trash2 class="h-3 w-3" />
-			</button>
-		{/if}
 	</button>
-
-	{#if isDirectory && expanded && node.children}
-		<div>
-			{#each node.children as child (child.path)}
-				<svelte:self node={child} {selectedPath} depth={depth + 1} {onselect} {ondelete} />
-			{/each}
-		</div>
+	{#if !node.isRequired && node.type === 'file' && showDelete}
+		<button
+			class="absolute right-1 flex-shrink-0 rounded p-0.5 text-muted-foreground/50 hover:text-destructive"
+			onclick={handleDelete}
+			title="Delete file"
+		>
+			<Trash2 class="h-3 w-3" />
+		</button>
 	{/if}
+
 </div>
+
+{#if isDirectory && expanded && node.children}
+	<div>
+		{#each node.children as child (child.path)}
+			<svelte:self node={child} {selectedPath} depth={depth + 1} {onselect} {ondelete} />
+		{/each}
+	</div>
+{/if}

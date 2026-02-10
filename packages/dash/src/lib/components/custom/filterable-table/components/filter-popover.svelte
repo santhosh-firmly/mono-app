@@ -74,6 +74,20 @@
 		)
 	);
 
+	// Determine if the Apply button should be disabled
+	let isApplyDisabled = $derived.by(() => {
+		if (isSelect) {
+			return selectedValues.length === 0 || filterOptions.length === 0;
+		}
+		if (isBoolean) {
+			return (filterValue !== true && filterValue !== false) || filterOptions.length === 0;
+		}
+		// String/number/date filters
+		if (!filterValue) return true;
+		if (filterCondition === 'between' && !filterValue2) return true;
+		return false;
+	});
+
 	// Reset search term when popover opens/closes or column changes
 	$effect(() => {
 		if (!show || selectedColumnId) {
@@ -240,12 +254,7 @@
 
 			<button
 				onclick={onApply}
-				disabled={isSelect
-					? selectedValues.length === 0 || filterOptions.length === 0
-					: isBoolean
-						? (filterValue !== true && filterValue !== false) ||
-							filterOptions.length === 0
-						: !filterValue || (filterCondition === 'between' && !filterValue2)}
+				disabled={isApplyDisabled}
 				class="w-full rounded bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:cursor-not-allowed disabled:bg-gray-300 dark:disabled:bg-gray-600 dark:disabled:text-gray-400"
 			>
 				Apply

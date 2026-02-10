@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import { sequence } from '@sveltejs/kit/hooks';
-// import { handleMetrics } from 'foundation/server/frameworks/sveltekit';
+import { handleMetrics } from 'foundation/server/frameworks/sveltekit';
 import { enforceSSOAuth, refreshAdminTokens } from '$lib/server/auth.js';
 import {
 	verifyToken,
@@ -374,9 +374,9 @@ async function validateUserSession(event, sessionToken, jwtSecret) {
 }
 
 export const handle = sequence(
-	// handleMetrics({
-	// 	serviceName: pkg.name,
-	// 	version: pkg.version
-	// }),
+	handleMetrics({
+		serviceName: pkg.name,
+		version: pkg.version
+	}),
 	handleAuth
 );

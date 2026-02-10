@@ -49,7 +49,7 @@ export function dataToCSV(data, columns, visibleColumns) {
 }
 
 /**
- * Escapes special characters in CSV values
+ * Escapes special characters in CSV values and prevents CSV injection
  * @param {string} value - Value to escape
  * @returns {string} Escaped value
  */
@@ -58,7 +58,13 @@ function escapeCSVValue(value) {
 		return '';
 	}
 
-	const stringValue = String(value);
+	let stringValue = String(value);
+
+	// Prevent CSV injection by prefixing formula-triggering characters with a single quote
+	// These characters can trigger formula execution in spreadsheet applications
+	if (/^[=+\-@\t\r]/.test(stringValue)) {
+		stringValue = "'" + stringValue;
+	}
 
 	// If value contains comma, newline, or quote, wrap in quotes
 	if (stringValue.includes(',') || stringValue.includes('\n') || stringValue.includes('"')) {

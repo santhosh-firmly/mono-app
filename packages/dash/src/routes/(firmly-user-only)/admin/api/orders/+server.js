@@ -59,7 +59,6 @@ export async function GET({ url, platform }) {
 		if (platformFilter) {
 			// Support multiple platforms (comma-separated)
 			const platforms = platformFilter.split(',').map((p) => p.trim()).filter(Boolean);
-			console.log('API received platformFilter:', platformFilter, 'parsed platforms:', platforms);
 			if (platforms.length === 1) {
 				conditions.push('platform = ?');
 				params.push(platforms[0]);
@@ -69,7 +68,6 @@ export async function GET({ url, platform }) {
 				params.push(...platforms);
 			}
 		}
-		console.log('Final query conditions:', conditions, 'params:', params);
 
 		if (conditions.length > 0) {
 			const whereClause = ' WHERE ' + conditions.join(' AND ');

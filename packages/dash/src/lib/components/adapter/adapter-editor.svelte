@@ -7,6 +7,7 @@
 	import TestPanel from './test-panel.svelte';
 	import PublishBar from './publish-bar.svelte';
 	import UnsavedDialog from './unsaved-dialog.svelte';
+	import ConfirmDialog from './confirm-dialog.svelte';
 
 	let { domain } = $props();
 
@@ -15,6 +16,8 @@
 	let showPublishConfirm = $state(false);
 	let showForcePublishWarning = $state(false);
 	let showRollbackConfirm = $state(false);
+	let showDeleteConfirm = $state(false);
+	let pendingDeletePath = $state(null);
 
 	onMount(() => {
 		adapterStore.initialize(domain);
@@ -60,14 +63,26 @@
 		}
 	}
 
-	async function handleDeleteFile(path) {
-		if (confirm(`Delete "${path}"? This cannot be undone.`)) {
+	function handleDeleteFile(path) {
+		pendingDeletePath = path;
+		showDeleteConfirm = true;
+	}
+
+	async function confirmDelete() {
+		showDeleteConfirm = false;
+		if (pendingDeletePath) {
 			try {
-				await adapterStore.deleteFile(path);
+				await adapterStore.deleteFile(pendingDeletePath);
 			} catch {
 				// Error is captured in the store
 			}
+			pendingDeletePath = null;
 		}
+	}
+
+	function cancelDelete() {
+		showDeleteConfirm = false;
+		pendingDeletePath = null;
 	}
 
 	function handlePublish() {
@@ -103,6 +118,17 @@
 			// Error is captured in the store
 		}
 	}
+
+	// Derived descriptions for dialogs
+	let forcePublishDescription = $derived(
+		adapterStore.testRun?.status === 'failed'
+			? `Tests have failed (${adapterStore.testRun.summary.failed} failures). Publishing may cause issues for your store.`
+			: 'Tests have not been run. We recommend running tests before publishing.'
+	);
+
+	let rollbackDescription = $derived(
+		`This will restore your adapter to the previous published version (${adapterStore.previousVersion?.versionId}). Your current draft changes will be lost.`
+	);
 
 	function handleKeydown(e) {
 		// Ctrl/Cmd+S to save
@@ -193,86 +219,41 @@
 	onCancel={handleUnsavedCancel}
 />
 
-<!-- Publish confirmation dialog -->
-{#if showPublishConfirm}
-	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" role="dialog">
-		<div class="w-full max-w-md rounded-lg border bg-background p-6 shadow-lg">
-			<h3 class="text-lg font-semibold">Publish Adapter</h3>
-			<p class="mt-2 text-sm text-muted-foreground">
-				This will make your current adapter code live. Are you sure?
-			</p>
-			<div class="mt-4 flex justify-end gap-2">
-				<button
-					class="inline-flex h-9 items-center rounded-md border px-4 text-sm font-medium hover:bg-accent"
-					onclick={() => (showPublishConfirm = false)}
-				>
-					Cancel
-				</button>
-				<button
-					class="inline-flex h-9 items-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-					onclick={() => confirmPublish(false)}
-				>
-					Publish
-				</button>
-			</div>
-		</div>
-	</div>
-{/if}
+<ConfirmDialog
+	bind:open={showDeleteConfirm}
+	title="Delete File"
+	description={`Delete "${pendingDeletePath}"? This cannot be undone.`}
+	confirmText="Delete"
+	variant="destructive"
+	onConfirm={confirmDelete}
+	onCancel={cancelDelete}
+/>
 
-<!-- Force publish warning dialog -->
-{#if showForcePublishWarning}
-	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" role="dialog">
-		<div class="w-full max-w-md rounded-lg border bg-background p-6 shadow-lg">
-			<h3 class="text-lg font-semibold text-amber-600">Warning: Tests Not Passing</h3>
-			<p class="mt-2 text-sm text-muted-foreground">
-				{#if adapterStore.testRun?.status === 'failed'}
-					Tests have failed ({adapterStore.testRun.summary.failed} failures). Publishing may
-					cause issues for your store.
-				{:else}
-					Tests have not been run. We recommend running tests before publishing.
-				{/if}
-			</p>
-			<div class="mt-4 flex justify-end gap-2">
-				<button
-					class="inline-flex h-9 items-center rounded-md border px-4 text-sm font-medium hover:bg-accent"
-					onclick={() => (showForcePublishWarning = false)}
-				>
-					Cancel
-				</button>
-				<button
-					class="inline-flex h-9 items-center rounded-md bg-amber-600 px-4 text-sm font-medium text-white hover:bg-amber-700"
-					onclick={() => confirmPublish(true)}
-				>
-					Force Publish
-				</button>
-			</div>
-		</div>
-	</div>
-{/if}
+<ConfirmDialog
+	bind:open={showPublishConfirm}
+	title="Publish Adapter"
+	description="This will make your current adapter code live. Are you sure?"
+	confirmText="Publish"
+	onConfirm={() => confirmPublish(false)}
+	onCancel={() => (showPublishConfirm = false)}
+/>
 
-<!-- Rollback confirmation dialog -->
-{#if showRollbackConfirm}
-	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" role="dialog">
-		<div class="w-full max-w-md rounded-lg border bg-background p-6 shadow-lg">
-			<h3 class="text-lg font-semibold">Rollback Adapter</h3>
-			<p class="mt-2 text-sm text-muted-foreground">
-				This will restore your adapter to the previous published version ({adapterStore
-					.previousVersion?.versionId}). Your current draft changes will be lost.
-			</p>
-			<div class="mt-4 flex justify-end gap-2">
-				<button
-					class="inline-flex h-9 items-center rounded-md border px-4 text-sm font-medium hover:bg-accent"
-					onclick={() => (showRollbackConfirm = false)}
-				>
-					Cancel
-				</button>
-				<button
-					class="inline-flex h-9 items-center rounded-md bg-destructive px-4 text-sm font-medium text-destructive-foreground hover:bg-destructive/90"
-					onclick={confirmRollback}
-				>
-					Rollback
-				</button>
-			</div>
-		</div>
-	</div>
-{/if}
+<ConfirmDialog
+	bind:open={showForcePublishWarning}
+	title="Warning: Tests Not Passing"
+	description={forcePublishDescription}
+	confirmText="Force Publish"
+	variant="warning"
+	onConfirm={() => confirmPublish(true)}
+	onCancel={() => (showForcePublishWarning = false)}
+/>
+
+<ConfirmDialog
+	bind:open={showRollbackConfirm}
+	title="Rollback Adapter"
+	description={rollbackDescription}
+	confirmText="Rollback"
+	variant="destructive"
+	onConfirm={confirmRollback}
+	onCancel={() => (showRollbackConfirm = false)}
+/>
