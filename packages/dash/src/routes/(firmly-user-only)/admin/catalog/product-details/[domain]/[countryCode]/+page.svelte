@@ -131,7 +131,7 @@
 			}
 			await loadData();
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to sync domain';
+			error = e instanceof Error ? e.message : 'Failed to start sync workflow';
 		} finally {
 			syncing = false;
 		}
