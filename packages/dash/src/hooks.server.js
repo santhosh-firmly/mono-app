@@ -374,10 +374,9 @@ async function validateUserSession(event, sessionToken, jwtSecret) {
 }
 
 export const handle = sequence(
-	(event) =>
-		handleMetrics(event, {
-			serviceName: pkg.name,
-			version: pkg.version
-		}),
+	handleMetrics({
+		serviceName: pkg.name,
+		version: pkg.version
+	}),
 	handleAuth
 );

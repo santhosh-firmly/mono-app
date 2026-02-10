@@ -15,6 +15,7 @@
 	import Cog from 'lucide-svelte/icons/cog';
 	import Zap from 'lucide-svelte/icons/zap';
 	import ShieldCheck from 'lucide-svelte/icons/shield-check';
+	import Code from 'lucide-svelte/icons/code';
 
 	let { currentPath, domain, userRole = 'viewer', isFirmlyAdmin = false } = $props();
 
@@ -74,6 +75,11 @@
 			icon: StoreIcon,
 			label: 'Destinations',
 			href: `/merchant/${domain}/destinations`
+		},
+		{
+			icon: Code,
+			label: 'Adapter',
+			href: `/merchant/${domain}/adapter`
 		}
 	]);
 

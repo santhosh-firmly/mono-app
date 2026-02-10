@@ -5,6 +5,9 @@ import { defineConfig } from 'vite';
 export default defineConfig((ctx) => {
 	const config = {
 		plugins: [sveltekit()],
+		optimizeDeps: {
+			exclude: ['svelte-codemirror-editor', 'codemirror', '@codemirror/lang-javascript']
+		},
 		server: {
 			proxy: {
 				// Catalog API proxy for local development
