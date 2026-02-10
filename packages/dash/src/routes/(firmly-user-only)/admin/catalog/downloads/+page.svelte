@@ -20,7 +20,7 @@
 	let exportFormat = $state('jsonl.gz');
 
 	// Per-domain exports
-	let domainExports = new SvelteMap();
+	let domainExports = $state(new SvelteMap());
 
 	const formatOptions = [
 		{ value: 'jsonl.gz', label: 'JSONL (gzipped)' },
@@ -45,18 +45,21 @@
 	}
 
 	async function loadExports() {
-		domainExports.clear();
+		const newExports = new SvelteMap();
 
 		await Promise.all(
 			domains.map(async (d) => {
 				try {
 					const manifest = await catalogApi.exports.getLatest(d.domain);
-					domainExports.set(d.domain, manifest);
+					newExports.set(d.domain, manifest);
 				} catch {
 					// No export available
 				}
 			})
 		);
+
+		// Reassign to trigger reactivity in $derived computations
+		domainExports = newExports;
 	}
 
 	function toggleDomain(domain) {

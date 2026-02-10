@@ -36,9 +36,9 @@
 	let gcsEnvironment = $state('wizard');
 
 	// Job tracking
-	let activeJobs = new SvelteMap();
-	let lastPublishDates = new SvelteMap();
-	let exportVersions = new SvelteMap();
+	let activeJobs = $state(new SvelteMap());
+	let lastPublishDates = $state(new SvelteMap());
+	let exportVersions = $state(new SvelteMap());
 	let publishProgress = $state([]);
 	let publishing = $state(false);
 
@@ -259,7 +259,8 @@
 			}
 
 			// Update exportVersions progressively so UI updates as we go
-			exportVersions = versions;
+			// Create a new SvelteMap to trigger reactivity in $derived computations
+			exportVersions = new SvelteMap(versions);
 		}
 
 		loadingExports = false;
