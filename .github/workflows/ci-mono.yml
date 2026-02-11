@@ -19,6 +19,9 @@ on:
 permissions:
     contents: read
     pull-requests: write # Combined permissions here
+    actions: read
+    checks: write
+    id-token: write
 
 jobs:
     # Call the base CI workflow from .github repo
