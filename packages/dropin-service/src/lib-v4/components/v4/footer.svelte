@@ -1,9 +1,9 @@
 <script>
 	// @ts-nocheck
 
-	import { slide } from 'svelte/transition';
 	import FooterLinks from './footer-links.svelte';
 	import PaymentButton from './payment-button.svelte';
+	import TermsBox from '$lib/components/checkout/terms-box.svelte';
 
 	let {
 		terms = null,
@@ -14,58 +14,16 @@
 		inProgress,
 		isOrderPlaced
 	} = $props();
-
-	let expanded = $state(false);
 </script>
 
 <div class="flex flex-col gap-4 pt-4 text-center">
 	{#if terms}
-		<div class="bg-fy-surface-subtle rounded-lg p-3">
-			<button
-				type="button"
-				class="flex w-full items-start justify-between gap-2 text-left"
-				on:click={() => (expanded = !expanded)}
-				aria-expanded={expanded}
-			>
-				<span class="text-fy-on-surface-subtle text-xs leading-normal">
-					By placing this order, you agree to the Terms of Service and Privacy Policy of
-					<span class="font-semibold">{terms.partnerName}</span>
-					and
-					<span class="font-semibold">{terms.merchantName}</span>.
-				</span>
-				<svg
-					class="mt-0.5 h-4 w-4 shrink-0 transition-transform duration-200 {expanded
-						? 'rotate-180'
-						: ''}"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M19 9l-7 7-7-7"
-					/>
-				</svg>
-			</button>
-			{#if expanded && terms.anchors?.length > 0}
-				<div
-					transition:slide={{ duration: 150, axis: 'y' }}
-					class="mt-2 flex flex-col gap-1.5 border-t border-gray-200 pt-2"
-				>
-					{#each terms.anchors as anchor}
-						<a
-							class="text-fy-on-surface-subtle text-xs underline"
-							target="_blank"
-							rel="noopener noreferrer"
-							href={anchor.url}
-						>
-							{anchor.label}
-						</a>
-					{/each}
-				</div>
-			{/if}
+		<div class="text-left">
+			<TermsBox
+				partnerName={terms.hasPartnerTerms ? terms.partnerName : ''}
+				merchantName={terms.merchantName}
+				anchors={terms.anchors}
+			/>
 		</div>
 	{/if}
 	<PaymentButton {onclick} {total} {disabled} {inProgress} {isOrderPlaced} {buttonText} />

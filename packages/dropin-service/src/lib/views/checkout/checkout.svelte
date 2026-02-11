@@ -89,18 +89,23 @@
 
 	let termsAnchors = $derived.by(() => {
 		const anchors = [];
+		let hasPartnerTerms = false;
 
 		if (isBuyFlow) {
-			if (partner?.termsOfUse)
+			if (partner?.termsOfUse) {
 				anchors.push({
 					label: `${resolvedPartnerName} Terms of Service`,
 					url: partner.termsOfUse
 				});
-			if (partner?.privacyPolicy)
+				hasPartnerTerms = true;
+			}
+			if (partner?.privacyPolicy) {
 				anchors.push({
 					label: `${resolvedPartnerName} Privacy Policy`,
 					url: partner.privacyPolicy
 				});
+				hasPartnerTerms = true;
+			}
 		}
 
 		if (merchant?.termsOfUse)
@@ -114,8 +119,10 @@
 				url: merchant.privacyPolicy
 			});
 
-		return anchors;
+		return { anchors, hasPartnerTerms };
 	});
+
+	let hasPartnerTerms = $derived(termsAnchors.hasPartnerTerms);
 
 	let isShippingCollapsed = $derived(!forceExpandShipping && checkout.shippingPreFilled);
 	let isShippingMethodCollapsed = $derived(
@@ -626,9 +633,9 @@
 		{#if checkout.features.terms}
 			<div class="mt-4">
 				<TermsBox
-					partnerName={isBuyFlow ? resolvedPartnerName : ''}
+					partnerName={hasPartnerTerms ? resolvedPartnerName : ''}
 					merchantName={resolvedMerchantName}
-					anchors={termsAnchors}
+					anchors={termsAnchors.anchors}
 				/>
 			</div>
 		{/if}

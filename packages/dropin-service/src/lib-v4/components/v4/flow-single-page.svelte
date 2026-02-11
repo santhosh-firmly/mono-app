@@ -87,13 +87,20 @@
 	export let isProduction;
 	export let isC2PSDKInitialized = false;
 	export let partnerDisclaimer = null;
+	export let partnerShowTerms = true;
 	export let buttonText = 'Place Order';
 
 	function createTermsArray() {
+		// Hide entire terms box if partner has disabled terms
+		if (!partnerShowTerms) return null;
+
 		const partnerName = partnerDisclaimer?.displayName || 'Partner';
 		const merchantName = $cart?.display_name || 'Merchant';
 		const anchors = [];
+		const hasPartnerTerms =
+			!!partnerDisclaimer?.termsOfUse || !!partnerDisclaimer?.privacyPolicy;
 
+		// Add partner terms if they exist
 		if (partnerDisclaimer?.termsOfUse) {
 			anchors.push({
 				label: `${partnerName} Terms of Service`,
@@ -106,6 +113,8 @@
 				url: partnerDisclaimer.privacyPolicy
 			});
 		}
+
+		// Add merchant terms if they exist
 		if (termsOfUse) {
 			anchors.push({ label: `${merchantName} Terms of Service`, url: termsOfUse });
 		}
@@ -115,7 +124,7 @@
 
 		if (anchors.length === 0) return null;
 
-		return { partnerName, merchantName, anchors };
+		return { partnerName, merchantName, anchors, hasPartnerTerms };
 	}
 
 	// Controls the express payment buttons

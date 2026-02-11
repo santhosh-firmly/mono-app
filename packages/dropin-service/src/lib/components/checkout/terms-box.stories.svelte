@@ -37,22 +37,12 @@
 	</div>
 {/snippet}
 
-<Story name="Default" {template} />
-
-<Story
-	name="Partner Only"
-	args={{
-		anchors: [
-			{ label: 'USA Today Terms of Service', url: 'https://www.usatoday.com/terms' },
-			{ label: 'USA Today Privacy Policy', url: 'https://www.usatoday.com/privacy-policy' }
-		]
-	}}
-	{template}
-/>
+<Story name="Both Partner and Merchant" {template} />
 
 <Story
 	name="Merchant Only"
 	args={{
+		partnerName: '',
 		anchors: [
 			{
 				label: 'Allbirds Terms of Service',
