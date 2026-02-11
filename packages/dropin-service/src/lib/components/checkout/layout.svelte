@@ -71,7 +71,7 @@
 	{/if}
 
 	<main
-		class="relative flex min-h-0 flex-1 flex-col @3xl:mx-auto @3xl:block @3xl:max-w-250 @3xl:py-12"
+		class="relative flex min-h-0 flex-1 flex-col @3xl:mx-auto @3xl:block @3xl:w-full @3xl:max-w-250 @3xl:py-12"
 	>
 		<div class="absolute inset-y-0 left-1/2 hidden w-px bg-gray-200 @3xl:block"></div>
 		<form

@@ -48,7 +48,8 @@
 	let prevFeatures = $state({
 		promoCodes: true,
 		paypal: true,
-		clickToPay: true
+		clickToPay: true,
+		terms: true
 	});
 	let currentCartState = $state(null);
 	let prevTheme = $state(null);
@@ -59,9 +60,11 @@
 
 	let isBuyNow = $derived(configurator?.product === 'buyNow');
 	let browserUrl = $derived(isBuyNow ? 'merchant-store.com/article' : 'checkout.firmly.ai');
-	let partnerPresentation = $derived({
+	let partner = $derived({
 		displayName: configurator?.theme?.merchantName,
-		largeLogo: configurator?.theme?.largeLogo
+		largeLogo: configurator?.theme?.largeLogo,
+		termsOfUse: configurator?.features?.terms ? 'https://www.firmly.ai/terms' : null,
+		privacyPolicy: configurator?.features?.terms ? 'https://www.firmly.ai/privacy' : null
 	});
 
 	function reloadCheckoutState() {
@@ -84,7 +87,8 @@
 			...baseCart,
 			features: {
 				promo_codes: configurator.features.promoCodes,
-				paypal: configurator.features.paypal
+				paypal: configurator.features.paypal,
+				terms: configurator.features.terms
 			},
 			shop_properties: {
 				paypal: configurator.features.paypal
@@ -134,7 +138,8 @@
 		const changed =
 			features.promoCodes !== prevFeatures.promoCodes ||
 			features.paypal !== prevFeatures.paypal ||
-			features.clickToPay !== prevFeatures.clickToPay;
+			features.clickToPay !== prevFeatures.clickToPay ||
+			features.terms !== prevFeatures.terms;
 
 		if (changed) {
 			if (features.clickToPay !== prevFeatures.clickToPay) {
@@ -164,6 +169,16 @@
 				});
 			}
 
+			if (features.terms !== prevFeatures.terms) {
+				untrack(() => {
+					if (!merchant) return;
+					merchant.termsOfUse = features.terms ? 'https://demo-store.com/terms' : null;
+					merchant.privacyPolicy = features.terms
+						? 'https://demo-store.com/privacy'
+						: null;
+				});
+			}
+
 			prevFeatures = { ...features };
 
 			untrack(() => {
@@ -178,7 +193,8 @@
 					...checkout.cart,
 					features: {
 						promo_codes: features.promoCodes,
-						paypal: features.paypal
+						paypal: features.paypal,
+						terms: features.terms
 					}
 				});
 			});
@@ -268,7 +284,9 @@
 						primary: configurator.theme.primaryColor,
 						action: configurator.theme.actionColor
 					}
-				}
+				},
+				termsOfUse: configurator.features.terms ? 'https://demo-store.com/terms' : null,
+				privacyPolicy: configurator.features.terms ? 'https://demo-store.com/privacy' : null
 			});
 
 			setConfiguratorForC2PMock(configurator);
@@ -349,7 +367,7 @@
 							{paypal}
 							{merchant}
 							notices={notices?.notices}
-							{partnerPresentation}
+							{partner}
 							isFullscreen={false}
 							onGoBack={() => getBuyNow().goToPdp()}
 							onDismissNotice={(id) => notices?.dismiss(id)}
@@ -368,6 +386,7 @@
 							{c2p}
 							{paypal}
 							{merchant}
+							{partner}
 							notices={notices?.notices}
 							isFullscreen={false}
 							onGoBack={() => getBuyNow().close()}
@@ -383,8 +402,10 @@
 					{c2p}
 					{paypal}
 					{merchant}
+					{partner}
 					notices={notices?.notices}
 					isFullscreen={true}
+					onClose={() => storeResetKey++}
 					onDismissNotice={(id) => notices?.dismiss(id)}
 				/>
 			{/if}

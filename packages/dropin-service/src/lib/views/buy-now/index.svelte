@@ -10,7 +10,7 @@
 		paypal = null,
 		merchant = null,
 		notices = null,
-		partnerPresentation = null,
+		partner = null,
 		isFullscreen = false,
 		onGoBack = () => {},
 		onDismissNotice = () => {},
@@ -35,7 +35,7 @@
 	/>
 {:else if buyNow.mode === 'pdp'}
 	<div class="flex h-full w-full flex-col">
-		<PdpHeader {partnerPresentation} onBackClick={() => buyNow.close()} />
+		<PdpHeader {partner} onBackClick={() => buyNow.close()} />
 		<div class="flex-1 overflow-auto">
 			{@render pdpContent?.()}
 		</div>
@@ -47,6 +47,7 @@
 			{c2p}
 			{paypal}
 			{merchant}
+			{partner}
 			{notices}
 			{onGoBack}
 			onClose={() => buyNow.close()}

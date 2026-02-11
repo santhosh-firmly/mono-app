@@ -16,7 +16,7 @@ describe('BuyNow Header', () => {
 	it('renders default header with FIRMLY text', () => {
 		const { container } = render(Header, {
 			props: {
-				partnerPresentation: null,
+				partner: null,
 				onBackClick: vi.fn()
 			}
 		});
@@ -26,13 +26,13 @@ describe('BuyNow Header', () => {
 	});
 
 	it('renders partner display name when provided', () => {
-		const partnerPresentation = {
+		const partner = {
 			displayName: 'Test Partner'
 		};
 
 		const { container } = render(Header, {
 			props: {
-				partnerPresentation,
+				partner,
 				onBackClick: vi.fn()
 			}
 		});
@@ -42,14 +42,14 @@ describe('BuyNow Header', () => {
 	});
 
 	it('renders partner logo when provided', () => {
-		const partnerPresentation = {
+		const partner = {
 			displayName: 'Test Partner',
 			largeLogo: 'https://example.com/logo.png'
 		};
 
 		const { container } = render(Header, {
 			props: {
-				partnerPresentation,
+				partner,
 				onBackClick: vi.fn()
 			}
 		});
@@ -68,7 +68,7 @@ describe('BuyNow Header', () => {
 
 		const { container } = render(Header, {
 			props: {
-				partnerPresentation: null,
+				partner: null,
 				onBackClick: handleBackClick
 			}
 		});
@@ -82,7 +82,7 @@ describe('BuyNow Header', () => {
 	it('renders back arrow SVG', () => {
 		const { container } = render(Header, {
 			props: {
-				partnerPresentation: null,
+				partner: null,
 				onBackClick: vi.fn()
 			}
 		});
@@ -96,7 +96,7 @@ describe('BuyNow Header', () => {
 	it('applies correct header styles', () => {
 		const { container } = render(Header, {
 			props: {
-				partnerPresentation: null,
+				partner: null,
 				onBackClick: vi.fn()
 			}
 		});
@@ -107,10 +107,10 @@ describe('BuyNow Header', () => {
 		expect(header).toHaveClass('shadow');
 	});
 
-	it('renders with empty partnerPresentation', () => {
+	it('renders with empty partner', () => {
 		const { container } = render(Header, {
 			props: {
-				partnerPresentation: {},
+				partner: {},
 				onBackClick: vi.fn()
 			}
 		});
@@ -119,14 +119,14 @@ describe('BuyNow Header', () => {
 	});
 
 	it('displays logo with correct alt text when logo is provided', () => {
-		const partnerPresentation = {
+		const partner = {
 			displayName: 'My Store',
 			largeLogo: 'https://example.com/store-logo.png'
 		};
 
 		const { container } = render(Header, {
 			props: {
-				partnerPresentation,
+				partner,
 				onBackClick: vi.fn()
 			}
 		});
@@ -139,7 +139,7 @@ describe('BuyNow Header', () => {
 	it('renders powered by firmly text in all cases', () => {
 		const { container, rerender } = render(Header, {
 			props: {
-				partnerPresentation: null,
+				partner: null,
 				onBackClick: vi.fn()
 			}
 		});
@@ -148,7 +148,7 @@ describe('BuyNow Header', () => {
 
 		rerender({
 			props: {
-				partnerPresentation: { displayName: 'Partner' },
+				partner: { displayName: 'Partner' },
 				onBackClick: vi.fn()
 			}
 		});
@@ -157,7 +157,7 @@ describe('BuyNow Header', () => {
 
 		rerender({
 			props: {
-				partnerPresentation: {
+				partner: {
 					displayName: 'Partner',
 					largeLogo: 'https://example.com/logo.png'
 				},
@@ -169,13 +169,13 @@ describe('BuyNow Header', () => {
 	});
 
 	it('uses FIRMLY as default when displayName is empty', () => {
-		const partnerPresentation = {
+		const partner = {
 			displayName: ''
 		};
 
 		const { container } = render(Header, {
 			props: {
-				partnerPresentation,
+				partner,
 				onBackClick: vi.fn()
 			}
 		});
@@ -186,7 +186,7 @@ describe('BuyNow Header', () => {
 	it('back button has correct accessibility attributes', () => {
 		const { container } = render(Header, {
 			props: {
-				partnerPresentation: null,
+				partner: null,
 				onBackClick: vi.fn()
 			}
 		});

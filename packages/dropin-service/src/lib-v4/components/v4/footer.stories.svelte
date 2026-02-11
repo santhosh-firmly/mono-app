@@ -32,62 +32,56 @@
 />
 
 <Story
-	name="Merchant Terms Only"
+	name="USA Today - Expandable Terms"
 	args={{
-		terms: [
-			{
-				text: 'By selecting "Place Order", I agree to the merchant´s Terms of Use and Privacy Policy.',
-				links: {
-					termsOfUse: 'https://example.com/terms',
-					privacyPolicy: 'https://example.com/privacy'
+		terms: {
+			partnerName: 'USA Today',
+			merchantName: 'Allbirds',
+			hasPartnerTerms: true,
+			anchors: [
+				{ label: 'USA Today Terms of Service', url: 'https://www.usatoday.com/terms' },
+				{
+					label: 'USA Today Privacy Policy',
+					url: 'https://www.usatoday.com/privacy-policy'
+				},
+				{
+					label: 'Allbirds Terms of Service',
+					url: 'https://www.allbirds.com/pages/terms-of-use'
+				},
+				{
+					label: 'Allbirds Privacy Policy',
+					url: 'https://www.allbirds.com/pages/privacy-policy'
 				}
-			}
-		],
+			]
+		},
 		total: {
 			currency: 'USD',
-			value: 99.99
+			value: 133.33
 		}
 	}}
 />
 
 <Story
-	name="Partner Disclaimer"
+	name="Merchant Only - Expandable Terms"
 	args={{
-		terms: [
-			{
-				text: 'By tapping "Buy Now", you agree that we can share information about you and your purchase transaction with our commerce partners to facilitate payment and with the merchant to fulfill the order. By completing this transaction you agree to our Terms of Service, Privacy Policy, and FTC compliance policy.',
-				links: {
-					termsOfService: 'https://cm.usatoday.com/terms/',
-					privacyPolicy: 'https://cm.usatoday.com/privacy',
-					ftcCompliance: null
+		terms: {
+			partnerName: '',
+			merchantName: 'Allbirds',
+			hasPartnerTerms: false,
+			anchors: [
+				{
+					label: 'Allbirds Terms of Service',
+					url: 'https://www.allbirds.com/pages/terms-of-use'
+				},
+				{
+					label: 'Allbirds Privacy Policy',
+					url: 'https://www.allbirds.com/pages/privacy-policy'
 				}
-			}
-		],
+			]
+		},
 		total: {
 			currency: 'USD',
-			value: 49.99
-		}
-	}}
-/>
-
-<Story
-	name="Multiple Terms"
-	args={{
-		terms: [
-			{
-				text: 'By tapping "Buy Now", you agree that we can share information about you and your purchase transaction with our commerce partners.'
-			},
-			{
-				text: 'By completing this transaction you agree to the merchant´s Terms of Use and Privacy Policy.',
-				links: {
-					termsOfUse: 'https://example.com/terms',
-					privacyPolicy: 'https://example.com/privacy'
-				}
-			}
-		],
-		total: {
-			currency: 'USD',
-			value: 29.99
+			value: 98.50
 		}
 	}}
 />

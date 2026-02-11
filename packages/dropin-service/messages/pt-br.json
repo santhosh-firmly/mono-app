@@ -35,6 +35,7 @@
 	"c2p_consent_link": "Click to Pay",
 	"c2p_consent_end": "para verificar se você possui cartões salvos",
 	"c2p_show_more": "Mostrar mais",
+	"terms_toggle_details": "Alternar detalhes dos termos",
 	"c2p_otp_message": "Um código de uso único pode ser enviado para este celular para confirmar sua identidade. Taxas de mensagem/dados podem ser aplicadas.",
 	"validation_name_required": "Nome é obrigatório",
 	"validation_name_first_last": "Nome deve conter pelo menos nome e sobrenome",

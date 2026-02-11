@@ -87,32 +87,44 @@
 	export let isProduction;
 	export let isC2PSDKInitialized = false;
 	export let partnerDisclaimer = null;
+	export let partnerShowTerms = true;
 	export let buttonText = 'Place Order';
 
-	/**
-	 * Creates array of terms/disclaimers for footer
-	 * @returns {Array} Array of term objects
-	 */
 	function createTermsArray() {
-		const terms = [];
+		// Hide entire terms box if partner has disabled terms
+		if (!partnerShowTerms) return null;
 
-		// Add partner disclaimer if present
-		if (partnerDisclaimer) {
-			terms.push(partnerDisclaimer);
+		const partnerName = partnerDisclaimer?.displayName || 'Partner';
+		const merchantName = $cart?.display_name || 'Merchant';
+		const anchors = [];
+		const hasPartnerTerms =
+			!!partnerDisclaimer?.termsOfUse || !!partnerDisclaimer?.privacyPolicy;
+
+		// Add partner terms if they exist
+		if (partnerDisclaimer?.termsOfUse) {
+			anchors.push({
+				label: `${partnerName} Terms of Service`,
+				url: partnerDisclaimer.termsOfUse
+			});
 		}
-
-		// Add merchant terms if present
-		if (termsOfUse && privacyPolicy) {
-			terms.push({
-				text: 'By tapping "Buy Now", you agree to the seller`s Terms of Service, and Privacy Policy',
-				links: {
-					termsOfUse: termsOfUse,
-					privacyPolicy: privacyPolicy
-				}
+		if (partnerDisclaimer?.privacyPolicy) {
+			anchors.push({
+				label: `${partnerName} Privacy Policy`,
+				url: partnerDisclaimer.privacyPolicy
 			});
 		}
 
-		return terms;
+		// Add merchant terms if they exist
+		if (termsOfUse) {
+			anchors.push({ label: `${merchantName} Terms of Service`, url: termsOfUse });
+		}
+		if (privacyPolicy) {
+			anchors.push({ label: `${merchantName} Privacy Policy`, url: privacyPolicy });
+		}
+
+		if (anchors.length === 0) return null;
+
+		return { partnerName, merchantName, anchors, hasPartnerTerms };
 	}
 
 	// Controls the express payment buttons
