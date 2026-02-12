@@ -2,7 +2,8 @@ const globalConfig = {
 	workspaces: {
 		'.': {
 			ignoreBinaries: ['check-outdated'],
-			ignoreDependencies: ['wrangler']
+			ignoreDependencies: ['wrangler'],
+			ignore: ['e2e-api-tests/**']
 		},
 		'packages/*': {
 			paths: {
@@ -41,7 +42,8 @@ export default {
 			ignoreDependencies: [
 				...globalConfig.workspaces['packages/*'].ignoreDependencies,
 				'@firmly/eslint-config',
-				'@storybook/addon-themes'
+				'@storybook/addon-themes',
+				'@iconify-icons/mdi' 
 			],
 			ignoreUnresolved: [
 				...globalConfig.workspaces['packages/*'].ignoreUnresolved,
@@ -62,7 +64,9 @@ export default {
 				'./*.config.js',
 				'./*.config.cjs',
 				'**/__mocks__/**'
-			]
+			],
+			ignoreExports: ['*'],
+			ignoreBinaries: ['dev', 'ci', 'qa', 'uat', 'prod']
 		},
 		'packages/var-service': {
 			...globalConfig.workspaces['packages/*'],
