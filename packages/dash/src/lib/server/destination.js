@@ -833,43 +833,34 @@ export async function getMerchantMetrics({
 					? 'orders'
 					: 'revenue / NULLIF(orders, 0)';
 
-		let result;
-		if (unrestricted) {
-			result = await reporting
-				.prepare(
-					`SELECT
-						shop_id,
-						COALESCE(SUM(order_total), 0) as revenue,
-						COUNT(*) as orders
-					 FROM orders
-					 WHERE app_id = ?
-					   AND created_dt >= ?
-					   AND created_dt <= ?
-					 GROUP BY shop_id
-					 ORDER BY ${sqlSort} ${sortOrder}`
-				)
-				.bind(appId, periodStart, periodEnd)
-				.all();
-		} else {
+		const bindParams = [appId];
+		let shopClause = '';
+
+		if (!unrestricted) {
 			const merchants = accessible.map((m) => m.domain);
 			const placeholders = merchants.map(() => '?').join(',');
-			result = await reporting
-				.prepare(
-					`SELECT
-						shop_id,
-						COALESCE(SUM(order_total), 0) as revenue,
-						COUNT(*) as orders
-					 FROM orders
-					 WHERE app_id = ?
-					   AND shop_id IN (${placeholders})
-					   AND created_dt >= ?
-					   AND created_dt <= ?
-					 GROUP BY shop_id
-					 ORDER BY ${sqlSort} ${sortOrder}`
-				)
-				.bind(appId, ...merchants, periodStart, periodEnd)
-				.all();
+			shopClause = `AND shop_id IN (${placeholders})`;
+			bindParams.push(...merchants);
 		}
+
+		bindParams.push(periodStart, periodEnd);
+
+		const result = await reporting
+			.prepare(
+				`SELECT
+					shop_id,
+					COALESCE(SUM(order_total), 0) as revenue,
+					COUNT(*) as orders
+				 FROM orders
+				 WHERE app_id = ?
+				   ${shopClause}
+				   AND created_dt >= ?
+				   AND created_dt <= ?
+				 GROUP BY shop_id
+				 ORDER BY ${sqlSort} ${sortOrder}`
+			)
+			.bind(...bindParams)
+			.all();
 
 		// Build merchant display name map
 		const merchantMap = new Map(accessible.map((m) => [m.domain, m.displayName]));
