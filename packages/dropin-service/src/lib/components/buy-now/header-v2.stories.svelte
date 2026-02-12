@@ -2,11 +2,11 @@
 	import { defineMeta } from '@storybook/addon-svelte-csf';
 	import { fn } from '@storybook/test';
 
-	import Header from './header.svelte';
+	import HeaderV2 from './header-v2.svelte';
 
 	const { Story } = defineMeta({
-		title: 'BuyNow/Header',
-		component: Header,
+		title: 'BuyNow/Header V2',
+		component: HeaderV2,
 		parameters: {
 			layout: 'padded'
 		},
@@ -20,7 +20,7 @@
 </script>
 
 {#snippet template(args)}
-	<Header {...args} />
+	<HeaderV2 {...args} />
 {/snippet}
 
 <Story
@@ -40,8 +40,4 @@
 	{template}
 />
 
-<Story
-	name="Default Fallback"
-	args={{ presentation: null }}
-	{template}
-/>
+<Story name="Default Fallback" args={{ presentation: null }} {template} />

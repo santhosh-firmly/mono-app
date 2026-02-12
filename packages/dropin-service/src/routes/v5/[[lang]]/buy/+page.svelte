@@ -29,11 +29,6 @@
 	let merchant = initializeMerchant(untrack(() => data.merchantPresentation));
 	let notices = getNotices();
 
-	let presentation = $derived({
-		...data.partnerPresentation,
-		largeLogo: data.merchantPresentation?.largeLogo || data.partnerPresentation?.largeLogo
-	});
-
 	onMount(() => {
 		pdp.initialize(data, version, $page.url.searchParams);
 	});
@@ -57,7 +52,7 @@
 	{paypal}
 	{merchant}
 	notices={notices.notices}
-	{presentation}
+	partner={data.partnerPresentation}
 	onGoBack={() => pdp.goBack()}
 	onDismissNotice={(id) => notices.dismiss(id)}
 	isFullscreen={buyNow.layoutType === 'fullscreen'}

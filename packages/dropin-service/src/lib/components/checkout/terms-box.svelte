@@ -23,7 +23,7 @@
 					class="mt-2 flex flex-col items-start gap-1.5 border-t border-gray-200 pt-2"
 					transition:slide={{ duration: 150, axis: 'y' }}
 				>
-					{#each anchors as anchor}
+					{#each anchors as anchor, i (i)}
 						<a
 							class="text-sm underline"
 							target="_blank"

@@ -4,7 +4,8 @@ import userEvent from '@testing-library/user-event';
 import Header from '$lib/components/buy-now/header.svelte';
 
 vi.mock('$lib/paraglide/messages', () => ({
-	return_to: ({ partner }) => `Return to ${partner}`
+	go_back: () => 'Go back',
+	powered_by: () => 'powered by'
 }));
 
 describe('BuyNow Header', () => {
@@ -15,38 +16,40 @@ describe('BuyNow Header', () => {
 	it('renders default header with FIRMLY text', () => {
 		const { container } = render(Header, {
 			props: {
-				presentation: null,
+				partner: null,
 				onBackClick: vi.fn()
 			}
 		});
 
 		expect(container.textContent).toContain('FIRMLY');
+		expect(container.textContent).toContain('powered by firmly');
 	});
 
 	it('renders partner display name when provided', () => {
-		const presentation = {
+		const partner = {
 			displayName: 'Test Partner'
 		};
 
 		const { container } = render(Header, {
 			props: {
-				presentation,
+				partner,
 				onBackClick: vi.fn()
 			}
 		});
 
 		expect(container.textContent).toContain('Test Partner');
+		expect(container.textContent).not.toContain('FIRMLY');
 	});
 
 	it('renders partner logo when provided', () => {
-		const presentation = {
+		const partner = {
 			displayName: 'Test Partner',
 			largeLogo: 'https://example.com/logo.png'
 		};
 
 		const { container } = render(Header, {
 			props: {
-				presentation,
+				partner,
 				onBackClick: vi.fn()
 			}
 		});
@@ -54,7 +57,9 @@ describe('BuyNow Header', () => {
 		const logo = container.querySelector('img');
 		expect(logo).toBeInTheDocument();
 		expect(logo).toHaveAttribute('src', 'https://example.com/logo.png');
-		expect(logo).toHaveClass('h-8');
+		expect(logo).toHaveClass('h-4');
+
+		expect(container.querySelector('span.text-sm')).not.toBeInTheDocument();
 	});
 
 	it('calls onBackClick when back button is clicked', async () => {
@@ -63,50 +68,49 @@ describe('BuyNow Header', () => {
 
 		const { container } = render(Header, {
 			props: {
-				presentation: null,
+				partner: null,
 				onBackClick: handleBackClick
 			}
 		});
 
-		const backButton = container.querySelector('button');
+		const backButton = container.querySelector('button[aria-label="Go back"]');
 		await user.click(backButton);
 
 		expect(handleBackClick).toHaveBeenCalledTimes(1);
 	});
 
-	it('renders return to button with partner name', () => {
-		const presentation = {
-			displayName: 'My Store'
-		};
-
+	it('renders back arrow SVG', () => {
 		const { container } = render(Header, {
 			props: {
-				presentation,
+				partner: null,
 				onBackClick: vi.fn()
 			}
 		});
 
-		const button = container.querySelector('button');
-		expect(button.textContent).toContain('Return to My Store');
+		const svg = container.querySelector('svg');
+		expect(svg).toBeInTheDocument();
+		expect(svg).toHaveAttribute('width', '17');
+		expect(svg).toHaveAttribute('height', '16');
 	});
 
-	it('applies correct container styles', () => {
+	it('applies correct header styles', () => {
 		const { container } = render(Header, {
 			props: {
-				presentation: null,
+				partner: null,
 				onBackClick: vi.fn()
 			}
 		});
 
-		const headerDiv = container.firstChild;
-		expect(headerDiv).toHaveClass('z-10');
-		expect(headerDiv).toHaveClass('bg-white');
+		const header = container.querySelector('header');
+		expect(header).toHaveClass('z-10');
+		expect(header).toHaveClass('h-12');
+		expect(header).toHaveClass('shadow');
 	});
 
-	it('renders with empty presentation', () => {
+	it('renders with empty partner', () => {
 		const { container } = render(Header, {
 			props: {
-				presentation: {},
+				partner: {},
 				onBackClick: vi.fn()
 			}
 		});
@@ -115,14 +119,14 @@ describe('BuyNow Header', () => {
 	});
 
 	it('displays logo with correct alt text when logo is provided', () => {
-		const presentation = {
+		const partner = {
 			displayName: 'My Store',
 			largeLogo: 'https://example.com/store-logo.png'
 		};
 
 		const { container } = render(Header, {
 			props: {
-				presentation,
+				partner,
 				onBackClick: vi.fn()
 			}
 		});
@@ -132,14 +136,46 @@ describe('BuyNow Header', () => {
 		expect(logo).toHaveAttribute('alt', 'My Store');
 	});
 
+	it('renders powered by firmly text in all cases', () => {
+		const { container, rerender } = render(Header, {
+			props: {
+				partner: null,
+				onBackClick: vi.fn()
+			}
+		});
+
+		expect(container.textContent).toContain('powered by firmly');
+
+		rerender({
+			props: {
+				partner: { displayName: 'Partner' },
+				onBackClick: vi.fn()
+			}
+		});
+
+		expect(container.textContent).toContain('powered by firmly');
+
+		rerender({
+			props: {
+				partner: {
+					displayName: 'Partner',
+					largeLogo: 'https://example.com/logo.png'
+				},
+				onBackClick: vi.fn()
+			}
+		});
+
+		expect(container.textContent).toContain('powered by firmly');
+	});
+
 	it('uses FIRMLY as default when displayName is empty', () => {
-		const presentation = {
+		const partner = {
 			displayName: ''
 		};
 
 		const { container } = render(Header, {
 			props: {
-				presentation,
+				partner,
 				onBackClick: vi.fn()
 			}
 		});
@@ -150,26 +186,13 @@ describe('BuyNow Header', () => {
 	it('back button has correct accessibility attributes', () => {
 		const { container } = render(Header, {
 			props: {
-				presentation: null,
+				partner: null,
 				onBackClick: vi.fn()
 			}
 		});
 
 		const backButton = container.querySelector('button');
 		expect(backButton.tagName).toBe('BUTTON');
-		expect(backButton).toHaveAttribute('aria-label', 'Return to FIRMLY');
-	});
-
-	it('renders gradient overlay for blur effect', () => {
-		const { container } = render(Header, {
-			props: {
-				presentation: null,
-				onBackClick: vi.fn()
-			}
-		});
-
-		const gradientOverlay = container.querySelector('.translate-y-full');
-		expect(gradientOverlay).toBeInTheDocument();
-		expect(gradientOverlay).toHaveClass('pointer-events-none');
+		expect(backButton).toHaveAttribute('aria-label', 'Go back');
 	});
 });
