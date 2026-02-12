@@ -2,7 +2,7 @@ const globalConfig = {
 	workspaces: {
 		'.': {
 			ignoreBinaries: ['check-outdated'],
-			ignoreDependencies: ['wrangler'],
+			ignoreDependencies: ['wrangler', '@iconify-icons/mdi'],
 			ignore: ['e2e-api-tests/**']
 		},
 		'packages/*': {
