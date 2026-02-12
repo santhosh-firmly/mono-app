@@ -65,7 +65,6 @@ export default {
 				'./*.config.cjs',
 				'**/__mocks__/**'
 			],
-			ignoreExports: ['*'],
 			ignoreBinaries: ['dev', 'ci', 'qa', 'uat', 'prod']
 		},
 		'packages/var-service': {
