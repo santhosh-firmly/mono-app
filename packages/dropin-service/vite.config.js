@@ -41,7 +41,7 @@ export default defineConfig((ctx) => {
 	const isStorybook =
 		process.env.npm_lifecycle_script?.includes('storybook') || process.env.STORYBOOK === 'true';
 
-	const isDev = !isBuild && !isStorybook;
+	const isDev = !isBuild && !isStorybook && !ctx.isPreview;
 
 	if (isDev) {
 		plugins.unshift(cloudflareModuleStubs());
