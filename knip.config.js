@@ -63,7 +63,9 @@ export default {
 				'./src/lib/components/ui/**', // shadcn components
 				'./*.config.js',
 				'./*.config.cjs',
-				'**/__mocks__/**'
+				'**/__mocks__/**',
+			    './src/lib/api/**',
+                './src/lib/components/**'
 			],
 			ignoreBinaries: ['dev', 'ci', 'qa', 'uat', 'prod']
 		},
