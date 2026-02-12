@@ -45,11 +45,12 @@ export async function load({ locals, params, platform }) {
 		const authInfo = locals.authInfo || {};
 
 		// Get all destinations and all merchants for the selector
-		const [allDestinationsResult, allMerchantsResult, merchants] = await Promise.all([
+		const [allDestinationsResult, allMerchantsResult, accessibleResult] = await Promise.all([
 			firmlyConfigs.prepare('SELECT key, info FROM app_identifiers ORDER BY key ASC').all(),
 			firmlyConfigs.prepare('SELECT key, info FROM stores ORDER BY key ASC').all(),
 			getAccessibleMerchants({ platform, appId: app_id })
 		]);
+		const merchants = accessibleResult.merchants;
 
 		const allDestinations = (allDestinationsResult.results || []).map((r) => {
 			let info = {};
@@ -119,7 +120,7 @@ export async function load({ locals, params, platform }) {
 	}
 
 	// Get user profile, destination profile, merchant access, and pending invites in parallel
-	const [profile, destinationProfile, merchantAccessData, pendingInvites, merchants] =
+	const [profile, destinationProfile, merchantAccessData, pendingInvites, accessibleResult] =
 		await Promise.all([
 			getProfile({ platform, userId }),
 			getDestinationProfile({ platform, appId: app_id }),
@@ -127,6 +128,7 @@ export async function load({ locals, params, platform }) {
 			getPendingInvites({ platform, userId }),
 			getAccessibleMerchants({ platform, appId: app_id })
 		]);
+	const merchants = accessibleResult.merchants;
 
 	// Normalize destination access data
 	const normalizedDestinationAccess = destinationAccess.map((access) => ({

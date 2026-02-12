@@ -685,10 +685,14 @@ export async function createDestinationAuditLog({
 
 /**
  * Get all merchants a destination has access to.
+ * If restrictMerchantAccess is false, returns ALL merchants with unrestricted flag.
+ * If restrictMerchantAccess is true (or undefined for backwards compatibility),
+ * returns only merchants explicitly enabled in the merchants map.
+ *
  * @param {Object} params
  * @param {Object} params.platform - SvelteKit platform object
  * @param {string} params.appId - Destination app_id
- * @returns {Promise<Array>} List of merchant domains
+ * @returns {Promise<{merchants: Array, unrestricted: boolean}>}
  */
 export async function getAccessibleMerchants({ platform, appId }) {
 	try {
@@ -704,17 +708,39 @@ export async function getAccessibleMerchants({ platform, appId }) {
 			.first();
 
 		if (!partnerResult?.info) {
-			return [];
+			return { merchants: [], unrestricted: false };
 		}
 
 		let partnerConfig = {};
 		try {
 			partnerConfig = JSON.parse(partnerResult.info);
 		} catch {
-			return [];
+			return { merchants: [], unrestricted: false };
 		}
 
-		// Extract enabled merchant domains from the merchants map
+		// If restrictMerchantAccess is false, return ALL merchants
+		if (partnerConfig.restrictMerchantAccess === false) {
+			const allStoresResult = await firmlyConfigs
+				.prepare('SELECT key, info FROM stores ORDER BY key ASC')
+				.all();
+
+			const merchants = (allStoresResult.results || []).map((row) => {
+				let storeInfo = {};
+				try {
+					storeInfo = JSON.parse(row.info || '{}');
+				} catch {
+					// Use defaults
+				}
+				return {
+					domain: row.key,
+					displayName: storeInfo.display_name || row.key
+				};
+			});
+
+			return { merchants, unrestricted: true };
+		}
+
+		// restrictMerchantAccess is true or undefined - use explicit merchants list
 		const enabledMerchants = [];
 		if (partnerConfig.merchants && typeof partnerConfig.merchants === 'object') {
 			for (const [domain, enabled] of Object.entries(partnerConfig.merchants)) {
@@ -725,7 +751,7 @@ export async function getAccessibleMerchants({ platform, appId }) {
 		}
 
 		if (enabledMerchants.length === 0) {
-			return [];
+			return { merchants: [], unrestricted: false };
 		}
 
 		// Get store info for each enabled merchant
@@ -746,16 +772,18 @@ export async function getAccessibleMerchants({ platform, appId }) {
 			storeMap.set(row.key, storeInfo);
 		}
 
-		return enabledMerchants.map((domain) => {
+		const merchants = enabledMerchants.map((domain) => {
 			const storeInfo = storeMap.get(domain) || {};
 			return {
 				domain,
 				displayName: storeInfo.display_name || domain
 			};
 		});
+
+		return { merchants, unrestricted: false };
 	} catch (error) {
 		console.error('Error getting accessible merchants:', error);
-		return [];
+		return { merchants: [], unrestricted: false };
 	}
 }
 
@@ -785,13 +813,13 @@ export async function getMerchantMetrics({
 		}
 
 		// Get accessible merchants
-		const accessible = await getAccessibleMerchants({ platform, appId });
-		if (accessible.length === 0) {
+		const { merchants: accessible, unrestricted } = await getAccessibleMerchants({
+			platform,
+			appId
+		});
+		if (accessible.length === 0 && !unrestricted) {
 			return [];
 		}
-
-		const merchants = accessible.map((m) => m.domain);
-		const placeholders = merchants.map(() => '?').join(',');
 
 		// Validate sort field
 		const validSortFields = ['revenue', 'orders', 'aov'];
@@ -805,38 +833,74 @@ export async function getMerchantMetrics({
 					? 'orders'
 					: 'revenue / NULLIF(orders, 0)';
 
-		const result = await reporting
-			.prepare(
-				`SELECT
-					shop_id,
-					COALESCE(SUM(order_total), 0) as revenue,
-					COUNT(*) as orders
-				 FROM orders
-				 WHERE app_id = ?
-				   AND shop_id IN (${placeholders})
-				   AND created_dt >= ?
-				   AND created_dt <= ?
-				 GROUP BY shop_id
-				 ORDER BY ${sqlSort} ${sortOrder}`
-			)
-			.bind(appId, ...merchants, periodStart, periodEnd)
-			.all();
+		let result;
+		if (unrestricted) {
+			result = await reporting
+				.prepare(
+					`SELECT
+						shop_id,
+						COALESCE(SUM(order_total), 0) as revenue,
+						COUNT(*) as orders
+					 FROM orders
+					 WHERE app_id = ?
+					   AND created_dt >= ?
+					   AND created_dt <= ?
+					 GROUP BY shop_id
+					 ORDER BY ${sqlSort} ${sortOrder}`
+				)
+				.bind(appId, periodStart, periodEnd)
+				.all();
+		} else {
+			const merchants = accessible.map((m) => m.domain);
+			const placeholders = merchants.map(() => '?').join(',');
+			result = await reporting
+				.prepare(
+					`SELECT
+						shop_id,
+						COALESCE(SUM(order_total), 0) as revenue,
+						COUNT(*) as orders
+					 FROM orders
+					 WHERE app_id = ?
+					   AND shop_id IN (${placeholders})
+					   AND created_dt >= ?
+					   AND created_dt <= ?
+					 GROUP BY shop_id
+					 ORDER BY ${sqlSort} ${sortOrder}`
+				)
+				.bind(appId, ...merchants, periodStart, periodEnd)
+				.all();
+		}
 
-		// Include merchants with no orders
+		// Build merchant display name map
+		const merchantMap = new Map(accessible.map((m) => [m.domain, m.displayName]));
+
+		// Include merchants with no orders (only for restricted mode where we know the full list)
 		const resultMap = new Map(
 			(result.results || []).map((r) => [r.shop_id, { revenue: r.revenue, orders: r.orders }])
 		);
 
-		let metrics = accessible.map((m) => {
-			const data = resultMap.get(m.domain) || { revenue: 0, orders: 0 };
-			return {
-				domain: m.domain,
-				displayName: m.displayName,
-				totalRevenue: data.revenue,
-				totalOrders: data.orders,
-				aov: data.orders > 0 ? data.revenue / data.orders : 0
-			};
-		});
+		let metrics;
+		if (unrestricted) {
+			// For unrestricted, build metrics from query results (we don't have a full merchant list to pad)
+			metrics = (result.results || []).map((r) => ({
+				domain: r.shop_id,
+				displayName: merchantMap.get(r.shop_id) || r.shop_id,
+				totalRevenue: r.revenue || 0,
+				totalOrders: r.orders || 0,
+				aov: r.orders > 0 ? r.revenue / r.orders : 0
+			}));
+		} else {
+			metrics = accessible.map((m) => {
+				const data = resultMap.get(m.domain) || { revenue: 0, orders: 0 };
+				return {
+					domain: m.domain,
+					displayName: m.displayName,
+					totalRevenue: data.revenue,
+					totalOrders: data.orders,
+					aov: data.orders > 0 ? data.revenue / data.orders : 0
+				};
+			});
+		}
 
 		// Sort by name if requested (can't do in SQL for display name)
 		if (sort === 'name') {

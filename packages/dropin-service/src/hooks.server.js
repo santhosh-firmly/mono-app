@@ -6,10 +6,9 @@ import { sequence } from '@sveltejs/kit/hooks';
 const handleParaglide = i18n.handle();
 
 export const handle = sequence(
-	(event) =>
-		handleMetrics(event, {
-			serviceName: pkg.name,
-			version: pkg.version
-		}),
+	handleMetrics({
+		serviceName: pkg.name,
+		version: pkg.version
+	}),
 	handleParaglide
 );
