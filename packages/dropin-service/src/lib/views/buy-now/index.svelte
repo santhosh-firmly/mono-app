@@ -1,6 +1,7 @@
 <script>
 	import { getBuyNow } from '$lib/states/buy-now.svelte.js';
 	import PdpHeader from '$lib/components/buy-now/header.svelte';
+	import PdpHeaderV2 from '$lib/components/buy-now/header-v2.svelte';
 	import ErrorView from '$lib/views/error.svelte';
 	import Checkout from '$lib/views/checkout/index.svelte';
 
@@ -35,7 +36,11 @@
 	/>
 {:else if buyNow.mode === 'pdp'}
 	<div class="flex h-full w-full flex-col">
-		<PdpHeader {partner} onBackClick={() => buyNow.close()} />
+		{#if partner?.headerVariant === 'v2'}
+			<PdpHeaderV2 presentation={partner} onBackClick={() => buyNow.close()} />
+		{:else}
+			<PdpHeader {partner} onBackClick={() => buyNow.close()} />
+		{/if}
 		<div class="flex-1 overflow-auto">
 			{@render pdpContent?.()}
 		</div>

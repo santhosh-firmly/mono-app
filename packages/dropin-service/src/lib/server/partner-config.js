@@ -33,6 +33,7 @@ export async function getPartnerPresentation(appId, env) {
 					displayName: presentation.name,
 					disclaimer: presentation.disclaimer,
 					buttonText: presentation.buttonText,
+					headerVariant: presentation.headerVariant || 'classic',
 					termsOfUse: presentation.termsOfUse || null,
 					privacyPolicy: presentation.privacyPolicy || null
 				}
@@ -54,6 +55,7 @@ function getDefaultPartnerPresentation() {
 			displayName: 'Firmly',
 			disclaimer: null,
 			buttonText: 'Place Order',
+			headerVariant: 'classic',
 			termsOfUse: null,
 			privacyPolicy: null
 		}

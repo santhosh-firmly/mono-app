@@ -52,6 +52,11 @@
 		{ value: 'fullscreen', label: 'Fullscreen' }
 	];
 
+	const headerVariantOptions = [
+		{ value: 'classic', label: 'Classic' },
+		{ value: 'v2', label: 'V2 - Centered' }
+	];
+
 	let languageOptions = $derived(
 		configurator.availableLanguages.map((lang) => ({
 			value: lang,
@@ -156,6 +161,17 @@
 											value={configurator.layoutType}
 											options={layoutOptions}
 											onchange={(type) => configurator.setLayoutType(type)}
+										/>
+									</section>
+									<section class="flex flex-col gap-2">
+										<h3 class="text-xs font-semibold text-gray-900">
+											Header Style
+										</h3>
+										<PanelSelect
+											value={configurator.headerVariant}
+											options={headerVariantOptions}
+											onchange={(variant) =>
+												configurator.setHeaderVariant(variant)}
 										/>
 									</section>
 									<div
