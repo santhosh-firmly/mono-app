@@ -183,5 +183,4 @@ describe('TermsBox', () => {
 			expect(links[1]).toHaveAttribute('href', 'https://merchant.com/privacy');
 		});
 	});
-
 });
