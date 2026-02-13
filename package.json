@@ -40,6 +40,7 @@
 		"svelte-headless-table/svelte": "^5.27.0"
 	},
 	"dependencies": {
-		"@iconify-icons/mdi": "^1.2.48"
+		"@iconify-icons/mdi": "^1.2.48",
+		"foundation": "github:goyalu/foundation#v1.15.2"
 	}
 }

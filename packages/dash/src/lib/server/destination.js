@@ -721,7 +721,7 @@ export async function getAccessibleMerchants({ platform, appId }) {
 		// If restrictMerchantAccess is false, return ALL merchants
 		if (partnerConfig.restrictMerchantAccess === false) {
 			const allStoresResult = await firmlyConfigs
-				.prepare('SELECT key, info FROM stores ORDER BY key ASC')
+				.prepare('SELECT key, info FROM stores WHERE soft_delete = false ORDER BY key ASC')
 				.all();
 
 			const merchants = (allStoresResult.results || []).map((row) => {
