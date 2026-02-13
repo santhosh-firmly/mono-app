@@ -1,27 +1,14 @@
 import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
-import { cloudflare } from '@cloudflare/vite-plugin';
+import { cloudflareDevConfig } from '@firmly/vite-config';
 import { defineConfig } from 'vite';
 
 export default defineConfig((ctx) => {
 	const plugins = [tailwindcss(), sveltekit()];
 
-	const isBuild = ctx.command === 'build';
-	const isPreview = ctx.isPreview === true;
-	const isTest = ctx.mode === 'test';
-	const isStorybook =
-		process.env.npm_lifecycle_script?.includes('storybook') || process.env.STORYBOOK === 'true';
-
-	if (!isBuild && !isPreview && !isTest && !isStorybook) {
-		plugins.push(
-			cloudflare({
-				configPath: './wrangler.jsonc'
-			})
-		);
-	}
-
 	return {
 		plugins,
+		...cloudflareDevConfig(ctx, { plugins }),
 		test: {
 			projects: [
 				{

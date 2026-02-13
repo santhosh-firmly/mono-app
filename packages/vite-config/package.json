@@ -1,0 +1,9 @@
+{
+	"name": "@firmly/vite-config",
+	"version": "0.43.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./index.js"
+	}
+}

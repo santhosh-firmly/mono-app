@@ -47,6 +47,7 @@
 	},
 	"dependencies": {
 		"@firmly/session-recorder": "^0.43.0",
+		"foundation": "github:goyalu/foundation#*",
 		"bits-ui": "^2.14.2",
 		"jose": "^5.10.0",
 		"phosphor-svelte": "^3.0.1",
