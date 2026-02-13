@@ -68,6 +68,7 @@
 	let partnerPresentation = $derived(data.partnerPresentation);
 	let partnerDisclaimer = $derived(data.partnerPresentation?.disclaimer);
 	let partnerButtonText = $derived(data.partnerPresentation?.buttonText);
+	let partnerShowTerms = $derived(data.partnerPresentation?.showTerms ?? true);
 
 	// Used for Layout configuration.
 	let layout = $state(FullscreenLayout);
@@ -813,6 +814,7 @@
 							{shouldUseVisa}
 							{isC2PSDKInitialized}
 							{partnerDisclaimer}
+							{partnerShowTerms}
 							buttonText={partnerButtonText || 'Place Order'}
 							on:back-click={onBackClick}
 							on:orderPlacedEvent={onOrderPlacedEvent}

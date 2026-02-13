@@ -37,7 +37,8 @@ class Configurator {
 	features = $state({
 		promoCodes: true,
 		paypal: true,
-		clickToPay: true
+		clickToPay: true,
+		terms: true
 	});
 	theme = $state({
 		merchantName: THEME_PRESETS.default.merchantName,

@@ -3,15 +3,15 @@
 
 	/**
 	 * @typedef {Object} BuyNowHeaderProps
-	 * @property {Object} partnerPresentation - Partner branding (displayName, largeLogo)
+	 * @property {Object} partner - Partner branding (displayName, largeLogo)
 	 * @property {Function} onBackClick - Handler for back button
 	 */
 
 	/** @type {BuyNowHeaderProps} */
-	let { partnerPresentation, onBackClick } = $props();
+	let { partner, onBackClick } = $props();
 
-	let displayName = $derived(partnerPresentation?.displayName || 'FIRMLY');
-	let largeLogo = $derived(partnerPresentation?.largeLogo);
+	let displayName = $derived(partner?.displayName || 'FIRMLY');
+	let largeLogo = $derived(partner?.largeLogo);
 </script>
 
 <header class="bg-background z-10 flex h-12 w-full shrink-0 items-center px-4 shadow">

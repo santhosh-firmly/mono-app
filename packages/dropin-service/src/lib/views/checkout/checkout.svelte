@@ -8,6 +8,7 @@
 	 * @property {Object} c2p - Click to Pay state object
 	 * @property {Object} [paypal] - PayPal state object
 	 * @property {Object} [merchant] - Merchant configuration and branding
+	 * @property {Object} [partner] - Partner configuration and branding
 	 * @property {HTMLElement} [paypalFastCheckoutButton] - PayPal fast checkout button element
 	 * @property {HTMLElement} [paypalPaymentButton] - PayPal payment button element
 	 * @property {Function} [onGoBack] - Handler for back navigation
@@ -36,6 +37,7 @@
 	import ShippingEmail from '$lib/components/checkout/shipping-email.svelte';
 	import CollapsedSection from '$lib/components/checkout/collapsed-section.svelte';
 	import PurchaseButton from '$lib/components/checkout/purchase.svelte';
+	import TermsBox from '$lib/components/checkout/terms-box.svelte';
 
 	import CheckoutPaymentOptionSwitch from '$lib/components/checkout/payment-option-switch.svelte';
 	import CheckoutPaymentForm from '$lib/components/checkout/payment-form.svelte';
@@ -52,6 +54,7 @@
 		c2p,
 		paypal = null,
 		merchant = null,
+		partner = null,
 		paypalFastCheckoutButton,
 		paypalPaymentButton,
 		onGoBack = () => {},
@@ -78,6 +81,48 @@
 		primary: merchant?.actionColor || '#333333',
 		background: merchant?.primaryColor || '#ffffff'
 	});
+
+	let resolvedPartnerName = $derived(partner?.displayName);
+	let resolvedMerchantName = $derived(checkout.cart?.display_name);
+	// Fullscreen is the standalone checkout; non-fullscreen is embedded in a buy-now flow
+	let isBuyFlow = $derived(!isFullscreen);
+
+	let termsAnchors = $derived.by(() => {
+		const anchors = [];
+		let hasPartnerTerms = false;
+
+		if (isBuyFlow) {
+			if (partner?.termsOfUse) {
+				anchors.push({
+					label: `${resolvedPartnerName} Terms of Service`,
+					url: partner.termsOfUse
+				});
+				hasPartnerTerms = true;
+			}
+			if (partner?.privacyPolicy) {
+				anchors.push({
+					label: `${resolvedPartnerName} Privacy Policy`,
+					url: partner.privacyPolicy
+				});
+				hasPartnerTerms = true;
+			}
+		}
+
+		if (merchant?.termsOfUse)
+			anchors.push({
+				label: `${resolvedMerchantName} Terms of Service`,
+				url: merchant.termsOfUse
+			});
+		if (merchant?.privacyPolicy)
+			anchors.push({
+				label: `${resolvedMerchantName} Privacy Policy`,
+				url: merchant.privacyPolicy
+			});
+
+		return { anchors, hasPartnerTerms };
+	});
+
+	let hasPartnerTerms = $derived(termsAnchors.hasPartnerTerms);
 
 	let isShippingCollapsed = $derived(!forceExpandShipping && checkout.shippingPreFilled);
 	let isShippingMethodCollapsed = $derived(
@@ -584,6 +629,16 @@
 			</SummaryCollapsible>
 			{@render CartSummary({ hiddenLineItems: true })}
 		</div>
+
+		{#if checkout.features.terms}
+			<div class="mt-4">
+				<TermsBox
+					partnerName={hasPartnerTerms ? resolvedPartnerName : ''}
+					merchantName={resolvedMerchantName}
+					anchors={termsAnchors.anchors}
+				/>
+			</div>
+		{/if}
 
 		<!-- Hide Place Order when CVV modal is showing (button is inside modal) -->
 		{#if !checkout.showPaymentCvvConfirmation}

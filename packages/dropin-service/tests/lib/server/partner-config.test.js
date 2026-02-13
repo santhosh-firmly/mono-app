@@ -31,7 +31,9 @@ describe('partner-config', () => {
 				smallLogo: null,
 				displayName: 'Firmly',
 				disclaimer: null,
-				buttonText: 'Place Order'
+				buttonText: 'Place Order',
+				termsOfUse: null,
+				privacyPolicy: null
 			}
 		};
 
@@ -60,7 +62,9 @@ describe('partner-config', () => {
 				smallLogo: 'https://partner.com/small.png',
 				name: 'Partner Name',
 				disclaimer: 'Some disclaimer',
-				buttonText: 'Buy Now'
+				buttonText: 'Buy Now',
+				termsOfUse: 'https://partner.com/terms',
+				privacyPolicy: 'https://partner.com/privacy'
 			};
 
 			accessData.mockResolvedValue(mockData);
@@ -74,7 +78,9 @@ describe('partner-config', () => {
 					smallLogo: 'https://partner.com/small.png',
 					displayName: 'Partner Name',
 					disclaimer: 'Some disclaimer',
-					buttonText: 'Buy Now'
+					buttonText: 'Buy Now',
+					termsOfUse: 'https://partner.com/terms',
+					privacyPolicy: 'https://partner.com/privacy'
 				}
 			});
 		});
@@ -85,7 +91,9 @@ describe('partner-config', () => {
 				smallLogo: 'https://partner.com/small.png',
 				name: 'Partner Name',
 				disclaimer: 'Some disclaimer',
-				buttonText: 'Buy Now'
+				buttonText: 'Buy Now',
+				termsOfUse: 'https://partner.com/terms',
+				privacyPolicy: 'https://partner.com/privacy'
 			});
 
 			accessData.mockResolvedValue(mockData);
@@ -99,7 +107,9 @@ describe('partner-config', () => {
 					smallLogo: 'https://partner.com/small.png',
 					displayName: 'Partner Name',
 					disclaimer: 'Some disclaimer',
-					buttonText: 'Buy Now'
+					buttonText: 'Buy Now',
+					termsOfUse: 'https://partner.com/terms',
+					privacyPolicy: 'https://partner.com/privacy'
 				}
 			});
 		});

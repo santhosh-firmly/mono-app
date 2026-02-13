@@ -10,6 +10,7 @@
 	 * @property {Object} c2p - Click to Pay state object
 	 * @property {Object} [paypal] - PayPal state object
 	 * @property {Object} [merchant] - Merchant configuration
+	 * @property {Object} [partner] - Partner configuration and branding
 	 * @property {Array} [notices] - Active notices to display
 	 * @property {HTMLElement} [paypalFastCheckoutButton] - PayPal fast checkout button element
 	 * @property {HTMLElement} [paypalPaymentButton] - PayPal payment button element
@@ -26,6 +27,7 @@
 		c2p,
 		paypal = null,
 		merchant = null,
+		partner = null,
 		notices = null,
 		paypalFastCheckoutButton,
 		paypalPaymentButton,
@@ -67,6 +69,7 @@
 			{c2p}
 			{paypal}
 			{merchant}
+			{partner}
 			{paypalFastCheckoutButton}
 			{paypalPaymentButton}
 			{onGoBack}
