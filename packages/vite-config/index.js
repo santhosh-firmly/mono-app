@@ -35,7 +35,7 @@ export function cloudflareDevConfig(ctx, { plugins }) {
 	const isStorybook =
 		process.env.npm_lifecycle_script?.includes('storybook') || process.env.STORYBOOK === 'true';
 
-	const isDev = ctx.command !== 'build' && !isStorybook && !ctx.isPreview;
+	const isDev = ctx.command !== 'build' && !isStorybook && !ctx.isPreview && ctx.mode !== 'test';
 
 	if (isDev) {
 		plugins.unshift(cloudflareModuleStubs());
