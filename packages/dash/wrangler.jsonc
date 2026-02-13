@@ -166,10 +166,6 @@
 			"account_id": "4e6de22bab2c64884e178b0be7559230",
 			"name": "dash",
 			"main": ".svelte-kit/cloudflare/_worker.js",
-			"assets": {
-				"directory": "./.svelte-kit/cloudflare",
-				"binding": "ASSETS"
-			},
 			"routes": [
 				{
 					"pattern": "dash.firmlyci.com/*",
