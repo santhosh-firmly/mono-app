@@ -25,8 +25,8 @@
 	},
 	"devDependencies": {
 		"@chromatic-com/storybook": "^3.2.5",
-		"@cloudflare/vite-plugin": "^0.1.17",
 		"@firmly/eslint-config": "^0.43.0",
+		"@firmly/vite-config": "^0.43.0",
 		"@storybook/addon-essentials": "^8.6.4",
 		"@storybook/addon-interactions": "^8.6.4",
 		"@storybook/addon-postcss": "^2.0.0",
@@ -72,7 +72,7 @@
 		"classnames": "^2.5.1",
 		"colord": "^2.9.3",
 		"flowbite": "^3.1.2",
-		"foundation": "github:goyalu/foundation#v1.12.18",
+		"foundation": "github:goyalu/foundation#*",
 		"json-stable-stringify": "^1.3.0",
 		"msw": "^2.7.3",
 		"sass-embedded": "^1.86.1",
