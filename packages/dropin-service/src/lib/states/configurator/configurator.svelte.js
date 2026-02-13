@@ -2,6 +2,7 @@ import { availableLanguageTags, languageTag, setLanguageTag } from '$lib/paragli
 
 const VALID_LAYOUT_TYPES = ['sidebar', 'popup', 'bottomsheet', 'fullscreen'];
 const VALID_PRODUCTS = ['checkout', 'buyNow'];
+const VALID_HEADER_VARIANTS = ['classic', 'v2'];
 
 const THEME_PRESETS = {
 	default: {
@@ -26,6 +27,7 @@ const THEME_PRESETS = {
 
 class Configurator {
 	product = $state('buyNow');
+	headerVariant = $state('classic');
 	pdpEnabled = $state(true);
 	pendingRequests = $state([]);
 	requestHistory = $state([]);
@@ -179,6 +181,12 @@ class Configurator {
 	setLayoutType(type) {
 		if (VALID_LAYOUT_TYPES.includes(type)) {
 			this.layoutType = type;
+		}
+	}
+
+	setHeaderVariant(variant) {
+		if (VALID_HEADER_VARIANTS.includes(variant)) {
+			this.headerVariant = variant;
 		}
 	}
 

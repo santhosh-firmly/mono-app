@@ -32,6 +32,7 @@ describe('partner-config', () => {
 				displayName: 'Firmly',
 				disclaimer: null,
 				buttonText: 'Place Order',
+				headerVariant: 'classic',
 				termsOfUse: null,
 				privacyPolicy: null
 			}
@@ -79,6 +80,7 @@ describe('partner-config', () => {
 					displayName: 'Partner Name',
 					disclaimer: 'Some disclaimer',
 					buttonText: 'Buy Now',
+					headerVariant: 'classic',
 					termsOfUse: 'https://partner.com/terms',
 					privacyPolicy: 'https://partner.com/privacy'
 				}
@@ -108,6 +110,7 @@ describe('partner-config', () => {
 					displayName: 'Partner Name',
 					disclaimer: 'Some disclaimer',
 					buttonText: 'Buy Now',
+					headerVariant: 'classic',
 					termsOfUse: 'https://partner.com/terms',
 					privacyPolicy: 'https://partner.com/privacy'
 				}

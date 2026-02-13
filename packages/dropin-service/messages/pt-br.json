@@ -81,6 +81,7 @@
 	"marketing_consent": "Concordo em receber comunicações de marketing",
 	"terms_and_conditions": "Termos e condições",
 	"go_back": "Voltar",
+	"return_to": "Voltar para {partner}",
 	"c2p_credit_debit": "Crédito/Débito",
 	"c2p_not_you": "Não é você?",
 	"c2p_found_cards": "O Click to Pay encontrou seus cartões vinculados",

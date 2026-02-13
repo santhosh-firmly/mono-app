@@ -63,6 +63,7 @@
 	let partner = $derived({
 		displayName: configurator?.theme?.merchantName,
 		largeLogo: configurator?.theme?.largeLogo,
+		headerVariant: configurator?.headerVariant,
 		termsOfUse: configurator?.features?.terms ? 'https://www.firmly.ai/terms' : null,
 		privacyPolicy: configurator?.features?.terms ? 'https://www.firmly.ai/privacy' : null
 	});
