@@ -71,7 +71,10 @@
 								{item.description || item.name || 'Item'}
 							</h4>
 							{#if item.platform_status}
-								<Badge class="flex-shrink-0" variant={getStatusVariant(item.platform_status)}>
+								<Badge
+									class="flex-shrink-0"
+									variant={getStatusVariant(item.platform_status)}
+								>
 									{item.platform_status}
 								</Badge>
 							{/if}

@@ -21,7 +21,9 @@
 		>firmly<span class="text-primary">.</span></span
 	>
 	{#if env && env !== 'prod'}
-		<span class="absolute -top-2 -right-6 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-primary-foreground">
+		<span
+			class="absolute -top-2 -right-6 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold uppercase leading-none text-primary-foreground"
+		>
 			{env}
 		</span>
 	{/if}

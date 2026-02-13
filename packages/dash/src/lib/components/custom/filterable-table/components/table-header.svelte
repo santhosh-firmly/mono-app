@@ -34,7 +34,9 @@
 								<ArrowDown class="h-4 w-4 min-w-fit text-purple-600" />
 							{/if}
 						{:else}
-							<ArrowUpDown class="h-4 w-4 min-w-fit text-gray-400 dark:text-gray-500" />
+							<ArrowUpDown
+								class="h-4 w-4 min-w-fit text-gray-400 dark:text-gray-500"
+							/>
 						{/if}
 					{/if}
 				</div>

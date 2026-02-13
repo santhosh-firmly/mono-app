@@ -12,7 +12,9 @@
 		class="absolute top-full right-0 z-50 mt-2 flex min-w-48 flex-col rounded-lg border border-gray-200 bg-white p-3 shadow-lg dark:border-gray-700 dark:bg-gray-800"
 		use:clickOutside={onClose}
 	>
-		<div class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">Select columns to display:</div>
+		<div class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+			Select columns to display:
+		</div>
 		{#each columns as column (column.id)}
 			<label
 				class="flex cursor-pointer items-center gap-2 rounded px-2 py-1 hover:bg-gray-50 dark:hover:bg-gray-700"

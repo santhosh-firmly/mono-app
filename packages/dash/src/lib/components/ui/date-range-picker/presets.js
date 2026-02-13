@@ -11,7 +11,7 @@ import {
 	startOfYear,
 	endOfYear,
 	subYears
-} from "date-fns";
+} from 'date-fns';
 
 /**
  * Creates an array of default date range presets.
@@ -26,16 +26,16 @@ export function createDefaultPresets(options = {}) {
 
 	return [
 		{
-			label: "Today",
-			comparisonLabel: "vs yesterday",
+			label: 'Today',
+			comparisonLabel: 'vs yesterday',
 			getValue: () => {
 				const today = new Date();
 				return { start: today, end: today };
 			}
 		},
 		{
-			label: "This week",
-			comparisonLabel: "vs last week",
+			label: 'This week',
+			comparisonLabel: 'vs last week',
 			getValue: () => {
 				const today = new Date();
 				return {
@@ -45,8 +45,8 @@ export function createDefaultPresets(options = {}) {
 			}
 		},
 		{
-			label: "This month",
-			comparisonLabel: "vs last month",
+			label: 'This month',
+			comparisonLabel: 'vs last month',
 			getValue: () => {
 				const today = new Date();
 				return {
@@ -56,8 +56,8 @@ export function createDefaultPresets(options = {}) {
 			}
 		},
 		{
-			label: "This quarter",
-			comparisonLabel: "vs last quarter",
+			label: 'This quarter',
+			comparisonLabel: 'vs last quarter',
 			getValue: () => {
 				const today = new Date();
 				return {
@@ -67,8 +67,8 @@ export function createDefaultPresets(options = {}) {
 			}
 		},
 		{
-			label: "This year",
-			comparisonLabel: "vs last year",
+			label: 'This year',
+			comparisonLabel: 'vs last year',
 			getValue: () => {
 				const today = new Date();
 				return {
@@ -78,8 +78,8 @@ export function createDefaultPresets(options = {}) {
 			}
 		},
 		{
-			label: "Last week",
-			comparisonLabel: "vs week before",
+			label: 'Last week',
+			comparisonLabel: 'vs week before',
 			getValue: () => {
 				const lastWeek = subDays(new Date(), 7);
 				return {
@@ -89,8 +89,8 @@ export function createDefaultPresets(options = {}) {
 			}
 		},
 		{
-			label: "Last month",
-			comparisonLabel: "vs month before",
+			label: 'Last month',
+			comparisonLabel: 'vs month before',
 			getValue: () => {
 				const lastMonth = subMonths(new Date(), 1);
 				return {
@@ -100,8 +100,8 @@ export function createDefaultPresets(options = {}) {
 			}
 		},
 		{
-			label: "Last quarter",
-			comparisonLabel: "vs quarter before",
+			label: 'Last quarter',
+			comparisonLabel: 'vs quarter before',
 			getValue: () => {
 				const lastQuarter = subQuarters(new Date(), 1);
 				return {
@@ -111,8 +111,8 @@ export function createDefaultPresets(options = {}) {
 			}
 		},
 		{
-			label: "Last year",
-			comparisonLabel: "vs year before",
+			label: 'Last year',
+			comparisonLabel: 'vs year before',
 			getValue: () => {
 				const lastYear = subYears(new Date(), 1);
 				return {
@@ -122,8 +122,8 @@ export function createDefaultPresets(options = {}) {
 			}
 		},
 		{
-			label: "Last 30 days",
-			comparisonLabel: "vs previous 30 days",
+			label: 'Last 30 days',
+			comparisonLabel: 'vs previous 30 days',
 			getValue: () => {
 				const today = new Date();
 				return {
@@ -133,8 +133,8 @@ export function createDefaultPresets(options = {}) {
 			}
 		},
 		{
-			label: "Last 90 days",
-			comparisonLabel: "vs previous 90 days",
+			label: 'Last 90 days',
+			comparisonLabel: 'vs previous 90 days',
 			getValue: () => {
 				const today = new Date();
 				return {
@@ -144,8 +144,8 @@ export function createDefaultPresets(options = {}) {
 			}
 		},
 		{
-			label: "Last 365 days",
-			comparisonLabel: "vs previous 365 days",
+			label: 'Last 365 days',
+			comparisonLabel: 'vs previous 365 days',
 			getValue: () => {
 				const today = new Date();
 				return {
@@ -155,8 +155,8 @@ export function createDefaultPresets(options = {}) {
 			}
 		},
 		{
-			label: "All time",
-			comparisonLabel: "",
+			label: 'All time',
+			comparisonLabel: '',
 			getValue: () => {
 				return { start: null, end: null };
 			}

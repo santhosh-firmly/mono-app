@@ -92,7 +92,9 @@
 		actions.push({
 			id: 'skip',
 			icon: SkipForward,
-			label: dashboard.allow_skip_onboarding ? 'Disable Skip Onboarding' : 'Enable Skip Onboarding',
+			label: dashboard.allow_skip_onboarding
+				? 'Disable Skip Onboarding'
+				: 'Enable Skip Onboarding',
 			variant: 'ghost',
 			class: dashboard.allow_skip_onboarding ? 'text-amber-600' : '',
 			onclick: () => onToggleSkipOnboarding(dashboard.domain, dashboard.allow_skip_onboarding)

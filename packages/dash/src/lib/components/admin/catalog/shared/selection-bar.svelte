@@ -10,7 +10,8 @@
 	>
 		<div class="flex items-center gap-4">
 			<span class="font-semibold text-primary">
-				{selectedCount} {selectedCount === 1 ? 'item' : 'items'} selected
+				{selectedCount}
+				{selectedCount === 1 ? 'item' : 'items'} selected
 			</span>
 			{#if totalCount > 0}
 				<span class="text-sm text-muted-foreground">of {totalCount} total</span>

@@ -112,7 +112,9 @@
 				<div class="space-y-2 rounded border border-gray-300 p-3 dark:border-gray-600">
 					{#if filterOptions.length === 0}
 						<div class="py-6 text-center">
-							<p class="text-sm text-gray-500 dark:text-gray-400">No values available</p>
+							<p class="text-sm text-gray-500 dark:text-gray-400">
+								No values available
+							</p>
 							<p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
 								All rows are empty for this column
 							</p>
@@ -131,7 +133,9 @@
 										filterValue = option.value;
 									}}
 								/>
-								<span class="text-sm text-gray-700 dark:text-gray-300">{option.label}</span>
+								<span class="text-sm text-gray-700 dark:text-gray-300"
+									>{option.label}</span
+								>
 							</label>
 						{/each}
 					{/if}
@@ -150,10 +154,14 @@
 					</div>
 				{/if}
 
-				<div class="max-h-64 space-y-2 overflow-y-auto rounded border border-gray-300 p-3 dark:border-gray-600">
+				<div
+					class="max-h-64 space-y-2 overflow-y-auto rounded border border-gray-300 p-3 dark:border-gray-600"
+				>
 					{#if filterOptions.length === 0}
 						<div class="py-6 text-center">
-							<p class="text-sm text-gray-500 dark:text-gray-400">No values available</p>
+							<p class="text-sm text-gray-500 dark:text-gray-400">
+								No values available
+							</p>
 							<p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
 								All rows are empty for this column
 							</p>
@@ -161,7 +169,9 @@
 					{:else if filteredOptions.length === 0}
 						<div class="py-6 text-center">
 							<p class="text-sm text-gray-500 dark:text-gray-400">No matches found</p>
-							<p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Try a different search term</p>
+							<p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+								Try a different search term
+							</p>
 						</div>
 					{:else}
 						{#each filteredOptions as option, idx (idx)}
@@ -182,7 +192,9 @@
 										}
 									}}
 								/>
-								<span class="text-sm text-gray-700 dark:text-gray-300">{option.label}</span>
+								<span class="text-sm text-gray-700 dark:text-gray-300"
+									>{option.label}</span
+								>
 							</label>
 						{/each}
 					{/if}

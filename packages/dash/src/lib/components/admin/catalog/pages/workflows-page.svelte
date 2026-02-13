@@ -332,12 +332,16 @@
 
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 			{#each filteredDomains as domain (`${domain.domain}/${domain.countryCode}`)}
-				<Card.Root class="cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lg">
+				<Card.Root
+					class="cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lg"
+				>
 					<Card.Content class="pt-6">
 						<div class="flex items-center justify-between mb-3">
 							<div>
 								<span class="font-semibold">{domain.domain}</span>
-								<span class="text-xs text-muted-foreground ml-2">{domain.countryCode}</span>
+								<span class="text-xs text-muted-foreground ml-2"
+									>{domain.countryCode}</span
+								>
 							</div>
 							<Badge variant={getStatusVariant(domain)}>
 								{getStatusText(domain)}
@@ -357,11 +361,15 @@
 								<p class="text-muted-foreground">Total</p>
 							</div>
 							<div class="p-2 bg-muted rounded-md">
-								<p class="font-semibold text-green-600">{formatNumber(domain.success)}</p>
+								<p class="font-semibold text-green-600">
+									{formatNumber(domain.success)}
+								</p>
 								<p class="text-muted-foreground">Success</p>
 							</div>
 							<div class="p-2 bg-muted rounded-md">
-								<p class="font-semibold text-yellow-600">{formatNumber(domain.pending)}</p>
+								<p class="font-semibold text-yellow-600">
+									{formatNumber(domain.pending)}
+								</p>
 								<p class="text-muted-foreground">Pending</p>
 							</div>
 							<div class="p-2 bg-muted rounded-md">
@@ -380,7 +388,8 @@
 									e.stopPropagation();
 									onTriggerWorkflow(domain);
 								}}
-								disabled={triggeringDomain === domain.domain || domain.pending === 0}
+								disabled={triggeringDomain === domain.domain ||
+									domain.pending === 0}
 							>
 								{#if triggeringDomain === domain.domain}
 									<RefreshCw class="h-4 w-4 mr-1 animate-spin" />

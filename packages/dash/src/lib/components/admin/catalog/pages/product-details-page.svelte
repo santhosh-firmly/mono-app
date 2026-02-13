@@ -169,7 +169,8 @@
 					comparison = a.pending - b.pending;
 					break;
 				case 'failed':
-					comparison = (a.failed + a.permanently_failed) - (b.failed + b.permanently_failed);
+					comparison =
+						a.failed + a.permanently_failed - (b.failed + b.permanently_failed);
 					break;
 				case 'progress':
 					comparison = a.completion_percent - b.completion_percent;
@@ -214,7 +215,9 @@
 	}
 
 	function selectAll() {
-		sortedAndFilteredDomains.forEach((d) => selectedDomains.add(`${d.domain}/${d.countryCode}`));
+		sortedAndFilteredDomains.forEach((d) =>
+			selectedDomains.add(`${d.domain}/${d.countryCode}`)
+		);
 	}
 
 	function deselectAll() {
@@ -691,7 +694,9 @@
 											onclick={() => handleSort('domain')}
 										>
 											Domain
-											<span class="text-xs text-muted-foreground">{getSortIcon('domain')}</span>
+											<span class="text-xs text-muted-foreground"
+												>{getSortIcon('domain')}</span
+											>
 										</button>
 									</th>
 									<th class="p-3 text-left font-medium">Workflow Status</th>
@@ -702,7 +707,9 @@
 											onclick={() => handleSort('progress')}
 										>
 											Progress
-											<span class="text-xs text-muted-foreground">{getSortIcon('progress')}</span>
+											<span class="text-xs text-muted-foreground"
+												>{getSortIcon('progress')}</span
+											>
 										</button>
 									</th>
 									<th class="p-3 text-right font-medium">
@@ -712,7 +719,9 @@
 											onclick={() => handleSort('total')}
 										>
 											Total
-											<span class="text-xs text-muted-foreground">{getSortIcon('total')}</span>
+											<span class="text-xs text-muted-foreground"
+												>{getSortIcon('total')}</span
+											>
 										</button>
 									</th>
 									<th class="p-3 text-right font-medium">
@@ -722,7 +731,9 @@
 											onclick={() => handleSort('success')}
 										>
 											Success
-											<span class="text-xs text-muted-foreground">{getSortIcon('success')}</span>
+											<span class="text-xs text-muted-foreground"
+												>{getSortIcon('success')}</span
+											>
 										</button>
 									</th>
 									<th class="p-3 text-right font-medium">
@@ -732,7 +743,9 @@
 											onclick={() => handleSort('pending')}
 										>
 											Pending
-											<span class="text-xs text-muted-foreground">{getSortIcon('pending')}</span>
+											<span class="text-xs text-muted-foreground"
+												>{getSortIcon('pending')}</span
+											>
 										</button>
 									</th>
 									<th class="p-3 text-right font-medium">
@@ -742,7 +755,9 @@
 											onclick={() => handleSort('failed')}
 										>
 											Failed
-											<span class="text-xs text-muted-foreground">{getSortIcon('failed')}</span>
+											<span class="text-xs text-muted-foreground"
+												>{getSortIcon('failed')}</span
+											>
 										</button>
 									</th>
 								</tr>

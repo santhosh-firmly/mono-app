@@ -86,19 +86,11 @@
 	</div>
 
 	{#if granularity !== 'day'}
-		<DateRangePickerInputs
-			value={workingValue}
-			onChange={handleInputChange}
-			{granularity}
-		/>
+		<DateRangePickerInputs value={workingValue} onChange={handleInputChange} {granularity} />
 	{/if}
 
 	<div class="flex justify-end gap-2 border-t px-4 py-3">
-		<Button variant="outline" size="sm" onclick={handleCancel}>
-			Cancel
-		</Button>
-		<Button size="sm" onclick={handleSelect}>
-			Select
-		</Button>
+		<Button variant="outline" size="sm" onclick={handleCancel}>Cancel</Button>
+		<Button size="sm" onclick={handleSelect}>Select</Button>
 	</div>
 </div>

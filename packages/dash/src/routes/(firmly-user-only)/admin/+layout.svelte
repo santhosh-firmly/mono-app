@@ -11,7 +11,12 @@
 </script>
 
 <div class="flex min-h-screen flex-col bg-background">
-	<AdminHeader user={data.authInfo} merchants={data.merchants} {currentPath} env={data.firmlyEnv} />
+	<AdminHeader
+		user={data.authInfo}
+		merchants={data.merchants}
+		{currentPath}
+		env={data.firmlyEnv}
+	/>
 	<div class="flex flex-1">
 		<AdminNavbar {currentPath} />
 		<main class="flex-1 overflow-auto p-4 lg:p-6">

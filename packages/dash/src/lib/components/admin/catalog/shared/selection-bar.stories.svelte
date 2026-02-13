@@ -52,9 +52,17 @@
 	template={basicTemplate}
 />
 
-<Story name="Full Selection" args={{ selectedCount: 45, totalCount: 45 }} template={basicTemplate} />
+<Story
+	name="Full Selection"
+	args={{ selectedCount: 45, totalCount: 45 }}
+	template={basicTemplate}
+/>
 
-<Story name="Single Selection" args={{ selectedCount: 1, totalCount: 45 }} template={basicTemplate} />
+<Story
+	name="Single Selection"
+	args={{ selectedCount: 1, totalCount: 45 }}
+	template={basicTemplate}
+/>
 
 <Story
 	name="With Actions"

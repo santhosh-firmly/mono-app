@@ -37,7 +37,7 @@
 			{ vendor: 'Philips', count: 480 },
 			{ vendor: 'Bose', count: 390 },
 			{ vendor: 'JBL', count: 320 },
-			{ vendor: 'Levi\'s', count: 280 }
+			{ vendor: "Levi's", count: 280 }
 		]
 	};
 

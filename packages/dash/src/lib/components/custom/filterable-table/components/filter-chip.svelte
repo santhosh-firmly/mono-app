@@ -18,7 +18,10 @@
 	>
 		<CircleX class="h-4 w-4" />
 	</button>
-	<button class="flex cursor-pointer items-center gap-1.5 hover:text-purple-600 dark:text-gray-300 dark:hover:text-purple-400" onclick={onEdit}>
+	<button
+		class="flex cursor-pointer items-center gap-1.5 hover:text-purple-600 dark:text-gray-300 dark:hover:text-purple-400"
+		onclick={onEdit}
+	>
 		<span class="font-medium">{filter.columnName}</span>
 		<span class="text-gray-200 dark:text-gray-600">|</span>
 		<span class="text-purple-600 dark:text-purple-400">{getFilterDisplayValue(filter)}</span>

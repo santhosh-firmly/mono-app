@@ -67,12 +67,8 @@
 
 	function isInHoverRange(day) {
 		if (!selectedRange.start || selectedRange.end || !hoverDate) return false;
-		const start = isBefore(hoverDate, selectedRange.start)
-			? hoverDate
-			: selectedRange.start;
-		const end = isBefore(hoverDate, selectedRange.start)
-			? selectedRange.start
-			: hoverDate;
+		const start = isBefore(hoverDate, selectedRange.start) ? hoverDate : selectedRange.start;
+		const end = isBefore(hoverDate, selectedRange.start) ? selectedRange.start : hoverDate;
 		return isWithinInterval(day, { start, end });
 	}
 

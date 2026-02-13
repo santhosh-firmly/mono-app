@@ -104,9 +104,21 @@
 	args={{
 		items: [
 			{ ...orderData.order.order_info.line_items[0], platform_status: 'Delivered' },
-			{ ...orderData.order.order_info.line_items[0], description: 'Second Item', platform_status: 'Shipped' },
-			{ ...orderData.order.order_info.line_items[0], description: 'Third Item', platform_status: 'Cancelled' },
-			{ ...orderData.order.order_info.line_items[0], description: 'Fourth Item', platform_status: null }
+			{
+				...orderData.order.order_info.line_items[0],
+				description: 'Second Item',
+				platform_status: 'Shipped'
+			},
+			{
+				...orderData.order.order_info.line_items[0],
+				description: 'Third Item',
+				platform_status: 'Cancelled'
+			},
+			{
+				...orderData.order.order_info.line_items[0],
+				description: 'Fourth Item',
+				platform_status: null
+			}
 		]
 	}}
 	{template}

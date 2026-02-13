@@ -339,7 +339,11 @@
 								{/if}
 								Save
 							</Button>
-							<Button variant="outline" size="sm" onclick={() => (editingConfig = false)}>
+							<Button
+								variant="outline"
+								size="sm"
+								onclick={() => (editingConfig = false)}
+							>
 								Cancel
 							</Button>
 						</div>
@@ -355,7 +359,9 @@
 							</div>
 							<div>
 								<p class="text-sm text-muted-foreground">Freshness Threshold</p>
-								<p class="font-semibold">{config.config.freshnessThresholdHours} hours</p>
+								<p class="font-semibold">
+									{config.config.freshnessThresholdHours} hours
+								</p>
 							</div>
 							<div>
 								<p class="text-sm text-muted-foreground">Max Retry Attempts</p>
@@ -363,7 +369,11 @@
 							</div>
 						</div>
 						<div class="mt-4">
-							<Button variant="outline" size="sm" onclick={() => (editingConfig = true)}>
+							<Button
+								variant="outline"
+								size="sm"
+								onclick={() => (editingConfig = true)}
+							>
 								<Pencil class="h-4 w-4 mr-2" />
 								Edit
 							</Button>
@@ -387,7 +397,9 @@
 						<div class="grid grid-cols-2 gap-4">
 							<div>
 								<p class="text-sm text-muted-foreground">Total Variants</p>
-								<p class="font-semibold">{formatNumber(variantStats.total_variants)}</p>
+								<p class="font-semibold">
+									{formatNumber(variantStats.total_variants)}
+								</p>
 							</div>
 							<div>
 								<p class="text-sm text-muted-foreground">Available</p>
@@ -438,11 +450,15 @@
 							{#each priceChanges.changes as change (change.id || change.variant_sku + change.recorded_at)}
 								<div class="p-3 border-b last:border-b-0 hover:bg-muted/30">
 									<p class="font-medium text-sm">{change.variant_sku}</p>
-									<p class="text-sm text-muted-foreground truncate">{change.title}</p>
+									<p class="text-sm text-muted-foreground truncate">
+										{change.title}
+									</p>
 									<p class="text-sm">
 										New price: <strong>${change.new_price}</strong>
 										{#if change.new_msrp}
-											<span class="text-muted-foreground">(MSRP: ${change.new_msrp})</span>
+											<span class="text-muted-foreground"
+												>(MSRP: ${change.new_msrp})</span
+											>
 										{/if}
 									</p>
 									<p class="text-xs text-muted-foreground mt-1">
@@ -469,10 +485,14 @@
 							{#each availabilityChanges.changes as change (change.id || change.variant_sku + change.recorded_at)}
 								<div class="p-3 border-b last:border-b-0 hover:bg-muted/30">
 									<p class="font-medium text-sm">{change.variant_sku}</p>
-									<p class="text-sm text-muted-foreground truncate">{change.title}</p>
+									<p class="text-sm text-muted-foreground truncate">
+										{change.title}
+									</p>
 									<p class="text-sm">
 										Status: <strong
-											class={change.available ? 'text-green-600' : 'text-red-600'}
+											class={change.available
+												? 'text-green-600'
+												: 'text-red-600'}
 										>
 											{change.available ? 'In Stock' : 'Out of Stock'}
 										</strong>
@@ -494,7 +514,8 @@
 
 			<div class="flex gap-2 mb-4 flex-wrap">
 				<button
-					class="px-3 py-1.5 text-sm border rounded-md transition-colors {statusFilter === ''
+					class="px-3 py-1.5 text-sm border rounded-md transition-colors {statusFilter ===
+					''
 						? 'bg-primary/10 border-primary text-primary'
 						: 'bg-background hover:bg-muted'}"
 					onclick={() => handleFilterChange('')}
@@ -573,7 +594,9 @@
 												{product.status}
 											</Badge>
 										</td>
-										<td class="p-3 text-right tabular-nums">{product.attempts}</td>
+										<td class="p-3 text-right tabular-nums"
+											>{product.attempts}</td
+										>
 										<td class="p-3 text-muted-foreground">
 											{new Date(product.updated_at).toLocaleString()}
 										</td>
@@ -586,7 +609,8 @@
 					{#if products.pagination}
 						<div class="flex items-center justify-between p-3 border-t">
 							<p class="text-sm text-muted-foreground">
-								Showing {(products.pagination.page - 1) * products.pagination.size + 1} - {Math.min(
+								Showing {(products.pagination.page - 1) * products.pagination.size +
+									1} - {Math.min(
 									products.pagination.page * products.pagination.size,
 									products.pagination.total
 								)} of {formatNumber(products.pagination.total)}
@@ -604,7 +628,8 @@
 								<Button
 									variant="outline"
 									size="sm"
-									disabled={products.pagination.page >= products.pagination.totalPages}
+									disabled={products.pagination.page >=
+										products.pagination.totalPages}
 									onclick={() => handlePageChange(products.pagination.page + 1)}
 								>
 									Next

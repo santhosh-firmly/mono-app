@@ -26,8 +26,7 @@
 <Story
 	name="Long Error Message"
 	args={{
-		error:
-			'Connection timeout while fetching product details from remote API. The server may be experiencing high load. Please wait a moment and try again.'
+		error: 'Connection timeout while fetching product details from remote API. The server may be experiencing high load. Please wait a moment and try again.'
 	}}
 	{template}
 />

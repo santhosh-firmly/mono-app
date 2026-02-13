@@ -2,11 +2,7 @@
 	import { cn } from '$lib/utils.js';
 	import { isSameDay } from 'date-fns';
 
-	let {
-		presets = [],
-		value = { start: null, end: null },
-		onSelect = () => {}
-	} = $props();
+	let { presets = [], value = { start: null, end: null }, onSelect = () => {} } = $props();
 
 	function isActivePreset(preset) {
 		const presetValue = preset.getValue();

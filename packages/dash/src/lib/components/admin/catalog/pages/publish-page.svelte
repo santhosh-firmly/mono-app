@@ -119,7 +119,9 @@
 
 	let allVisibleSelected = $derived(
 		sortedAndFilteredDomains.length > 0 &&
-			sortedAndFilteredDomains.every((d) => selectedDomains.has(`${d.domain}/${d.countryCode}`))
+			sortedAndFilteredDomains.every((d) =>
+				selectedDomains.has(`${d.domain}/${d.countryCode}`)
+			)
 	);
 
 	let isIndeterminate = $derived(
@@ -313,7 +315,9 @@
 				<h2 class="text-lg font-semibold">
 					Publish Progress
 					{#if runningCount > 0}
-						<span class="font-normal text-muted-foreground">({runningCount} running)</span>
+						<span class="font-normal text-muted-foreground"
+							>({runningCount} running)</span
+						>
 					{/if}
 				</h2>
 				{#if completedCount > 0}
@@ -329,7 +333,9 @@
 							<div
 								class="flex items-center justify-between p-3 border rounded-md bg-background"
 							>
-								<span class="font-medium text-sm">{item.domain}/{item.countryCode}</span>
+								<span class="font-medium text-sm"
+									>{item.domain}/{item.countryCode}</span
+								>
 								<div class="flex items-center gap-2">
 									<Badge variant={getBadgeVariant(item.status)}>
 										{item.status === 'pending'
@@ -341,7 +347,9 @@
 													: 'Failed'}
 									</Badge>
 									{#if item.status === 'running'}
-										<RefreshCw class="h-4 w-4 animate-spin text-muted-foreground" />
+										<RefreshCw
+											class="h-4 w-4 animate-spin text-muted-foreground"
+										/>
 									{/if}
 								</div>
 							</div>
@@ -401,7 +409,9 @@
 					<span class="font-semibold text-primary"
 						>{selectedCount} domain{selectedCount !== 1 ? 's' : ''} selected</span
 					>
-					<span class="text-muted-foreground">({selectedStats.withExport} with exports)</span>
+					<span class="text-muted-foreground"
+						>({selectedStats.withExport} with exports)</span
+					>
 				</div>
 				<div class="flex items-center gap-2">
 					<Button variant="ghost" size="sm" onclick={onClearSelection}>Clear</Button>
@@ -431,10 +441,11 @@
 				Showing {sortedAndFilteredDomains.length} domains with exports available ({allDomains.length}
 				total)
 			{:else if publishStatusFilter === 'running'}
-				Showing {sortedAndFilteredDomains.length} publishing domains ({domainsWithExport} with exports
-				out of {allDomains.length} total)
+				Showing {sortedAndFilteredDomains.length} publishing domains ({domainsWithExport} with
+				exports out of {allDomains.length} total)
 			{:else if publishStatusFilter === 'no_export'}
-				Showing {sortedAndFilteredDomains.length} domains without exports ({allDomains.length} total)
+				Showing {sortedAndFilteredDomains.length} domains without exports ({allDomains.length}
+				total)
 			{:else}
 				Showing {sortedAndFilteredDomains.length} of {allDomains.length} total domains
 			{/if}
@@ -477,7 +488,9 @@
 										onchange={onToggleSelectAll}
 									/>
 								</th>
-								<th class="p-3 text-left font-semibold text-muted-foreground">Domain</th>
+								<th class="p-3 text-left font-semibold text-muted-foreground"
+									>Domain</th
+								>
 								<th class="p-3 text-left font-semibold text-muted-foreground w-32"
 									>Status</th
 								>
@@ -495,7 +508,10 @@
 						<tbody>
 							{#each sortedAndFilteredDomains as domain (`${domain.domain}/${domain.countryCode}`)}
 								{@const key = `${domain.domain}/${domain.countryCode}`}
-								{@const status = getPublishStatus(domain.domain, domain.countryCode)}
+								{@const status = getPublishStatus(
+									domain.domain,
+									domain.countryCode
+								)}
 								{@const exportInfo = exportVersions.get(key)}
 								{@const hasExport = !!exportInfo}
 								<tr
@@ -513,7 +529,8 @@
 												: 'cursor-not-allowed opacity-50'}"
 											checked={selectedDomains.has(key)}
 											disabled={!hasExport}
-											onchange={() => onToggleDomain(domain.domain, domain.countryCode)}
+											onchange={() =>
+												onToggleDomain(domain.domain, domain.countryCode)}
 										/>
 									</td>
 									<td class="p-3 font-medium">{domain.domain}</td>
@@ -555,7 +572,9 @@
 											-
 										{/if}
 									</td>
-									<td class="p-3 text-right text-xs text-muted-foreground tabular-nums">
+									<td
+										class="p-3 text-right text-xs text-muted-foreground tabular-nums"
+									>
 										{#if exportInfo}
 											{exportInfo.products.toLocaleString()}
 										{:else}

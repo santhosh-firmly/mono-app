@@ -61,7 +61,12 @@ export async function GET({ locals, params, platform }) {
 		}
 
 		// Fetch order status from orders-service and enhance order_info
-		const orderStatusData = await fetchOrderStatus(platform, orderId, orderResult.shop_id, appId);
+		const orderStatusData = await fetchOrderStatus(
+			platform,
+			orderId,
+			orderResult.shop_id,
+			appId
+		);
 		enhanceOrderInfo(orderInfo, orderStatusData);
 
 		const order = {

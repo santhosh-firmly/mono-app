@@ -29,8 +29,7 @@
 	let canNavigate = $derived(value.start != null && value.end != null);
 
 	let forwardDisabled = $derived(
-		!canNavigate ||
-			(maxDate != null && addDays(value.end, 1) > startOfDay(maxDate))
+		!canNavigate || (maxDate != null && addDays(value.end, 1) > startOfDay(maxDate))
 	);
 
 	let backwardDisabled = $derived(

@@ -33,7 +33,12 @@ export async function load({ params, platform }) {
 	}
 
 	// Fetch order status from orders-service and enhance order_info
-	const orderStatusData = await fetchOrderStatus(platform, orderId, orderResult.shop_id, orderResult.app_id);
+	const orderStatusData = await fetchOrderStatus(
+		platform,
+		orderId,
+		orderResult.shop_id,
+		orderResult.app_id
+	);
 	enhanceOrderInfo(orderInfo, orderStatusData);
 
 	// Build merchant map

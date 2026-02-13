@@ -87,11 +87,7 @@
 	{template}
 />
 
-<Story
-	name="Without Selection"
-	args={{ domains: mockDomains, showSelection: false }}
-	{template}
-/>
+<Story name="Without Selection" args={{ domains: mockDomains, showSelection: false }} {template} />
 
 <Story
 	name="Without Progress"
@@ -110,6 +106,10 @@
 	/>
 {/snippet}
 
-<Story name="Sortable" args={{ domains: mockDomains, showSelection: true }} template={sortableTemplate} />
+<Story
+	name="Sortable"
+	args={{ domains: mockDomains, showSelection: true }}
+	template={sortableTemplate}
+/>
 
 <Story name="Empty" args={{ domains: [], showSelection: true }} {template} />

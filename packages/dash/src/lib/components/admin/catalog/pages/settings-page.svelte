@@ -149,7 +149,9 @@
 		<!-- Stats Summary -->
 		<div class="flex gap-6 flex-wrap">
 			<div class="flex flex-col gap-1">
-				<span class="text-xs text-muted-foreground uppercase tracking-wide">Total Domains</span>
+				<span class="text-xs text-muted-foreground uppercase tracking-wide"
+					>Total Domains</span
+				>
 				<span class="text-2xl font-bold">{stats.total_domains}</span>
 			</div>
 			<div class="flex flex-col gap-1">
@@ -262,12 +264,18 @@
 											{domain.domain}
 										</a>
 									</td>
-									<td class="p-3 text-sm text-muted-foreground">{domain.countryCode}</td>
+									<td class="p-3 text-sm text-muted-foreground"
+										>{domain.countryCode}</td
+									>
 									<td class="p-3 text-right text-sm tabular-nums"
 										>{domain.total.toLocaleString()}</td
 									>
 									<td class="p-3 text-center">
-										<Badge variant={getCompletionBadgeVariant(domain.completion_percent)}>
+										<Badge
+											variant={getCompletionBadgeVariant(
+												domain.completion_percent
+											)}
+										>
 											{domain.completion_percent}%
 										</Badge>
 									</td>
@@ -370,7 +378,8 @@
 								<input
 									type="checkbox"
 									checked={domainConfig.enabled}
-									onchange={(e) => handleConfigFieldChange('enabled', e.target.checked)}
+									onchange={(e) =>
+										handleConfigFieldChange('enabled', e.target.checked)}
 									class="w-4 h-4"
 								/>
 								<span class="text-sm font-medium">Enabled</span>
@@ -400,7 +409,9 @@
 										parseInt(e.target.value)
 									)}
 							/>
-							<p class="text-xs text-muted-foreground mt-1">Milliseconds between batches</p>
+							<p class="text-xs text-muted-foreground mt-1">
+								Milliseconds between batches
+							</p>
 						</div>
 						<div>
 							<Label class="text-sm mb-1.5 block">Freshness Threshold (hours)</Label>
@@ -413,7 +424,9 @@
 										parseInt(e.target.value)
 									)}
 							/>
-							<p class="text-xs text-muted-foreground mt-1">Re-fetch products older than this</p>
+							<p class="text-xs text-muted-foreground mt-1">
+								Re-fetch products older than this
+							</p>
 						</div>
 						<div>
 							<Label class="text-sm mb-1.5 block">Max Retries</Label>
@@ -421,7 +434,10 @@
 								type="number"
 								value={domainConfig.max_retries}
 								oninput={(e) =>
-									handleConfigFieldChange('max_retries', parseInt(e.target.value))}
+									handleConfigFieldChange(
+										'max_retries',
+										parseInt(e.target.value)
+									)}
 							/>
 							<p class="text-xs text-muted-foreground mt-1">Retry failed requests</p>
 						</div>
@@ -431,7 +447,10 @@
 								type="number"
 								value={domainConfig.retry_delay_ms}
 								oninput={(e) =>
-									handleConfigFieldChange('retry_delay_ms', parseInt(e.target.value))}
+									handleConfigFieldChange(
+										'retry_delay_ms',
+										parseInt(e.target.value)
+									)}
 							/>
 							<p class="text-xs text-muted-foreground mt-1">Delay before retrying</p>
 						</div>
@@ -475,16 +494,16 @@
 			<div class="p-6">
 				{#if domainToDelete}
 					<p class="text-sm text-muted-foreground mb-3">
-						Are you sure you want to delete <strong>{domainToDelete.domain}</strong>? This
-						will remove all catalog data for this domain.
+						Are you sure you want to delete <strong>{domainToDelete.domain}</strong>?
+						This will remove all catalog data for this domain.
 					</p>
 					<div
 						class="bg-destructive/10 border border-destructive/30 rounded-md p-3 mb-4 flex items-start gap-2"
 					>
 						<AlertTriangle class="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
 						<p class="text-destructive text-sm">
-							This action cannot be undone. All {domainToDelete.total.toLocaleString()} products
-							will be permanently deleted.
+							This action cannot be undone. All {domainToDelete.total.toLocaleString()}
+							products will be permanently deleted.
 						</p>
 					</div>
 					<div>

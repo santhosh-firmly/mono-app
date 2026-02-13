@@ -82,7 +82,6 @@
 			<Trash2 class="h-3 w-3" />
 		</button>
 	{/if}
-
 </div>
 
 {#if isDirectory && expanded && node.children}
