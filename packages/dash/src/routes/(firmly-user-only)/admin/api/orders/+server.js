@@ -25,7 +25,13 @@ export async function GET({ url, platform }) {
 	const orderDir = url.searchParams.get('orderDir')?.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
 
 	// Validate orderBy against allowed columns to prevent SQL injection
-	const allowedColumns = ['created_dt', 'order_total', 'platform_order_number', 'shop_id', 'platform'];
+	const allowedColumns = [
+		'created_dt',
+		'order_total',
+		'platform_order_number',
+		'shop_id',
+		'platform'
+	];
 	const safeOrderBy = allowedColumns.includes(orderBy) ? orderBy : 'created_dt';
 
 	const reporting = platform?.env?.reporting;
@@ -58,7 +64,10 @@ export async function GET({ url, platform }) {
 
 		if (platformFilter) {
 			// Support multiple platforms (comma-separated)
-			const platforms = platformFilter.split(',').map((p) => p.trim()).filter(Boolean);
+			const platforms = platformFilter
+				.split(',')
+				.map((p) => p.trim())
+				.filter(Boolean);
 			if (platforms.length === 1) {
 				conditions.push('platform = ?');
 				params.push(platforms[0]);
@@ -81,15 +90,18 @@ export async function GET({ url, platform }) {
 		const countStmt = reporting.prepare(countQuery);
 		const merchantsStmt = firmlyConfigs.prepare('SELECT info FROM stores');
 		const partnersStmt = firmlyConfigs.prepare('SELECT key, info FROM app_identifiers');
-		const platformsStmt = reporting.prepare('SELECT DISTINCT platform FROM orders WHERE platform IS NOT NULL AND platform != "" ORDER BY platform');
+		const platformsStmt = reporting.prepare(
+			'SELECT DISTINCT platform FROM orders WHERE platform IS NOT NULL AND platform != "" ORDER BY platform'
+		);
 
-		const [ordersResult, countResult, merchantsResult, partnersResult, platformsResult] = await Promise.all([
-			ordersStmt.bind(...params, limit, offset).all(),
-			countStmt.bind(...params).first(),
-			merchantsStmt.all(),
-			partnersStmt.all(),
-			platformsStmt.all()
-		]);
+		const [ordersResult, countResult, merchantsResult, partnersResult, platformsResult] =
+			await Promise.all([
+				ordersStmt.bind(...params, limit, offset).all(),
+				countStmt.bind(...params).first(),
+				merchantsStmt.all(),
+				partnersStmt.all(),
+				platformsStmt.all()
+			]);
 
 		// Build a map of store_id to display_name and list of merchants for filtering
 		const merchantMap = new Map();

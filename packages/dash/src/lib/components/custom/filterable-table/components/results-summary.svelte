@@ -53,9 +53,8 @@
 	<div class="flex items-center justify-between pt-2 text-xs text-gray-500 dark:text-gray-400">
 		<div class="flex items-center gap-2">
 			<span>
-				Showing <span class="font-medium text-gray-700 dark:text-gray-300">{startItem}</span>-<span
-					class="font-medium text-gray-700 dark:text-gray-300">{endItem}</span
-				>
+				Showing <span class="font-medium text-gray-700 dark:text-gray-300">{startItem}</span
+				>-<span class="font-medium text-gray-700 dark:text-gray-300">{endItem}</span>
 				of <span class="font-medium text-gray-700 dark:text-gray-300">{filteredCount}</span> items
 			</span>
 			{#if hasActiveFilters}
@@ -94,7 +93,10 @@
 					<ChevronLeft class="h-4 w-4" />
 				</button>
 				<span class="px-1">
-					Page <span class="font-medium text-gray-700 dark:text-gray-300">{pagination.page}</span> of
+					Page <span class="font-medium text-gray-700 dark:text-gray-300"
+						>{pagination.page}</span
+					>
+					of
 					<span class="font-medium text-gray-700 dark:text-gray-300">{totalPages}</span>
 				</span>
 				<button
@@ -111,7 +113,10 @@
 {:else if totalCount > 0}
 	<div class="flex items-center gap-2 pt-2 text-xs text-gray-500 dark:text-gray-400">
 		<span
-			>Showing <span class="font-medium text-gray-700 dark:text-gray-300">{filteredCount}</span> of
+			>Showing <span class="font-medium text-gray-700 dark:text-gray-300"
+				>{filteredCount}</span
+			>
+			of
 			<span class="font-medium text-gray-700 dark:text-gray-300">{totalCount}</span>
 			{totalCount === 1 ? 'item' : 'items'}</span
 		>

@@ -88,7 +88,10 @@
 					<option value={option.value}>{option.label}</option>
 				{/each}
 			</select>
-			<Button onclick={handleExportSelected} disabled={selectedDomains.size === 0 || exporting}>
+			<Button
+				onclick={handleExportSelected}
+				disabled={selectedDomains.size === 0 || exporting}
+			>
 				{#if exporting}
 					<RefreshCw class="h-4 w-4 mr-2 animate-spin" />
 				{:else}
@@ -142,16 +145,20 @@
 									onchange={toggleAll}
 								/>
 							</th>
-							<th class="p-3 text-left text-xs font-semibold text-muted-foreground uppercase"
+							<th
+								class="p-3 text-left text-xs font-semibold text-muted-foreground uppercase"
 								>Domain</th
 							>
-							<th class="p-3 text-left text-xs font-semibold text-muted-foreground uppercase"
+							<th
+								class="p-3 text-left text-xs font-semibold text-muted-foreground uppercase"
 								>Products</th
 							>
-							<th class="p-3 text-left text-xs font-semibold text-muted-foreground uppercase"
+							<th
+								class="p-3 text-left text-xs font-semibold text-muted-foreground uppercase"
 								>Last Export</th
 							>
-							<th class="p-3 text-left text-xs font-semibold text-muted-foreground uppercase"
+							<th
+								class="p-3 text-left text-xs font-semibold text-muted-foreground uppercase"
 								>Files</th
 							>
 						</tr>
@@ -197,7 +204,10 @@
 													variant="ghost"
 													size="sm"
 													onclick={() =>
-														handleDownloadSingleExport(domain.domain, file.filename)}
+														handleDownloadSingleExport(
+															domain.domain,
+															file.filename
+														)}
 												>
 													<FileText class="h-3 w-3 mr-1" />
 													{file.filename}

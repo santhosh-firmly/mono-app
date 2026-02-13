@@ -129,9 +129,21 @@
 						createdAt: '2024-01-15T08:00:00Z',
 						totalProducts: 14986,
 						files: [
-							{ fileName: 'products-001.jsonl.gz', productCount: 5000, gzSizeBytes: 1250000 },
-							{ fileName: 'products-002.jsonl.gz', productCount: 5000, gzSizeBytes: 1180000 },
-							{ fileName: 'products-003.jsonl.gz', productCount: 4986, gzSizeBytes: 1120000 }
+							{
+								fileName: 'products-001.jsonl.gz',
+								productCount: 5000,
+								gzSizeBytes: 1250000
+							},
+							{
+								fileName: 'products-002.jsonl.gz',
+								productCount: 5000,
+								gzSizeBytes: 1180000
+							},
+							{
+								fileName: 'products-003.jsonl.gz',
+								productCount: 4986,
+								gzSizeBytes: 1120000
+							}
 						]
 					},
 					{
@@ -139,9 +151,21 @@
 						createdAt: '2024-01-14T08:00:00Z',
 						totalProducts: 14500,
 						files: [
-							{ fileName: 'products-001.jsonl.gz', productCount: 5000, gzSizeBytes: 1200000 },
-							{ fileName: 'products-002.jsonl.gz', productCount: 5000, gzSizeBytes: 1150000 },
-							{ fileName: 'products-003.jsonl.gz', productCount: 4500, gzSizeBytes: 1050000 }
+							{
+								fileName: 'products-001.jsonl.gz',
+								productCount: 5000,
+								gzSizeBytes: 1200000
+							},
+							{
+								fileName: 'products-002.jsonl.gz',
+								productCount: 5000,
+								gzSizeBytes: 1150000
+							},
+							{
+								fileName: 'products-003.jsonl.gz',
+								productCount: 4500,
+								gzSizeBytes: 1050000
+							}
 						]
 					}
 				]

@@ -139,7 +139,9 @@
 	<!-- Right side: Admin badge + Notifications + User menu -->
 	<div class="flex items-center gap-2">
 		{#if isFirmlyAdmin}
-			<span class="rounded-full bg-primary px-2 py-0.5 text-xs font-bold uppercase leading-none text-primary-foreground">
+			<span
+				class="rounded-full bg-primary px-2 py-0.5 text-xs font-bold uppercase leading-none text-primary-foreground"
+			>
 				admin
 			</span>
 		{/if}

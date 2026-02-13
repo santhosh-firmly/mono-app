@@ -28,7 +28,9 @@
 <tbody>
 	{#each data as item, index (item?.rowKey ?? (Number.isFinite(Number(item?.rowNumber)) ? `row-${item.rowNumber}` : `idx-${index}`))}
 		<tr
-			class="group relative cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-800 {rowClass?.(item)}"
+			class="group relative cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-800 {rowClass?.(
+				item
+			)}"
 			onclick={() => {
 				onclick?.(item, index);
 			}}
@@ -95,7 +97,8 @@
 			<tr>
 				<td
 					colspan={visibleColumnsCount + (showActions ? 1 : 0) || 1}
-					class="py-3 text-center text-gray-500 dark:text-gray-400">{emptyMessage || 'No data found'}</td
+					class="py-3 text-center text-gray-500 dark:text-gray-400"
+					>{emptyMessage || 'No data found'}</td
 				>
 			</tr>
 		{/if}

@@ -2,11 +2,7 @@
 	import { cn } from '$lib/utils.js';
 	import { format, parse, isValid } from 'date-fns';
 
-	let {
-		value = { start: null, end: null },
-		onChange = () => {},
-		granularity = 'day'
-	} = $props();
+	let { value = { start: null, end: null }, onChange = () => {}, granularity = 'day' } = $props();
 
 	let dateFormat = $derived(granularity === 'day' ? 'yyyy-MM-dd' : 'yyyy-MM-dd HH:mm');
 

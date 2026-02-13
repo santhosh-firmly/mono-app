@@ -52,15 +52,20 @@
 		<!-- Stats Summary -->
 		<div class="flex gap-6 flex-wrap">
 			<div class="flex flex-col gap-1">
-				<span class="text-xs text-muted-foreground uppercase tracking-wide">Total Domains</span>
+				<span class="text-xs text-muted-foreground uppercase tracking-wide"
+					>Total Domains</span
+				>
 				<span class="text-2xl font-bold">{totalDomains}</span>
 			</div>
 			<div class="flex flex-col gap-1">
-				<span class="text-xs text-muted-foreground uppercase tracking-wide">Total Products</span>
+				<span class="text-xs text-muted-foreground uppercase tracking-wide"
+					>Total Products</span
+				>
 				<span class="text-2xl font-bold">{totalProducts?.toLocaleString()}</span>
 			</div>
 			<div class="flex flex-col gap-1">
-				<span class="text-xs text-muted-foreground uppercase tracking-wide">Categories</span>
+				<span class="text-xs text-muted-foreground uppercase tracking-wide">Categories</span
+				>
 				<span class="text-2xl font-bold">{categoryList?.length}</span>
 			</div>
 		</div>
@@ -75,7 +80,9 @@
 					>
 						<div class="flex items-center justify-between p-4">
 							<div class="flex items-center gap-3">
-								<span class="font-semibold">{category.category || 'Uncategorized'}</span>
+								<span class="font-semibold"
+									>{category.category || 'Uncategorized'}</span
+								>
 								<span class="text-sm text-muted-foreground">
 									{category.totalCount?.toLocaleString()} products
 								</span>
@@ -108,7 +115,9 @@
 											>
 												{domainName}
 											</span>
-											<span class="font-semibold">{count.toLocaleString()}</span>
+											<span class="font-semibold"
+												>{count.toLocaleString()}</span
+											>
 										</div>
 									{/each}
 								</div>
@@ -120,7 +129,9 @@
 										</div>
 										<div class="flex flex-wrap gap-2">
 											{#each category.rawTypes.slice(0, 10) as rawType (rawType)}
-												<Badge variant="secondary" class="text-xs">{rawType}</Badge>
+												<Badge variant="secondary" class="text-xs"
+													>{rawType}</Badge
+												>
 											{/each}
 											{#if category.rawTypes.length > 10}
 												<Badge variant="secondary" class="text-xs">

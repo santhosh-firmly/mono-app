@@ -70,7 +70,11 @@
 		{ name: 'Footwear', product_count: 4200, aliases: ['Shoes', 'Boots', 'Sneakers'] },
 		{ name: 'Accessories', product_count: 6700, aliases: ['Bags', 'Wallets', 'Jewelry'] },
 		{ name: 'Home & Garden', product_count: 9800, aliases: ['Home', 'Garden', 'Decor'] },
-		{ name: 'Sports & Outdoors', product_count: 5400, aliases: ['Sports', 'Outdoor', 'Fitness'] }
+		{
+			name: 'Sports & Outdoors',
+			product_count: 5400,
+			aliases: ['Sports', 'Outdoor', 'Fitness']
+		}
 	];
 
 	const mockJobs = [

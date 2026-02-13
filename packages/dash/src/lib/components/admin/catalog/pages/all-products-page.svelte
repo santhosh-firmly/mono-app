@@ -315,7 +315,9 @@
 				<h2 class="text-lg font-semibold">
 					Active Jobs
 					{#if runningCount > 0}
-						<span class="font-normal text-muted-foreground">({runningCount} running)</span>
+						<span class="font-normal text-muted-foreground"
+							>({runningCount} running)</span
+						>
 					{/if}
 				</h2>
 				{#if completedCount > 0}
@@ -385,7 +387,7 @@
 		</div>
 
 		<SelectionBar
-			selectedCount={selectedCount}
+			{selectedCount}
 			totalCount={allDomains.length}
 			onClear={() => selectedDomains.clear()}
 		>
@@ -446,7 +448,8 @@
 										type="checkbox"
 										class="rounded"
 										checked={selectedDomains.has(key)}
-										onchange={() => toggleDomain(domain.domain, domain.countryCode)}
+										onchange={() =>
+											toggleDomain(domain.domain, domain.countryCode)}
 									/>
 								</td>
 								<td class="p-3">
@@ -458,12 +461,11 @@
 									</a>
 								</td>
 								<td class="p-3">
-									<WorkflowStatusBadge
-										{status}
-										lastRunDate={job?.startedAt}
-									/>
+									<WorkflowStatusBadge {status} lastRunDate={job?.startedAt} />
 								</td>
-								<td class="p-3 text-muted-foreground">{formatNumber(domain.total)}</td>
+								<td class="p-3 text-muted-foreground"
+									>{formatNumber(domain.total)}</td
+								>
 								<td class="p-3 text-muted-foreground">{domain.countryCode}</td>
 								<td class="p-3 text-muted-foreground">
 									{#if job?.startedAt}

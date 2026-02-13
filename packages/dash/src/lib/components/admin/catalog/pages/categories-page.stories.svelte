@@ -25,7 +25,19 @@
 					'gadgets-world.com': 3400,
 					'widgets-inc.com': 1800
 				},
-				rawTypes: ['Tech', 'Gadgets', 'Devices', 'Accessories', 'Audio', 'Cameras', 'Computers', 'Phones', 'Tablets', 'Wearables', 'Smart Home']
+				rawTypes: [
+					'Tech',
+					'Gadgets',
+					'Devices',
+					'Accessories',
+					'Audio',
+					'Cameras',
+					'Computers',
+					'Phones',
+					'Tablets',
+					'Wearables',
+					'Smart Home'
+				]
 			},
 			{
 				category: 'Apparel',

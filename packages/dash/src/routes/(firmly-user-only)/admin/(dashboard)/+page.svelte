@@ -44,7 +44,10 @@
 				continue;
 			}
 			if (!range.start || !range.end || !presetRange.start || !presetRange.end) continue;
-			if (isSameDay(range.start, presetRange.start) && isSameDay(range.end, presetRange.end)) {
+			if (
+				isSameDay(range.start, presetRange.start) &&
+				isSameDay(range.end, presetRange.end)
+			) {
 				return preset;
 			}
 		}
@@ -169,9 +172,7 @@
 
 			params.append('periodLabel', selectedPresetLabel);
 			const comparePeriodLabel = comparisonLabel
-				? comparisonLabel
-						.replace(/^vs /, '')
-						.replace(/^./, (c) => c.toUpperCase())
+				? comparisonLabel.replace(/^vs /, '').replace(/^./, (c) => c.toUpperCase())
 				: '';
 			params.append('comparePeriodLabel', comparePeriodLabel);
 

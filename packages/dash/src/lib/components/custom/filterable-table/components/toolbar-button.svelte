@@ -11,7 +11,9 @@
 				? 'opacity-40 cursor-not-allowed'
 				: 'cursor-pointer hover:scale-110 hover:text-purple-500 hover:shadow-lg dark:hover:text-purple-400'} {active
 				? 'text-purple-500 dark:text-purple-400'
-				: 'text-slate-500 dark:text-gray-400'} {separator ? 'border-r border-l border-gray-100 dark:border-gray-700' : ''}"
+				: 'text-slate-500 dark:text-gray-400'} {separator
+				? 'border-r border-l border-gray-100 dark:border-gray-700'
+				: ''}"
 			onclick={disabled ? undefined : onclick}
 		>
 			{@render children()}

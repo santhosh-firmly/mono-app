@@ -34,9 +34,7 @@
 				workflowId: 'wf-def456',
 				createdAt: '2024-01-14T09:00:00Z',
 				totalProducts: 8750,
-				files: [
-					{ filename: 'products.jsonl.gz', productCount: 8750, gzSizeBytes: 456000 }
-				]
+				files: [{ filename: 'products.jsonl.gz', productCount: 8750, gzSizeBytes: 456000 }]
 			}
 		],
 		[

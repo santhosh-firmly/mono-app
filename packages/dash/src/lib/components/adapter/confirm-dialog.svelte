@@ -35,7 +35,9 @@
 <Dialog.Root bind:open onOpenChange={handleOpenChange}>
 	<Dialog.Content>
 		<Dialog.Header>
-			<Dialog.Title class={variant === 'warning' ? 'text-amber-600' : ''}>{title}</Dialog.Title>
+			<Dialog.Title class={variant === 'warning' ? 'text-amber-600' : ''}
+				>{title}</Dialog.Title
+			>
 			<Dialog.Description>
 				{description}
 			</Dialog.Description>

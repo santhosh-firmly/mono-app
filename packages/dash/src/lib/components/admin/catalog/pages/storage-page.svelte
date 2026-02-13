@@ -120,7 +120,10 @@
 				<Card.Root>
 					<Card.Content class="p-4 text-center">
 						<div class="text-xl font-bold">{count}</div>
-						<div class="text-xs text-muted-foreground uppercase mt-1 truncate" title={folder}>
+						<div
+							class="text-xs text-muted-foreground uppercase mt-1 truncate"
+							title={folder}
+						>
 							{folder}
 						</div>
 					</Card.Content>
@@ -250,11 +253,11 @@
 						<span>Modified: {new Date(fileContent.uploaded).toLocaleString()}</span>
 					</div>
 					<div class="bg-gray-900 rounded-lg p-4 max-h-[500px] overflow-auto">
-						<pre class="text-xs text-gray-100 whitespace-pre-wrap break-all font-mono"
-							>{typeof fileContent.content === 'string'
+						<pre
+							class="text-xs text-gray-100 whitespace-pre-wrap break-all font-mono">{typeof fileContent.content ===
+							'string'
 								? fileContent.content
-								: JSON.stringify(fileContent.content, null, 2)}</pre
-						>
+								: JSON.stringify(fileContent.content, null, 2)}</pre>
 					</div>
 				{/if}
 			</div>

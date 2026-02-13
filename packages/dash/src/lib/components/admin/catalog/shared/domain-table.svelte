@@ -96,7 +96,9 @@
 				{@const key = `${domain.domain}/${domain.countryCode}`}
 				{@const isSelected = selectedDomains.has(key)}
 				<tr
-					class="border-b hover:bg-muted/30 transition-colors {isSelected ? 'bg-primary/5' : ''}"
+					class="border-b hover:bg-muted/30 transition-colors {isSelected
+						? 'bg-primary/5'
+						: ''}"
 				>
 					{#if showSelection}
 						<td class="p-3 text-center">
@@ -116,7 +118,9 @@
 							{domain.domain}
 						</a>
 						{#if domain.countryCode}
-							<span class="text-xs text-muted-foreground ml-1">{domain.countryCode}</span>
+							<span class="text-xs text-muted-foreground ml-1"
+								>{domain.countryCode}</span
+							>
 						{/if}
 					</td>
 					<td class="p-3 text-muted-foreground">{formatNumber(domain.total)}</td>
@@ -129,7 +133,9 @@
 						<td class="p-3">
 							<div class="flex items-center gap-2">
 								<Progress value={domain.completion_percent} class="w-20 h-2" />
-								<span class="text-muted-foreground">{domain.completion_percent}%</span>
+								<span class="text-muted-foreground"
+									>{domain.completion_percent}%</span
+								>
 							</div>
 						</td>
 					{/if}

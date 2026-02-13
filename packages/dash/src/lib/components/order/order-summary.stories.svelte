@@ -25,7 +25,10 @@
 			shipping: { control: 'number', description: 'Shipping cost' },
 			tax: { control: 'number', description: 'Tax amount' },
 			total: { control: 'number', description: 'Order total' },
-			refund: { control: 'object', description: 'Refund total (currency object with value, shown in red if > 0)' }
+			refund: {
+				control: 'object',
+				description: 'Refund total (currency object with value, shown in red if > 0)'
+			}
 		}
 	});
 </script>

@@ -90,9 +90,7 @@ export async function GET({ platform, url }) {
 		const periodStart = hasExplicitDates ? new Date(startDateParam) : startOfMonth(today);
 		const periodEnd = hasExplicitDates ? new Date(endDateParam) : today;
 
-		const hasComparison = hasExplicitDates
-			? !!(compareStartParam && compareEndParam)
-			: true;
+		const hasComparison = hasExplicitDates ? !!(compareStartParam && compareEndParam) : true;
 		const compStart = compareStartParam
 			? new Date(compareStartParam)
 			: startOfMonth(subMonths(today, 1));

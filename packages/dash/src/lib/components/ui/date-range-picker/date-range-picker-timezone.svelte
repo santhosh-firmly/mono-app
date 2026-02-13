@@ -2,10 +2,8 @@
 	import * as Select from '$lib/components/ui/select/index.js';
 	import Globe from 'lucide-svelte/icons/globe';
 
-	let {
-		value = Intl.DateTimeFormat().resolvedOptions().timeZone,
-		onChange = () => {}
-	} = $props();
+	let { value = Intl.DateTimeFormat().resolvedOptions().timeZone, onChange = () => {} } =
+		$props();
 
 	const timezoneGroups = [
 		{

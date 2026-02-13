@@ -54,8 +54,4 @@
 
 <Story name="Many Merchants" args={{ merchants: manyMerchants }} {template} />
 
-<Story
-	name="Single Merchant"
-	args={{ merchants: [{ domain: 'single-store.com' }] }}
-	{template}
-/>
+<Story name="Single Merchant" args={{ merchants: [{ domain: 'single-store.com' }] }} {template} />

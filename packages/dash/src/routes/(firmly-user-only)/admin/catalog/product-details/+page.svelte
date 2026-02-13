@@ -311,7 +311,9 @@
 	}
 
 	function selectAll() {
-		sortedAndFilteredDomains.forEach((d) => selectedDomains.add(`${d.domain}/${d.countryCode}`));
+		sortedAndFilteredDomains.forEach((d) =>
+			selectedDomains.add(`${d.domain}/${d.countryCode}`)
+		);
 	}
 
 	function deselectAll() {

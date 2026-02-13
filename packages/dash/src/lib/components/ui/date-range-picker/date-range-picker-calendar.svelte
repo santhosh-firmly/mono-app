@@ -15,9 +15,7 @@
 
 	let viewDate = $state(value.start || new Date());
 	let hoverDate = $state(null);
-	let selectionState = $state(
-		value.start && !value.end ? 'selecting-end' : 'selecting-start'
-	);
+	let selectionState = $state(value.start && !value.end ? 'selecting-end' : 'selecting-start');
 
 	let leftMonth = $derived(viewDate);
 	let rightMonth = $derived(addMonths(viewDate, 1));

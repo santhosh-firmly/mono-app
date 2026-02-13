@@ -108,7 +108,10 @@
 			};
 
 			// Select first order if current selection is not in results
-			if (orders.length > 0 && !orders.find((o) => o.platform_order_number === selectedOrderNumber)) {
+			if (
+				orders.length > 0 &&
+				!orders.find((o) => o.platform_order_number === selectedOrderNumber)
+			) {
 				selectedOrderNumber = orders[0].platform_order_number;
 			}
 		} catch (err) {
@@ -140,7 +143,9 @@
 	let getRowClass = $derived.by(() => {
 		const currentSelection = selectedOrderNumber;
 		return (item) => {
-			return item?.platform_order_number === currentSelection ? 'bg-purple-50 dark:bg-purple-900/30' : '';
+			return item?.platform_order_number === currentSelection
+				? 'bg-purple-50 dark:bg-purple-900/30'
+				: '';
 		};
 	});
 </script>
@@ -151,7 +156,9 @@
 		class="max-w-64 overflow-hidden border-b border-gray-200 p-2.5 pl-4 align-middle group-hover:bg-slate-100 dark:border-gray-700 dark:group-hover:bg-gray-800"
 	>
 		<div class="flex flex-col">
-			<span class="font-medium text-gray-900 dark:text-gray-100">{item.merchant_display_name || item.shop_id}</span>
+			<span class="font-medium text-gray-900 dark:text-gray-100"
+				>{item.merchant_display_name || item.shop_id}</span
+			>
 			{#if item.merchant_display_name && item.shop_id}
 				<span class="text-xs text-gray-500 dark:text-gray-400">{item.shop_id}</span>
 			{/if}
@@ -225,9 +232,20 @@
 								filterType: 'number',
 								cellView: amountCell
 							},
-							{ id: 'platform', name: 'Platform', hideOnMobile: true, filterable: true, filterType: 'select' },
+							{
+								id: 'platform',
+								name: 'Platform',
+								hideOnMobile: true,
+								filterable: true,
+								filterType: 'select'
+							},
 							{ id: 'payment_method', name: 'Payment', hideOnMobile: true },
-							{ id: 'items_count', name: 'Items', hideOnMobile: true, align: 'center' },
+							{
+								id: 'items_count',
+								name: 'Items',
+								hideOnMobile: true,
+								align: 'center'
+							},
 							{ id: 'shipping_city', name: 'Ship City', hideOnMobile: true },
 							{ id: 'shipping_state', name: 'Ship State', hideOnMobile: true },
 							{ id: 'shipping_postal', name: 'Ship Postal', hideOnMobile: true },

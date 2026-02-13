@@ -110,7 +110,9 @@ export const domainManagement = {
 		if (options?.markInactive !== undefined)
 			params.set('markInactive', String(options.markInactive));
 		const query = params.toString();
-		return post(`${BASE_URL}/${domain}/${countryCode}/sync-workflow${query ? `?${query}` : ''}`);
+		return post(
+			`${BASE_URL}/${domain}/${countryCode}/sync-workflow${query ? `?${query}` : ''}`
+		);
 	},
 
 	getStats: (domain, countryCode) => get(`${BASE_URL}/${domain}/${countryCode}/stats`),

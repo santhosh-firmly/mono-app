@@ -196,7 +196,9 @@
 								<div
 									class="flex items-center justify-between p-2 bg-muted/50 rounded text-sm"
 								>
-									<span class="text-muted-foreground">{cat.category || 'Uncategorized'}</span>
+									<span class="text-muted-foreground"
+										>{cat.category || 'Uncategorized'}</span
+									>
 									<span class="font-semibold">{cat.count?.toLocaleString()}</span>
 								</div>
 							{/each}
@@ -298,7 +300,9 @@
 								<div>
 									<div class="font-medium text-sm">{file.filename}</div>
 									<div class="text-xs text-muted-foreground">
-										{file.productCount} products · {(file.gzSizeBytes / 1024).toFixed(1)} KB
+										{file.productCount} products · {(
+											file.gzSizeBytes / 1024
+										).toFixed(1)} KB
 									</div>
 								</div>
 								<Button
@@ -407,7 +411,9 @@
 			</div>
 
 			<div class="flex justify-end p-4 border-t">
-				<Button variant="secondary" onclick={() => (showWorkflowModal = false)}>Close</Button>
+				<Button variant="secondary" onclick={() => (showWorkflowModal = false)}
+					>Close</Button
+				>
 			</div>
 		</div>
 	</div>
@@ -462,7 +468,11 @@
 						</div>
 						<div>
 							<Label for="max_parallel">Max Parallel</Label>
-							<Input id="max_parallel" type="number" bind:value={config.max_parallel} />
+							<Input
+								id="max_parallel"
+								type="number"
+								bind:value={config.max_parallel}
+							/>
 						</div>
 						<div>
 							<Label for="batch_size">Batch Size</Label>

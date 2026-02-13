@@ -42,7 +42,12 @@ export async function GET({ locals, params, platform }) {
 		}
 
 		// Fetch order status from orders-service and enhance order_info
-		const orderStatusData = await fetchOrderStatus(platform, orderId, domain, orderResult.app_id);
+		const orderStatusData = await fetchOrderStatus(
+			platform,
+			orderId,
+			domain,
+			orderResult.app_id
+		);
 		enhanceOrderInfo(orderInfo, orderStatusData);
 
 		const order = {
