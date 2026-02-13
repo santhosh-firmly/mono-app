@@ -28,24 +28,35 @@ export async function GET({ locals, params, platform }) {
 		}
 
 		// Get accessible merchants for this destination
-		const accessible = await getAccessibleMerchants({ platform, appId });
-		if (accessible.length === 0) {
+		const { merchants: accessible, unrestricted } = await getAccessibleMerchants({
+			platform,
+			appId
+		});
+		if (accessible.length === 0 && !unrestricted) {
 			return json({ error: 'No accessible merchants' }, { status: 403 });
 		}
 
 		const merchantMap = new Map(accessible.map((m) => [m.domain, m.displayName]));
-		const merchantDomains = accessible.map((m) => m.domain);
-		const placeholders = merchantDomains.map(() => '?').join(',');
+
+		// Build shop_id filter clause dynamically
+		const shopBindParams = [];
+		let shopClause = '';
+
+		if (!unrestricted) {
+			const merchantDomains = accessible.map((m) => m.domain);
+			const placeholders = merchantDomains.map(() => '?').join(',');
+			shopClause = ` AND shop_id IN (${placeholders})`;
+			shopBindParams.push(...merchantDomains);
+		}
 
 		// Fetch order with app_id and merchant filter for security
 		const orderResult = await reporting
 			.prepare(
 				`SELECT * FROM orders
 				 WHERE platform_order_number = ?
-				 AND app_id = ?
-				 AND shop_id IN (${placeholders})`
+				 AND app_id = ?${shopClause}`
 			)
-			.bind(orderId, appId, ...merchantDomains)
+			.bind(orderId, appId, ...shopBindParams)
 			.first();
 
 		if (!orderResult) {
@@ -81,10 +92,10 @@ export async function GET({ locals, params, platform }) {
 		const relatedOrders = await reporting
 			.prepare(
 				`SELECT platform_order_number FROM orders
-				 WHERE app_id = ? AND shop_id IN (${placeholders})
+				 WHERE app_id = ?${shopClause}
 				 ORDER BY created_dt DESC LIMIT 20`
 			)
-			.bind(appId, ...merchantDomains)
+			.bind(appId, ...shopBindParams)
 			.all();
 
 		// Find current order index for navigation

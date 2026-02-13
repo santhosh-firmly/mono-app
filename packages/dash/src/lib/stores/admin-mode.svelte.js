@@ -48,10 +48,24 @@ function initializeFromUrl() {
 
 /**
  * Check if admin mode is active for this tab.
+ * Checks both sessionStorage (for persisted state) and URL (for initial load).
  * @returns {boolean}
  */
 function isAdminMode() {
-	return getStoredValue();
+	// First check sessionStorage (already initialized state)
+	if (getStoredValue()) return true;
+
+	// Fallback: check URL directly for initial page load before onMount runs
+	if (typeof window !== 'undefined') {
+		const urlParams = new URLSearchParams(window.location.search);
+		if (urlParams.get('admin_mode') === 'true') {
+			// Also store it so subsequent checks are faster
+			setStoredValue(true);
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /**

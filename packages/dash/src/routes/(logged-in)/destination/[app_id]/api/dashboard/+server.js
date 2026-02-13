@@ -38,9 +38,12 @@ export async function GET({ locals, params, platform, url }) {
 		}
 
 		// Get accessible merchants for this destination using the helper function
-		const allMerchants = await getAccessibleMerchants({ platform, appId });
+		const { merchants: allMerchants, unrestricted } = await getAccessibleMerchants({
+			platform,
+			appId
+		});
 
-		if (allMerchants.length === 0) {
+		if (allMerchants.length === 0 && !unrestricted) {
 			return json({
 				summary: {
 					totalRevenue: 0,
@@ -59,13 +62,12 @@ export async function GET({ locals, params, platform, url }) {
 
 		const merchantMap = new Map(allMerchants.map((m) => [m.domain, m.displayName]));
 
-		// Apply merchant filter if provided
+		// Apply merchant filter if provided (single merchant filter always uses IN clause)
 		let merchantDomains = allMerchants.map((m) => m.domain);
-		if (merchantFilter && merchantDomains.includes(merchantFilter)) {
+		const useFilter = merchantFilter && merchantDomains.includes(merchantFilter);
+		if (useFilter) {
 			merchantDomains = [merchantFilter];
 		}
-
-		const placeholders = merchantDomains.map(() => '?').join(',');
 
 		const today = new Date();
 		const monthStart = startOfMonth(today);
@@ -73,65 +75,15 @@ export async function GET({ locals, params, platform, url }) {
 		const sameTimeLastMonth = subMonths(today, 1);
 		const lastMonthCompareEnd = startOfDay(addDays(sameTimeLastMonth, 1));
 
-		// Summary queries
-		const summaryQuery = `
-			SELECT
-				COALESCE(SUM(order_total), 0) as total_revenue,
-				COUNT(*) as total_orders,
-				COALESCE(AVG(order_total), 0) as aov
-			FROM orders
-			WHERE app_id = ? AND shop_id IN (${placeholders}) AND created_dt >= ?
-		`;
+		// Build shop_id filter clause dynamically
+		const shopBindParams = [];
+		let shopClause = '';
 
-		const lastPeriodQuery = `
-			SELECT
-				COALESCE(SUM(order_total), 0) as total_revenue,
-				COUNT(*) as total_orders,
-				COALESCE(AVG(order_total), 0) as aov
-			FROM orders
-			WHERE app_id = ? AND shop_id IN (${placeholders}) AND created_dt >= ? AND created_dt < ?
-		`;
-
-		const dailyRevenueQuery = `
-			SELECT
-				DATE(created_dt) as date,
-				SUM(order_total) as revenue,
-				COUNT(*) as orders
-			FROM orders
-			WHERE app_id = ? AND shop_id IN (${placeholders}) AND created_dt >= ?
-			GROUP BY DATE(created_dt)
-			ORDER BY date ASC
-		`;
-
-		const dailyRevenueBoundedQuery = `
-			SELECT
-				DATE(created_dt) as date,
-				SUM(order_total) as revenue,
-				COUNT(*) as orders
-			FROM orders
-			WHERE app_id = ? AND shop_id IN (${placeholders}) AND created_dt >= ? AND created_dt < ?
-			GROUP BY DATE(created_dt)
-			ORDER BY date ASC
-		`;
-
-		const topMerchantsQuery = `
-			SELECT
-				shop_id,
-				COALESCE(SUM(order_total), 0) as revenue,
-				COUNT(*) as orders,
-				COALESCE(AVG(order_total), 0) as aov
-			FROM orders
-			WHERE app_id = ? AND shop_id IN (${placeholders}) AND created_dt >= ?
-			GROUP BY shop_id
-			ORDER BY revenue DESC
-			LIMIT 5
-		`;
-
-		const activeMerchantsQuery = `
-			SELECT COUNT(DISTINCT shop_id) as count
-			FROM orders
-			WHERE app_id = ? AND shop_id IN (${placeholders}) AND created_dt >= ?
-		`;
+		if (!(unrestricted && !useFilter)) {
+			const placeholders = merchantDomains.map(() => '?').join(',');
+			shopClause = ` AND shop_id IN (${placeholders})`;
+			shopBindParams.push(...merchantDomains);
+		}
 
 		// Execute queries in parallel
 		const [
@@ -143,38 +95,54 @@ export async function GET({ locals, params, platform, url }) {
 			activeMerchantsResult
 		] = await Promise.all([
 			reporting
-				.prepare(summaryQuery)
-				.bind(appId, ...merchantDomains, monthStart.toISOString())
+				.prepare(
+					`SELECT COALESCE(SUM(order_total), 0) as total_revenue, COUNT(*) as total_orders, COALESCE(AVG(order_total), 0) as aov
+					FROM orders WHERE app_id = ?${shopClause} AND created_dt >= ?`
+				)
+				.bind(appId, ...shopBindParams, monthStart.toISOString())
 				.first(),
 			reporting
-				.prepare(lastPeriodQuery)
+				.prepare(
+					`SELECT COALESCE(SUM(order_total), 0) as total_revenue, COUNT(*) as total_orders, COALESCE(AVG(order_total), 0) as aov
+					FROM orders WHERE app_id = ?${shopClause} AND created_dt >= ? AND created_dt < ?`
+				)
 				.bind(
 					appId,
-					...merchantDomains,
+					...shopBindParams,
 					lastMonthStart.toISOString(),
 					lastMonthCompareEnd.toISOString()
 				)
 				.first(),
 			reporting
-				.prepare(dailyRevenueQuery)
-				.bind(appId, ...merchantDomains, monthStart.toISOString())
-				.all(),
-			reporting
-				.prepare(dailyRevenueBoundedQuery)
-				.bind(
-					appId,
-					...merchantDomains,
-					lastMonthStart.toISOString(),
-					monthStart.toISOString()
+				.prepare(
+					`SELECT DATE(created_dt) as date, SUM(order_total) as revenue, COUNT(*) as orders
+					FROM orders WHERE app_id = ?${shopClause} AND created_dt >= ?
+					GROUP BY DATE(created_dt) ORDER BY date ASC`
 				)
+				.bind(appId, ...shopBindParams, monthStart.toISOString())
 				.all(),
 			reporting
-				.prepare(topMerchantsQuery)
-				.bind(appId, ...merchantDomains, monthStart.toISOString())
+				.prepare(
+					`SELECT DATE(created_dt) as date, SUM(order_total) as revenue, COUNT(*) as orders
+					FROM orders WHERE app_id = ?${shopClause} AND created_dt >= ? AND created_dt < ?
+					GROUP BY DATE(created_dt) ORDER BY date ASC`
+				)
+				.bind(appId, ...shopBindParams, lastMonthStart.toISOString(), monthStart.toISOString())
 				.all(),
 			reporting
-				.prepare(activeMerchantsQuery)
-				.bind(appId, ...merchantDomains, monthStart.toISOString())
+				.prepare(
+					`SELECT shop_id, COALESCE(SUM(order_total), 0) as revenue, COUNT(*) as orders, COALESCE(AVG(order_total), 0) as aov
+					FROM orders WHERE app_id = ?${shopClause} AND created_dt >= ?
+					GROUP BY shop_id ORDER BY revenue DESC LIMIT 5`
+				)
+				.bind(appId, ...shopBindParams, monthStart.toISOString())
+				.all(),
+			reporting
+				.prepare(
+					`SELECT COUNT(DISTINCT shop_id) as count
+					FROM orders WHERE app_id = ?${shopClause} AND created_dt >= ?`
+				)
+				.bind(appId, ...shopBindParams, monthStart.toISOString())
 				.first()
 		]);
 

@@ -34,8 +34,11 @@ export async function GET({ locals, params, platform, url }) {
 		const merchantFilter = url.searchParams.get('merchant') || '';
 
 		// Get accessible merchants for this destination
-		const accessible = await getAccessibleMerchants({ platform, appId });
-		if (accessible.length === 0) {
+		const { merchants: accessible, unrestricted } = await getAccessibleMerchants({
+			platform,
+			appId
+		});
+		if (accessible.length === 0 && !unrestricted) {
 			return json({
 				orders: [],
 				merchants: [],
@@ -49,15 +52,24 @@ export async function GET({ locals, params, platform, url }) {
 
 		// Apply merchant filter if provided
 		let merchantDomains = accessible.map((m) => m.domain);
-		if (merchantFilter && merchantDomains.includes(merchantFilter)) {
+		const useFilter = merchantFilter && merchantDomains.includes(merchantFilter);
+		if (useFilter) {
 			merchantDomains = [merchantFilter];
 		}
 
-		const placeholders = merchantDomains.map(() => '?').join(',');
+		const skipShopFilter = unrestricted && !useFilter;
 
 		// Build queries
-		let whereClause = `app_id = ? AND shop_id IN (${placeholders})`;
-		const bindParams = [appId, ...merchantDomains];
+		let whereClause;
+		let bindParams;
+		if (skipShopFilter) {
+			whereClause = 'app_id = ?';
+			bindParams = [appId];
+		} else {
+			const placeholders = merchantDomains.map(() => '?').join(',');
+			whereClause = `app_id = ? AND shop_id IN (${placeholders})`;
+			bindParams = [appId, ...merchantDomains];
+		}
 
 		if (search) {
 			whereClause += ' AND platform_order_number LIKE ?';
