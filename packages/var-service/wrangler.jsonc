@@ -24,6 +24,12 @@
 					"zone_name": "firmly.dev"
 				}
 			],
+			"services": [
+				{
+					"binding": "envLoader",
+					"service": "env-loader"
+				}
+			],
 			"vars": {
 				"PUBLIC_AZURE_AD_CLIENT_ID": "194f24d1-f48d-401e-acaa-b0e2900bce67",
 				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
@@ -41,6 +47,12 @@
 					"zone_name": "firmlyuat.com"
 				}
 			],
+			"services": [
+				{
+					"binding": "envLoader",
+					"service": "env-loader"
+				}
+			],
 			"vars": {
 				"PUBLIC_AZURE_AD_CLIENT_ID": "d6e4c0e6-03d6-4681-ae55-6886f9fae696",
 				"PUBLIC_AZURE_AD_TENANT_ID": "98186320-48ac-4b11-b1af-9f6b0b140a45",
@@ -56,6 +68,12 @@
 				{
 					"pattern": "var.firmly.live/*",
 					"zone_name": "firmly.live"
+				}
+			],
+			"services": [
+				{
+					"binding": "envLoader",
+					"service": "env-loader"
 				}
 			],
 			"vars": {

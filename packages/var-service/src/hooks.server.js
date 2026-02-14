@@ -1,7 +1,10 @@
 import { redirect } from '@sveltejs/kit';
+import { sequence } from '@sveltejs/kit/hooks';
+import { handleMetrics } from 'foundation/server/frameworks/sveltekit';
 import { enforceSSOAuth } from '$lib/server/ms-auth.js';
+import pkg from '../package.json';
 
-export async function handle({ event, resolve }) {
+async function handleAuth({ event, resolve }) {
 	const { platform } = event;
 
 	// Validate required environment variables
@@ -42,3 +45,11 @@ export async function handle({ event, resolve }) {
 		return redirect(302, '/auth/sign-in');
 	}
 }
+
+export const handle = sequence(
+	handleMetrics({
+		serviceName: pkg.name,
+		version: pkg.version
+	}),
+	handleAuth
+);
