@@ -41,6 +41,6 @@
 	},
 	"dependencies": {
 		"@iconify-icons/mdi": "^1.2.48",
-		"foundation": "github:santhosh-firmly/foundation#v1.15.2"
+		"foundation": "git+https://github.com/santhosh-firmly/foundation.git#v1.15.2"
 	}
 }
