@@ -1,0 +1,28 @@
+name: Validate Tag From Main
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  validate-tag:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # Important: fetch full history
+
+      - name: Fetch main branch
+        run: git fetch origin main
+
+      - name: Verify tag commit is in main
+        run: |
+          if ! git branch -r --contains $GITHUB_SHA | grep origin/main; then
+            echo "❌ ERROR: Tag was not created from main branch."
+            exit 1
+          fi
+
+          echo "✅ Tag is from main branch."
