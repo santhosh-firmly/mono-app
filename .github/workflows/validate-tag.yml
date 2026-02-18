@@ -10,18 +10,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Fetch main branch
+      - name: Fetch main
         run: git fetch origin main
 
-      - name: Verify tag commit is in main
+      - name: Ensure tag is created from main HEAD
         run: |
-          if git merge-base --is-ancestor $GITHUB_SHA origin/main; then
-            echo "✅ Tag commit exists in main."
-          else
-            echo "❌ ERROR: Tag was not created from main branch."
+          MAIN_HEAD=$(git rev-parse origin/main)
+          echo "Main HEAD: $MAIN_HEAD"
+          echo "Tag SHA:   $GITHUB_SHA"
+
+          if [ "$GITHUB_SHA" != "$MAIN_HEAD" ]; then
+            echo "ERROR: Tag must be created from main branch HEAD only."
             exit 1
           fi
+
+          echo "Tag is valid."
